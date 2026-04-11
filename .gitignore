@@ -1,0 +1,63 @@
+# ===== macOS =====
+.DS_Store
+**/.DS_Store
+
+# ===== 编辑器 / IDE =====
+.idea/
+.vscode/
+.history/
+*.iml
+*.swp
+*.swo
+
+# ===== Node.js（前端）=====
+node_modules/
+.pnpm-store/
+.next/
+dist/
+build/
+*.tsbuildinfo
+.turbo/
+.vite/
+
+# ===== Java（后端）=====
+target/
+*.class
+*.jar
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+.classpath
+.project
+.settings/
+.factorypath
+hs_err_pid*.log
+
+# ===== 日志 =====
+*.log
+logs/
+
+# ===== 环境变量 =====
+.env
+.env.local
+.env.*.local
+.env.development
+.env.production
+.env.test
+
+# ===== 生成物 =====
+# @mb/api-sdk（OpenAPI Generator 产物，不入 git，ADR-0004 后续补充）
+client/packages/api-sdk/src/gen/
+# TanStack Router 路由树生成物（按主流做法入 git）
+!**/routeTree.gen.ts
+# jOOQ 生成代码入 git（ADR-0004 明确）
+!server/mb-schema/src/main/jooq-generated/
+
+# ===== 测试产物 =====
+coverage/
+*.lcov
+.nyc_output/
+playwright-report/
+test-results/
+
+# ===== 其他 OS =====
+Thumbs.db
