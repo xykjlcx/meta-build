@@ -37,14 +37,14 @@
 | 5 | `AsyncConfig` | 🟡 | ThreadLocal 传递列表替换（Spring Security → Sa-Token，方案 E 后**不再传 `DataScopeContext`**），见 [A.2.2](#a22) | `mb-infra/infra-async/.../AsyncConfig.java` |
 | 6 | `RateLimitInterceptor` | 🟢 | M1 用内存版（Bucket4j），标注"高并发时升级 Redis" | `mb-infra/infra-rate-limit/.../RateLimitInterceptor.java` |
 | 7 | `GlobalExceptionHandler` | 🟡 | 骨架保留，**响应格式重写**（自定义 `R<T>` → RFC 9457 `ProblemDetail`），见 [A.2.3](#a23) | `mb-infra/infra-exception/.../GlobalExceptionHandler.java` |
-| 8 | `JooqHelper` | 🟡 | 借 14 个静态工具方法；**移除所有泄漏 jOOQ 内部 API 的方法**；**不包含 `dataScopeFilter()`**（方案 E 单点拦截原则），见 [A.2.4](#a24) | `mb-infra/infra-jooq/.../JooqHelper.java` |
+| 8 | `JooqHelper` | 🟠 | **概念重写**：从静态工具聚合类改为 `@Component` + 二元路径（批量 `batch*`、条件 `conditional*`），砍掉 `softDeletedFilter` / `setAuditInsert` / `setAuditUpdate` / `dataScopeFilter`（全部被 jOOQ 原生机制替代）；详见 [A.2.4](#a24) | `mb-infra/infra-jooq/.../JooqHelper.java` |
 | 9 | `DataScopeAspect` → `DataScopeVisitListener` | 🟠 | 生态切换（MyBatis AOP 基类 → jOOQ `VisitListener` 单点），**方案 E = ADR-0007 的触发样本**，见 [A.2.5](#a25) | `mb-infra/infra-jooq/.../DataScopeVisitListener.java` |
 | 10 | ~~`JwtTokenProvider`~~ | 🔴 | Sa-Token `sa-token-jwt` 模块原生支持，零代码复用，见 [A.2.6](#a26) | Sa-Token `sa-token-jwt` |
 | 11 | ~~`SecurityUtils`~~ → `CurrentUser` | 🔴→🟠 | Spring Security 静态工具彻底放弃；门面接口是新生态原生架构答案，见 [A.2.7](#a27) | 接口：`mb-common/.../security/CurrentUser.java`；实现：`mb-infra/infra-security/.../SaTokenCurrentUser.java` |
 | 12 | ~~`MemoryTokenBlacklist` / `RedisTokenBlacklist`~~ | 🔴 | Sa-Token `StpLogic` + Redis session 原生支持黑名单/强制注销/踢人下线 | Sa-Token 内置 |
 | 13 | `SnowflakeIdGenerator` | 🟢 | 纯算法工具类，无生态耦合 | `mb-common/.../id/SnowflakeIdGenerator.java` |
 | 14 | `I18nHelper` + `MessageSource` 配置 | 🟢 | 集成 `AcceptHeaderLocaleResolver`，Spring 原生答案 | `mb-infra/infra-i18n/...` |
-| 15 | Flyway schema 设计（sys_iam_*） | 🟡 | **只借业务结构**，SQL 按 PostgreSQL 惯例重写；加 `tenant_id` / `version`；命名 `V<yyyymmdd>_<nnn>__<module>_<table>.sql`（ADR-0008 时间戳）；位置在 `mb-schema`（ADR-0004），见 [A.2.8](#a28) | `mb-schema/src/main/resources/db/migration/V20260601_001__iam_user.sql` 等 |
+| 15 | Flyway schema 设计（mb_iam_*） | 🟡 | **只借业务结构**，SQL 按 PostgreSQL 惯例重写；加 `tenant_id` / `version`；命名 `V<yyyymmdd>_<nnn>__<module>_<table>.sql`（ADR-0008 时间戳）；位置在 `mb-schema`（ADR-0004），见 [A.2.8](#a28) | `mb-schema/src/main/resources/db/migration/V20260601_001__iam_user.sql` 等 |
 | 16 | `CorsConfig` | ⚪ | nxboot 无此项，按 Spring `CorsConfigurationSource` + `CorsFilter` 原生答案从零写 | `mb-infra/infra-security/.../CorsConfig.java` |
 
 <!-- verify: test -d /Users/ocean/Studio/01-workshop/02-软件开发/04-nxboot/server/nxboot-common && test -d /Users/ocean/Studio/01-workshop/02-软件开发/04-nxboot/server/nxboot-framework -->
@@ -90,17 +90,16 @@
 ---
 
 <a id="a24"></a>
-#### A.2.4 `JooqHelper`（🟡 部分借用）
+#### A.2.4 `JooqHelper`（🟠 概念重写）
 
 | 审查问 | 答案 |
 |---|---|
-| **原生范式来源** | 静态工具类 + DSL 链式调用 —— **jOOQ 原生范式**，nxboot 只是直接使用 jOOQ 原生风格写了一组工具 |
-| **新生态答案** | 同上，jOOQ 的工具类写法本身无需重写。但有两处必须剔除：① 任何泄漏 `org.jooq.*` 内部 API 到业务层的方法（违反 §8 jOOQ 隔离硬约束，由 [ArchUnit `JOOQ_MUST_BE_ISOLATED`](08-archunit-rules.md) 强制）② `dataScopeFilter()` 这个便捷方法 —— **方案 E 单点拦截原则下此方法不应存在**：业务层任何显式调用 `JooqHelper.dataScopeFilter(query, scope)` 都回到了"opt-in 数据权限"的反模式，数据权限必须由 `DataScopeVisitListener` 在 AST 层统一拦截，业务层零感知 |
-| **改造策略** | **部分借用**：14 个纯工具方法（`applyPaging` / `optimisticLockUpdate` / `setAuditInsert` / `setAuditUpdate` / `softDeletedFilter` / ...）直接搬；剔除泄漏 API 和 `dataScopeFilter()` |
-| **决策依据** | ADR-0007 方案 E 单点拦截原则 + §8 jOOQ 隔离 |
+| **原生范式来源** | nxboot 的 `JooqHelper` 是一个静态工具聚合类，承载 14 个方法：分页辅助、软删除过滤 `softDeletedFilter()`、审计字段填充 `setAuditInsert()`/`setAuditUpdate()`、乐观锁辅助、jOOQ 便捷操作等。这是"把所有横切关注点聚合到单个 helper"的传统 Java 工具类范式 |
+| **新生态答案** | **jOOQ 原生已经为这些横切关注点提供了框架级拦截机制**，根本不需要 helper 聚合：① **乐观锁**：`Settings.executeWithOptimisticLocking + updateRecordVersion` 全局开关 ② **`updated_at` 自动**：`Settings.updateRecordTimestamp` ③ **`created_by / updated_by` 填充**：`RecordListener.insertStart / updateStart` 钩子（`AuditFieldsRecordListener`）④ **`created_at` 初始值**：数据库 `DEFAULT CURRENT_TIMESTAMP` ⑤ **数据权限 `WHERE dept_id IN (...)`**：`VisitListener`（方案 E，[05-security.md §7](05-security.md)）⑥ **软删除**：meta-build 不做（详见 [04-data-persistence.md §8.8](04-data-persistence.md)）⑦ **慢查询日志**：`ExecuteListener`（nxboot `SlowQueryListener` 本来就是原生） |
+| **改造策略** | **🟠 概念重写**：把 `JooqHelper` 从"静态工具聚合类"重新定义为 `@Component`（Spring bean，注入 `DSLContext + CurrentUser`），只保留**批量操作和业务条件更新**两类方法（`batchInsert` / `batchUpdate` / `batchDelete` / `conditionalUpdate` / `conditionalDelete`）。**全部砍掉**的方法：`softDeletedFilter` / `setAuditInsert` / `setAuditUpdate` / `dataScopeFilter` / `optimisticUpdate`（这些全部被 jOOQ 原生机制替代）。保留的 nxboot 借用方法：仅分页辅助和 Snowflake ID 相关的纯工具方法（具体清单见实施时的 Javadoc）|
+| **决策依据** | ADR-0007 元方法论第三次应用（前两次：方案 E 数据权限、ADR-0008 Flyway 命名）。本次的元规则强化："**决策起点是官方文档，不是 nxboot 或项目已有抽象**"——官方 jOOQ 文档清晰说明 `Settings + RecordListener + VisitListener` 是横切关注点的原生归宿，helper 聚合范式只在这三个原生机制无法覆盖的场景（批量 DSL 不触发 listener）才有意义 |
 
-> ⚠️ **本条修复了一处 drift**：原"改造点"列写的是"增加 `dataScopeFilter()`"，这是方案 E 之前的方案残留。方案 E 完成后此方法**禁止存在**，否则破坏"数据权限业务层零感知"的核心设计意图。
-
+> ⚠️ **本条是一次较大规模的改造**：`JooqHelper` 的形态从静态工具改为 `@Component`，砍掉 5 个方法，新增 5 个二元路径方法。业务层的所有写操作收敛到两个入口——`UpdatableRecord.store()` 或 `jooqHelper.batch*/conditional*`，由 ArchUnit 的 4 条规则硬性强制（见 [08-archunit-rules.md](08-archunit-rules.md)）。
 ---
 
 <a id="a25"></a>
@@ -146,7 +145,7 @@
 |---|---|
 | **原生范式来源** | nxboot 的 SQL 基于 **MySQL 8 + MyBatis-Plus 约定**（`BIGINT` 主键、`DATETIME` 时间类型、`utf8mb4` 字符集、`TINYINT(1)` 表示 boolean、单表无分区等） |
 | **新生态答案** | meta-build 用 **PostgreSQL 16 + jOOQ**。PostgreSQL 的原生特性必须被激活：① `BIGINT` 保留但用 Snowflake 生成（ADR-0006 主键策略）② 时间类型用 `TIMESTAMPTZ`（带时区，规划决策 6 时区约束）③ 字符集无需声明（PG 默认 UTF-8）④ boolean 用真正的 `BOOLEAN` 类型（不用 tinyint）⑤ 复杂字段用 `JSONB`（不用 TEXT + 应用层 JSON 解析）⑥ 大表支持声明式分区（`PARTITION BY RANGE`） |
-| **改造策略** | **只借业务结构**：sys_iam_* 的表数量、字段含义、索引策略、关联关系作为参考；**SQL 按 PostgreSQL 惯例重写**。额外必须调整：加 `tenant_id BIGINT NOT NULL DEFAULT 0`（多租户预留 + 单租户默认值 0）加 `version INTEGER NOT NULL DEFAULT 0`（乐观锁）文件命名采用时间戳格式 `V<yyyymmdd>_<nnn>__<module>_<table>.sql`（ADR-0008）位置迁移到 `mb-schema`（ADR-0004） |
+| **改造策略** | **只借业务结构**：mb_iam_* 的表数量、字段含义、索引策略、关联关系作为参考；**SQL 按 PostgreSQL 惯例重写**。额外必须调整：加 `tenant_id BIGINT NOT NULL DEFAULT 0`（多租户预留 + 单租户默认值 0）加 `version INTEGER NOT NULL DEFAULT 0`（乐观锁）文件命名采用时间戳格式 `V<yyyymmdd>_<nnn>__<module>_<table>.sql`（ADR-0008）位置迁移到 `mb-schema`（ADR-0004） |
 | **决策依据** | ADR-0004（mb-schema 契约层）+ 规划决策 2（PostgreSQL 优先）+ ADR-0007（数据库也是一种生态，MySQL 惯例不能搬到 PostgreSQL） |
 
 ## 附录 B: 每个 Maven 模块的 M1/M4 实施清单
@@ -155,7 +154,7 @@
 
 | 阶段 | 必做 |
 |------|------|
-| M1 | `pom.xml` + jOOQ codegen profile 配置 + V01 Flyway 脚本（至少 `sys_iam_user`）+ 第一次 codegen 生成 |
+| M1 | `pom.xml` + jOOQ codegen profile 配置 + V01 Flyway 脚本（至少 `mb_iam_user`）+ 第一次 codegen 生成 |
 | M4 | 8 个 platform 域的完整 Flyway 脚本（iam/audit/file/notification/dict/config/job/monitor，命名见 ADR-0008 时间戳规范）+ 初始化数据脚本 `V<yyyymmdd>_<nnn>__init_data.sql` + 完整 jOOQ 生成代码 |
 | M5 | canonical reference 三个模块的 Flyway 脚本：`business-notice` / `business-order`（主从表）/ `business-approval`（跨模块编排），时间戳命名 `V<yyyymmdd>_<nnn>__business_<模块>_<表>.sql`（ADR-0008） |
 
@@ -178,8 +177,8 @@
 
 | 模块 | 核心内容 |
 |------|---------|
-| `platform-iam` | `UserApi` / `RoleApi` / `MenuApi` / `DeptApi` / `AuthApi` / `PermissionApi` + 对应 domain/infrastructure/web + `@Audit` 注解装饰 + **方案 E 的 `DataScopeLoader`**（登录时展开数据范围的业务计算） |
-| `platform-audit` | `AuditApi` + `@Audit` 注解 + `AuditAspect` + 异步写入 `sys_audit_log` + 敏感字段脱敏 |
+| `platform-iam` | `UserApi` / `RoleApi` / `MenuApi` / `DeptApi` / `AuthApi` / `PermissionApi` + 对应 api/domain/web + `@OperationLog` 注解装饰 + **方案 E 的 `DataScopeLoader`**（登录时展开数据范围的业务计算） |
+| `platform-oplog` | `OperationLogApi` + `@OperationLog` 注解 + `OperationLogAspect` + 异步写入 `mb_operation_log` + 敏感字段脱敏 |
 | `platform-file` | `FileApi` + `FileStorage` 接口 + `LocalFileStorage` + `MinioFileStorage`（可选）+ 秒传 |
 | `platform-notification` | `NotificationApi` + 通知公告 + 站内信 + 邮件/短信 adapter（可选） |
 | `platform-dict` | `DictApi` + 字典 CRUD + 本地缓存 + 事件刷新 |
@@ -229,18 +228,26 @@
 | **ground truth** | 不可质疑的事实基线（本文档对后端就是 ground truth） |
 | **opt-in / opt-out** | 默认行为方式：opt-in = 默认关闭，需显式启用；opt-out = 默认开启，需显式跳过 |
 | **Sa-Token** | dromara 开源的轻量 Java 认证框架，meta-build 的认证底层（ADR-0005） |
-| **CurrentUser** | **认证读门面接口**（ADR-0005）。业务层必须通过这个接口获取当前用户信息和权限判断，禁止直接依赖 Sa-Token API。接口定义在 `mb-common.security`，Sa-Token 实现在 `infra-security` |
+| **CurrentUser** | **认证读门面接口**（ADR-0005）。业务层必须通过这个接口获取当前用户信息和权限判断，禁止直接依赖 Sa-Token API。接口定义在 `mb-common.security`，Sa-Token 实现在 `infra-security`。v1 M4.2 扩展:新增常量 `SYSTEM_USER_ID = 0L` 和默认方法 `userIdOrSystem()`,用于无认证上下文（`@Scheduled` / `@Async`）场景下的审计字段填充。|
 | **AuthFacade** | **认证写门面接口**（ADR-0005 + 方案 E）。封装登录/登出/强制注销/续期等"改变认证状态"的操作，业务层要做登录等技术动作时必须通过此接口。与 `CurrentUser` 对称（读 vs 写） |
-| **@RequirePermission** | **自定义权限注解**（ADR-0005）。Controller 用这个注解声明权限，AOP 委托给 `CurrentUser.hasPermission()` 判断 |
+| **@RequirePermission** | **自定义权限注解**（ADR-0005）。**必须放在 Controller 层的方法上**（N3 §2.5），不能放 Service 层。AOP 委托给 `CurrentUser.hasPermission()` 判断。Service 间调用不重新检查权限，跨模块可见性通过 `<Module>Api` 接口 + ArchUnit 编译期保护 |
+| **View** | API 响应 DTO 的命名后缀，如 `UserView` / `OrderDetailView`，必须是 record，带 `from(Record)` 静态工厂方法 |
+| **Command** | 写操作请求 DTO 的命名后缀，如 `UserCreateCommand` / `UserUpdateEmailCommand` / `OrderSubmitCommand`，必须是 record |
+| **Query** | 查询参数 DTO 的命名后缀，如 `UserQuery` / `OrderQuery`，必须是 record |
+| **Event** | 领域事件 DTO 的命名后缀，如 `UserCreatedEvent`，必须是 record，通过 `ApplicationEventPublisher` 发布 |
+| **&lt;Module&gt;Api** | 跨模块调用接口的命名，如 `UserApi` / `OrderApi`。模块内的 `Service` class `implements <Module>Api`。跨模块调用必须走 Api 接口（`CROSS_PLATFORM_ONLY_VIA_API` ArchUnit 规则强制）|
+| **Application Service / Use Case / 编排 Service** | meta-build v1 不强制区分 "Application Service vs Domain Service"（DDD 纯粹派分法）。复杂业务（跨多个聚合根/模块）拆独立的 `<Process>Service`（如 `UserRegistrationService` / `OrderSubmitService`）。详见 [01-module-structure.md §4.7](./01-module-structure.md) |
 | **MockCurrentUser** | 测试用的 `CurrentUser` 实现，通过 `@Primary` Bean 替换生产实现，测试代码零 Sa-Token 引用 |
 | **ProblemDetail** | RFC 9457 定义的 HTTP 错误响应标准格式（Spring Boot 3.x 内置 `org.springframework.http.ProblemDetail`） |
-| **PageResult** | 分页响应的统一结构（`{ content, totalElements, totalPages, page, size }`） |
+| **PageQuery** | 分页查询参数 record（`mb-common.pagination`），包含 `page` / `size` / `sort`。由 `PageQueryArgumentResolver` 自动从 HTTP query string 解析 |
+| **PageResult&lt;T&gt;** | 分页结果 record（`mb-common.pagination`），包含 `content` / `totalElements` / `totalPages` / `page` / `size`。通过 `PageResult.of(content, total, query)` 构造。详见 [06-api-and-contract.md §12](./06-api-and-contract.md) |
+| **SortParser** | Sort 字段解析器（`mb-common.pagination`），Builder 风格 API，`.forTable()` 自动注册通用字段，`.allow()` 显式列举业务字段，`.defaultSort()` 指定默认排序。详见 [06-api-and-contract.md §12.5](./06-api-and-contract.md) |
 | **ArchUnit** | Java 架构测试库，把架构规则写成 JUnit 测试。meta-build 用它做模块边界 + 代码细节守护（ADR-0003） |
 | **DataScope** | 数据范围值对象（`DataScopeType + Set<Long> deptIds`）。5 种类型：`ALL / CUSTOM_DEPT / OWN_DEPT / OWN_DEPT_AND_CHILD / SELF`。类型定义在 `mb-common.security`，登录时由 `DataScopeLoader` 展开并存入 Sa-Token session |
 | **DataScopeRegistry**（方案 E） | 数据权限受保护表的**集中注册中心**（`infra-jooq`）。使用者在 `@Configuration` 里声明"表名 → 部门字段名"映射，`DataScopeVisitListener` 读取此映射决定哪些查询要注入 where 条件 |
 | **DataScopeVisitListener**（方案 E） | 数据权限的**唯一拦截点**。jOOQ 全局 VisitListener，在 SQL AST 构建层自动对注册过的表注入 `dept_id IN (...)` 条件。替代 nxboot 的 `DataScopeAspect` + `DataScopedRepository` 基类双保险（详见 ADR-0007） |
 | **BypassDataScope** | 显式跳过数据权限的注解。实现是 `BypassDataScopeAspect`（`infra-jooq`）——一个窄范围 AOP 切面，只持有一个 `boolean` ThreadLocal 标记，`@BypassDataScope` 方法返回时 try-finally 清理。注解必须填 `reason` 说明 bypass 理由 |
-| **@Audit** | 自定义审计日志注解（ADR-0006 P0.6），AOP 拦截写入 `sys_audit_log` |
+| **@OperationLog** | 自定义操作日志注解（ADR-0006 P0.6），AOP 拦截写入 `mb_operation_log` |
 | **ShedLock** | 分布式定时任务锁库，防止多实例重复执行 `@Scheduled` 任务 |
 | **FileStorage** | 文件存储抽象接口（ADR-0006 P0.5），实现类：`LocalFileStorage` / `MinioFileStorage` |
 | **HikariCP** | Spring Boot 默认的 JDBC 连接池，见 7.8 节的基线配置 |

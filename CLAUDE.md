@@ -148,7 +148,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 
 ## AI 必须遵守的硬约束
 
-后端的 16 条 MUST NOT + 1 条元方法论 + 11 条 MUST 完整列表、防御机制、规则代码位置，统一维护在：
+后端的 17 条 MUST NOT + 1 条元方法论 + 15 条 MUST 完整列表、防御机制、规则代码位置，统一维护在：
 
 → **[后端硬约束反向索引](docs/specs/backend/README.md#后端硬约束反向索引)**
 
@@ -243,7 +243,7 @@ cd client && pnpm -C apps/web-admin tsc --noEmit
 
 ## 反面教材速览（详见 [backend/README.md 后端硬约束反向索引](docs/specs/backend/README.md#后端硬约束反向索引)）
 
-从 nxboot 踩过的坑提炼出 15 条硬约束 + 1 条元方法论（ADR-0007）。前 7 条最致命：
+从 nxboot 踩过的坑提炼出 15 条坑 + meta-build 扩展 2 条 + 1 条元方法论（ADR-0007），MUST NOT 共 17 条。前 7 条最致命：
 
 1. **文档-代码 drift**（nxboot CLAUDE.md 描述了 7 个 shared/components 在磁盘是空目录）→ 本文档索引式 + 每章 verify 块
 2. **opt-in 安全模式**（DataScope 忘加注解就静默泄漏）→ **方案 E**：`DataScopeVisitListener` 在 jOOQ SQL 构建层单点拦截 + 零 Repository 基类 + `DataScopeRegistry` 集中声明（详见 ADR-0007）
@@ -278,4 +278,7 @@ cd client && pnpm -C apps/web-admin tsc --noEmit
   5. **Flyway migration 命名切换到时间戳**（ADR-0008 落盘）：撤销 V50-V89 数字分段方案，改为 `V<yyyymmdd>_<nnn>__<module>_<table>.sql`。ADR-0007 元方法论的第二次落地 + 引入"一致性 > 局部优化"次级元原则
   6. **配置管理完整版落盘**(M1.1 任务):后端新增独立配置管理章节(~730 行,见 [backend/README.md](docs/specs/backend/README.md) 子文档导航),覆盖前缀策略(原生优先 + `mb.*` 自建)、70+ env var 完整清单(11 组)、profile 分层(dev/test/prod)、`@ConfigurationProperties` 规范、fail-fast 三层防护、敏感配置 `toString()` 覆盖 ArchUnit、AI 协作 checklist
   7. **密码与账户安全规范落盘**(M4.1 任务):后端 05-security.md 追加 §8 "密码与账户安全"章节(~450 行)——密码哈希选型 `spring-security-crypto` + bcrypt strength=12(不违反 ADR-0005 的 ArchUnit 精确规则)、可配置密码策略 `mb.iam.password.*`、Redis 账户锁定、Redis 一次性忘密 token + 防 email enumeration、首次登录强制改密、`AuthFacade.kickoutAll` 扩展、完整 AuthService 代码骨架、v1.5+ 预留(2FA/zxcvbn/异常登录)
+  8. **jOOQ 横切关注点全面原生化**(M4.2 任务):04-data-persistence.md 新增 §8.5-§8.8 四节(~430 行)——乐观锁 / updated_at / created_by / updated_by 全部走 jOOQ 原生 Settings + RecordListener；JooqHelper 从静态工具聚合类重构为 @Component 二元路径（单条 Record / 批量+条件 helper）；4 条 ArchUnit 硬规则锁死业务层写操作入口（见 [backend/README.md](docs/specs/backend/README.md)）；**软删除完全去除**（schema 清理 deleted 字段）；新增 `CurrentUser.userIdOrSystem()` + `SYSTEM_USER_ID = 0L` 支持无认证上下文的审计填充。ADR-0007 元方法论第三次应用样本。
+  9. **分页查询保护性约束落盘**(M4.3 任务):`mb-common.pagination` 包新增 `PageQuery` / `PageResult<T>` / `SortParser`（Builder 风格，`forTable` 约定 + `allow` 显式白名单）；`infra-exception` 模块新增 `MbApiPaginationProperties` + `PageQueryArgumentResolver`（Spring MVC 自动解析，Controller 零样板）；配置项 `mb.api.pagination.{default-size=20, max-size=200}`；未指定 sort 时默认 `created_at DESC`；6 组文档落地（06 分页契约章节 / 04 jOOQ 分页模板 / 09 配置项 / appendix 术语表 / README 阅读路径 / CLAUDE.md 最近大修）。
+  10. **Domain Model 规范 + 职责划分 + 编码风格契约**（N3+C2 合并任务）：01-module-structure.md 新增 §4 Domain Model 与层次职责（~370 行：11 类清单 + Controller/Service/Repository 职责表 + 包结构约定 + 典型代码示例 + 编排 Service 拆分原则 + DTO 命名后缀表）；**修复 §8.5.4 drift**（Service 不再直接持有 DSLContext，通过 repository.save() 走 M4.2 原生路径）；**修复权限注解位置 drift**（05-security.md §8 两处 @RequirePermission 从 Service 方法移到对应的 Controller 层示例，新增 §2.5 位置规范节）；08-archunit-rules.md 新增"N3 精化规则"章节（DSLCONTEXT_ONLY_IN_REPOSITORY + SERVICE_MUST_NOT_USE_JOOQ_DSL 两条新规则）和"编码风格契约 [M4]"章节（7 条硬规则：record / @RequiredArgsConstructor / 禁 MapStruct / virtual thread 关闭 / Optional 限制 / enum 状态 / jakarta.annotation.Nullable + M4 实施 checklist）；appendix.md 术语表补充 View/Command/Query/Event/ModuleApi/编排 Service 条目；README 反向索引补充 MUST NOT #17 和 MUST #12-14；verify-docs.sh 新增 §4.7 N3 关键词检查和 §4.8 C2 关键词检查。ADR-0007 元方法论第四次应用样本。
 - **下一次**: frontend-architecture.md 完成时，或 M1 脚手架完成时

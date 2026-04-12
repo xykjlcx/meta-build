@@ -47,7 +47,7 @@ public class AuthService implements AuthApi {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
-    private final AuthFacade authFacade;                // infra-security 门面，封装 Sa-Token
+    private final AuthFacade authFacade;                // mb-common 接口，SaTokenAuthFacade 实现在 infra-security
 
     @Transactional(readOnly = true)
     public LoginResult login(LoginCommand cmd) {
@@ -61,12 +61,8 @@ public class AuthService implements AuthApi {
         DataScope dataScope = DataScopeLoader.load(user, roleRepository);
 
         // 通过 AuthFacade 颁发 token，业务层完全不 import cn.dev33.satoken.*
-        return authFacade.doLogin(user.id(), Map.of(
-            "username",         user.username(),
-            "tenantId",         user.tenantId(),
-            "dataScopeType",    dataScope.type().name(),
-            "dataScopeDeptIds", dataScope.deptIds()
-        ));
+        return authFacade.doLogin(user.id(),
+            new SessionData(user.id(), user.username(), user.tenantId(), dataScope, false));
     }
 }
 ```
@@ -76,11 +72,64 @@ public class AuthService implements AuthApi {
 - 业务层（包括 `platform-iam`）要做"登录/登出/强制注销/刷新 token"等技术操作，**必须**通过 `AuthFacade` 门面（由 ArchUnit 规则 `BUSINESS_MUST_NOT_DEPEND_ON_SA_TOKEN` 强制）
 - `AuthFacade` 和 `CurrentUser` 是**对称的**一对门面：读取当前用户信息用 `CurrentUser`，执行认证技术操作用 `AuthFacade`
 
+## 1.1 Sa-Token 异常处理
+
+Sa-Token 抛出自己的异常类型，未显式处理时会落入 `GlobalExceptionHandler`（[06-api-and-contract.md §2](./06-api-and-contract.md)）的通用 `Exception` 兜底，返回 `500 Internal Server Error`——而不是语义正确的 `401 / 403`。
+
+**`GlobalExceptionHandler` 中必须显式处理以下 Sa-Token 异常**：
+
+```java
+// mb-infra/infra-exception/src/main/java/com/metabuild/infra/exception/GlobalExceptionHandler.java
+// （以下处理器需加入 §2 的 GlobalExceptionHandler）
+
+@ExceptionHandler(cn.dev33.satoken.exception.NotLoginException.class)
+public ProblemDetail handleNotLogin(NotLoginException ex, HttpServletRequest request) {
+    ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
+    detail.setTitle("Unauthorized");
+    detail.setDetail("请先登录");
+    detail.setProperty("code", "auth.notAuthenticated");
+    return detail;
+}
+
+@ExceptionHandler(cn.dev33.satoken.exception.NotPermissionException.class)
+public ProblemDetail handleNotPermission(NotPermissionException ex, HttpServletRequest request) {
+    ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+    detail.setTitle("Forbidden");
+    detail.setDetail("权限不足");
+    detail.setProperty("code", "auth.permissionDenied");
+    return detail;
+}
+
+@ExceptionHandler(cn.dev33.satoken.exception.NotRoleException.class)
+public ProblemDetail handleNotRole(NotRoleException ex, HttpServletRequest request) {
+    ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+    detail.setTitle("Forbidden");
+    detail.setDetail("角色不满足");
+    detail.setProperty("code", "auth.roleDenied");
+    return detail;
+}
+
+@ExceptionHandler(cn.dev33.satoken.exception.DisableServiceException.class)
+public ProblemDetail handleDisabled(DisableServiceException ex, HttpServletRequest request) {
+    ProblemDetail detail = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+    detail.setTitle("Forbidden");
+    detail.setDetail("账户已被禁用");
+    detail.setProperty("code", "auth.accountDisabled");
+    return detail;
+}
+```
+
+**注意**：`GlobalExceptionHandler` 定义在 `infra-exception` 模块（不在 `infra-security`），因此这些处理器需要声明对 `cn.dev33.satoken:sa-token-spring-boot3-starter` 的 `compileOnly` 或 `provided` 依赖，或者通过 `infra-security` 统一 re-export。具体依赖方式 [M1 时补]。
+
+---
+
 ## 2. 权限模型 CurrentUser + @RequirePermission
 
 ### 2.1 权限点命名规范
 
-格式: `<模块>.<资源>.<操作>`（camelCase，和错误码命名一致）
+格式: **点分隔字符串，不限段数**（camelCase，和错误码命名一致），语义清晰即可。推荐三段式 `<module>.<resource>.<action>`，二段式 `<module>.<action>` 也合法。
+
+AppPermission 生成链路（§13）保证前后端一致——后端 `@RequirePermission` 标什么字符串，前端联合类型就生成什么。
 
 例:
 - `iam.user.list`
@@ -168,6 +217,65 @@ public class UserController {
 
 **关键**：Controller 代码里**零 Sa-Token 引用**，完全通过 `@RequirePermission` + `CurrentUser` 门面访问认证能力。
 
+### 2.5 @RequirePermission 位置规范（N3 修订）
+
+**硬规则**：`@RequirePermission` 注解**必须放在 Controller 层的方法上**，不能放在 Service 层。
+
+**理由**（Clean Architecture 官方立场）：
+- 权限是"用户业务意图"的属性，对应 HTTP endpoint
+- Service 是"业务规则的执行工具"，被 Controller / 其他 Service / 定时任务 / 事件处理器调用
+- 如果权限放 Service 层，Service 间调用时会造成混乱（调用方有权限但被调用方没权限，反之亦然）
+- 跨模块 API 可见性应该通过 `<Module>Api` 接口 + ArchUnit `CROSS_PLATFORM_ONLY_VIA_API` 编译期保护，不是运行时权限注解
+
+```java
+// ✅ 正确：@RequirePermission 在 Controller 层
+@RestController
+public class UserController {
+    @PostMapping("/users")
+    @RequirePermission("iam.user.create")
+    public UserView create(@RequestBody @Valid UserCreateCommand cmd) {
+        return userService.create(cmd);
+    }
+}
+
+@Service
+public class UserService {
+    // 没有 @RequirePermission
+    public UserView create(UserCreateCommand cmd) { ... }
+}
+
+// ❌ 错误：@RequirePermission 在 Service 层（禁止！）
+@Service
+public class UserService {
+    // @RequirePermission("iam.user.create")  ← 禁止！
+    public UserView create(UserCreateCommand cmd) { ... }
+}
+```
+
+**动态权限检查**：如果权限判断依赖运行时数据（如"只能改自己的邮箱"），在 Service 层用 `currentUser.hasPermission(String)` 程序性调用：
+
+```java
+// Service 层的动态权限检查（不是注解）
+public UserView updateEmail(Long userId, UserUpdateEmailCommand cmd) {
+    if (!currentUser.userId().equals(userId) && !currentUser.hasPermission("iam.user.update")) {
+        throw new BusinessException("iam.user.cannotUpdate");
+    }
+    // ...
+}
+```
+
+**完整权限模型**：
+
+| 权限类型 | 机制 | 层 |
+|---|---|---|
+| 静态用户权限（"能创建用户吗"）| `@RequirePermission` 注解 | Controller 层 |
+| 动态用户权限（"能改这条订单吗"）| `currentUser.hasPermission()` 程序性调用 | Service 层 |
+| 跨模块 API 可见性 | `<Module>Api` 接口 + ArchUnit 编译期 | 模块契约层 |
+| 行级数据权限 | `DataScopeVisitListener`（方案 E）| Repository（jOOQ 查询拦截）|
+| 系统动作（定时任务/异步/事件）| 无 Controller，无 `@RequirePermission`，通过 `currentUser.isSystem()` 或 `SYSTEM_USER_ID` | 天然适配 |
+
+**每种权限需求有唯一对应的机制，不重叠、不混淆、不遗漏**。
+
 ## 3. DataScope opt-out 实现细节
 
 （数据权限的完整机制在 [§7 数据权限方案 E](#7-数据权限方案-e)，本节只强调与认证模型的集成）
@@ -178,13 +286,10 @@ public class UserController {
 登录时（platform-iam.domain.auth.AuthService）
     ↓
 DataScopeLoader.load(user, roleService, deptService)
-    ↓（读 sys_iam_role.data_scope 字段 + 展开部门树）
+    ↓（读 mb_iam_role.data_scope 字段 + 展开部门树）
 DataScope(type=OWN_DEPT_AND_CHILD, deptIds={1,2,3,4})
     ↓
-AuthFacade.doLogin(userId, Map.of(
-    "dataScopeType",    dataScope.type().name(),
-    "dataScopeDeptIds", dataScope.deptIds()
-))
+AuthFacade.doLogin(userId, new SessionData(userId, username, dataScope, mustChangePassword))
     ↓
 Sa-Token session 持久化
 
@@ -200,7 +305,7 @@ DataScopeVisitListener.visitStart(ctx)
 ```
 
 **关键点**：
-- 用户的数据范围规则存在 `sys_iam_role.data_scope` 字段
+- 用户的数据范围规则存在 `mb_iam_role.data_scope` 字段
 - 登录时**一次性**展开为具体 `Set<Long> deptIds`，存入 session（后续请求零查询）
 - 业务层**只通过** `CurrentUser.dataScopeType()` / `CurrentUser.dataScopeDeptIds()` 读取（不直接访问 Sa-Token session）
 - `DataScopeVisitListener` 在 jOOQ SQL 构建层自动注入条件，Repository 是普通类**零继承、零数据权限代码**
@@ -217,7 +322,7 @@ DataScopeVisitListener.visitStart(ctx)
 | `MB_DB_USERNAME` | ✓ | （无） | PostgreSQL 用户 |
 | `MB_REDIS_PASSWORD` | 生产必填 | `""` | Redis 密码（Sa-Token 黑名单 + 缓存） |
 | `MB_REDIS_HOST` | 生产必填 | `localhost` | Redis 主机 |
-| `MB_CORS_ORIGINS` | 跨域必填 | `""` | CORS 白名单（逗号分隔） |
+| `MB_CORS_ALLOWED_ORIGINS` | 跨域必填 | `""` | CORS 白名单（逗号分隔，完整清单见 09-config-management.md §9.2.10）|
 | `MB_ID_WORKER` | 集群必填 | `1` | Snowflake workerId |
 | `MB_SWAGGER_ENABLED` | - | `false` | 生产禁用 Swagger UI |
 | `MB_FILE_STORAGE_PATH` | - | `/var/lib/meta-build/files` | 本地文件存储路径 |
@@ -242,25 +347,28 @@ sa-token:
 
 ### 决策
 
-- 白名单管理: `MB_CORS_ORIGINS` 逗号分隔（例: `https://admin.meta-build.dev,https://app.meta-build.dev`）
-- **默认禁止跨域**（空字符串 = 仅同源）
+- 白名单管理: `MB_CORS_ALLOWED_ORIGINS` 逗号分隔（例: `https://admin.meta-build.dev,https://app.meta-build.dev`），通过 `MbCorsProperties` 注入（见 [09-config-management.md §9.2.10](./09-config-management.md#9210-cors白名单)）
+- **默认禁止跨域**（空列表 = 仅同源）
 - **禁止** `Access-Control-Allow-Origin: *` + `Allow-Credentials: true` 组合（浏览器标准拒绝）
 - 配置位置: `infra-security/src/main/java/com/metabuild/infra/security/CorsConfig.java`
 
 ```java
 @Configuration
+@RequiredArgsConstructor
 public class CorsConfig {
+
+    private final MbCorsProperties corsProperties;
+
     @Bean
-    public CorsConfigurationSource corsConfigurationSource(
-            @Value("${MB_CORS_ORIGINS:}") String origins) {
+    public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        if (!origins.isBlank()) {
-            config.setAllowedOrigins(List.of(origins.split(",")));
-            config.setAllowCredentials(true);
+        if (!corsProperties.allowedOrigins().isEmpty()) {
+            config.setAllowedOrigins(corsProperties.allowedOrigins());
+            config.setAllowCredentials(corsProperties.allowCredentials());
         }
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setMaxAge(3600L);
+        config.setAllowedMethods(corsProperties.allowedMethods());
+        config.setAllowedHeaders(corsProperties.allowedHeaders());
+        config.setMaxAge(corsProperties.maxAgeSeconds());
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/api/**", config);
@@ -391,7 +499,7 @@ public class SaTokenCurrentUser implements CurrentUser {
 
     @Override
     public boolean isAdmin() {
-        return hasRole("admin") || permissions().contains("*:*:*");
+        return hasRole("admin") || permissions().contains("*.*.*");
     }
 
     // ... 其他方法
@@ -404,8 +512,8 @@ public class SaTokenCurrentUser implements CurrentUser {
 // mb-admin/src/test/java/com/metabuild/TestSecurityConfig.java
 package com.metabuild;
 
+import com.metabuild.common.security.AuthFacade;
 import com.metabuild.common.security.CurrentUser;
-import com.metabuild.infra.security.AuthFacade;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
@@ -450,7 +558,7 @@ public class MockCurrentUser implements CurrentUser {
     public MockCurrentUser asAdmin() {
         this.userId = 1L;
         this.username = "admin";
-        this.permissions = Set.of("*:*:*");
+        this.permissions = Set.of("*.*.*");
         this.admin = true;
         return this;
     }
@@ -529,51 +637,50 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
 #### 6.6.2 AuthFacade 接口定义
 
 ```java
-// mb-infra/infra-security/src/main/java/com/metabuild/infra/security/AuthFacade.java
-package com.metabuild.infra.security;
+// mb-common/src/main/java/com/metabuild/common/security/AuthFacade.java
+package com.metabuild.common.security;
 
 import java.util.Map;
 
 /**
  * 认证技术门面——封装登录/登出/强制注销等"改变认证状态"的操作。
  *
- * 与 {@link com.metabuild.common.security.CurrentUser} 对称：
+ * 与 {@link CurrentUser} 对称，同放 mb-common.security：
  * - CurrentUser：读当前用户信息和权限（请求处理中使用）
  * - AuthFacade： 写认证状态（登录/登出/续期等）
+ *
+ * 接口放 mb-common（零 Spring / 零 Sa-Token 依赖，纯抽象），
+ * Sa-Token 的实现类 {@link com.metabuild.infra.security.SaTokenAuthFacade} 在 infra-security。
  *
  * 业务层（platform/business）要做登录等技术操作时必须通过此接口，
  * 禁止直接依赖 Sa-Token、Spring Security 等认证框架 API（由 ArchUnit 强制）。
  *
- * 未来切换认证框架时，只需提供 {@link SaTokenAuthFacade} 的替代实现，
+ * 未来切换认证框架时，只需提供 {@link com.metabuild.infra.security.SaTokenAuthFacade} 的替代实现，
  * 业务代码完全不需要修改。
  */
 public interface AuthFacade {
 
     /**
-     * 颁发 token 并把 session 属性写入认证框架。
+     * 颁发 token 并把 session 数据写入认证框架。
      *
-     * @param userId        登录成功的用户 ID
-     * @param sessionAttrs  要写入 session 的附加属性（例如 username / tenantId / dataScopeType / dataScopeDeptIds）
+     * @param userId      登录成功的用户 ID
+     * @param sessionData 要写入 session 的数据对象（如 SessionData record）
      * @return token 值 + 过期时间
      */
-    LoginResult doLogin(long userId, Map<String, Object> sessionAttrs);
+    LoginResult doLogin(Long userId, Object sessionData);
 
     /** 当前会话登出，token 加入黑名单 */
-    void doLogout();
+    void logout();
 
     /**
      * 强制注销指定用户的所有会话（封禁 / 管理员踢出 / 修改密码场景）。
      *
      * @param userId 目标用户 ID
      */
-    void kickOut(long userId);
+    void kickoutAll(Long userId);
 
-    /**
-     * 延长当前 token 的有效期。
-     *
-     * @param seconds 延长的秒数
-     */
-    void renewTimeout(long seconds);
+    /** 延长当前 token 的有效期 */
+    void renewTimeout();
 }
 ```
 
@@ -594,26 +701,27 @@ public record LoginResult(String token, long timeoutSeconds) {}
 public class SaTokenAuthFacade implements AuthFacade {
 
     @Override
-    public LoginResult doLogin(long userId, Map<String, Object> sessionAttrs) {
+    public LoginResult doLogin(Long userId, Object sessionData) {
         StpUtil.login(userId);
         SaSession session = StpUtil.getSession();
-        sessionAttrs.forEach(session::set);
+        // sessionData 由业务层传入的 record 类型，通过反射或约定字段写入 session
+        // [M4 时补：约定 sessionData 实现 SessionDataProvider 接口，由 SaTokenAuthFacade 统一写入]
         return new LoginResult(StpUtil.getTokenValue(), StpUtil.getTokenTimeout());
     }
 
     @Override
-    public void doLogout() {
+    public void logout() {
         StpUtil.logout();
     }
 
     @Override
-    public void kickOut(long userId) {
+    public void kickoutAll(Long userId) {
         StpUtil.kickout(userId);
     }
 
     @Override
-    public void renewTimeout(long seconds) {
-        StpUtil.renewTimeout(seconds);
+    public void renewTimeout() {
+        StpUtil.renewTimeout(StpUtil.getTokenTimeout());
     }
 }
 ```
@@ -635,14 +743,14 @@ public class MockAuthFacade implements AuthFacade {
     private final List<Long> kickedOutUsers = new ArrayList<>();
 
     @Override
-    public LoginResult doLogin(long userId, Map<String, Object> sessionAttrs) {
+    public LoginResult doLogin(Long userId, Object sessionData) {
         loggedInUsers.add(userId);
         return new LoginResult("mock-token-" + userId, 3600L);
     }
 
-    @Override public void doLogout() {}
-    @Override public void kickOut(long userId) { kickedOutUsers.add(userId); }
-    @Override public void renewTimeout(long seconds) {}
+    @Override public void logout() {}
+    @Override public void kickoutAll(Long userId) { kickedOutUsers.add(userId); }
+    @Override public void renewTimeout() {}
 
     // 测试断言辅助方法
     public boolean wasUserLoggedIn(long userId) { return loggedInUsers.contains(userId); }
@@ -773,7 +881,7 @@ public class DataScopeRegistry {
     /**
      * 注册一个受数据权限保护的表。
      *
-     * @param tableName      表名（如 "sys_iam_user"）
+     * @param tableName      表名（如 "mb_iam_user"）
      * @param deptColumnName 部门字段名（如 "dept_id"）
      */
     public void register(String tableName, String deptColumnName) {
@@ -935,9 +1043,9 @@ public class DataScopeConfig {
     ApplicationRunner dataScopeInit(DataScopeRegistry registry) {
         return args -> {
             // === platform 层受保护表 ===
-            registry.register("sys_iam_user",  "dept_id");
-            registry.register("sys_iam_dept",  "parent_id");      // 部门树自身按 parent_id 受限
-            registry.register("sys_audit_log", "dept_id");
+            registry.register("mb_iam_user",       "dept_id");
+            registry.register("mb_iam_dept",       "parent_id");  // 部门树自身按 parent_id 受限
+            registry.register("mb_operation_log",  "dept_id");
 
             // === canonical reference（M5 填入）===
             registry.register("biz_order_main", "owner_dept_id");
@@ -954,7 +1062,7 @@ public class DataScopeConfig {
 ### 7.8 Repository 写起来是普通类（零魔法）
 
 ```java
-// platform-iam/src/main/java/com/metabuild/platform/iam/infrastructure/user/UserRepository.java
+// platform-iam/src/main/java/com/metabuild/platform/iam/domain/user/UserRepository.java
 @Repository
 @RequiredArgsConstructor
 public class UserRepository {
@@ -963,16 +1071,16 @@ public class UserRepository {
 
     public Optional<User> findById(Long id) {
         // 就是普通 jOOQ 查询。
-        // sys_iam_user 在 DataScopeRegistry 注册过，VisitListener 会自动在 SELECT 上注入 dept_id 过滤。
-        return dsl.selectFrom(SYS_IAM_USER)
+        // mb_iam_user 在 DataScopeRegistry 注册过，VisitListener 会自动在 SELECT 上注入 dept_id 过滤。
+        return dsl.selectFrom(MB_IAM_USER)
             .where(SYS_IAM_USER.ID.eq(id))
             .fetchOptional(this::toDomain);
     }
 
     public List<User> findByStatus(int status) {
         // 同样，零数据权限相关代码，自动受保护
-        return dsl.selectFrom(SYS_IAM_USER)
-            .where(SYS_IAM_USER.STATUS.eq(status))
+        return dsl.selectFrom(MB_IAM_USER)
+            .where(MB_IAM_USER.STATUS.eq(status))
             .fetch(this::toDomain);
     }
 
@@ -980,12 +1088,12 @@ public class UserRepository {
     public Optional<User> findByUsernameForLogin(String username) {
         // 这个方法调用期间整个 AOP 切面把 bypass 标记置 true，
         // VisitListener 跳过注入，用于登录等系统级查询
-        return dsl.selectFrom(SYS_IAM_USER)
-            .where(SYS_IAM_USER.USERNAME.eq(username))
+        return dsl.selectFrom(MB_IAM_USER)
+            .where(MB_IAM_USER.USERNAME.eq(username))
             .fetchOptional(this::toDomain);
     }
 
-    private User toDomain(SysIamUserRecord r) { /* ... */ return null; }
+    private User toDomain(MbIamUserRecord r) { /* ... */ return null; }
 }
 ```
 
@@ -1019,7 +1127,15 @@ public class DataScopeRule {
 
 > **注意**：jOOQ 给所有"接受字符串 SQL"的 DSLContext API 都打了 `@PlainSQL` 注解（`fetch(String)` / `execute(String)` / `resultQuery(String)` 等），直接用 ArchUnit 按注解匹配即可，不需要枚举每个方法签名。
 
-### 7.10 测试策略
+### 7.10 方案 E 作为 "jOOQ 横切关注点原生拦截" 的第一个样本
+
+方案 E 把"数据权限"这一横切关注点从业务代码抽到 jOOQ `VisitListener` 单点拦截。这是 meta-build 内部"jOOQ 原生拦截机制吞掉横切关注点"的第一个样本。
+
+后续 M4.2（[04-data-persistence.md §8.5-§8.8](04-data-persistence.md)）把**乐观锁** / **审计字段** / **`updated_at` 自动**也全部收敛到 jOOQ 原生拦截（`Settings` + `RecordListener`），砍掉了 nxboot 的 `JooqHelper` 聚合范式。
+
+两次落地共享同一套哲学：**横切关注点用 jOOQ 原生拦截（`VisitListener` / `RecordListener` / `ExecuteListener` / `Settings`），业务层零感知**。详见 ADR-0007 元方法论。
+
+### 7.11 测试策略
 
 ```java
 // platform-iam/.../UserRepositoryDataScopeTest.java
@@ -1032,7 +1148,7 @@ class UserRepositoryDataScopeTest extends BaseIntegrationTest {
     @Autowired private DataScopeRegistry registry;
 
     @BeforeEach void setup() {
-        registry.register("sys_iam_user", "dept_id");
+        registry.register("mb_iam_user", "dept_id");
     }
 
     @Test
@@ -1083,7 +1199,7 @@ class UserRepositoryDataScopeTest extends BaseIntegrationTest {
 | **密码策略** | 通过 `mb.iam.password.*` 配置项可调 | 长度 / 复杂度 / 历史不重用 / 过期 / 锁定阈值 |
 | **账户锁定** | Redis 计数器 + TTL（5 次失败 / 锁定 30 分钟）| Sa-Token `AuthFacade.kickoutAll(userId)` 做强制下线 |
 | **忘密流程** | Redis 一次性 token（TTL 15 分钟）+ `platform-notification` 发邮件 | 防 email enumeration（统一响应 + 恒定时间）|
-| **首次登录改密** | `sys_iam_user.must_change_password` 字段 | 管理员创建用户 / 管理员重置密码时设为 `true` |
+| **首次登录改密** | `mb_iam_user.must_change_password` 字段 | 管理员创建用户 / 管理员重置密码时设为 `true` |
 | **改密后所有 session 失效** | `AuthFacade.kickoutAll(userId)` | Sa-Token 原生能力 |
 | **客户端不 hash** | 信任 HTTPS，客户端传明文 | 详见 [§8.3.5](#835-客户端不-hash信任-https) |
 | **2FA** | **v1.5+ 预留**，v1 不做 | Sa-Token 支持二次校验 `StpUtil.openSafe`，v1.5 扩展 |
@@ -1302,7 +1418,7 @@ public class PasswordPolicyValidator {
 
 #### 8.3.4 首次登录强制改密
 
-**Schema 字段**：`sys_iam_user.must_change_password BOOLEAN NOT NULL DEFAULT false`
+**Schema 字段**：`mb_iam_user.must_change_password BOOLEAN NOT NULL DEFAULT false`
 
 **何时设为 true**：
 1. 管理员创建用户时（`UserService.create()` 默认 `must_change_password = true`）
@@ -1522,8 +1638,8 @@ public void requestPasswordReset(String email) {
 
 ```java
 @Transactional
-@Audit(action = "iam.auth.changePassword", targetType = "User", targetIdExpr = "#root.currentUser.userId()")
 public void changePassword(ChangePasswordCommand cmd) {
+    // 注意：@OperationLog 放对应的 Controller 方法上（N3 §2.5）
     Long userId = currentUser.userId();
     User user = userRepository.findById(userId)
         .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
@@ -1563,27 +1679,50 @@ private void checkPasswordHistory(Long userId, String newPlainPassword) {
 
 #### 8.6.2 管理员重置密码
 
+**注意**：`@RequirePermission("iam.user.resetPassword")` 应该放在对应的 Controller 方法上，不在 Service 方法上（N3 §2.5）。
+
+Controller 层（权限声明）：
+
 ```java
+// platform-iam/web/PasswordController.java
+@RestController
+@RequestMapping("/api/v1/iam/passwords")
+@RequiredArgsConstructor
+public class PasswordController {
+
+    private final PasswordService passwordService;
+
+    @PostMapping("/admin-reset")
+    @RequirePermission("iam.user.resetPassword")       // ← 权限在 Controller 层
+    @OperationLog(action = "iam.auth.resetPasswordByAdmin")
+    public String resetPasswordByAdmin(@RequestBody @Valid ResetPasswordByAdminCommand cmd) {
+        return passwordService.resetPasswordByAdmin(cmd);
+    }
+}
+```
+
+Service 层（业务逻辑，无 @RequirePermission）：
+
+```java
+// platform-iam/domain/auth/PasswordService.java
 @Transactional
-@Audit(action = "iam.auth.resetPasswordByAdmin", targetType = "User", targetIdExpr = "#cmd.targetUserId")
-@RequirePermission("iam:user:resetPassword")
-public void resetPasswordByAdmin(ResetPasswordByAdminCommand cmd) {
+public String resetPasswordByAdmin(ResetPasswordByAdminCommand cmd) {
     User user = userRepository.findById(cmd.targetUserId())
         .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
 
-    // 生成临时密码(或使用管理员传入的密码)
+    // 生成临时密码（或使用管理员传入的密码）
     String tempPassword = cmd.newPassword() != null ? cmd.newPassword() : generateTempPassword();
     passwordPolicyValidator.validate(tempPassword);
 
     String newHash = passwordEncoder.encode(tempPassword);
-    // must_change_password=true:用户下次登录必须改密
+    // must_change_password=true：用户下次登录必须改密
     userRepository.updatePassword(cmd.targetUserId(), newHash, true);
     passwordHistoryRepository.append(cmd.targetUserId(), user.passwordHash());
 
     // 管理员重置密码也应该 kickoutAll
     authFacade.kickoutAll(cmd.targetUserId());
 
-    // 如果管理员选择"通知用户",则发送包含临时密码的邮件
+    // 如果管理员选择"通知用户"，则发送包含临时密码的邮件
     if (cmd.notifyUser()) {
         notificationApi.sendEmail(
             user.email(),
@@ -1591,6 +1730,7 @@ public void resetPasswordByAdmin(ResetPasswordByAdminCommand cmd) {
             i18n.get("iam.email.passwordResetByAdmin.body", tempPassword)
         );
     }
+    return tempPassword;  // 返回给管理员，由管理员转告用户或走邮件
 }
 ```
 
@@ -1616,13 +1756,13 @@ public void kickoutAll(Long userId) {
 
 ### 8.7 Schema 扩展
 
-#### 8.7.1 `sys_iam_user` 新增字段
+#### 8.7.1 `mb_iam_user` 新增字段
 
 在原有 user 表基础上加四个字段（`mb-schema/src/main/resources/db/migration/` 的早期 migration 里直接包含）：
 
 ```sql
 -- V20260601_001__iam_user.sql 的完整版本
-CREATE TABLE sys_iam_user (
+CREATE TABLE mb_iam_user (
     id                     BIGINT       PRIMARY KEY,
     tenant_id              BIGINT       NOT NULL DEFAULT 0,
     username               VARCHAR(64)  NOT NULL,
@@ -1634,7 +1774,6 @@ CREATE TABLE sys_iam_user (
     password_updated_at    TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     must_change_password   BOOLEAN      NOT NULL DEFAULT false,
     -- =====================================
-    deleted                SMALLINT     NOT NULL DEFAULT 0,
     version                INTEGER      NOT NULL DEFAULT 0,
     created_by             BIGINT,
     created_at             TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -1642,10 +1781,10 @@ CREATE TABLE sys_iam_user (
     updated_at             TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX uk_sys_iam_user_tenant_username
-    ON sys_iam_user (tenant_id, username) WHERE deleted = 0;
-CREATE INDEX idx_sys_iam_user_tenant_email
-    ON sys_iam_user (tenant_id, email) WHERE deleted = 0;
+CREATE UNIQUE INDEX uk_mb_iam_user_tenant_username
+    ON mb_iam_user (tenant_id, username);
+CREATE INDEX idx_mb_iam_user_tenant_email
+    ON mb_iam_user (tenant_id, email);
 ```
 
 **说明**：
@@ -1653,11 +1792,11 @@ CREATE INDEX idx_sys_iam_user_tenant_email
 - `password_updated_at` 用于密码过期检查（如果 `mb.iam.password.max-age-days > 0`）
 - `must_change_password` 用于首次登录强制改密（§8.3.4）
 
-#### 8.7.2 `sys_iam_password_history` 表
+#### 8.7.2 `mb_iam_password_history` 表
 
 ```sql
 -- V20260601_007__iam_password_history.sql
-CREATE TABLE sys_iam_password_history (
+CREATE TABLE mb_iam_password_history (
     id                BIGINT       PRIMARY KEY,
     tenant_id         BIGINT       NOT NULL DEFAULT 0,
     user_id           BIGINT       NOT NULL,
@@ -1665,19 +1804,19 @@ CREATE TABLE sys_iam_password_history (
     created_at        TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_sys_iam_password_history_user_created
-    ON sys_iam_password_history (tenant_id, user_id, created_at DESC);
+CREATE INDEX idx_mb_iam_password_history_user_created
+    ON mb_iam_password_history (tenant_id, user_id, created_at DESC);
 ```
 
 **清理策略**：`PasswordHistoryRepository.trimToLastN(userId, N)` 在每次改密后执行——保留最新 N 条，删除更老的。不需要定时任务。
 
 #### 8.7.3 忘密 token 不建表
 
-忘密 token 存 Redis（§8.5.2），**不创建 `sys_iam_password_reset_token` 表**，理由：
+忘密 token 存 Redis（§8.5.2），**不创建 `mb_iam_password_reset_token` 表**，理由：
 
 - token 的生命周期 15 分钟，DB 存储成本和清理成本不划算
 - Redis 的 `SET ... EX ... NX` + `GETDEL` 是原生原子操作
-- 忘密 token 不需要"历史审计"（审计 log 由 `@Audit` 注解记录）
+- 忘密 token 不需要"历史审计"（操作日志由 `@OperationLog` 注解记录）
 
 ---
 
@@ -1737,6 +1876,58 @@ public void kickoutAll(Long userId) {
 
 > **这是 M4 落地时的参考实现**。使用者可以直接复制到 `platform-iam/domain/auth/AuthService.java`。
 
+#### `PasswordResetEmailSender`（独立 Bean，确保 @Async 代理生效）
+
+Spring AOP 代理机制：同一个 Bean 内部调用（`this.sendXxx()`）不走代理，`@Async` 不生效。因此发重置邮件的逻辑必须提取到独立 Bean：
+
+```java
+// platform-iam/domain/auth/PasswordResetEmailSender.java
+package com.metabuild.platform.iam.domain.auth;
+
+import com.metabuild.platform.notification.api.NotificationApi;
+import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.stereotype.Component;
+
+import java.time.Duration;
+import java.util.Optional;
+
+@Component
+@RequiredArgsConstructor
+public class PasswordResetEmailSender {
+
+    private final UserRepository userRepository;
+    private final ResetTokenStore resetTokenStore;
+    private final NotificationApi notificationApi;
+    private final MbIamPasswordProperties policy;
+
+    /**
+     * 异步发送密码重置邮件。
+     *
+     * 必须放在独立 Bean（非 AuthService 内部方法），
+     * 否则 Spring AOP 代理的同类内部调用绕过 @Async 拦截，方法会在当前线程同步执行。
+     */
+    @Async
+    public void sendResetEmail(String email) {
+        Optional<User> userOpt = userRepository.findByEmail(email);
+        if (userOpt.isEmpty()) return;  // 静默失败，防 email enumeration
+
+        User user = userOpt.get();
+        String token = generateResetToken();
+        resetTokenStore.put(token, user.id(), Duration.ofMinutes(policy.resetTokenTtlMinutes()));
+        notificationApi.sendPasswordResetEmail(user.email(), token);
+    }
+
+    private static String generateResetToken() {
+        byte[] bytes = new byte[32];
+        new java.security.SecureRandom().nextBytes(bytes);
+        return java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
+    }
+}
+```
+
+#### `AuthService` 骨架
+
 ```java
 package com.metabuild.platform.iam.domain.auth;
 
@@ -1744,7 +1935,7 @@ import com.metabuild.common.security.AuthFacade;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.common.security.DataScope;
 import com.metabuild.common.security.LoginResult;
-import com.metabuild.platform.audit.Audit;
+// 注意：@OperationLog 放 Controller 层，Service 不导入
 import com.metabuild.platform.iam.config.MbIamPasswordProperties;
 import com.metabuild.platform.iam.domain.user.User;
 import com.metabuild.platform.iam.domain.user.UserRepository;
@@ -1775,8 +1966,8 @@ public class AuthService {
     private final AuthFacade authFacade;
     private final AccountLockService accountLockService;
     private final DataScopeLoader dataScopeLoader;
-    private final ResetTokenStore resetTokenStore;   // Redis 封装
-    private final NotificationApi notificationApi;
+    private final ResetTokenStore resetTokenStore;                   // Redis 封装
+    private final PasswordResetEmailSender passwordResetEmailSender; // 独立 Bean 确保 @Async 代理生效
     private final CurrentUser currentUser;
     private final MbIamPasswordProperties policy;
 
@@ -1835,8 +2026,8 @@ public class AuthService {
     }
 
     @Transactional
-    @Audit(action = "iam.auth.changePassword", targetType = "User", targetIdExpr = "#currentUserId")
     public void changePassword(ChangePasswordCommand cmd) {
+        // 注意：@OperationLog 放对应的 Controller 方法上（N3 §2.5）
         Long userId = currentUser.userId();
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
@@ -1857,25 +2048,15 @@ public class AuthService {
 
     /** 忘密流程第一步:请求重置邮件 */
     public void requestPasswordReset(String email) {
-        // 主线程立即返回,异步处理(防 email enumeration 通过响应时间差)
-        sendResetEmailAsync(email);
-    }
-
-    @Async
-    protected void sendResetEmailAsync(String email) {
-        Optional<User> userOpt = userRepository.findByEmail(email);
-        if (userOpt.isEmpty()) return;  // 静默失败
-
-        User user = userOpt.get();
-        String token = generateResetToken();
-        resetTokenStore.put(token, user.id(), Duration.ofMinutes(policy.resetTokenTtlMinutes()));
-        notificationApi.sendPasswordResetEmail(user.email(), token);
+        // 注意：通过独立 Bean passwordResetEmailSender 而非 this.sendXxx() 调用异步方法，
+        // 避免 Spring AOP 代理的同类内部调用问题（@Async 在 this.xxx() 上不生效）
+        passwordResetEmailSender.sendResetEmail(email);
     }
 
     /** 忘密流程第二步:凭 token 改密 */
     @Transactional
-    @Audit(action = "iam.auth.confirmPasswordReset", targetType = "User", targetIdExpr = "#result")
     public Long confirmPasswordReset(String token, String newPassword) {
+        // 注意：@OperationLog 放对应的 Controller 方法上（N3 §2.5）
         Long userId = resetTokenStore.consume(token)
             .orElseThrow(() -> new BusinessException("iam.auth.invalidResetToken"));
 
@@ -1895,9 +2076,8 @@ public class AuthService {
         return userId;
     }
 
+    // 注意：@RequirePermission 和 @OperationLog 都必须放在 Controller 层（N3 §2.5），不放 Service
     @Transactional
-    @Audit(action = "iam.auth.resetPasswordByAdmin", targetType = "User", targetIdExpr = "#cmd.targetUserId")
-    @RequirePermission("iam:user:resetPassword")
     public String resetPasswordByAdmin(ResetPasswordByAdminCommand cmd) {
         User user = userRepository.findById(cmd.targetUserId())
             .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
@@ -1913,7 +2093,7 @@ public class AuthService {
         if (cmd.notifyUser()) {
             notificationApi.sendPasswordResetByAdminEmail(user.email(), tempPassword);
         }
-        return tempPassword;  // 返回给管理员,由管理员转告用户或走邮件
+        return tempPassword;  // 返回给管理员，由管理员转告用户或走邮件
     }
 
     private void checkPasswordHistory(Long userId, String newPlainPassword) {
@@ -1924,12 +2104,6 @@ public class AuthService {
                 throw new BusinessException("iam.password.reused", policy.historyCount());
             }
         }
-    }
-
-    private static String generateResetToken() {
-        byte[] bytes = new byte[32];
-        new SecureRandom().nextBytes(bytes);
-        return Base64.getUrlEncoder().withoutPadding().encodeToString(bytes);
     }
 
     private static String generateTempPassword() {
@@ -1944,7 +2118,88 @@ public class AuthService {
 
 ---
 
-### 8.10 测试策略
+### 8.10 AuthController 骨架
+
+> **这是 M4 落地时的参考实现**。`/api/v1/auth/**` 是认证相关的唯一入口，`AuthService` 承担业务逻辑，`AuthController` 只做请求解析和响应映射。
+
+```java
+// import com.metabuild.common.security.CurrentUser;
+// import com.metabuild.platform.oplog.OperationLog;  // 操作日志注解
+
+/**
+ * 认证相关端点。
+ * /auth/login 和 /auth/logout 是公开/半公开路径，
+ * /auth/me 需要已登录（Sa-Token 自动验证，不需要 @RequirePermission）。
+ */
+@RestController
+@RequestMapping("/api/v1/auth")
+@RequiredArgsConstructor
+public class AuthController {
+
+    private final AuthService authService;
+    private final CurrentUser currentUser;
+
+    /**
+     * 获取当前登录用户信息（前端 useCurrentUser hook 消费）。
+     * 未登录时 Sa-Token 拦截返回 401 ProblemDetail，前端 throwOnError:false 降级为匿名用户。
+     */
+    @GetMapping("/me")
+    public CurrentUserSnapshot me() {
+        return authService.getCurrentUserSnapshot(currentUser.userId());
+    }
+
+    @PostMapping("/login")
+    @OperationLog(action = "iam.auth.login")
+    public LoginResult login(@RequestBody @Valid LoginCommand cmd) {
+        return authService.login(cmd.username(), cmd.password());
+    }
+
+    @PostMapping("/logout")
+    @OperationLog(action = "iam.auth.logout")
+    public void logout() {
+        authService.logout();
+    }
+}
+```
+
+#### `CurrentUserSnapshot` DTO
+
+`/auth/me` 响应体，前端 `useCurrentUser()` hook 消费。字段设计遵循"前端需要什么就暴露什么"原则，权限点 code 列表由角色→菜单→路由树 JOIN 推导（详见前端权限双树架构）。
+
+```java
+/**
+ * /auth/me 响应体，前端 useCurrentUser() 消费。
+ */
+public record CurrentUserSnapshot(
+    long userId,
+    String username,
+    long tenantId,
+    List<String> permissions,       // 权限点 code 列表（由角色→菜单→路由树 JOIN 推导）
+    List<String> roles,             // 角色 code 列表
+    String dataScopeType,           // 数据范围类型
+    List<Long> dataScopeDeptIds     // 自定义部门范围（dataScopeType=CUSTOM_DEPT 时有值）
+) {
+    public static CurrentUserSnapshot from(CurrentUser user, List<String> permissions) {
+        return new CurrentUserSnapshot(
+            user.userId(), user.username(), user.tenantId(),
+            permissions, List.copyOf(user.roles()),
+            user.dataScopeType().name(), List.copyOf(user.dataScopeDeptIds())
+        );
+    }
+}
+```
+
+**Sa-Token 路由放行规则**：
+
+| 端点 | 放行策略 | 说明 |
+|---|---|---|
+| `POST /api/v1/auth/login` | 完全放行（匿名可访问）| Sa-Token 拦截器 excludeList |
+| `POST /api/v1/auth/logout` | 放行（未登录也可调用）| 幂等，未登录时 no-op |
+| `GET /api/v1/auth/me` | **需要登录**（Sa-Token 拦截器校验 token）| 未登录返回 401 ProblemDetail |
+
+---
+
+### 8.11 测试策略
 
 | 测试 | 覆盖点 | 落地位置 |
 |---|---|---|
@@ -1958,17 +2213,17 @@ public class AuthService {
 
 ---
 
-### 8.11 v1.5+ 预留
+### 8.12 v1.5+ 预留
 
 | 能力 | 实现思路 |
 |---|---|
-| **2FA（TOTP）**| Sa-Token 原生 `StpUtil.openSafe(service, safeTime)` 做二次校验 token；`sys_iam_user` 加 `totp_secret` 字段；登录成功后进入"二次校验"状态，提交 TOTP 码才能访问敏感接口 |
+| **2FA（TOTP）**| Sa-Token 原生 `StpUtil.openSafe(service, safeTime)` 做二次校验 token；`mb_iam_user` 加 `totp_secret` 字段；登录成功后进入"二次校验"状态，提交 TOTP 码才能访问敏感接口 |
 | **密码强度评估** | 引入 `nulab:zxcvbn4j` 库，前端也可以用 `zxcvbn` JS 版实时评分 |
 | **异常登录检测** | 记录登录 IP / User-Agent / 地理位置；新设备登录时发送通知邮件；连续异常时强制 2FA |
 | **WebAuthn / 指纹 / Passkey** | 独立模块 `infra-webauthn`（v2+ 设计）|
 | **OAuth2 / OIDC 集成** | 切换到 Spring Security 或引入 `just-auth` 库（v1.5 评估）|
 
-v1 **不做以上任何一项**，M4 落地时只覆盖 §8.1-8.10 的核心能力。
+v1 **不做以上任何一项**，M4 落地时只覆盖 §8.1-8.11 的核心能力。
 
 ---
 

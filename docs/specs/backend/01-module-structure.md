@@ -50,7 +50,7 @@ mb-admin     ← 依赖所有上层模块（聚合启动 + ArchUnit 测试基地
 | 层 | 根包 | 示例 |
 |---|---|---|
 | common | `com.metabuild.common.<功能>` | `com.metabuild.common.exception.MetaBuildException`、`com.metabuild.common.security.CurrentUser`、`com.metabuild.common.security.DataScope` |
-| schema | `com.metabuild.schema.<jooq 概念>` | `com.metabuild.schema.tables.SysIamUser` |
+| schema | `com.metabuild.schema.<jooq 概念>` | `com.metabuild.schema.tables.MbIamUser` |
 | infra | `com.metabuild.infra.<能力>` | `com.metabuild.infra.security.SaTokenCurrentUser`、`com.metabuild.infra.jooq.DataScopeVisitListener` |
 | platform | `com.metabuild.platform.<域>.<子包>` | `com.metabuild.platform.iam.domain.user.UserService` |
 | business | `com.metabuild.business.<域>.<子包>` | `com.metabuild.business.order.domain.OrderService` |
@@ -97,7 +97,7 @@ server/
 │       │   └── V20260605_001__init_data.sql
 │       └── jooq-generated/                   # jOOQ 生成代码（入 git）
 │           └── com/metabuild/schema/
-│               ├── tables/                   # 表类型（SysIamUser、SysAuditLog 等）
+│               ├── tables/                   # 表类型（MbIamUser、MbOperationLog 等）
 │               ├── records/                  # Record 类
 │               ├── keys/                     # 外键引用
 │               └── indexes/                  # 索引引用
@@ -118,7 +118,7 @@ server/
 ├── mb-platform/
 │   ├── pom.xml                               # parent pom
 │   ├── platform-iam/                         # 用户/角色/菜单/部门/权限/数据范围/会话
-│   ├── platform-audit/                       # 审计日志
+│   ├── platform-oplog/                       # 操作日志
 │   ├── platform-file/                        # 文件上传/存储
 │   ├── platform-notification/                # 通知/站内信/邮件/短信
 │   ├── platform-dict/                        # 字典管理
@@ -189,11 +189,11 @@ server/
 
 **双保险机制**：
 1. **Maven 层（pom 级硬隔离，编译期）**：业务模块之间默认禁止互相依赖，跨模块访问必须在 `pom.xml` 里显式添加依赖声明（pom 层白名单，PR review 时可见）
-2. **ArchUnit 层（包级细约束，测试期）**：即使 pom 依赖允许，跨模块仍然只能 `import` 对方的 `api` 子包，禁止 `import domain` / `infrastructure` 包
+2. **ArchUnit 层（包级细约束，测试期）**：即使 pom 依赖允许，跨模块仍然只能 `import` 对方的 `api` 子包，禁止 `import domain` 下的内部实现
 
 ### 2.2 模块内部包结构（以 iam 为例）
 
-每个业务模块按 `api / domain / infrastructure / web` 四层组织。`api` 子包是对外契约（接口 + DTO），其他子包是内部实现。
+每个业务模块按 `api / domain / web` 三层组织。`api` 子包是对外契约（接口 + DTO），其他子包是内部实现。Repository 放在 `domain/<aggregate>/` 下，不拆独立的 `infrastructure` 包。
 
 ```
 com.metabuild.platform.iam/
@@ -208,28 +208,21 @@ com.metabuild.platform.iam/
 │       ├── UserQuery.java
 │       └── ...
 │
-├── domain/                        # 业务逻辑（Service + Domain Object）
+├── domain/                        # 业务逻辑（Service + Repository，不拆 infrastructure）
 │   ├── user/
-│   │   ├── User.java              # 领域对象（record 或 class）
 │   │   ├── UserService.java       # implements UserApi
-│   │   └── PasswordPolicy.java
+│   │   └── UserRepository.java   # 普通类，零继承；数据权限由 DataScopeVisitListener 在 jOOQ 层自动拦截（方案 E）
 │   ├── role/
-│   │   └── RoleService.java
+│   │   ├── RoleService.java
+│   │   └── RoleRepository.java
 │   ├── menu/
-│   │   └── MenuService.java
+│   │   ├── MenuService.java
+│   │   └── MenuRepository.java
 │   ├── dept/
 │   ├── permission/
 │   ├── datascope/
 │   ├── auth/
 │   └── session/
-│
-├── infrastructure/                # 数据访问 + 外部集成（jOOQ 唯一允许的位置）
-│   ├── user/
-│   │   └── UserRepository.java    # 普通类，零继承；数据权限由 DataScopeVisitListener 在 jOOQ 层自动拦截（方案 E）
-│   ├── role/
-│   │   └── RoleRepository.java
-│   └── menu/
-│       └── MenuRepository.java
 │
 └── web/                           # Controller（依赖本模块 api + domain，以及其他模块的 api）
     ├── UserController.java
@@ -241,7 +234,7 @@ com.metabuild.platform.iam/
 
 #### 规则 1：Maven 层 pom 白名单
 
-`platform-audit` 的 `pom.xml` 默认只依赖：
+`platform-oplog` 的 `pom.xml` 默认只依赖：
 ```xml
 <dependencies>
     <dependency><groupId>com.metabuild</groupId><artifactId>mb-common</artifactId></dependency>
@@ -253,7 +246,7 @@ com.metabuild.platform.iam/
 </dependencies>
 ```
 
-如果 `platform-audit` 需要调用 `platform-iam` 的 `UserApi`，必须**显式**在 pom 里添加：
+如果 `platform-oplog` 需要调用 `platform-iam` 的 `UserApi`，必须**显式**在 pom 里添加：
 ```xml
 <dependency><groupId>com.metabuild</groupId><artifactId>platform-iam</artifactId></dependency>
 ```
@@ -262,13 +255,13 @@ com.metabuild.platform.iam/
 
 #### 规则 2：ArchUnit 层只能 import api 子包
 
-即使 `platform-audit` 在 pom 里依赖了 `platform-iam`，仍然**只能** `import com.metabuild.platform.iam.api.*`，不能 `import com.metabuild.platform.iam.domain.*` 或 `com.metabuild.platform.iam.infrastructure.*`。
+即使 `platform-oplog` 在 pom 里依赖了 `platform-iam`，仍然**只能** `import com.metabuild.platform.iam.api.*`，不能 `import com.metabuild.platform.iam.domain.*`（domain 内部实现，含 Service / Repository）。
 
 ArchUnit 规则会拦截违规：
 
 ```java
 public static final ArchRule CROSS_PLATFORM_ONLY_VIA_API = classes()
-    .that().resideInAPackage("com.metabuild.platform.(*).(domain|infrastructure|web)..")
+    .that().resideInAPackage("com.metabuild.platform.(*).(domain|web)..")
     .should().onlyDependOnClassesThat()
     .resideInAnyPackage(
         "com.metabuild.platform.${1}..",       // 本模块内部任意访问
@@ -301,14 +294,14 @@ public class UserService implements UserApi {
     }
 }
 
-// audit 模块订阅事件
+// oplog 模块订阅事件
 @Component
-public class UserAuditListener {
+public class UserOperationLogListener {
     @Async
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void onUserCreated(UserCreatedEvent event) {
-        // 事务提交后异步记录审计
-        auditService.log(event);
+        // 事务提交后异步记录操作日志
+        operationLogService.log(event);
     }
 }
 ```
@@ -359,7 +352,7 @@ public record UserCreatedEvent(User user) {}
 graph TB
     subgraph "platform"
         iam[platform-iam]
-        audit[platform-audit]
+        audit[platform-oplog]
         file[platform-file]
         notification[platform-notification]
         dict[platform-dict]
@@ -405,14 +398,14 @@ M4 阶段每新增一个 platform 模块：
 
 ### 3.1 问题
 
-nxboot 里 `RoleService.listForExport()` 直接读 menu 表，通过 `MenuRepository` 查询。`DataScopeAspect` 直接在 Service 层 SQL 中 join `sys_user_role + sys_role` 表。模块边界形同虚设。
+nxboot 里 `RoleService.listForExport()` 直接读 menu 表，通过 `MenuRepository` 查询。`DataScopeAspect` 直接在 Service 层 SQL 中 join `mb_iam_user_role + mb_iam_role` 表。模块边界形同虚设。
 
 ### 3.2 修复
 
 **双保险机制（Maven + ArchUnit，ADR-0003 已移除 Spring Modulith）**：
 
-1. **Maven 层 pom 白名单**：`platform-audit/pom.xml` 默认不依赖 `platform-iam`。如要用 `UserApi`，必须在 pom 里显式声明依赖（PR review 可见）
-2. **ArchUnit 规则**：即使 pom 允许依赖，跨模块仍只能 `import com.metabuild.platform.<X>.api.*`，禁止 import `domain` / `infrastructure` / `web` 子包
+1. **Maven 层 pom 白名单**：`platform-oplog/pom.xml` 默认不依赖 `platform-iam`。如要用 `UserApi`，必须在 pom 里显式声明依赖（PR review 可见）
+2. **ArchUnit 规则**：即使 pom 允许依赖，跨模块仍只能 `import com.metabuild.platform.<X>.api.*`，禁止 import `domain` / `web` 子包
 3. **循环依赖检测**：`slices().should().beFreeOfCycles()`
 
 ### 3.3 ArchUnit 规则
@@ -423,7 +416,7 @@ public class ModuleBoundaryRule {
 
     /** 跨 platform 模块只能依赖对方的 api 子包 */
     public static final ArchRule CROSS_PLATFORM_ONLY_VIA_API = classes()
-        .that().resideInAPackage("com.metabuild.platform.(*).(domain|infrastructure|web)..")
+        .that().resideInAPackage("com.metabuild.platform.(*).(domain|web)..")
         .should().onlyDependOnClassesThat()
         .resideInAnyPackage(
             "com.metabuild.platform.${1}..",        // 本模块内部任意访问
@@ -438,13 +431,12 @@ public class ModuleBoundaryRule {
         )
         .as("跨 platform 模块访问必须通过对方的 api 子包");
 
-    /** business 模块只能依赖 platform 的 api，不能依赖 platform 的 domain/infrastructure */
+    /** business 模块只能依赖 platform 的 api，不能依赖 platform 的 domain 内部实现 */
     public static final ArchRule BUSINESS_ONLY_DEPENDS_ON_PLATFORM_API = noClasses()
         .that().resideInAPackage("com.metabuild.business..")
         .should().dependOnClassesThat()
         .resideInAnyPackage(
-            "com.metabuild.platform.*.domain..",
-            "com.metabuild.platform.*.infrastructure.."
+            "com.metabuild.platform.*.domain.."
         )
         .as("business 模块只能通过 platform 模块的 api 子包访问其能力");
 
@@ -458,5 +450,374 @@ public class ModuleBoundaryRule {
 <!-- verify: cd server && mvn -pl mb-admin test -Dtest=ModuleBoundaryTest -->
 
 ---
+
+---
+
+## 4. Domain Model 与层次职责 [M4]
+
+> **关注点**：一个业务实体的完整类清单、Controller/Service/Repository 三层的严格职责划分、包位置约定、典型代码示范。
+>
+> **核心决策**：基于 jOOQ 官方哲学（反对过度分层）+ Clean Architecture 对权限位置的规范，meta-build 采用**两层架构（Record + DTO）+ 权限在 Controller 层**的设计。
+
+### 4.1 一个业务实体的完整类清单
+
+以"用户"为例，一个业务实体最终有以下文件：
+
+| # | 类名 | 形态 | 来源 | 包位置 | 角色 |
+|---|---|---|---|---|---|
+| 1 | `mb_iam_user` | Flyway SQL | 手写 | `mb-schema/src/main/resources/db/migration/` | 数据库表 |
+| 2 | `UserRecord` | jOOQ 生成 | codegen | `com.metabuild.schema.tables.records` | **Service 层的数据载体**（不手写）|
+| 3 | `UserView` | record | 手写 | `com.metabuild.platform.iam.api.dto` | API 响应 DTO（脱敏，带 `from(UserRecord)` 静态工厂）|
+| 4 | `UserCreateCommand` | record | 手写 | 同上 | API 创建请求 |
+| 5 | `UserUpdateEmailCommand` | record | 手写 | 同上 | API 更新请求（业务动作命名）|
+| 6 | `UserQuery` | record | 手写 | 同上 | API 查询条件 |
+| 7 | `UserCreatedEvent` | record | 手写 | `com.metabuild.platform.iam.api.event` | 领域事件 |
+| 8 | `UserApi` | interface | 手写 | `com.metabuild.platform.iam.api` | 跨模块调用接口 |
+| 9 | `UserService` | class | 手写 | `com.metabuild.platform.iam.domain.user` | `implements UserApi`，业务编排 |
+| 10 | `UserRepository` | class | 手写 | 同上 | 持久化（唯一 import `DSLContext`）|
+| 11 | `UserController` | class | 手写 | `com.metabuild.platform.iam.web` | HTTP 入口（`@RequirePermission` 位置）|
+
+**关键说明**：
+- **不引入独立 `User` 领域 record**。Service 看到的是 `UserRecord`（jOOQ 生成）
+- 理由：符合 jOOQ 官方"反对过度分层"哲学，避免重复映射层
+- 业务不变量通过**数据库约束 + Service 层校验 + ArchUnit** 保证，不是通过独立领域类型
+
+### 4.2 层次职责严格划分
+
+#### Controller 层
+
+| 职责 | 说明 |
+|---|---|
+| ✅ 接收 HTTP 请求 | `@RequestBody` / `@PathVariable` / `@RequestParam` / `PageQuery` |
+| ✅ 参数 bean validation | `@Valid`（Jakarta Bean Validation）|
+| ✅ **静态权限检查** | `@RequirePermission("iam.user.create")` 标注方法 |
+| ✅ `@OperationLog` 操作日志注解标注 | 推荐放 Controller 层（离 HTTP 入口近）|
+| ✅ 调 Service，返回 View | 通常一行 `return userService.create(cmd);` |
+| ❌ 业务逻辑 | 在 Service 层 |
+| ❌ 事务 | 在 Service 层 |
+| ❌ 直接 import `DSLContext` / `UserRecord` | 通过 Service 间接用 |
+
+#### Service 层
+
+| 职责 | 说明 |
+|---|---|
+| ✅ 业务逻辑 | 校验、状态转换、不变量检查 |
+| ✅ 事务边界 | `@Transactional`（readOnly=true 用于只读）|
+| ✅ 动态权限检查 | `currentUser.hasPermission(String)` 程序性调用（非注解）|
+| ✅ 编排多个 Repository / 其他 Service / 跨模块 API | 业务流程的主要发生地 |
+| ✅ 事件发布 | `events.publishEvent(new UserCreatedEvent(...))` |
+| ✅ import `UserRecord`（数据类型）| 通过 `mb-schema.*` 包，不是 `org.jooq.*` |
+| ❌ import `DSLContext` / `Field` / `Condition` | 由 ArchUnit 强制 |
+| ❌ 写 jOOQ DSL 查询 | 查询必须在 Repository 里 |
+| ❌ 直接调 `record.store()` / `record.insert()` | 通过 `repository.save(record)` 包装 |
+| ❌ `@RequirePermission` 静态权限注解 | 权限在 Controller 层 |
+
+#### Repository 层
+
+| 职责 | 说明 |
+|---|---|
+| ✅ **唯一** import `DSLContext` 的地方 | 写 jOOQ DSL 查询（ArchUnit 规则 `DSLCONTEXT_ONLY_IN_REPOSITORY` 强制，见 [08-archunit-rules.md §6](08-archunit-rules.md)）|
+| ✅ 提供 `findById` / `findByUsername` / `page` / `count` / `exists` 等检索方法 | 业务性命名 |
+| ✅ 提供 `save(Record)` / `delete(Record)` 等保存方法 | 内部调 `record.store()` / `.delete()`（M4.2 原生路径）|
+| ✅ 提供 `newRecord()` 包装 `dsl.newRecord(TABLE)` | Service 不直接用 dsl |
+| ✅ 批量/条件操作通过 `JooqHelper` | M4.2 二元路径的批量侧 |
+| ❌ `@Transactional` | 事务在 Service 层定义 |
+| ❌ 抛 `BusinessException` | Repository 返回 Optional / 空列表，Service 判断是否抛业务异常 |
+| ❌ 调 `CurrentUser` / 做权限判断 | Repository 是纯持久化 |
+| ❌ 发事件 | 事件在 Service 层发布 |
+| ❌ 调其他 Repository | Repository 之间不互相调用，编排在 Service |
+
+### 4.3 包结构约定
+
+```
+platform-iam/
+├── api/                              # 对外 API 边界
+│   ├── UserApi.java                  # 跨模块调用接口
+│   ├── RoleApi.java
+│   ├── dto/                          # 所有 DTO 集中
+│   │   ├── UserView.java
+│   │   ├── UserCreateCommand.java
+│   │   ├── UserUpdateEmailCommand.java
+│   │   ├── UserQuery.java
+│   │   └── ...
+│   └── event/                        # 领域事件
+│       ├── UserCreatedEvent.java
+│       ├── UserDeletedEvent.java
+│       └── ...
+├── domain/                           # 业务逻辑（Service + Repository 不拆 infrastructure）
+│   ├── user/
+│   │   ├── UserService.java          # implements UserApi
+│   │   └── UserRepository.java       # 普通 class
+│   ├── role/
+│   │   └── ...
+│   └── auth/
+│       └── AuthService.java
+└── web/                              # HTTP 入口
+    ├── UserController.java
+    └── RoleController.java
+```
+
+**关键约定**：
+- **不拆 `domain / infrastructure` 两层**（不过度分层）
+- `Repository` 作为普通 class 放在 `domain/<aggregate>/` 下
+- 跨模块调用通过 `api/<Module>Api.java` 接口（`CROSS_PLATFORM_ONLY_VIA_API` ArchUnit 规则强制）
+
+### 4.4 典型 Repository 代码
+
+```java
+// platform-iam/domain/user/UserRepository.java
+package com.metabuild.platform.iam.domain.user;
+
+import com.metabuild.common.pagination.PageQuery;
+import com.metabuild.common.pagination.PageResult;
+import com.metabuild.common.pagination.SortParser;
+import com.metabuild.platform.iam.api.dto.UserQuery;
+import com.metabuild.platform.iam.api.dto.UserView;
+import com.metabuild.schema.tables.records.UserRecord;
+import lombok.RequiredArgsConstructor;
+import org.jooq.Condition;
+import org.jooq.DSLContext;              // ← Repository 是唯一允许 import 这些的地方
+import org.jooq.SortField;
+import org.jooq.impl.DSL;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+import static com.metabuild.schema.tables.MbIamUser.MB_IAM_USER;
+
+@Repository
+@RequiredArgsConstructor
+public class UserRepository {
+
+    private final DSLContext dsl;
+
+    // ---------- 查询 ----------
+
+    public Optional<UserRecord> findById(Long id) {
+        return Optional.ofNullable(dsl.fetchOne(MB_IAM_USER, MB_IAM_USER.ID.eq(id)));
+    }
+
+    public Optional<UserRecord> findByUsername(String username) {
+        return Optional.ofNullable(dsl.fetchOne(MB_IAM_USER, MB_IAM_USER.USERNAME.eq(username)));
+    }
+
+    public boolean existsByUsername(String username) {
+        return dsl.fetchExists(MB_IAM_USER, MB_IAM_USER.USERNAME.eq(username));
+    }
+
+    public PageResult<UserView> page(UserQuery query, PageQuery pagination) {
+        List<SortField<?>> orderBy = SortParser.builder()
+            .forTable(MB_IAM_USER)
+            .allow("username", MB_IAM_USER.USERNAME)
+            .allow("email",    MB_IAM_USER.EMAIL)
+            .defaultSort(MB_IAM_USER.CREATED_AT.desc())
+            .parse(pagination.sort());
+
+        Condition where = buildCondition(query);
+
+        long total = dsl.selectCount().from(MB_IAM_USER).where(where).fetchOne(0, long.class);
+        List<UserRecord> records = dsl.selectFrom(MB_IAM_USER)
+            .where(where)
+            .orderBy(orderBy)
+            .limit(pagination.size())
+            .offset(pagination.offset())
+            .fetch();
+
+        return PageResult.of(
+            records.stream().map(UserView::from).toList(),
+            total,
+            pagination
+        );
+    }
+
+    private Condition buildCondition(UserQuery query) {
+        Condition c = DSL.trueCondition();
+        if (query.usernameLike() != null) {
+            c = c.and(MB_IAM_USER.USERNAME.likeIgnoreCase("%" + query.usernameLike() + "%"));
+        }
+        if (query.status() != null) {
+            c = c.and(MB_IAM_USER.STATUS.eq(query.status()));
+        }
+        return c;
+    }
+
+    // ---------- 构造 / 保存 / 删除 ----------
+
+    public UserRecord newRecord() {
+        return dsl.newRecord(MB_IAM_USER);
+    }
+
+    /**
+     * 保存（插入或更新）。内部走 M4.2 原生路径，自动触发 Settings + RecordListener.
+     */
+    public UserRecord save(UserRecord record) {
+        record.store();  // 新记录 INSERT，已有 UPDATE + 乐观锁
+        return record;
+    }
+
+    public int delete(UserRecord record) {
+        return record.delete();
+    }
+}
+```
+
+### 4.5 典型 Service 代码
+
+```java
+// platform-iam/domain/user/UserService.java
+package com.metabuild.platform.iam.domain.user;
+
+import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.NotFoundException;
+import com.metabuild.common.security.CurrentUser;
+import com.metabuild.platform.iam.api.UserApi;
+import com.metabuild.platform.iam.api.dto.*;
+import com.metabuild.platform.iam.api.event.UserCreatedEvent;
+import com.metabuild.schema.tables.records.UserRecord;  // ← 数据类型，不是 org.jooq.*
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+public class UserService implements UserApi {
+
+    private final UserRepository userRepository;   // ← 通过 Repository 访问数据
+    // 注意：没有 DSLContext dsl
+    private final PasswordEncoder passwordEncoder;
+    private final CurrentUser currentUser;
+    private final ApplicationEventPublisher events;
+
+    @Transactional
+    public UserView create(UserCreateCommand cmd) {
+        // 业务校验
+        if (userRepository.existsByUsername(cmd.username())) {
+            throw new BusinessException("iam.user.usernameExists", cmd.username());
+        }
+
+        // 通过 Repository 构造 Record（不直接用 DSLContext）
+        UserRecord record = userRepository.newRecord();
+        record.setUsername(cmd.username());
+        record.setEmail(cmd.email());
+        record.setPasswordHash(passwordEncoder.encode(cmd.password()));
+        record.setStatus(1);
+
+        // 通过 Repository 保存
+        UserRecord saved = userRepository.save(record);
+
+        // 发事件
+        events.publishEvent(new UserCreatedEvent(saved.getId(), currentUser.userId()));
+
+        return UserView.from(saved);
+    }
+
+    @Transactional
+    public UserView updateEmail(Long userId, UserUpdateEmailCommand cmd) {
+        UserRecord record = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
+
+        // 动态权限（不是注解）：只能改自己的邮箱，或有 update 权限
+        if (!currentUser.userId().equals(userId) && !currentUser.hasPermission("iam.user.update")) {
+            throw new BusinessException("iam.user.cannotUpdate");
+        }
+
+        record.setEmail(cmd.newEmail());
+        UserRecord saved = userRepository.save(record);
+        return UserView.from(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public PageResult<UserView> page(UserQuery query, PageQuery pagination) {
+        return userRepository.page(query, pagination);
+    }
+}
+```
+
+### 4.6 典型 Controller 代码
+
+```java
+// platform-iam/web/UserController.java
+package com.metabuild.platform.iam.web;
+
+import com.metabuild.common.pagination.PageQuery;
+import com.metabuild.common.pagination.PageResult;
+import com.metabuild.infra.security.RequirePermission;
+import com.metabuild.platform.operationlog.OperationLog;
+import com.metabuild.platform.iam.api.dto.*;
+import com.metabuild.platform.iam.domain.user.UserService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v1/admin/iam/users")
+@RequiredArgsConstructor
+public class UserController {
+
+    private final UserService userService;
+
+    @PostMapping
+    @RequirePermission("iam.user.create")                // ← 权限在 Controller 层
+    @OperationLog(action = "iam.user.create", targetType = "User", targetIdExpr = "#result.id")
+    public UserView create(@RequestBody @Valid UserCreateCommand cmd) {
+        return userService.create(cmd);
+    }
+
+    @PatchMapping("/{id}/email")
+    @RequirePermission("iam.user.update")
+    @OperationLog(action = "iam.user.updateEmail", targetType = "User", targetIdExpr = "#id")
+    public UserView updateEmail(@PathVariable Long id, @RequestBody @Valid UserUpdateEmailCommand cmd) {
+        return userService.updateEmail(id, cmd);
+    }
+
+    @GetMapping
+    @RequirePermission("iam.user.view")
+    public PageResult<UserView> list(UserQuery query, PageQuery pagination) {
+        return userService.page(query, pagination);
+    }
+}
+```
+
+### 4.7 Service 膨胀怎么办：编排 Service 拆分
+
+当业务涉及**跨多个聚合根 / 跨多个模块 / 多步流程**时，拆出独立的"编排 Service"：
+
+| 业务场景 | 基础 Service | 编排 Service |
+|---|---|---|
+| 单一聚合 CRUD | `UserService` / `OrderService` | — |
+| 用户注册流程 | — | `UserRegistrationService`（编排 UserService + MailService + OperationLogService）|
+| 订单提交流程 | — | `OrderSubmitService`（编排 OrderService + InventoryService + NotificationService）|
+| 审批流程 | — | `ApprovalFlowService`（编排多个 platform-iam + business 模块）|
+
+**拆分信号**：
+- Service 超过 500 行
+- Service 依赖注入超过 8 个
+- 一个方法跨越 3 个以上模块
+
+**命名约定**：
+- 单一聚合 → `<Aggregate>Service`（如 `UserService`）
+- 流程编排 → `<Process>Service`（如 `UserRegistrationService`）
+
+**位置**：**同 `domain/` 包**（不单独拆 `application/` 子包，避免过度分层）。
+
+**不强制区分 DDD 经典的 "Application Service vs Domain Service"**——v1 只定"复杂编排拆独立 Service"的通用原则。M5 canonical reference `business-approval` 模块作为编排 Service 的示范样本。
+
+### 4.8 DTO 命名后缀约定
+
+| 后缀 | 角色 | 例子 |
+|---|---|---|
+| `*Record` | jOOQ 生成的数据行（不手写）| `UserRecord` / `OrderMainRecord` |
+| `*View` | API 响应 DTO | `UserView` / `OrderDetailView` |
+| `*Command` | 写操作请求（Create/Update/Delete/业务动作）| `UserCreateCommand` / `UserUpdateEmailCommand` / `OrderSubmitCommand` / `UserLockCommand` |
+| `*Query` | 读操作查询参数 | `UserQuery` / `OrderQuery` |
+| `*Event` | 领域事件 | `UserCreatedEvent` / `OrderSubmittedEvent` |
+| `*Api` | 跨模块调用接口 | `UserApi` / `OrderApi` |
+| `*Service` | 模块内业务服务 class | `UserService implements UserApi` |
+| `*Repository` | 持久化 class | `UserRepository` |
+| `*Controller` | HTTP 入口 | `UserController` |
+
 
 [← 返回 README](./README.md)

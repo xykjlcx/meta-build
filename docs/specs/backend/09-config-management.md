@@ -72,6 +72,7 @@
 
 | 前缀 | 用途 | 为什么没用原生 |
 |---|---|---|
+| `mb.id.worker` / `mb.id.datacenter` | Snowflake ID 生成器 worker/datacenter 编号 | Spring Boot 无对应；自建 `MbIdProperties` |
 | `mb.jooq.slow-query-threshold-ms` | `SlowQueryListener` 阈值 | jOOQ 自建监听器，Spring Boot 无对应 |
 | `mb.cache.jitter-percent` | Redis 缓存 TTL 抖动（防雪崩）| Spring Cache 原生不支持抖动 |
 | `mb.file.storage.*` | 文件存储抽象（local / minio 切换）| `FileStorage` 是自建接口（ADR-0006）|
@@ -82,6 +83,8 @@
 | `mb.observability.*` | 可观测性聚合配置（JSON 日志开关 / trace 采样率）| 聚合多个 Micrometer 配置 |
 | `mb.app.version` | 应用版本（从 Maven property 注入）| 自建元数据 |
 | `mb.iam.password.*` | platform-iam 密码策略（长度/复杂度/历史/过期/锁定阈值）| Sa-Token 不管密码策略，自建（详见 [05-security.md §8.3](./05-security.md#83-密码策略可配置)）|
+| `mb.api.pagination.*` | 分页参数默认值和上限（详见 [06-api-and-contract.md §12](./06-api-and-contract.md)）| Spring Boot 原生无对应前缀，自建 |
+| `mb.route-tree.path` | 路由树 JSON 文件路径，`RouteTreeSyncRunner` 启动时读取 | 默认 `classpath:route-tree.json`；Spring Boot 无对应原生前缀，自建 |
 
 ---
 
@@ -134,13 +137,15 @@
 
 | Env Var | yml 键 | 类型 | 默认值 | 必填 | 敏感 | 说明 |
 |---|---|---|---|---|---|---|
-| `SA_TOKEN_JWT_SECRET_KEY` | `sa-token.jwt-secret-key` | String | — | **prod** | 🔐 | JWT 签名密钥（最少 32 字符，§9.5）|
-| `SA_TOKEN_TOKEN_NAME` | `sa-token.token-name` | String | `mb-token` | — | — | token header / cookie 名 |
+| `MB_JWT_SECRET` | `sa-token.jwt-secret-key` | String | — | **prod** | 🔐 | JWT 签名密钥（最少 32 字符，§9.5）|
+| `SA_TOKEN_TOKEN_NAME` | `sa-token.token-name` | String | `Authorization` | — | — | token header / cookie 名 |
 | `SA_TOKEN_TIMEOUT` | `sa-token.timeout` | long(秒) | `2592000` | — | — | token 有效期（30 天）|
-| `SA_TOKEN_ACTIVE_TIMEOUT` | `sa-token.active-timeout` | long(秒) | `1800` | — | — | 无操作超时（30 分钟续期阈值）|
+| `SA_TOKEN_ACTIVE_TIMEOUT` | `sa-token.active-timeout` | long(秒) | `-1` | — | — | 不检查活跃度 |
 | `SA_TOKEN_IS_CONCURRENT` | `sa-token.is-concurrent` | boolean | `true` | — | — | 允许同账号多端登录 |
 | `SA_TOKEN_IS_SHARE` | `sa-token.is-share` | boolean | `false` | — | — | 多端共享 token |
-| `SA_TOKEN_TOKEN_STYLE` | `sa-token.token-style` | String | `uuid` | — | — | token 风格 |
+| `SA_TOKEN_TOKEN_STYLE` | `sa-token.token-style` | String | `jwt` | — | — | token 风格 |
+| `SA_TOKEN_TOKEN_PREFIX` | `sa-token.token-prefix` | String | `Bearer` | — | — | token 前缀 |
+| `SA_TOKEN_AUTO_RENEW` | `sa-token.auto-renew` | boolean | `false` | — | — | 不自动续签 |
 | `SA_TOKEN_IS_LOG` | `sa-token.is-log` | boolean | `false` | — | — | Sa-Token 内部日志（prod 必须 false，dev 可 true）|
 
 ### 9.2.5 文件存储（local / MinIO 切换）
@@ -235,7 +240,20 @@
 | `MB_IAM_PASSWORD_LOCKOUT_DURATION_MINUTES` | `mb.iam.password.lockout-duration-minutes` | int | `30` | — | — | 锁定持续时长 |
 | `MB_IAM_PASSWORD_RESET_TOKEN_TTL_MINUTES` | `mb.iam.password.reset-token-ttl-minutes` | int | `15` | — | — | 忘密 token 有效期 |
 
-**合计**：约 81 个配置项，分 12 组；其中**敏感字段 6 个**（§9.6.1）。
+### 9.2.13 分页配置（`mb.api.pagination.*`，详见 [06-api-and-contract.md §12](./06-api-and-contract.md)）
+
+| Env Var | yml 键 | 类型 | 默认值 | 必填 | 敏感 | 说明 |
+|---|---|---|---|---|---|---|
+| `MB_API_PAGINATION_DEFAULT_SIZE` | `mb.api.pagination.default-size` | int | `20` | — | — | 未传 size 时的默认值 |
+| `MB_API_PAGINATION_MAX_SIZE` | `mb.api.pagination.max-size` | int | `200` | — | — | size 硬上限，超过抛 HTTP 400 |
+
+### 9.2.14 路由树同步（`mb.route-tree.*`）
+
+| Env Var | yml 键 | 类型 | 默认值 | 必填 | 敏感 | 说明 |
+|---|---|---|---|---|---|---|
+| `MB_ROUTE_TREE_PATH` | `mb.route-tree.path` | String | `classpath:route-tree.json` | — | — | 路由树 JSON 文件路径（`RouteTreeSyncRunner` 启动时读取）|
+
+**合计**：约 84 个配置项，分 14 组；其中**敏感字段 6 个**（§9.6.1）。
 
 ---
 
@@ -291,12 +309,14 @@ spring:
     fallback-to-system-locale: false
 
 sa-token:
-  token-name: mb-token
+  token-name: Authorization
+  token-prefix: Bearer
   timeout: 2592000
-  active-timeout: 1800
+  active-timeout: -1
   is-concurrent: true
   is-share: false
-  token-style: uuid
+  token-style: jwt
+  auto-renew: false
 
 mb:
   jooq:
@@ -439,7 +459,7 @@ spring:
             enable: true
 
 sa-token:
-  jwt-secret-key: ${SA_TOKEN_JWT_SECRET_KEY}
+  jwt-secret-key: ${MB_JWT_SECRET}
   is-log: false
 
 mb:
@@ -482,6 +502,7 @@ management:
 
 | Properties 类 | 前缀 | 归属模块 | 包位置 |
 |---|---|---|---|
+| `MbIdProperties` | `mb.id` | infra-jooq | `com.metabuild.infra.jooq.config` |
 | `MbJooqProperties` | `mb.jooq` | infra-jooq | `com.metabuild.infra.jooq.config` |
 | `MbCacheProperties` | `mb.cache` | infra-cache | `com.metabuild.infra.cache.config` |
 | `MbCorsProperties` | `mb.cors` | infra-security | `com.metabuild.infra.security.config` |
@@ -491,6 +512,7 @@ management:
 | `MbFileStorageProperties` | `mb.file.storage` | platform-file | `com.metabuild.platform.file.config` |
 | `MbMailProperties` | `mb.mail` | platform-notification | `com.metabuild.platform.notification.config` |
 | `MbJobProperties` | `mb.job` | platform-job | `com.metabuild.platform.job.config` |
+| `MbRouteTreeProperties` | `mb.route-tree` | platform-iam | `com.metabuild.platform.iam.config` |
 | `MbAppProperties` | `mb.app` | mb-admin | `com.metabuild.admin.config` |
 
 **Spring Boot / starter 原生配置**（`spring.datasource.*` / `sa-token.*` / `server.*` 等）**不定义自己的 Properties 类**，由 Spring Boot / starter 自动绑定到其内部配置类（`DataSourceProperties` / `SaTokenConfig` / ...）。
@@ -678,7 +700,7 @@ import java.util.List;
 /**
  * prod profile 下的跨字段配置校验。
  *
- * 注册方式:META-INF/spring.factories
+ * 注册方式:见 MetaBuildApplication.main()
  */
 public class ProfileConfigValidator implements ApplicationContextInitializer<ConfigurableApplicationContext> {
 
@@ -738,12 +760,23 @@ public class ProfileConfigValidator implements ApplicationContextInitializer<Con
 }
 ```
 
-注册到 `mb-admin/src/main/resources/META-INF/spring.factories`：
+**Spring Boot 3.x 注册方式**（`spring.factories` 已废弃）：
 
-```properties
-org.springframework.context.ApplicationContextInitializer=\
-com.metabuild.admin.bootstrap.ProfileConfigValidator
+在 `MetaBuildApplication.main()` 中直接注册：
+
+```java
+@SpringBootApplication
+@ConfigurationPropertiesScan(basePackages = "com.metabuild")
+public class MetaBuildApplication {
+    public static void main(String[] args) {
+        new SpringApplicationBuilder(MetaBuildApplication.class)
+            .initializers(new ProfileConfigValidator())
+            .run(args);
+    }
+}
 ```
+
+> ⚠️ Spring Boot 3.x 已不推荐 `META-INF/spring.factories` 注册 `ApplicationContextInitializer`，改用 `SpringApplicationBuilder.initializers()` 显式注册。
 
 **第三层**：k8s / docker liveness probe（基础设施级）
 
@@ -793,7 +826,7 @@ public record MbMailProperties(
 |---|---|---|
 | 数据库 | `SPRING_DATASOURCE_PASSWORD` | PostgreSQL 密码 |
 | Redis | `SPRING_DATA_REDIS_PASSWORD` | Redis 密码 |
-| Sa-Token | `SA_TOKEN_JWT_SECRET_KEY` | JWT 签名密钥 |
+| Sa-Token | `MB_JWT_SECRET` | JWT 签名密钥 |
 | 文件存储(MinIO) | `MB_FILE_STORAGE_MINIO_ACCESS_KEY` | MinIO accessKey |
 | 文件存储(MinIO) | `MB_FILE_STORAGE_MINIO_SECRET_KEY` | MinIO secretKey |
 | 邮件 | `SPRING_MAIL_PASSWORD` | SMTP 密码 |
@@ -882,7 +915,7 @@ prod profile 下：
 **v1 的轮转流程**（无零停机）：
 
 1. 生成新 JWT 密钥（至少 32 字符随机）
-2. 通过容器编排平台注入新 `SA_TOKEN_JWT_SECRET_KEY`
+2. 通过容器编排平台注入新 `MB_JWT_SECRET`
 3. 重启应用
 4. 所有旧 token 失效，用户需重新登录
 
@@ -915,7 +948,7 @@ management:
 
 访问 `/actuator/configprops` 查看当前所有 `@ConfigurationProperties` 的绑定值。敏感字段自动脱敏（显示为 `******`）。
 
-权限拦截通过 `@RequirePermission("admin:config:view")` 注解 Actuator 的 `WebEndpoint`（具体落地在 infra-observability M4）。
+权限拦截通过 `@RequirePermission("admin.config.view")` 注解 Actuator 的 `WebEndpoint`（具体落地在 infra-observability M4）。
 
 ### 9.7.3 v1.5+ 预留
 
@@ -952,6 +985,8 @@ v1 不做，等使用者反馈决定升级。
 - [ ] **集成测试**（如涉及外部依赖）：在 `BaseIntegrationTest` 子类里通过 `@DynamicPropertySource` 注入测试值
 
 **ArchUnit 自动兜底**：`NO_AT_VALUE_ANNOTATION` / `PROPERTIES_MUST_BE_VALIDATED` / `SENSITIVE_RECORDS_MUST_OVERRIDE_TOSTRING` 三条规则自动覆盖部分 checklist 项。其他靠 code review。
+
+- [ ] **时间获取**：新增需要获取当前时间的代码时，注入 `Clock` Bean 而非直接调用 `Instant.now()`（`Clock` 是代码中注册的 Spring Bean，便于测试时替换，无需配置项）
 
 ---
 

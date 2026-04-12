@@ -50,7 +50,7 @@ management:
 | **HTTP** | 自动 | `http.server.requests` (count/duration/status) |
 | **数据库** | HikariCP | `hikaricp.connections.active`, `hikaricp.connections.usage` |
 | **jOOQ 慢查询** | SlowQueryListener | `db.slow_query.count`, `db.slow_query.duration` |
-| **业务（手动）** | 自定义 | `mb.auth.login.success`, `mb.auth.login.failure`, `mb.audit.log.write` |
+| **业务（手动）** | 自定义 | `mb.auth.login.success`, `mb.auth.login.failure`, `mb.oplog.write` |
 
 #### 自定义业务指标示例
 
@@ -361,7 +361,7 @@ src/test/resources/
 │   │   ├── 01-users.sql          # 基础用户数据
 │   │   ├── 02-roles.sql
 │   │   └── 03-user-roles.sql
-│   ├── audit/
+│   ├── oplog/
 │   │   └── 01-logs.sql
 │   └── order/
 │       └── 01-orders.sql

@@ -15,7 +15,7 @@
 | # | 模块 | 职责 | 对外 api 接口 | nxboot 对应 |
 |---|------|------|--------------|------------|
 | 1 | `platform-iam` | 用户/角色/菜单/部门/权限/数据范围/在线用户/认证/登录日志 | `UserApi`, `RoleApi`, `MenuApi`, `DeptApi`, `AuthApi`, `PermissionApi` | user + role + menu + dept + auth + online + login-log |
-| 2 | `platform-audit` | 业务审计日志 + 操作日志（**`@Audit` 注解 + AOP + `sys_audit_log`**） | `AuditApi` | audit + log |
+| 2 | `platform-oplog` | 操作日志（**`@OperationLog` 注解 + AOP + `mb_operation_log`**） | `OperationLogApi` | audit + log |
 | 3 | `platform-file` | 文件上传 + 本地/MinIO 存储 + 附件元数据 | `FileApi`, `FileStorage` | file |
 | 4 | `platform-notification` | 通知公告 + 站内信 + 邮件 + 短信 + Webhook | `NotificationApi` | notice（扩展） |
 | 5 | `platform-dict` | 字典 + 枚举管理 | `DictApi` | dict |
@@ -28,7 +28,7 @@
 - **定时调度**：Spring `@Scheduled`（单体应用的最简方案）
 - **分布式锁**：[ShedLock](https://github.com/lukas-krecan/ShedLock)（防多实例重复执行）
 - **锁存储**：JDBC 表 `shedlock`（由 `platform-job` 通过 Flyway migration 建表，ADR-0008 时间戳命名，例如 `V20260603_005__shedlock.sql`）
-- **执行历史**：`sys_job_log` 表，记录每次执行的 trigger_time / duration / status / error_message
+- **执行历史**：`mb_job_log` 表，记录每次执行的 trigger_time / duration / status / error_message
 
 ```java
 @Service
@@ -85,9 +85,9 @@ public interface FileStorage {
 - 默认允许的 MIME：`image/* + application/pdf + application/zip + application/json`
 - **双重校验**（扩展名 + MIME type），避免伪装
 
-**元数据表** `sys_file_metadata`：
+**元数据表** `mb_file_metadata`：
 ```sql
-CREATE TABLE sys_file_metadata (
+CREATE TABLE mb_file_metadata (
     id                BIGINT       PRIMARY KEY,
     tenant_id         BIGINT       NOT NULL DEFAULT 0,
     original_filename VARCHAR(255) NOT NULL,
@@ -96,83 +96,124 @@ CREATE TABLE sys_file_metadata (
     sha256            VARCHAR(64)  NOT NULL,
     storage_type      VARCHAR(16)  NOT NULL,  -- local / minio
     storage_path      VARCHAR(512) NOT NULL,
-    deleted           SMALLINT     NOT NULL DEFAULT 0,
-    created_by        BIGINT,
-    created_at        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_by        BIGINT,
-    updated_at        TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    version           INT          NOT NULL DEFAULT 0,
+    created_by        BIGINT       NOT NULL,
+    created_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
+    updated_by        BIGINT       NOT NULL,
+    updated_at        TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
-CREATE UNIQUE INDEX uk_sys_file_tenant_sha256
-    ON sys_file_metadata (tenant_id, sha256) WHERE deleted = 0;
+CREATE UNIQUE INDEX uk_mb_file_tenant_sha256
+    ON mb_file_metadata (tenant_id, sha256);
 ```
 
-### 2.3 platform-audit 的具体实现（[P0]）
+### 2.3 platform-oplog 的具体实现（[P0]）
 
-**AOP 注解驱动**：
+**定位**：操作日志，记录 Controller 入参/返回值级别的用户操作，不做字段级 before/after 快照。
+
+**AOP 注解驱动**（注解标注在 **Controller 层**，不在 Service 层）：
 
 ```java
-// platform-audit/src/main/java/com/metabuild/platform/audit/api/Audit.java
+// platform-oplog/src/main/java/com/metabuild/platform/oplog/api/OperationLog.java
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface Audit {
-    /** 动作标识，例如 "iam.user.update" */
+public @interface OperationLog {
+    /** 操作标识，如 "iam.user.create" */
     String action();
 
-    /** 目标实体类型 */
-    String targetType();
+    /** 模块名（空则自动推断 Controller 类名前缀） */
+    String module() default "";
 
-    /** 目标 ID 的 SpEL 表达式，例如 "#cmd.userId" */
-    String targetIdExpr() default "";
+    /** 是否记录入参（默认 true，密码等敏感字段须在 DTO 上标 @Sensitive 脱敏） */
+    boolean recordRequestBody() default true;
 
-    /** 是否记录 before/after 快照 */
-    boolean recordSnapshot() default true;
+    /** 是否记录返回值（默认 false，避免大对象入库） */
+    boolean recordResponseBody() default false;
 }
 ```
 
-**业务层用法**：
+**Controller 层用法**：
 ```java
-@Service
-public class UserService implements UserApi {
-    @Audit(action = "iam.user.update", targetType = "User", targetIdExpr = "#user.id")
-    @Transactional
-    public User update(User user) {
-        // 业务逻辑
+@RestController
+@RequestMapping("/api/v1/iam/users")
+@RequiredArgsConstructor
+public class UserController {
+
+    private final UserApi api;
+
+    @PostMapping
+    @RequirePermission("iam.user.create")
+    @OperationLog(action = "iam.user.create", module = "iam")
+    public UserView create(@RequestBody @Valid UserCreateCommand cmd) {
+        return api.create(cmd);
+    }
+
+    @PutMapping("/{id}")
+    @RequirePermission("iam.user.update")
+    @OperationLog(action = "iam.user.update", module = "iam")
+    public UserView update(@PathVariable Long id, @RequestBody @Valid UserUpdateCommand cmd) {
+        return api.update(id, cmd);
     }
 }
 ```
 
-**AOP 实现要点**：
-- 方法执行前：通过 Repository 查询当前快照（before）
-- 方法执行后：再次查询新快照（after）
-- **异步写入** `sys_audit_log`（Spring `@Async + @EventListener`）
-- **敏感字段脱敏**：密码、token 等字段通过 `@Sensitive` 注解或 JsonMapper 过滤
+**AOP 实现要点（`OperationLogAspect`）**：
+- 在 Controller 层拦截 `@OperationLog` 标注的方法
+- 通过 `HttpServletRequest` 获取 IP、User-Agent、URL、HTTP method
+- 通过 `CurrentUser` 获取操作人（userId + username）
+- 入参脱敏：DTO 字段上标 `@Sensitive` 的通过 JsonMapper 过滤（密码、token 等）
+- **异步写入**（提交到 `@Async` 线程池，不阻塞主流程）
+- 记录执行耗时（`System.nanoTime()` 差值换算毫秒）
+- 捕获方法抛出的异常，status 记为 `FAILURE`，error_message 填异常消息
 
-**审计日志表** `sys_audit_log`：
+**操作日志表** `mb_operation_log`：
+
+> 注意：操作日志是只追加不更新的表，**没有 version / updated_by / updated_at 字段**。
+
 ```sql
-CREATE TABLE sys_audit_log (
-    id             BIGINT       PRIMARY KEY,
-    tenant_id      BIGINT       NOT NULL DEFAULT 0,
-    user_id        BIGINT,                              -- 操作人（匿名时 NULL）
-    username       VARCHAR(64),
-    action         VARCHAR(128) NOT NULL,               -- iam.user.update
-    target_type    VARCHAR(64)  NOT NULL,               -- User
-    target_id      VARCHAR(64),                         -- 目标 ID
-    before_json    JSONB,                               -- 变更前快照
-    after_json     JSONB,                               -- 变更后快照
-    client_ip      VARCHAR(45),                         -- IPv6 兼容
-    user_agent     VARCHAR(512),
-    trace_id       VARCHAR(64),                         -- 关联日志
-    created_at     TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+CREATE TABLE mb_operation_log (
+    id              BIGINT PRIMARY KEY,
+    tenant_id       BIGINT NOT NULL DEFAULT 0,
+    user_id         BIGINT NOT NULL,
+    username        VARCHAR(64),
+    action          VARCHAR(128) NOT NULL,       -- 操作标识，如 iam.user.create
+    module          VARCHAR(64),                 -- 模块名，如 iam
+    method          VARCHAR(16),                 -- HTTP method: GET/POST/PUT/DELETE
+    url             VARCHAR(512),                -- 请求路径
+    request_body    JSONB,                       -- 入参（脱敏后）
+    response_body   JSONB,                       -- 返回值摘要（可选，大对象不记）
+    status          VARCHAR(16) NOT NULL,        -- SUCCESS / FAILURE
+    error_message   TEXT,                        -- 失败时的错误信息
+    duration_ms     INT,                         -- 执行耗时（毫秒）
+    ip              VARCHAR(64),                 -- 客户端 IP
+    user_agent      VARCHAR(512),                -- User-Agent
+    created_by      BIGINT NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_sys_audit_log_tenant_action_time
-    ON sys_audit_log (tenant_id, action, created_at DESC);
-CREATE INDEX idx_sys_audit_log_tenant_target
-    ON sys_audit_log (tenant_id, target_type, target_id);
+CREATE INDEX idx_mb_operation_log_tenant_user ON mb_operation_log (tenant_id, user_id);
+CREATE INDEX idx_mb_operation_log_tenant_action ON mb_operation_log (tenant_id, action);
+CREATE INDEX idx_mb_operation_log_created_at ON mb_operation_log (created_at);
 ```
 
-**保留期**：默认 **90 天**（配置 `mb.audit.retention-days`），过期数据由 `platform-job` 的清理任务删除。
+**`OperationLogWriter`**（异步写入组件）：
+```java
+// platform-oplog/src/main/java/com/metabuild/platform/oplog/domain/OperationLogWriter.java
+@Component
+@RequiredArgsConstructor
+public class OperationLogWriter {
+
+    private final OperationLogRepository repository;
+
+    /** 异步写入，不影响主流程事务 */
+    @Async
+    public void write(OperationLogRecord record) {
+        repository.insert(record);
+    }
+}
+```
+
+**保留期**：默认 **90 天**（配置 `mb.oplog.retention-days`），过期数据由 `platform-job` 的清理任务删除。
 
 ## 3. iam 大模块的内部子领域 [M4]
 
@@ -197,8 +238,6 @@ com.metabuild.platform.iam/
 │   ├── datascope/        # 数据范围规则
 │   ├── auth/             # 认证 / 登录
 │   └── session/          # 在线用户 + 登录日志
-├── infrastructure/
-│   └── [镜像 domain 结构]
 └── web/
     ├── UserController.java
     ├── RoleController.java
@@ -206,6 +245,213 @@ com.metabuild.platform.iam/
 ```
 
 子领域之间可以自由互相 import（都在同一个 platform-iam Maven 模块内），但跨 iam 模块（例如 audit → iam）时只能通过 `api` 包。
+
+### 3.0 基础 IAM 表 [M4]
+
+`mb_iam_role`、`mb_iam_dept`、`mb_iam_user_role` 是权限双树和数据范围的基础依赖表，在 §3.1 双树表之前建立。
+
+```sql
+-- 角色表
+CREATE TABLE mb_iam_role (
+    id              BIGINT PRIMARY KEY,
+    tenant_id       BIGINT NOT NULL DEFAULT 0,
+    code            VARCHAR(64) NOT NULL,
+    name            VARCHAR(128) NOT NULL,
+    description     VARCHAR(512),
+    data_scope      VARCHAR(32) NOT NULL DEFAULT 'SELF',  -- SELF / DEPT / DEPT_AND_CHILDREN / ALL / CUSTOM_DEPT
+    version         INT NOT NULL DEFAULT 0,
+    created_by      BIGINT NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by      BIGINT NOT NULL,
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (tenant_id, code)
+);
+
+-- 部门表（树状结构）
+CREATE TABLE mb_iam_dept (
+    id              BIGINT PRIMARY KEY,
+    tenant_id       BIGINT NOT NULL DEFAULT 0,
+    parent_id       BIGINT,                          -- 自引用，NULL 为顶级
+    name            VARCHAR(128) NOT NULL,
+    sort_order      INT NOT NULL DEFAULT 0,
+    version         INT NOT NULL DEFAULT 0,
+    created_by      BIGINT NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by      BIGINT NOT NULL,
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_mb_iam_dept_tenant_parent ON mb_iam_dept (tenant_id, parent_id);
+
+-- 用户-角色关联表
+CREATE TABLE mb_iam_user_role (
+    id              BIGINT PRIMARY KEY,
+    tenant_id       BIGINT NOT NULL DEFAULT 0,
+    user_id         BIGINT NOT NULL,                 -- → mb_iam_user.id
+    role_id         BIGINT NOT NULL,                 -- → mb_iam_role.id
+    version         INT NOT NULL DEFAULT 0,
+    created_by      BIGINT NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by      BIGINT NOT NULL,
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (tenant_id, user_id, role_id)
+);
+```
+
+### 3.1 权限双树表结构 [M4]
+
+iam 模块实现权限双树架构：**路由树**（前端路由扫描产物，只读）+ **菜单树**（运维自由配置）。两棵树通过 `route_ref_id` 关联，角色授权挂在菜单节点上，最终权限点通过 JOIN 路由树的 `code` 字段推导。
+
+```sql
+-- 路由树（前端路由扫描产物，只读，由 RouteTreeSyncRunner 启动时同步）
+CREATE TABLE mb_iam_route_tree (
+    id              BIGINT PRIMARY KEY,
+    tenant_id       BIGINT NOT NULL DEFAULT 0,
+    kind            VARCHAR(16) NOT NULL CHECK (kind IN ('menu', 'button')),
+    code            VARCHAR(128) NOT NULL,         -- 权限点 code，如 iam.user.create
+    default_name    VARCHAR(128) NOT NULL,          -- 默认显示名
+    path            VARCHAR(256),                   -- 前端路由路径（仅 menu 类型有）
+    parent_code     VARCHAR(128),                   -- 父级 code（仅 button 类型有，指向所属页面）
+    description     VARCHAR(512),
+    is_stale        BOOLEAN NOT NULL DEFAULT FALSE, -- 前端删除后标记为 stale，不物理删除
+    last_seen_at    TIMESTAMPTZ NOT NULL,
+    version         INT NOT NULL DEFAULT 0,
+    created_by      BIGINT NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by      BIGINT NOT NULL,
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (tenant_id, code)
+);
+
+-- 菜单树（运维自由配置，引用路由树节点）
+CREATE TABLE mb_iam_menu (
+    id              BIGINT PRIMARY KEY,
+    tenant_id       BIGINT NOT NULL DEFAULT 0,
+    parent_id       BIGINT,                         -- 自引用，树状结构
+    route_ref_id    BIGINT,                         -- → mb_iam_route_tree.id（directory 节点为 NULL）
+    kind            VARCHAR(16) NOT NULL CHECK (kind IN ('directory', 'menu', 'button')),
+    name            VARCHAR(128) NOT NULL,           -- 菜单显示名（不走 i18n，普通 VARCHAR）
+    icon            VARCHAR(256),
+    sort_order      INT NOT NULL DEFAULT 0,
+    visible         BOOLEAN NOT NULL DEFAULT TRUE,
+    version         INT NOT NULL DEFAULT 0,
+    created_by      BIGINT NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by      BIGINT NOT NULL,
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+CREATE INDEX idx_mb_iam_menu_tenant_parent ON mb_iam_menu (tenant_id, parent_id);
+CREATE INDEX idx_mb_iam_menu_tenant_route_ref ON mb_iam_menu (tenant_id, route_ref_id);
+
+-- 角色-菜单关联（关联到菜单节点，不直接关联权限点 code）
+CREATE TABLE mb_iam_role_menu (
+    id              BIGINT PRIMARY KEY,
+    tenant_id       BIGINT NOT NULL DEFAULT 0,
+    role_id         BIGINT NOT NULL,                -- → mb_iam_role.id
+    menu_id         BIGINT NOT NULL,                -- → mb_iam_menu.id
+    version         INT NOT NULL DEFAULT 0,
+    created_by      BIGINT NOT NULL,
+    created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_by      BIGINT NOT NULL,
+    updated_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (tenant_id, role_id, menu_id)
+);
+```
+
+**设计要点**：
+- `mb_iam_route_tree` 是只读的，由 `RouteTreeSyncRunner` 启动时从前端路由清单同步
+- `mb_iam_menu` 是运维可配置的菜单树，通过 `route_ref_id` 引用路由树节点
+- `mb_iam_role_menu` 关联角色到菜单节点（不直接关联权限点 code），运维改菜单层次不影响授权数据
+- 最终权限点通过 JOIN `mb_iam_route_tree.code` 推导
+
+### 3.2 RouteTreeSyncRunner（启动时路由树同步）[M4]
+
+应用启动时从 `route-tree.json` 同步路由树到 `mb_iam_route_tree` 表。前端构建产物包含完整路由清单，后端读取后做 upsert。
+
+```java
+/**
+ * 应用启动时从 route-tree.json 同步路由树到 mb_iam_route_tree 表。
+ * 配置项：mb.route-tree.path（默认 classpath:route-tree.json）
+ */
+@Component
+@RequiredArgsConstructor
+public class RouteTreeSyncRunner implements ApplicationRunner {
+
+    private final RouteTreeRepository routeTreeRepository;
+
+    @Override
+    @Transactional
+    public void run(ApplicationArguments args) {
+        List<RouteTreeNodeDto> nodes = loadRouteTreeJson();
+        Set<String> seenCodes = new HashSet<>();
+
+        for (RouteTreeNodeDto node : nodes) {
+            routeTreeRepository.upsertByCode(node, Instant.now());
+            seenCodes.add(node.code());
+        }
+
+        // 本次扫描没出现的 code → 标记为 stale（不物理删除，避免菜单悬空引用）
+        routeTreeRepository.markStale(seenCodes, Instant.now());
+    }
+}
+```
+
+**upsert 逻辑**：
+- code 不存在 → 插入，`is_stale=false`
+- code 已存在且 `is_stale=false` → 更新 `default_name/path/parent_code/description/last_seen_at`
+- code 已存在且 `is_stale=true`（之前标记为 stale 又加回来）→ 复活：`is_stale=false` + 更新所有字段
+
+### 3.3 MenuApi（跨模块菜单接口）[M4]
+
+```java
+/**
+ * 菜单模块对外 API（跨模块调用接口）。
+ */
+public interface MenuApi {
+
+    /** 查询当前用户可见菜单树 + 权限点列表 */
+    CurrentUserMenuResult queryCurrentUserMenu(long userId, long tenantId);
+
+    /** 查询完整菜单树（管理端用） */
+    List<MenuTreeNode> queryMenuTreeForAdmin(long tenantId);
+
+    /** 查询路由树节点（菜单管理 UI 的路由 picker） */
+    List<RouteTreeNodeView> listRouteTreeNodes(String kindFilter, boolean includeStale);
+}
+```
+
+对应的 HTTP 端点（MenuController）：
+
+| 方法 | 端点 | 说明 |
+|------|------|------|
+| `GET /api/v1/menus/current-user` | 当前用户菜单 + 权限 | 返回 `CurrentUserMenuResult`（扁平节点列表 + permissions 数组） |
+| `GET /api/v1/menus` | 管理端完整菜单树 | `@RequirePermission("iam.menu.list")` |
+| `POST /api/v1/menus` | 创建菜单节点 | `@RequirePermission("iam.menu.create")` |
+| `PATCH /api/v1/menus/{id}/route-ref` | 重新绑定路由引用 | `@RequirePermission("iam.menu.update")` |
+| `GET /api/v1/route-tree-nodes` | 路由树节点列表 | `@RequirePermission("iam.menu.list")` |
+
+`GET /api/v1/menus/current-user` 返回体 DTO 结构：
+
+```java
+/**
+ * 当前用户菜单 + 权限（前端 useMenu() 消费）。
+ * 返回扁平节点列表（前端自己 buildMenuTree）+ 权限 code 数组。
+ */
+public record CurrentUserMenuResult(
+    List<MenuNodeView> nodes,       // 扁平菜单节点列表
+    List<String> permissions        // 权限点 code 列表（用于构造 Set<AppPermission>）
+) {}
+
+public record MenuNodeView(
+    long id,
+    Long parentId,                  // NULL 为顶级
+    String name,
+    String icon,
+    String path,                    // 前端路由路径（仅 menu 类型有）
+    String kind,                    // directory / menu / button
+    String permissionCode,          // 对应 mb_iam_route_tree.code（button 类型有）
+    boolean isOrphan                // route_ref 指向的 route_tree 节点 is_stale=true
+) {}
+```
 
 ## 4. 业务模块的标准骨架 [M4]
 
@@ -221,9 +467,8 @@ platform-<name>/  (或 business-<name>/)
 │   │       ├── <Name>View.java
 │   │       ├── <Name>CreateCommand.java
 │   │       └── <Name>Query.java
-│   ├── domain/                           # 业务逻辑
-│   │   └── <Name>Service.java            # implements <Name>Api
-│   ├── infrastructure/                   # 数据访问
+│   ├── domain/                           # 业务逻辑（Service + Repository，不拆 infrastructure）
+│   │   ├── <Name>Service.java            # implements <Name>Api
 │   │   └── <Name>Repository.java         # 普通类（方案 E：数据权限在 jOOQ VisitListener 层拦截，Repository 零继承）
 │   └── web/                              # Controller
 │       └── <Name>Controller.java         # @RequirePermission
@@ -285,7 +530,6 @@ public class <Name>Service implements <Name>Api {
     }
 
     @Override
-    @Audit(action = "<layer>.<name>.create", targetType = "<Name>", targetIdExpr = "#result.id")
     @Transactional
     public <Name>View create(<Name>CreateCommand cmd) {
         Long currentUserId = currentUser.userId();      // 通过门面获取，零 Sa-Token 引用
@@ -305,7 +549,7 @@ public class <Name>Service implements <Name>Api {
 
 **步骤 1：在 `server/mb-business/` 下新建 `business-order/` 目录**
 ```bash
-mkdir -p server/mb-business/business-order/src/main/java/com/metabuild/business/order/{api,domain,infrastructure,web}
+mkdir -p server/mb-business/business-order/src/main/java/com/metabuild/business/order/{api,domain,web}
 mkdir -p server/mb-business/business-order/src/main/resources/messages
 mkdir -p server/mb-business/business-order/src/test/java/com/metabuild/business/order
 ```
@@ -334,13 +578,13 @@ mkdir -p server/mb-business/business-order/src/test/java/com/metabuild/business/
         <!-- 跨模块依赖：需要 iam 的 UserApi 和 file 的 FileApi -->
         <dependency><groupId>com.metabuild</groupId><artifactId>platform-iam</artifactId></dependency>
         <dependency><groupId>com.metabuild</groupId><artifactId>platform-file</artifactId></dependency>
-        <!-- 需要审计？依赖 platform-audit 的 api -->
-        <dependency><groupId>com.metabuild</groupId><artifactId>platform-audit</artifactId></dependency>
+        <!-- 需要操作日志？依赖 platform-oplog 的 api -->
+        <dependency><groupId>com.metabuild</groupId><artifactId>platform-oplog</artifactId></dependency>
     </dependencies>
 </project>
 ```
 
-**步骤 3：创建 Java 包和 `api / domain / infrastructure / web` 四层子包**
+**步骤 3：创建 Java 包和 `api / domain / web` 三层子包**
 （目录已在步骤 1 创建，这步只需要写 Java 文件）
 
 **步骤 4：写 `OrderApi` 接口放 `api` 子包**
@@ -366,7 +610,7 @@ public interface OrderApi {
  * 跨模块依赖（由 pom.xml 和 ArchUnit 规则双保险）：
  * - platform-iam::api   （需要 UserApi 查询用户）
  * - platform-file::api  （需要 FileApi 存储订单附件）
- * - platform-audit::api （需要 Audit 注解记录操作日志）
+ * - platform-oplog::api （需要 OperationLog 注解记录操作日志）
  *
  * 发布的领域事件：
  * - OrderCreatedEvent
@@ -387,9 +631,9 @@ CREATE TABLE biz_order_main (
     tenant_id     BIGINT       NOT NULL DEFAULT 0,
     order_no      VARCHAR(64)  NOT NULL,
     user_id       BIGINT       NOT NULL,
+    owner_dept_id BIGINT,                          -- 数据权限关联列（DataScopeRegistry 按此字段过滤）
     status        SMALLINT     NOT NULL DEFAULT 0,
     total_amount  DECIMAL(18,2) NOT NULL,
-    deleted       SMALLINT     NOT NULL DEFAULT 0,
     version       INT          NOT NULL DEFAULT 0,
     created_by    BIGINT,
     created_at    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -398,7 +642,7 @@ CREATE TABLE biz_order_main (
 );
 
 CREATE UNIQUE INDEX uk_biz_order_tenant_no
-    ON biz_order_main (tenant_id, order_no) WHERE deleted = 0;
+    ON biz_order_main (tenant_id, order_no);
 CREATE INDEX idx_biz_order_tenant_user ON biz_order_main (tenant_id, user_id);
 ```
 
@@ -424,14 +668,33 @@ cd server && mvn -Pcodegen generate-sources -pl mb-schema
 ```
 生成的 `com.metabuild.schema.tables.BizOrderMain` 和 `BizOrderMainRecord` 进入 `mb-schema/src/main/jooq-generated/`，**commit 到 git**。
 
+**步骤 3.5（插入在步骤 3 之后）：明确一个业务实体的完整类清单**
+
+每个业务实体对应以下文件（详见 [01-module-structure.md §4](01-module-structure.md)）：
+
+| 文件 | 位置 | 角色 |
+|---|---|---|
+| `<Entity>View.java` | `api/dto/` | API 响应 DTO（record + `from()` 静态工厂）|
+| `<Entity>CreateCommand.java` | `api/dto/` | API 创建请求（record）|
+| `<Entity>Update<Action>Command.java` | `api/dto/` | API 更新/业务动作请求（按业务语义命名，record）|
+| `<Entity>Query.java` | `api/dto/` | API 查询条件（record）|
+| `<Entity>CreatedEvent.java` | `api/event/` | 领域事件（record）|
+| `<Entity>Api.java` | `api/` | 跨模块调用接口 |
+| `<Entity>Service.java` | `domain/<aggregate>/` | `implements <Entity>Api`，业务编排 |
+| `<Entity>Repository.java` | `domain/<aggregate>/` | 持久化 class（唯一持有 DSLContext）|
+| `<Entity>Controller.java` | `web/` | HTTP 入口（`@RequirePermission` 放这里）|
+
+**不需要** `<Entity>` 独立领域 record——Service 直接用 `<Entity>Record`（jOOQ 生成）。
+
 **步骤 10：写 Service / Repository / Controller**
 
-按 4.4 节的标准骨架写代码。关键约束：
-- Service 不 `import org.jooq.*`（ArchUnit 强制）
+按 [01-module-structure.md §4](01-module-structure.md) 的层次职责划分写代码。关键约束：
+- Service 对 `org.jooq` 的依赖仅限 `Record` / `Result` / `exception` 白名单（ArchUnit 规则 `SERVICE_JOOQ_WHITELIST` 强制，`DSLContext` / `DSL` / `Field` / `Condition` 等一律禁止）
+- Service 不直接调 `record.store()`，通过 `orderRepository.save(record)` 包装（N3 §4.2）
 - Controller 不 `import cn.dev33.satoken.*`（ArchUnit 强制，通过 `CurrentUser` / `AuthFacade` 门面）
 - Repository 是**普通类**——方案 E 不再需要继承任何基类。数据权限由 `DataScopeVisitListener` 在 jOOQ 层单点拦截，**前提是在 `DataScopeConfig` 里把新表注册到 `DataScopeRegistry`**（见步骤 10.1）
 - Repository 禁止使用 jOOQ 的 `@PlainSQL` API（`fetch(String)` 等），由 ArchUnit 规则 `NO_RAW_SQL_FETCH` 强制
-- Controller 每个方法标注 `@RequirePermission("business.order.<action>")`
+- Controller 每个方法标注 `@RequirePermission("business.order.<action>")`（**权限只能在 Controller 层，不在 Service 层**，详见 [05-security.md §2.5](05-security.md)）
 
 **步骤 10.1（新加业务表时的必补步骤）**：在 `mb-admin/src/main/java/com/metabuild/admin/config/DataScopeConfig.java` 里添加：
 

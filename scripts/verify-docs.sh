@@ -142,6 +142,50 @@ for kw in "${scheme_e_keywords[@]}"; do
     fi
 done
 
+# === 4.5 M4.2 jOOQ 原生拦截关键词 ===
+section "4.5 M4.2 jOOQ 原生拦截关键词在 04-data-persistence.md"
+
+m42_keywords=(
+    "executeWithOptimisticLocking"
+    "updateRecordVersion"
+    "updateRecordTimestamp"
+    "RecordListener"
+    "AuditFieldsRecordListener"
+    "DataChangedException"
+    "batchInsert"
+    "batchUpdate"
+    "conditionalUpdate"
+    "SYSTEM_USER_ID"
+)
+
+for kw in "${m42_keywords[@]}"; do
+    if grep -q "$kw" docs/specs/backend/04-data-persistence.md; then
+        ok "04-data-persistence.md 包含 $kw"
+    else
+        fail "04-data-persistence.md 缺少 $kw"
+    fi
+done
+
+# === 4.6 M4.3 分页契约关键词 ===
+section "4.6 M4.3 分页契约关键词在 06-api-and-contract.md"
+
+m43_keywords=(
+    "PageQuery"
+    "PageResult"
+    "SortParser"
+    "forTable"
+    "PageQueryArgumentResolver"
+    "mb.api.pagination"
+)
+
+for kw in "${m43_keywords[@]}"; do
+    if grep -q "$kw" docs/specs/backend/06-api-and-contract.md; then
+        ok "06-api-and-contract.md 包含 $kw"
+    else
+        fail "06-api-and-contract.md 缺少 $kw"
+    fi
+done
+
 # === 5. ArchUnit 规则在 08-archunit-rules.md ===
 section "5. ArchUnit 规则在 08-archunit-rules.md"
 
@@ -188,6 +232,18 @@ if [ -n "$bad_ctx_hits" ]; then
     echo "$bad_ctx_hits"
 else
     ok "DataScopeContext 只在合法的废弃语境里出现"
+fi
+
+# M4.2: softDeletedFilter / setAuditInsert / setAuditUpdate 只应出现在"废弃/砍掉/改造"合法语境
+M42_LEGIT='废弃\|砍掉\|被.*替代\|不应存在\|全部砍掉\|改造\|改为\|反面教材\|概念重写\|nxboot\|已废弃\|不做'
+
+bad_soft=$(grep -rn "softDeletedFilter\|setAuditInsert\|setAuditUpdate" docs/specs/backend/ 2>/dev/null | \
+    grep -v "$M42_LEGIT" || true)
+if [ -n "$bad_soft" ]; then
+    fail "softDeletedFilter/setAuditInsert/setAuditUpdate 出现在非废弃语境:"
+    echo "$bad_soft"
+else
+    ok "softDeletedFilter/setAuditInsert/setAuditUpdate 只在合法的废弃语境里出现"
 fi
 
 # === 7. ADR 交叉引用更新 ===
@@ -242,13 +298,54 @@ else
     fail "backend/ 子文件总行数 $new_lines < 3500，可能内容缺失"
 fi
 
-# === 10. 前端 README 占位 ===
-section "10. 前端 README 占位"
+# === 10. 前端文档检查 ===
+# 说明:前端文档由独立会话维护,本脚本不再检查前端文档的具体状态。
+# 如需前端文档完整性检查,应创建独立的 verify-frontend-docs.sh。
 
-if grep -q "M0 待写" docs/specs/frontend/README.md; then
-    ok "frontend/README.md 标明 M0 待写"
+# === 4.7 N3 域模型规范关键词 ===
+section "4.7 N3 域模型规范关键词在 01-module-structure.md"
+
+n3_keywords=(
+    "Domain Model"
+    "DSLCONTEXT_ONLY_IN_REPOSITORY"
+    "UserApi"
+    "编排 Service"
+    "from(UserRecord)"
+)
+
+for kw in "${n3_keywords[@]}"; do
+    if grep -q "$kw" docs/specs/backend/01-module-structure.md; then
+        ok "01-module-structure.md 包含 $kw"
+    else
+        fail "01-module-structure.md 缺少 $kw"
+    fi
+done
+
+# === 4.8 C2 编码风格契约关键词 ===
+section "4.8 C2 编码风格契约关键词在 08-archunit-rules.md"
+
+c2_keywords=(
+    "编码风格契约"
+    "NO_MAPSTRUCT"
+    "OPTIONAL_ONLY_RETURN"
+    "ONLY_JAKARTA_NULLABLE"
+    "virtual thread"
+    "pinning"
+)
+
+for kw in "${c2_keywords[@]}"; do
+    if grep -q "$kw" docs/specs/backend/08-archunit-rules.md; then
+        ok "08-archunit-rules.md 包含 $kw"
+    else
+        fail "08-archunit-rules.md 缺少 $kw"
+    fi
+done
+
+# 检查 05-security.md 包含 @RequirePermission Controller 层规范
+if grep -q "@RequirePermission.*必须放在 Controller 层" docs/specs/backend/05-security.md; then
+    ok "05-security.md 明确 @RequirePermission 放 Controller 层"
 else
-    fail "frontend/README.md 未标明 M0 待写"
+    fail "05-security.md 未明确 @RequirePermission 放 Controller 层"
 fi
 
 # === 总结 ===
