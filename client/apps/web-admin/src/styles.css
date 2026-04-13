@@ -1,0 +1,8 @@
+@import "@mb/ui-tokens/tailwind-theme.css";
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
