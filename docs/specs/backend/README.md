@@ -94,7 +94,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | **AI，要修架构 bug** | README → [08-archunit-rules.md](./08-archunit-rules.md)（看规则） → 对应子文档 |
 | **M1 脚手架实施者** | README → [01-module-structure.md](./01-module-structure.md) → [02-infra-modules.md](./02-infra-modules.md) → [09-config-management.md](./09-config-management.md)（**写 application.yml 必读**）→ [04-data-persistence.md](./04-data-persistence.md) → [appendix.md B](./appendix.md) |
 | **M4 后端底座实施者** | README → [03-platform-modules.md](./03-platform-modules.md) → [05-security.md](./05-security.md) → [06-api-and-contract.md](./06-api-and-contract.md) → [07-observability-testing.md](./07-observability-testing.md) |
-| **回顾决策原因** | README 决策回顾表 → [ADR 索引](#adr-索引)（7 份） → 规划文档 |
+| **回顾决策原因** | README 决策回顾表 → [ADR 索引](#adr-索引)（12 份） → 规划文档 |
 | **新增业务表** | [03-platform-modules.md §5 步骤 10.1](./03-platform-modules.md) → [05-security.md §7 方案 E 注册](./05-security.md) |
 
 ---
@@ -122,12 +122,12 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | 12 | 业务异常抛 checked Exception（必须继承 `RuntimeException`） | 代码约定 | [04-data-persistence.md §8 事务边界规范（回滚规则）](./04-data-persistence.md#8-事务边界规范-m4) |
 | 13 | 业务层使用 jOOQ `@PlainSQL` 字符串 SQL API（`dsl.fetch(String)` 等，会绕过 `DataScopeVisitListener` 数据权限拦截） | ArchUnit `NO_RAW_SQL_FETCH` | [05-security.md §7.9 ArchUnit 规则 NO_RAW_SQL_FETCH](./05-security.md#79-archunit-规则-no_raw_sql_fetch) |
 | 14 | jOOQ 生成代码放在 `mb-infra` 或业务层(必须在 `mb-schema/src/main/jooq-generated/`) | 约定 + codegen profile 配置 | [04-data-persistence.md §6 jOOQ 代码生成流程](./04-data-persistence.md#6-jooq-代码生成流程-m1m4) |
-| 15 | 硬编码敏感配置 / 用 `@Value` 注入 / 含敏感字段的 `record` 未覆盖 `toString()`（必须全部通过 `@ConfigurationProperties` + `@Validated` + env var） | ArchUnit `NO_AT_VALUE_ANNOTATION` / `PROPERTIES_MUST_BE_VALIDATED` / `SENSITIVE_RECORDS_MUST_OVERRIDE_TOSTRING` + 启动失败兜底（§9.5）| [09-config-management.md §9.5 fail-fast 启动校验](./09-config-management.md#95-fail-fast-启动校验) + [§9.6 敏感配置处理](./09-config-management.md#96-敏感配置处理) |
+| 15 | 硬编码敏感配置 / 用 `@Value` 注入（必须全部通过 `@ConfigurationProperties` + `@Validated` + env var）；含敏感字段的 record 应手动覆盖 `toString()` 脱敏（文档约定，由 code review 守护） | ArchUnit `NO_AT_VALUE_ANNOTATION` / `PROPERTIES_MUST_BE_VALIDATED` + 启动失败兜底（§9.5）| [09-config-management.md §9.5 fail-fast 启动校验](./09-config-management.md#95-fail-fast-启动校验) + [§9.6 敏感配置处理](./09-config-management.md#96-敏感配置处理) |
 | 16 | 业务层直接调用 `StpUtil.login()` / `logout()` / `kickout()` 等 Sa-Token 写 API（必须通过 `AuthFacade` 门面） | ArchUnit `BUSINESS_MUST_NOT_DEPEND_ON_SA_TOKEN` + `ONLY_INFRA_SECURITY_DEPENDS_ON_SA_TOKEN` | [05-security.md §6.6 AuthFacade 登录登出技术门面](./05-security.md#66-authfacade登录登出技术门面) |
 | 17 | `Optional<T>` 作为字段类型 / 方法参数 / 集合元素（只能作为返回值）| ArchUnit `OPTIONAL_ONLY_RETURN` + `NO_OPTIONAL_PARAMETERS`（C2）| [08-archunit-rules.md §7.5](./08-archunit-rules.md) |
 | **元** | **从 nxboot（或任何遗产项目）借用组件时，未先挑战新技术栈的原生范式**（继承惯性把 MyBatis-Plus 的基类范式带到 jOOQ 世界） | ADR-0007 元方法论 + 借用清单审查流程 | [ADR-0007 继承遗产前先问原生哲学](../../adr/0007-继承遗产前先问原生哲学.md) + [appendix.md 附录 A 借用清单](./appendix.md#附录-a-从-nxboot-借用的组件清单) |
 
-### MUST 速查（15 条）
+### MUST 速查（16 条）
 
 | # | 必须 | 详见 |
 |---|------|------|
@@ -146,6 +146,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | 13 | Service / Repository / Controller **必须**用 Lombok `@RequiredArgsConstructor` + `final` 字段构造器注入（C2）| [08-archunit-rules.md §7.2](./08-archunit-rules.md) |
 | 14 | 实体 → DTO 映射**必须**手写 `from()` 静态方法，v1 **禁用** MapStruct / ModelMapper（C2）| [08-archunit-rules.md §7.3](./08-archunit-rules.md) |
 | 15 | Service 对 `org.jooq` 的依赖**仅限** `Record` / `Result` / `exception` 白名单（`SERVICE_JOOQ_WHITELIST`）；`DSLContext` / `DSL` / `Field` / `Condition` / 各类 Step 一律禁止（C8）| [08-archunit-rules.md §6 N3 精化规则](./08-archunit-rules.md) |
+| 16 | 含 `owner_dept_id` 字段的表**必须**在 `DataScopeConfig` 注册到 `DataScopeRegistry`（ArchUnit 自动检测：扫描 jOOQ schema 中有 OWNER_DEPT_ID 字段的表 vs Registry 注册列表，差集非空则测试失败） | [05-security.md §7.7](./05-security.md) |
 
 ---
 
@@ -161,6 +162,10 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | [0006](../../adr/0006-canonical-reference质量规范.md) | canonical reference 代码质量规范（P0 六维度 + P1 五维度） | 已采纳 |
 | [0007](../../adr/0007-继承遗产前先问原生哲学.md) | **继承遗产前先问新技术栈的原生哲学**（元方法论，方案 E 数据权限重构） | 已采纳 |
 | [0008](../../adr/0008-flyway-migration命名用时间戳.md) | **Flyway migration 命名从数字分段切换到时间戳**（ADR-0007 元方法论的第二次落地 + "一致性 > 局部优化"次级元原则） | 已采纳 |
+| [0009](../../adr/0009-表前缀sys改mb.md) | **平台表前缀从 sys_ 切换到 mb_** | 已采纳 |
+| [0010](../../adr/0010-审计日志改操作日志.md) | **v1 用操作日志替代审计日志**（platform-audit → platform-oplog，@Audit → @OperationLog） | 已采纳 |
+| [0011](../../adr/0011-version字段按需添加.md) | **version 字段按需添加**（不再强制所有表） | 已采纳 |
+| [0012](../../adr/0012-全局时间策略clock-bean.md) | **全局时间策略**（Clock Bean + 文档引导） | 已采纳 |
 
 ---
 

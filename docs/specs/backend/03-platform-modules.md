@@ -16,7 +16,7 @@
 |---|------|------|--------------|------------|
 | 1 | `platform-iam` | 用户/角色/菜单/部门/权限/数据范围/在线用户/认证/登录日志 | `UserApi`, `RoleApi`, `MenuApi`, `DeptApi`, `AuthApi`, `PermissionApi` | user + role + menu + dept + auth + online + login-log |
 | 2 | `platform-oplog` | 操作日志（**`@OperationLog` 注解 + AOP + `mb_operation_log`**） | `OperationLogApi` | audit + log |
-| 3 | `platform-file` | 文件上传 + 本地/MinIO 存储 + 附件元数据 | `FileApi`, `FileStorage` | file |
+| 3 | `platform-file` | 文件上传 + 本地/阿里云 OSS 存储 + 附件元数据 | `FileApi`, `FileStorage` | file |
 | 4 | `platform-notification` | 通知公告 + 站内信 + 邮件 + 短信 + Webhook | `NotificationApi` | notice（扩展） |
 | 5 | `platform-dict` | 字典 + 枚举管理 | `DictApi` | dict |
 | 6 | `platform-config` | 运行时配置 + 业务参数 | `ConfigApi` | config |
@@ -75,10 +75,10 @@ public interface FileStorage {
 - 按 SHA-256 哈希分 2 级目录（`files/ab/cd/abcdef1234...`）
 - 秒传：上传前校验哈希，命中直接返回已有 metadata
 
-**可选实现**：`MinioFileStorage`（S3 兼容）
-- 通过 `MB_FILE_STORAGE_TYPE=minio` 启用
-- 依赖 `io.minio:minio:8.x`
-- 环境变量：`MB_MINIO_ENDPOINT` / `MB_MINIO_ACCESS_KEY` / `MB_MINIO_SECRET_KEY` / `MB_MINIO_BUCKET`
+**可选实现**：`AliyunOssFileStorage`
+- 通过 `MB_FILE_STORAGE_TYPE=oss` 启用
+- 依赖 `com.aliyun.oss:aliyun-sdk-oss:3.x`
+- 环境变量：`MB_FILE_STORAGE_OSS_ENDPOINT` / `MB_FILE_STORAGE_OSS_ACCESS_KEY` / `MB_FILE_STORAGE_OSS_SECRET_KEY` / `MB_FILE_STORAGE_OSS_BUCKET`
 
 **文件限制**：
 - 默认最大 **10MB**（`MB_FILE_MAX_SIZE`）
@@ -94,7 +94,7 @@ CREATE TABLE mb_file_metadata (
     content_type      VARCHAR(128) NOT NULL,
     size_bytes        BIGINT       NOT NULL,
     sha256            VARCHAR(64)  NOT NULL,
-    storage_type      VARCHAR(16)  NOT NULL,  -- local / minio
+    storage_type      VARCHAR(16)  NOT NULL,  -- local / oss
     storage_path      VARCHAR(512) NOT NULL,
     version           INT          NOT NULL DEFAULT 0,
     created_by        BIGINT       NOT NULL,
@@ -703,6 +703,8 @@ registry.register("biz_order_main", "owner_dept_id");
 ```
 
 **漏注册的后果**：表可以正常读写，但数据权限**不会生效**（超权风险）。`NO_RAW_SQL_FETCH` 规则挡不住这个漏洞——它只挡原始 SQL 绕过。这是方案 E 需要使用者心智参与的唯一地方，通过 canonical reference 示范 + code review 强化。
+
+**步骤 10.2**：确认业务表 DDL 包含 `owner_dept_id BIGINT NOT NULL` 字段 + 索引 `idx_xxx_tenant_dept (tenant_id, owner_dept_id)`。RecordListener 会在 INSERT 时自动从 `CurrentUser.deptId()` 填充。
 
 **步骤 11：写集成测试**
 ```java

@@ -85,7 +85,7 @@
 | **原生范式来源** | `@ControllerAdvice` + `@ExceptionHandler` 是 **Spring 原生**（nxboot 和 meta-build 在这一层没有分歧）。但 nxboot 在**更深一层**踩了反面教材：**自定义 `R<T>` 包装所有错误返回 200 OK** —— 这违反的不是 Spring 生态，而是 **HTTP 协议本身**的语义（4xx/5xx 状态码 + 结构化错误体） |
 | **新生态答案** | **RFC 9457 ProblemDetail** —— HTTP 生态对"结构化错误响应"的标准答案，Spring Boot 3.x 原生内置 `org.springframework.http.ProblemDetail`。业务成功返回业务对象直接序列化（非 `ResponseEntity` 包装），失败返回 `ProblemDetail` |
 | **改造策略** | 骨架借用（`@ControllerAdvice` 结构 + 异常类型到 HTTP 状态码的映射表），**响应格式完全重写**（`R<T>` → `ProblemDetail`） |
-| **决策依据** | [反面教材 #5](08-archunit-rules.md#第14节-反面教材索引)：nxboot 的 `R<T>` 200 OK 包装破坏 HTTP 语义。ADR-0007 元方法论推论：**当 nxboot 违反的是更底层协议的原生语义时，必须回归协议原生答案**，不能以"这是 nxboot 的做法"为由机械搬运 |
+| **决策依据** | [反面教材 #5](08-archunit-rules.md)：nxboot 的 `R<T>` 200 OK 包装破坏 HTTP 语义。ADR-0007 元方法论推论：**当 nxboot 违反的是更底层协议的原生语义时，必须回归协议原生答案**，不能以"这是 nxboot 的做法"为由机械搬运 |
 
 ---
 
@@ -179,7 +179,7 @@
 |------|---------|
 | `platform-iam` | `UserApi` / `RoleApi` / `MenuApi` / `DeptApi` / `AuthApi` / `PermissionApi` + 对应 api/domain/web + `@OperationLog` 注解装饰 + **方案 E 的 `DataScopeLoader`**（登录时展开数据范围的业务计算） |
 | `platform-oplog` | `OperationLogApi` + `@OperationLog` 注解 + `OperationLogAspect` + 异步写入 `mb_operation_log` + 敏感字段脱敏 |
-| `platform-file` | `FileApi` + `FileStorage` 接口 + `LocalFileStorage` + `MinioFileStorage`（可选）+ 秒传 |
+| `platform-file` | `FileApi` + `FileStorage` 接口 + `LocalFileStorage` + `AliyunOssFileStorage`（可选）+ 秒传 |
 | `platform-notification` | `NotificationApi` + 通知公告 + 站内信 + 邮件/短信 adapter（可选） |
 | `platform-dict` | `DictApi` + 字典 CRUD + 本地缓存 + 事件刷新 |
 | `platform-config` | `ConfigApi` + 运行时配置 + 本地缓存 |
@@ -202,7 +202,7 @@
 |------|---------|---------|
 | ~~**配置管理完整版** [P1]~~ | ~~M1 写 application.yml 时~~ | **已展开为独立章节 [09-config-management.md](09-config-management.md)**(M1.1 任务完成,~730 行) |
 | **Dockerfile** | M1 写 Dockerfile 时 | 多阶段构建 / `eclipse-temurin:21-jre-alpine` base / layered jar / JVM 启动参数 / healthcheck / 用户权限 |
-| **docker-compose.yml** | M1 写 compose 时 | postgres + redis + (minio 可选) / 卷挂载 / 健康检查 / 网络 / profile 切换 |
+| **docker-compose.yml** | M1 写 compose 时 | postgres + redis / 卷挂载 / 健康检查 / 网络 / profile 切换 |
 | **CI/CD server.yml 完整脚本** [P1] | M1 写 CI 时 | JDK 21 setup → Maven cache → `mvn -B verify` → jacoco report → docker build（可选）→ push registry（可选） |
 | **WebSocket 推送** | v1.5 | 单节点实现 + Redis Pub/Sub 多节点 + 强制下线集成 |
 | **消息队列集成**（Kafka/RabbitMQ） | v1.5+ | v1 用 Spring 原生事件即可 |
@@ -249,11 +249,15 @@
 | **BypassDataScope** | 显式跳过数据权限的注解。实现是 `BypassDataScopeAspect`（`infra-jooq`）——一个窄范围 AOP 切面，只持有一个 `boolean` ThreadLocal 标记，`@BypassDataScope` 方法返回时 try-finally 清理。注解必须填 `reason` 说明 bypass 理由 |
 | **@OperationLog** | 自定义操作日志注解（ADR-0006 P0.6），AOP 拦截写入 `mb_operation_log` |
 | **ShedLock** | 分布式定时任务锁库，防止多实例重复执行 `@Scheduled` 任务 |
-| **FileStorage** | 文件存储抽象接口（ADR-0006 P0.5），实现类：`LocalFileStorage` / `MinioFileStorage` |
+| **FileStorage** | 文件存储抽象接口（ADR-0006 P0.5），实现类：`LocalFileStorage` / `AliyunOssFileStorage` |
 | **HikariCP** | Spring Boot 默认的 JDBC 连接池，见 7.8 节的基线配置 |
 | **ADR** | Architecture Decision Record，架构决策记录 |
 | **M1/M4/M5** | 规划文档里的 milestone 编号（M1 = 脚手架，M4 = 后端底座 + 平台模块 + 契约驱动，M5 = canonical reference） |
 | **P0/P1/P2** | canonical reference 质量规范的优先级（ADR-0006）：P0 必在 M0 就定完，P1 占位 + 方向，P2 推迟 |
+| **JooqHelper** | `mb-infra/infra-jooq` 中的 jOOQ 操作辅助类，提供 conditionalUpdate、batch 等简化 API |
+| **RecordListener** | jOOQ 原生接口，在 record 的 insert/update/delete 操作前后触发回调。meta-build 用于自动填充审计字段（created_by / updated_by / updated_at / owner_dept_id） |
+| **Clock Bean** | Spring Bean（`java.time.Clock`），统一时间获取入口。生产注入 `Clock.systemUTC()`，测试注入 `Clock.fixed(...)` 实现时间冻结 |
+| **owner_dept_id** | 数据权限归属部门字段，记录数据创建时所属的部门 ID。创建后不可变，不随创建人调岗更新。VisitListener 通过此字段注入 `WHERE owner_dept_id IN (...)` 条件 |
 
 ---
 

@@ -16,41 +16,46 @@
 2. **自研模块边界规则**：跨模块访问、jOOQ 隔离、Sa-Token 隔离等（核心守护）
 3. **自研代码细节规则**：事务边界、时区、@CacheEvict 等
 
-M1 启动 3 条最基础的规则，M4 补全到 10+ 条。
+M1 启动 3 条最基础的规则，M4 补全到 23 条（含 GeneralCodingRules 零成本规则）。
 
 ## 2. M1 启动 3 条规则 [M1]
 
 | # | 规则名 | 意图 | 所属章节 |
 |---|--------|-----|---------|
-| 1 | `DOMAIN_MUST_NOT_USE_JOOQ`（精化为 `DSLCONTEXT_ONLY_IN_REPOSITORY` + `SERVICE_JOOQ_WHITELIST`，N3）| Service / Controller 禁止持有 DSLContext；Service 对 jOOQ 依赖仅限 Record/Result 白名单 | [5.1](#51-jooq-不入-service-m1m4) + 本章编码风格契约 |
-| 2 | `CROSS_PLATFORM_ONLY_VIA_API` | 跨 platform 模块只走 api 子包 | [5.2](#52-跨模块走对方-api-子包-m1m4) |
-| 3 | `NO_CYCLIC_DEPENDENCIES` | 无模块间循环依赖 | [5.2](#52-跨模块走对方-api-子包-m1m4) |
+| 1 | `DOMAIN_MUST_NOT_USE_JOOQ`（精化为 `DSLCONTEXT_ONLY_IN_REPOSITORY` + `SERVICE_JOOQ_WHITELIST`，N3）| Service / Controller 禁止持有 DSLContext；Service 对 jOOQ 依赖仅限 Record/Result 白名单 | [04-data-persistence.md §7](./04-data-persistence.md) + 本章编码风格契约 |
+| 2 | `CROSS_PLATFORM_ONLY_VIA_API` | 跨 platform 模块只走 api 子包 | [01-module-structure.md §3](./01-module-structure.md) |
+| 3 | `NO_CYCLIC_DEPENDENCIES` | 无模块间循环依赖 | [01-module-structure.md §3](./01-module-structure.md) |
 
 ## 3. M4 补全规则 [M4]
 
 | # | 规则名 | 意图 | 所属章节 |
 |---|--------|-----|---------|
-| 4 | `NO_RAW_SQL_FETCH` | **业务层禁止使用 jOOQ `@PlainSQL` API**（会绕过 `DataScopeVisitListener`） | [5.3](#53-datascope-opt-out方案-e-visitlistener-单点--零基类-m1m4) |
-| 5 | `NO_EVICT_ALL_ENTRIES` | 禁止 @CacheEvict(allEntries=true) | [5.4](#54-缓存-key-级失效禁用-allentriestrue-m4) |
-| 6 | `BUSINESS_MUST_NOT_DEPEND_ON_SA_TOKEN` | **业务层禁止直接依赖 Sa-Token**（ADR-0005） | [8.6](#86-currentuser-门面层设计-adr-0005) |
-| 7 | `CONTROLLER_NO_DIRECT_REPOSITORY` | Controller 不直接注入 Repository | 本章 6.4 |
-| 8 | `CONTROLLER_MUST_HAVE_REQUIRE_PERMISSION` | 所有 Controller 方法必须有 @RequirePermission 或 @PermitAll | 本章 6.4 |
-| 9 | `NO_LOCALDATETIME_IN_API` | api 包禁用 LocalDateTime（必须 Instant） | [13](#13-时区规范-adr-008-m1) |
-| 10 | `TRANSACTIONAL_ONLY_IN_SERVICE` | @Transactional 只出现在 Service 层 | [7.7](#77-事务边界规范-p1) |
-| 11 | `BUSINESS_ONLY_DEPENDS_ON_PLATFORM_API` | business 模块只能依赖 platform 的 api | [5.2](#52-跨模块走对方-api-子包-m1m4) |
-| 12 | `GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION` | 禁用 @Autowired 字段注入 | 本章 6.4 |
-| 13 | `GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS` | 禁用 System.out/err | 本章 6.4 |
-| 14 | `GeneralCodingRules.NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING` | 禁用 java.util.logging（必须 SLF4J） | 本章 6.4 |
-| 15 | `DSLCONTEXT_ONLY_IN_REPOSITORY` | DSLContext 只能作为 Repository 字段，Service/Controller 禁止持有（N3） | 本章编码风格契约 |
-| 16 | `SERVICE_JOOQ_WHITELIST` | Service 对 org.jooq 依赖仅限 Record/Result/exception 白名单；DSLContext / DSL / Field / Condition 等 DSL 类一律禁止（N3，C8）| 本章编码风格契约 |
-| 17 | `NO_MAPSTRUCT` | v1 禁用 MapStruct / ModelMapper，手写 `from()` 静态工厂（C2） | 本章编码风格契约 |
-| 18 | `OPTIONAL_ONLY_RETURN` | Optional 只能作为返回值，禁作字段类型/参数（C2） | 本章编码风格契约 |
-| 19 | `ONLY_JAKARTA_NULLABLE` | @Nullable 统一用 jakarta.annotation.Nullable（C2） | 本章编码风格契约 |
-| 20 | `NO_DIRECT_TIME_API` | 禁止无参时间获取调用（Instant.now() / OffsetDateTime.now() 等），统一通过注入 `Clock` Bean（C3） | 本章编码风格契约 §7.8 |
+| 4 | `NO_RAW_SQL_FETCH` | **业务层禁止使用 jOOQ `@PlainSQL` API**（会绕过 `DataScopeVisitListener`） | [05-security.md §7](./05-security.md) |
+| 5 | `NO_EVICT_ALL_ENTRIES` | 禁止 @CacheEvict(allEntries=true) | [04-data-persistence.md §11](./04-data-persistence.md) |
+| 6 | `BUSINESS_MUST_NOT_DEPEND_ON_SA_TOKEN` | **业务层禁止直接依赖 Sa-Token**（ADR-0005） | [05-security.md §6](./05-security.md) |
+| 7 | `CONTROLLER_NO_DIRECT_REPOSITORY` | Controller 不直接注入 Repository | 本章 §4 |
+| 8 | `CONTROLLER_MUST_HAVE_REQUIRE_PERMISSION` | 所有 Controller 方法必须有 @RequirePermission 或 @PermitAll | 本章 §4 |
+| 9 | `NO_LOCALDATETIME_IN_API` | api 包禁用 LocalDateTime（必须 Instant） | [04-data-persistence.md §12](./04-data-persistence.md) |
+| 10 | `TRANSACTIONAL_ONLY_IN_SERVICE` | @Transactional 只出现在 Service 层 | [04-data-persistence.md §8](./04-data-persistence.md) |
+| 11 | `BUSINESS_ONLY_DEPENDS_ON_PLATFORM_API` | business 模块只能依赖 platform 的 api | [01-module-structure.md §3](./01-module-structure.md) [M4 补全] |
+| 12 | `GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION` | 禁用 @Autowired 字段注入 | 本章 §4 |
+| 13 | `GeneralCodingRules.NO_CLASSES_SHOULD_ACCESS_STANDARD_STREAMS` | 禁用 System.out/err | 本章 §4 |
+| 14 | `GeneralCodingRules.NO_CLASSES_SHOULD_USE_JAVA_UTIL_LOGGING` | 禁用 java.util.logging（必须 SLF4J） | 本章 §4 |
+| 15 | `DSLCONTEXT_ONLY_IN_REPOSITORY` | DSLContext 只能作为 Repository 字段，Service/Controller 禁止持有（N3） | 本章 §7 N3 精化规则 |
+| 16 | `SERVICE_JOOQ_WHITELIST` | Service 对 org.jooq 依赖仅限 Record/Result/exception 白名单；DSLContext / DSL / Field / Condition 等 DSL 类一律禁止（N3，C8）| 本章 §7 N3 精化规则 |
+| 17 | `NO_MAPSTRUCT` | v1 禁用 MapStruct / ModelMapper，手写 `from()` 静态工厂（C2） | 本章 §8 编码风格契约 |
+| 18 | `OPTIONAL_ONLY_RETURN` + `NO_OPTIONAL_PARAMETERS` | Optional 只能作为返回值，禁作字段类型（OPTIONAL_ONLY_RETURN）和方法参数（NO_OPTIONAL_PARAMETERS）（C2） | 本章 §8 编码风格契约 |
+| 19 | `ONLY_JAKARTA_NULLABLE` | @Nullable 统一用 jakarta.annotation.Nullable（C2） | 本章 §8 编码风格契约 |
+| 20 | `ONLY_INFRA_SECURITY_DEPENDS_ON_SA_TOKEN` | Sa-Token API 只能在 infra-security 和 admin 里用 | [05-security.md §6](./05-security.md) + 本章 §4 |
+| 21 | `WRITE_OPS_ONLY_VIA_RECORD_OR_HELPER` | 业务层写操作只走 Record.store() 或 JooqHelper | 本章 §6 M4 jOOQ 写操作硬约束 |
+| 22 | `NO_MANUAL_VERSION_INCREMENT` | 业务层禁止手动操作 version 字段 | 本章 §6 M4 jOOQ 写操作硬约束 |
+| 23 | `NO_MANUAL_AUDIT_FIELDS` | 业务层禁止手动设置审计字段 | 本章 §6 M4 jOOQ 写操作硬约束 |
 
 > **注意**：原规则 `REPOSITORIES_MUST_EXTEND_DATA_SCOPED` 已被方案 E 移除（详见 ADR-0007）。数据权限改由 `DataScopeVisitListener` 单点拦截，不再需要 Repository 继承基类。等价的守护规则是新的 `NO_RAW_SQL_FETCH`——只要业务层不走 `@PlainSQL` 字符串 SQL，VisitListener 就不会被绕过。
 >
-> **N3 精化**：原规则 `DOMAIN_MUST_NOT_USE_JOOQ` 在 M1 阶段仍然保留，M4 阶段用更精确的 `DSLCONTEXT_ONLY_IN_REPOSITORY`（字段级）+ `SERVICE_JOOQ_WHITELIST`（白名单级）替代，完整表达"jOOQ DSL 查询只在 Repository 里写"的意图（详见本章编码风格契约）。
+> **N3 精化**：原规则 `DOMAIN_MUST_NOT_USE_JOOQ` 在 M1 阶段仍然保留，M4 阶段用更精确的 `DSLCONTEXT_ONLY_IN_REPOSITORY`（字段级）+ `SERVICE_JOOQ_WHITELIST`（白名单级）替代，完整表达"jOOQ DSL 查询只在 Repository 里写"的意图（详见本章 §7 N3 精化规则）。
+>
+> **Clock Bean**：`Clock` Bean 统一时间获取为编码建议（非 ArchUnit 硬规则），通过 canonical reference 模板代码示范引导，详见本章 §8.8。
 
 ## 4. Controller + 依赖注入 + 编码规范规则 [M4]
 
@@ -195,9 +200,49 @@ public class ArchitectureTest {
     static final ArchRule transactional_only_in_service =
         TransactionRule.TRANSACTIONAL_ONLY_IN_SERVICE;
 
+    // === M4 jOOQ 写操作硬约束 ===
     @ArchTest
-    static final ArchRule no_direct_time_api =
-        TimeRule.NO_DIRECT_TIME_API;
+    static final ArchRule write_ops_only_via_record_or_helper =
+        JooqWriteRule.WRITE_OPS_ONLY_VIA_RECORD_OR_HELPER;
+
+    @ArchTest
+    static final ArchRule no_manual_version_increment =
+        JooqWriteRule.NO_MANUAL_VERSION_INCREMENT;
+
+    @ArchTest
+    static final ArchRule no_manual_audit_fields =
+        JooqWriteRule.NO_MANUAL_AUDIT_FIELDS;
+
+    // === Sa-Token 双向隔离 ===
+    @ArchTest
+    static final ArchRule only_infra_security_depends_on_sa_token =
+        SaTokenIsolationRule.ONLY_INFRA_SECURITY_DEPENDS_ON_SA_TOKEN;
+
+    // === N3 精化规则 ===
+    @ArchTest
+    static final ArchRule dslcontext_only_in_repository =
+        JooqIsolationRule.DSLCONTEXT_ONLY_IN_REPOSITORY;
+
+    @ArchTest
+    static final ArchRule service_jooq_whitelist =
+        JooqIsolationRule.SERVICE_JOOQ_WHITELIST;
+
+    // === 编码风格契约规则 ===
+    @ArchTest
+    static final ArchRule no_mapstruct =
+        CodingStyleRule.NO_MAPSTRUCT;
+
+    @ArchTest
+    static final ArchRule optional_only_return =
+        CodingStyleRule.OPTIONAL_ONLY_RETURN;
+
+    @ArchTest
+    static final ArchRule no_optional_parameters =
+        CodingStyleRule.NO_OPTIONAL_PARAMETERS;
+
+    @ArchTest
+    static final ArchRule only_jakarta_nullable =
+        CodingStyleRule.ONLY_JAKARTA_NULLABLE;
 
     // === GeneralCodingRules 零成本规则 ===
     @ArchTest
@@ -211,6 +256,9 @@ public class ArchitectureTest {
 
     @ArchTest
     static final ArchRule no_generic_exceptions = GeneralCodingRulesBundle.NO_GENERIC_EXCEPTIONS;
+
+    @ArchTest
+    static final ArchRule no_jodatime = GeneralCodingRulesBundle.NO_JODATIME;
 }
 ```
 
@@ -240,7 +288,7 @@ public class DoNotIncludeGeneratedJooq implements ImportOption {
 
 <!-- verify: cd server && mvn -pl mb-admin test -Dtest=ArchitectureTest -->
 
-## 5. M4 jOOQ 写操作硬约束 [M4]
+## 6. M4 jOOQ 写操作硬约束 [M4]
 
 > 配合 [04-data-persistence.md §8.5-§8.7](04-data-persistence.md) 的 jOOQ 二元路径规范。业务层的所有写操作收敛到两个入口：`UpdatableRecord.store()`（单条）或 `jooqHelper.batch*/conditional*`（批量+条件）。以下 4 条 ArchUnit 规则强制锁死其他入口。
 
@@ -329,7 +377,7 @@ static final ArchRule NO_MANUAL_AUDIT_FIELDS = noClasses()
 
 ---
 
-## 6. N3 精化规则：DSLContext 隔离 [M4]
+## 7. N3 精化规则：DSLContext 隔离 [M4]
 
 > N3 对原 `DOMAIN_MUST_NOT_USE_JOOQ` 的精化：用两条更精确的规则替代，完整表达"jOOQ DSL 查询只在 Repository 里写"的意图。`SERVICE_JOOQ_WHITELIST` 用白名单而非黑名单——允许 Service 使用 Record/Result 数据载体，拒绝 DSLContext / DSL 等查询构建 API。
 
@@ -390,13 +438,13 @@ private static ArchCondition<JavaClass> onlyDependOnJooqDataCarriers() {
 
 ---
 
-## 7. 编码风格契约 [M4]
+## 8. 编码风格契约 [M4]
 
 > **关注点**：Java 21 + Spring Boot 3.x + Lombok 的编码风格硬规则，通过 ArchUnit 规则和 code review 强制。
 >
 > **定位**：给 AI 和使用者一份明确的"do/don't"清单，避免 M4 落地时各业务模块风格不一。
 
-### 7.1 DTO / VO / Command / Query / Event 必须用 `record`
+### 8.1 DTO / VO / Command / Query / Event 必须用 `record`
 
 **规则**：所有 API 边界的数据类（`*View` / `*Command` / `*Query` / `*Event`）必须用 Java `record` 定义，禁用 Lombok `@Data` / `@Value` / `@Getter` + `@Setter` 组合。
 
@@ -427,11 +475,11 @@ public class UserView {
 
 **例外**：`@ConfigurationProperties` 类也用 record（已在 [09-config-management.md §9.4.2](09-config-management.md) 定下）。
 
-### 7.2 Service / Repository / Controller 用 `@RequiredArgsConstructor` 构造器注入
+### 8.2 Service / Repository / Controller 用 `@RequiredArgsConstructor` 构造器注入
 
 **规则**：所有 Spring Bean（`@Service` / `@Repository` / `@Controller` / `@Component`）用 Lombok `@RequiredArgsConstructor` + `final` 字段做构造器注入，禁用 `@Autowired` 字段注入。
 
-**ArchUnit 规则**（已存在，`08-archunit-rules.md §4`）：
+**ArchUnit 规则**（已存在，本章 §4）：
 
 ```java
 @ArchTest
@@ -458,7 +506,7 @@ public class UserService {
 }
 ```
 
-### 7.3 实体 → DTO 映射手写 `from()` 静态方法，不引入 MapStruct
+### 8.3 实体 → DTO 映射手写 `from()` 静态方法，不引入 MapStruct
 
 **规则**：实体（`UserRecord`）到 DTO（`UserView`）的映射通过 DTO record 里的 `public static <DTO> from(<Entity>)` 静态工厂方法手写。v1 **禁用** MapStruct / ModelMapper。
 
@@ -479,9 +527,9 @@ static final ArchRule NO_MAPSTRUCT = noClasses()
 - AI 生成手写 `from()` 错误率比 MapStruct 注解低
 - M5 canonical reference 写完后有实战数据再评估 MapStruct（v1.5+）
 
-**示例**见 §7.1 的 `UserView.from()`。
+**示例**见 §8.1 的 `UserView.from()`。
 
-### 7.4 virtual thread 默认关闭
+### 8.4 virtual thread 默认关闭
 
 **规则**：`application.yml` 硬设 `spring.threads.virtual.enabled=false`，v1 不启用 virtual thread。
 
@@ -497,7 +545,7 @@ static final ArchRule NO_MAPSTRUCT = noClasses()
 
 **不是"保守不追新"**，而是"不追尚未成熟的特性"。盲目开 virtual thread 本身是补丁式追新。
 
-### 7.5 `Optional` 只作返回值
+### 8.5 `Optional` 只作返回值
 
 **规则**：`Optional<T>` **只能**作为方法返回值，**禁止**作为：
 - 字段类型（`private Optional<User> currentUser;` ← 禁）
@@ -523,7 +571,7 @@ static final ArchRule NO_OPTIONAL_PARAMETERS = noMethods()
 - `Optional` 不实现 `Serializable`，作为字段类型会导致序列化失败
 - 作为参数违反简洁性（应该用方法重载或 `@Nullable` 替代）
 
-### 7.6 sealed class / pattern matching 不用，状态用 `enum`
+### 8.6 sealed class / pattern matching 不用，状态用 `enum`
 
 **规则**：v1 **不使用** sealed class / sealed interface。所有业务状态（订单状态 / 审批状态 / 用户状态）用 Java `enum`。
 
@@ -554,7 +602,7 @@ public enum OrderStatus {
 
 v1.5+ 可以评估 sealed class，v1 不用。
 
-### 7.7 `@Nullable` 统一用 `jakarta.annotation.Nullable`
+### 8.7 `@Nullable` 统一用 `jakarta.annotation.Nullable`
 
 **规则**：需要标记"可能为 null"的字段/参数/返回值时，统一用 `jakarta.annotation.Nullable`。**禁用**以下其他注解（v1）：
 - ❌ `javax.annotation.Nullable`（JSR-305 废弃草案）
@@ -577,31 +625,11 @@ static final ArchRule ONLY_JAKARTA_NULLABLE = noClasses()
 - Spring Boot 3.x **原生依赖** `jakarta.annotation-api`，不需要额外加依赖
 - v1.5+ 跟随 Spring Framework 6.2+ 迁移到 JSpecify（业界趋势）
 
-### 7.8 `Clock` Bean 统一时间获取，禁止无参调用 [M4]
+### 8.8 `Clock` Bean 统一时间获取（编码建议） [M4]
 
-**规则**：业务代码禁止直接调用无参时间获取方法，统一通过注入 `Clock` Bean 后使用带 Clock 参数的重载。SQL 层统一用 `CURRENT_TIMESTAMP`（由数据库填充，不在 Java 代码里生成时间）。
+**本节为编码建议，不通过 ArchUnit 硬约束。** 通过 `Clock` Bean 工具类 + canonical reference 模板代码示范引导。
 
-**ArchUnit 规则**（`NO_DIRECT_TIME_API`，规则 #20）：
-
-```java
-// infra-archunit/src/main/java/com/metabuild/infra/archunit/rules/TimeRule.java
-
-// NO_DIRECT_TIME_API [M4]
-// 禁止直接调用无参时间获取方法，统一通过注入 Clock Bean
-// 生产: Clock.systemUTC()  测试: Clock.fixed(...)
-public static final ArchRule NO_DIRECT_TIME_API = noClasses()
-    .that().resideInAnyPackage("com.metabuild..")
-    .should().callMethod(Instant.class, "now")
-    .orShould().callMethod(OffsetDateTime.class, "now")
-    .orShould().callMethod(LocalDateTime.class, "now")
-    .orShould().callMethod(LocalDate.class, "now")
-    .orShould().callConstructor(java.util.Date.class)
-    .because(
-        "业务代码统一通过 Instant.now(clock) 获取时间（带 Clock 参数的重载），" +
-        "禁止无参调用。生产注入 Clock.systemUTC()，测试注入 Clock.fixed(...)，" +
-        "保证测试时间可控。SQL 层统一用 CURRENT_TIMESTAMP，不在 Java 代码里生成时间。"
-    );
-```
+**建议**：业务代码通过注入 `Clock` Bean 后使用带 Clock 参数的重载获取时间，避免直接调用无参时间获取方法。SQL 层统一用 `CURRENT_TIMESTAMP`（由数据库填充，不在 Java 代码里生成时间）。
 
 **正确用法示例**：
 
@@ -632,11 +660,11 @@ class SomeServiceTest {
 // ✅ SQL 层：用数据库函数，不在 Java 层生成时间
 -- created_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
 
-// ❌ 禁止：无参时间调用
-Instant.now()           // 禁
-OffsetDateTime.now()    // 禁
-LocalDateTime.now()     // 禁
-new Date()              // 禁
+// ❌ 不推荐：无参时间调用（测试不可控）
+Instant.now()           // 不推荐
+OffsetDateTime.now()    // 不推荐
+LocalDateTime.now()     // 不推荐
+new Date()              // 不推荐
 ```
 
 **理由**：
@@ -644,9 +672,9 @@ new Date()              // 禁
 - `Clock` Bean 是 Spring 官方推荐的可测试时间模式
 - 统一入口后，未来切换时区策略只改一处
 
-**例外**：`infra-*` 模块内部的基础设施初始化代码（如 Micrometer 计时）可以例外，ArchUnit 规则通过包名已排除 `com.metabuild.infra..*`（直接在 `com.metabuild..` 范围内，infra 包受检；如有必要可用 `@SuppressArchitectureViolations` 单点豁免）。
+**例外**：`infra-*` 模块内部的基础设施初始化代码（如 Micrometer 计时）可以直接用无参调用。
 
-### 7.9 次要规范（文档推荐，不做硬规则）
+### 8.9 次要规范（文档推荐，不做硬规则）
 
 以下是推荐做法，不通过 ArchUnit 强制，由 code review 守护：
 
@@ -656,7 +684,7 @@ new Date()              // 禁
 - **方法引用** `UserView::from` 优先于等价 lambda `r -> UserView.from(r)`
 - **Stream API** 推荐用于集合转换（`stream().map().toList()`），传统 for 循环用于有副作用的场景
 
-### 7.10 M4 实施 checklist
+### 8.10 M4 实施 checklist
 
 每个业务模块 M4 落地时应该通过以下自检：
 
@@ -667,7 +695,7 @@ new Date()              // 禁
 - [ ] `Optional` 只在方法返回值出现，无字段/参数
 - [ ] 所有状态字段用 enum，无 sealed class
 - [ ] 所有 `@Nullable` 注解是 `jakarta.annotation.Nullable`
-- [ ] 时间获取通过注入 `Clock` Bean + `Instant.now(clock)`，无 `Instant.now()` / `new Date()` 等无参调用
+- [ ] 时间获取推荐通过注入 `Clock` Bean + `Instant.now(clock)`（编码建议，非硬规则）
 - [ ] `mvn verify` 通过（含 ArchUnit 测试）
 
 ---
@@ -676,23 +704,23 @@ new Date()              // 禁
 
 > 这些是 nxboot 已经踩过的坑，**meta-build 从第一天起用工具拦截**，让错误在编译/测试阶段暴露。每条都有对应的防御机制 + 可执行验证。
 
-| # | 反面教材 | 防御机制 | 本文档位置 | 验证方式 |
+| # | 反面教材 | 防御机制 | 文档位置 | 验证方式 |
 |---|---------|---------|-----------|---------|
 | 1 | **文档-代码 drift**（nxboot CLAUDE.md 描述 7 个 shared/components 在磁盘是空目录） | 每章 verify 块可执行 + CLAUDE.md 索引式（与代码同步演进） | 全文 | 每章末尾 `<!-- verify: -->` |
-| 2 | **反 opt-in 安全模式**（DataScope 忘加注解就静默泄漏） | **方案 E：`DataScopeVisitListener` 在 jOOQ SQL 构建层单点拦截（零 Repository 基类）**+ `DataScopeRegistry` 集中声明受保护表 + `@BypassDataScope` 显式跳过 + `NO_RAW_SQL_FETCH` ArchUnit 兜底 | [5.3](#53-datascope-opt-out方案-e-visitlistener-单点--零基类-m1m4) | `UserRepositoryDataScopeTest` + `NO_RAW_SQL_FETCH` 规则 |
-| 3 | **反 jOOQ 泄漏到 Service**（nxboot 50 个文件 import org.jooq） | ArchUnit `DOMAIN_MUST_NOT_USE_JOOQ` | [5.1](#51-jooq-不入-service-m1m4) | `JooqIsolationTest` |
-| 4 | **反全量缓存失效**（`@CacheEvict(allEntries=true)` 规模上去形同虚设） | ArchUnit `NO_EVICT_ALL_ENTRIES` + grep 校验 | [5.4](#54-缓存-key-级失效禁用-allentriestrue-m4) | `mvn test + grep` |
-| 5 | **反继承惯性从 nxboot 搬 `DataScopedRepository` 基类**（MyBatis-Plus 习惯带到 jOOQ，隐式全局 `DataScopeContext` ThreadLocal，异步丢失 + AI 追父类心智负担） | **方案 E 整体砍掉基类和 `DataScopeContext`**；数据权限通过 `CurrentUser`（来自 Sa-Token session 单一数据源）+ `DataScopeVisitListener` 实现，整个项目只剩 Sa-Token 一个 ThreadLocal 需要在 `AsyncConfig` 传递 | [5.3](#53-datascope-opt-out方案-e-visitlistener-单点--零基类-m1m4) / [ADR-0007](../adr/0007-继承遗产前先问原生哲学.md) | 代码搜索 `extends DataScopedRepository` / `DataScopeContext` 应全为 0 |
-| 6 | **反 R<T> 200 OK 包装**（破坏 HTTP 语义，监控/CDN 失效） | 错误一律 4xx/5xx + ProblemDetail + ArchUnit 校验 Controller 返回类型 | [9.3](#93-响应格式混合方案) | `ResponseFormatTest` |
-| 7 | **反硬编码敏感配置**（密钥默认值写在代码里） | env var 无默认值，缺失启动失败 + `@ConfigurationProperties` 校验 | [8.4](#84-强制敏感配置) | `ConfigValidationTest` |
-| 8 | **反跨模块穿透 Repository**（RoleService 直接读 menu 表） | Maven pom 白名单 + ArchUnit `CROSS_PLATFORM_ONLY_VIA_API`（ADR-0003） | [5.2](#52-跨模块走对方-api-子包-m1m4) | `ModuleBoundaryTest` |
-| 9 | **反时区混乱**（LocalDateTime 出现在 API 边界） | ArchUnit `NO_LOCALDATETIME_IN_API` + Jackson UTC 配置 | [13](#13-时区规范-adr-008-m1) | `TimezoneRuleTest` |
-| 10 | **反 Controller 直接注入 Repository** | ArchUnit `CONTROLLER_NO_DIRECT_REPOSITORY` | [6.4](#64-controller--依赖注入--编码规范规则) | `ControllerBoundaryTest` |
-| 11 | **反 @Autowired 字段注入** | `GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION` | [6.4](#64-controller--依赖注入--编码规范规则) | `InjectionStyleTest` |
+| 2 | **反 opt-in 安全模式**（DataScope 忘加注解就静默泄漏） | **方案 E：`DataScopeVisitListener` 在 jOOQ SQL 构建层单点拦截（零 Repository 基类）**+ `DataScopeRegistry` 集中声明受保护表 + `@BypassDataScope` 显式跳过 + `NO_RAW_SQL_FETCH` ArchUnit 兜底 | [05-security.md §7](./05-security.md) | `UserRepositoryDataScopeTest` + `NO_RAW_SQL_FETCH` 规则 |
+| 3 | **反 jOOQ 泄漏到 Service**（nxboot 50 个文件 import org.jooq） | ArchUnit `DOMAIN_MUST_NOT_USE_JOOQ` | [04-data-persistence.md §7](./04-data-persistence.md) | `JooqIsolationTest` |
+| 4 | **反全量缓存失效**（`@CacheEvict(allEntries=true)` 规模上去形同虚设） | ArchUnit `NO_EVICT_ALL_ENTRIES` + grep 校验 | [04-data-persistence.md §11](./04-data-persistence.md) | `mvn test + grep` |
+| 5 | **反继承惯性从 nxboot 搬 `DataScopedRepository` 基类**（MyBatis-Plus 习惯带到 jOOQ，隐式全局 `DataScopeContext` ThreadLocal，异步丢失 + AI 追父类心智负担） | **方案 E 整体砍掉基类和 `DataScopeContext`**；数据权限通过 `CurrentUser`（来自 Sa-Token session 单一数据源）+ `DataScopeVisitListener` 实现，整个项目只剩 Sa-Token 一个 ThreadLocal 需要在 `AsyncConfig` 传递 | [05-security.md §7](./05-security.md) / [ADR-0007](../adr/0007-继承遗产前先问原生哲学.md) | 代码搜索 `extends DataScopedRepository` / `DataScopeContext` 应全为 0 |
+| 6 | **反 R<T> 200 OK 包装**（破坏 HTTP 语义，监控/CDN 失效） | 错误一律 4xx/5xx + ProblemDetail + ArchUnit 校验 Controller 返回类型 | [06-api-and-contract.md §3](./06-api-and-contract.md) | `ResponseFormatTest` |
+| 7 | **反硬编码敏感配置**（密钥默认值写在代码里） | env var 无默认值，缺失启动失败 + `@ConfigurationProperties` 校验 | [05-security.md §4](./05-security.md) / [09-config-management.md §9.6](./09-config-management.md) | `ConfigValidationTest` |
+| 8 | **反跨模块穿透 Repository**（RoleService 直接读 menu 表） | Maven pom 白名单 + ArchUnit `CROSS_PLATFORM_ONLY_VIA_API`（ADR-0003） | [01-module-structure.md §3](./01-module-structure.md) | `ModuleBoundaryTest` |
+| 9 | **反时区混乱**（LocalDateTime 出现在 API 边界） | ArchUnit `NO_LOCALDATETIME_IN_API` + Jackson UTC 配置 | [04-data-persistence.md §12](./04-data-persistence.md) | `TimezoneRuleTest` |
+| 10 | **反 Controller 直接注入 Repository** | ArchUnit `CONTROLLER_NO_DIRECT_REPOSITORY` | 本章 §4 | `ControllerBoundaryTest` |
+| 11 | **反 @Autowired 字段注入** | `GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION` | 本章 §4 | `InjectionStyleTest` |
 | 12 | **反 CLAUDE.md 全细节**（nxboot CLAUDE.md 19KB 单文件，drift 一次全毁） | CLAUDE.md 索引式，细节下放 specs/adr | `CLAUDE.md` 骨架 | 人工审查 |
-| 13 | **反认证框架耦合业务层**（Spring Security / Sa-Token 的 API 散落在 Service / Controller） | `CurrentUser` 门面 + ArchUnit `BUSINESS_MUST_NOT_DEPEND_ON_SA_TOKEN`（ADR-0005） | [8.6](#86-currentuser-门面层设计-adr-0005) | `SaTokenIsolationTest` |
-| 14 | **反 jOOQ 生成代码放在基础设施层**（语义错配） | 独立 `mb-schema` 数据库契约层（ADR-0004） | [1.2](#12-6-层-maven-模块)、[7.6](#76-jooq-代码生成流程adr-0004codegen-在-mb-schema) | Maven 依赖检查 |
-| 15 | **反 Service 方法抛 checked Exception**（Spring 默认不回滚） | 业务异常继承 `RuntimeException`；约定 Service 不抛 checked | [7.7 回滚规则](#回滚规则) | 代码 review |
+| 13 | **反认证框架耦合业务层**（Spring Security / Sa-Token 的 API 散落在 Service / Controller） | `CurrentUser` 门面 + ArchUnit `BUSINESS_MUST_NOT_DEPEND_ON_SA_TOKEN`（ADR-0005） | [05-security.md §6](./05-security.md) | `SaTokenIsolationTest` |
+| 14 | **反 jOOQ 生成代码放在基础设施层**（语义错配） | 独立 `mb-schema` 数据库契约层（ADR-0004） | [01-module-structure.md §1](./01-module-structure.md) / [04-data-persistence.md §6](./04-data-persistence.md) | Maven 依赖检查 |
+| 15 | **反 Service 方法抛 checked Exception**（Spring 默认不回滚） | 业务异常继承 `RuntimeException`；约定 Service 不抛 checked | [04-data-persistence.md §8](./04-data-persistence.md) | 代码 review |
 
 ---
 

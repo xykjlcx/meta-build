@@ -1,6 +1,6 @@
 # 05 - 安全模型
 
-> **关注点**：Sa-Token JWT 配置、`CurrentUser` 读门面、`AuthFacade` 写门面、`@RequirePermission` 注解、CORS、敏感配置、**方案 E 数据权限**（DataScopeRegistry + DataScopeVisitListener + BypassDataScopeAspect）。
+> **关注点**：Sa-Token JWT Simple 模式 + Refresh Token Rotation、`CurrentUser` 读门面、`AuthFacade` 写门面、`@RequirePermission` 注解、CORS、Web 安全基线（XSS/CSRF）、敏感配置、**方案 E 数据权限**（DataScopeRegistry + DataScopeVisitListener + BypassDataScopeAspect）。
 >
 > **本文件吸收原 backend-architecture.md §8（安全模型）+ §5.3（数据权限方案 E）**。这是本目录最长的文件，因为安全相关的所有概念高度内聚，硬拆会让交叉引用爆炸。
 >
@@ -8,14 +8,14 @@
 
 > **ADR-0005**：本章是对规划文档决策 4 的翻转——从 Spring Security + JJWT 切换到 Sa-Token + CurrentUser 门面层 + `@RequirePermission` 自定义注解。
 
-## 1. Sa-Token JWT Mixed 模式
+## 1. Sa-Token JWT Simple 模式
 
-**选择 JWT mixed 模式**：JWT 载荷（无状态）+ Redis 黑名单（主动注销）。每次请求无需查 Redis，注销时 token 加入黑名单。
+**选择 JWT Simple 模式**：JWT 格式 token + Redis 完整会话管理。每次请求查 Redis 验证 token 有效性和会话数据。支持全部 Sa-Token 能力（踢人下线、会话管理、账号封禁等）。
 
 | Token 类型 | 有效期 | 载体 | 存储 |
 |-----------|------|------|------|
-| **access** | 30 天（可配置） | JWT（自签） | 无状态（客户端持有） |
-| **refresh** | 可选 | JWT | 无状态 |
+| **access** | 30 分钟（可配置） | JWT（自签） | Redis 会话 |
+| **refresh** | 30 天（可配置） | JWT | Redis（一次性，rotation） |
 | **黑名单** | token 过期时长 | Redis | `sa-token:black:tokenValue` |
 
 - **签名算法**: HS256
@@ -25,17 +25,68 @@
 **Sa-Token 配置**（`application.yml`）：
 ```yaml
 sa-token:
-  token-name: Authorization          # 从 Authorization header 读
-  token-prefix: Bearer               # Bearer 前缀
-  timeout: 2592000                   # 30 天
-  active-timeout: -1                 # 不检查活跃度
-  is-concurrent: true                # 允许同账号多端登录
-  is-share: false                    # 多端 token 不共享
-  token-style: jwt                   # JWT 模式
-  auto-renew: false                  # 不自动续签
-  is-log: false                      # 生产关闭日志
-  jwt-secret-key: ${MB_JWT_SECRET}   # 缺失启动失败
+  token-name: Authorization
+  token-prefix: Bearer
+  timeout: 1800                    # access token 30 分钟
+  active-timeout: -1               # 由 refresh 机制管理续期
+  is-concurrent: true
+  is-share: false                  # Simple 模式强制 false
+  is-log: false
+  jwt-secret-key: ${MB_JWT_SECRET}
 ```
+
+**JWT 模式启用方式**（不是通过 `token-style` 配置，而是注册 StpLogic Bean）：
+
+```java
+@Configuration
+public class SaTokenJwtConfig {
+    @Bean
+    public StpLogic getStpLogicJwt() {
+        return new StpLogicJwtForSimple();
+    }
+}
+```
+
+**Maven 依赖**：`sa-token-jwt`（在 `mb-infra/infra-security/pom.xml` 中引入）。
+
+### 1.0.1 Token 刷新机制（Refresh Token Rotation）
+
+v1 采用 access token（30 分钟）+ refresh token（30 天）+ rotation 机制：
+
+1. **登录时**：`AuthFacade.doLogin()` 签发 access token + refresh token，refresh token 存入 Redis（key: `mb:auth:refresh:{tokenValue}`，TTL 30 天）
+2. **正常请求**：携带 access token，Sa-Token 从 Redis 验证会话
+3. **access 过期时**：前端拿 refresh token 调 `/api/auth/refresh`
+4. **refresh 端点行为**：
+   - 验证 refresh token 有效
+   - **作废旧 refresh token**（Redis 删除）
+   - 签发新 access token + 新 refresh token
+   - 返回给前端
+5. **Rotation 入侵检测**：如果一个已作废的 refresh token 被再次使用，说明该 token 已泄漏 → 立即吊销该用户所有 token（`AuthFacade.kickoutAll()`）→ 记录安全告警日志
+
+**配置项**：
+
+| 配置 | 默认值 | 说明 |
+|------|--------|------|
+| `mb.auth.access-timeout` | `1800`（30 分钟） | Access token 有效期（秒） |
+| `mb.auth.refresh-timeout` | `2592000`（30 天） | Refresh token 有效期（秒） |
+| `mb.auth.refresh-rotation` | `true` | 是否启用 rotation（强烈建议不要关闭） |
+
+**AuthFacade 接口扩展**：
+
+```java
+public interface AuthFacade {
+    LoginResult doLogin(Long userId, SessionData sessionData);  // 签发 access + refresh
+    TokenPair refresh(String refreshToken);                      // 刷新 token（rotation）
+    void logout();
+    void kickoutAll(Long userId);
+    // ...
+}
+```
+
+**安全要点**：
+- Refresh token **不随普通 API 请求发送**，仅在 `/api/auth/refresh` 端点使用
+- 前端应将 refresh token 存储在比 access token 更安全的位置（如 httpOnly cookie 或内存）
+- Rotation 检测到入侵时，除了吊销 token，还应通过 `@OperationLog` 记录安全事件
 
 **登录代码**(业务层零 Sa-Token 引用，通过 `AuthFacade` 门面完成技术操作，详见 [§6.6](#66-authfacade登录登出技术门面))：
 
@@ -377,6 +428,25 @@ public class CorsConfig {
 }
 ```
 
+## 5.1 Web 安全基线声明
+
+### XSS 防护
+
+v1 所有 API 返回 `application/json`，浏览器不会将 JSON 渲染为 HTML，这是天然的 XSS 防线。
+
+补充防御（`infra-web` 的 `SecurityHeaderFilter`）：
+- `X-Content-Type-Options: nosniff` — 禁止浏览器嗅探 MIME 类型
+- `Content-Security-Policy: default-src 'self'` — 限制资源加载来源
+- `X-Frame-Options: DENY` — 禁止 iframe 嵌入（防 clickjacking）
+
+> **注意**：如果未来有富文本字段（公告内容、通知模板等）需要渲染 HTML，必须在写入时做 input sanitization（如 jsoup clean），不能信任前端。
+
+### CSRF 防护
+
+v1 token 通过 `Authorization: Bearer` header 传递，不使用 Cookie 存储 token。浏览器不会在跨域请求中自动附带自定义 header，因此**天然免疫 CSRF 攻击**，无需额外 CSRF token 机制。
+
+> **⚠️ 架构约束**：如果未来切换到 Cookie-based token 传递（如 SSR 场景），**必须**同时引入 CSRF token 机制（如 Spring Security 的 `CsrfFilter`）。此约束记录在此，防止架构变更时遗漏。
+
 ## 6. CurrentUser 门面层设计（ADR-0005）
 
 这是本章最重要的一节。**meta-build 的业务层（platform / business / schema）零感知认证框架**，通过 `CurrentUser` 门面访问所有认证相关能力。
@@ -419,6 +489,9 @@ public interface CurrentUser {
 
     /** 当前用户名 */
     String username();
+
+    /** 当前用户所属部门 ID */
+    Long deptId();
 
     /** 当前租户 ID（v1 总是返回 0） */
     long tenantId();
@@ -935,6 +1008,13 @@ public class DataScopeVisitListener implements VisitListener {
     @Override
     public void visitStart(VisitContext context) {
         // [M4 时补: 完整 AST 访问 + Condition 注入逻辑]
+        //
+        // 设计原则：数据权限只在查询主表（FROM 子句的主表）上注入 WHERE 条件，
+        // JOIN 表和子查询中的关联表不单独注入。原因：
+        // 1. JOIN 表是主表的附属数据，主表已过滤则结果安全
+        // 2. 对 JOIN 表也注入会导致跨部门关联数据丢失（如 dept=1 的订单 owner 是 dept=99 的用户，JOIN 匹配不到）
+        // 3. 大幅降低 VisitListener 实现复杂度（不需要处理 JOIN/子查询/UNION 嵌套）
+        //
         // 伪代码骨架：
         // if (BypassDataScopeAspect.isBypassed()) return;
         // CurrentUser user = currentUserProvider.getIfAvailable();

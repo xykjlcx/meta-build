@@ -75,7 +75,7 @@
 | `mb.id.worker` / `mb.id.datacenter` | Snowflake ID 生成器 worker/datacenter 编号 | Spring Boot 无对应；自建 `MbIdProperties` |
 | `mb.jooq.slow-query-threshold-ms` | `SlowQueryListener` 阈值 | jOOQ 自建监听器，Spring Boot 无对应 |
 | `mb.cache.jitter-percent` | Redis 缓存 TTL 抖动（防雪崩）| Spring Cache 原生不支持抖动 |
-| `mb.file.storage.*` | 文件存储抽象（local / minio 切换）| `FileStorage` 是自建接口（ADR-0006）|
+| `mb.file.storage.*` | 文件存储抽象（local / oss 切换）| `FileStorage` 是自建接口（ADR-0006）|
 | `mb.rate-limit.*` | Bucket4j 限流参数 | 自建限流 |
 | `mb.job.enabled` / `mb.job.timezone` | 定时任务总开关 | 自建 |
 | `mb.i18n.supported-locales` | 支持的 locale 列表 | Spring `spring.messages.*` 只定义 bundle，没有"支持列表"概念 |
@@ -143,21 +143,20 @@
 | `SA_TOKEN_ACTIVE_TIMEOUT` | `sa-token.active-timeout` | long(秒) | `-1` | — | — | 不检查活跃度 |
 | `SA_TOKEN_IS_CONCURRENT` | `sa-token.is-concurrent` | boolean | `true` | — | — | 允许同账号多端登录 |
 | `SA_TOKEN_IS_SHARE` | `sa-token.is-share` | boolean | `false` | — | — | 多端共享 token |
-| `SA_TOKEN_TOKEN_STYLE` | `sa-token.token-style` | String | `jwt` | — | — | token 风格 |
 | `SA_TOKEN_TOKEN_PREFIX` | `sa-token.token-prefix` | String | `Bearer` | — | — | token 前缀 |
 | `SA_TOKEN_AUTO_RENEW` | `sa-token.auto-renew` | boolean | `false` | — | — | 不自动续签 |
 | `SA_TOKEN_IS_LOG` | `sa-token.is-log` | boolean | `false` | — | — | Sa-Token 内部日志（prod 必须 false，dev 可 true）|
 
-### 9.2.5 文件存储（local / MinIO 切换）
+### 9.2.5 文件存储（local / 阿里云 OSS 切换）
 
 | Env Var | yml 键 | 类型 | 默认值 | 必填 | 敏感 | 说明 |
 |---|---|---|---|---|---|---|
-| `MB_FILE_STORAGE_MODE` | `mb.file.storage.mode` | enum(`LOCAL`/`MINIO`) | `LOCAL` | — | — | 存储模式 |
+| `MB_FILE_STORAGE_MODE` | `mb.file.storage.mode` | enum(`LOCAL`/`OSS`) | `LOCAL` | — | — | 存储模式 |
 | `MB_FILE_STORAGE_LOCAL_BASE_PATH` | `mb.file.storage.local.base-path` | String | `/var/mb/files` | `LOCAL` 时必填 | — | 本地根目录 |
-| `MB_FILE_STORAGE_MINIO_ENDPOINT` | `mb.file.storage.minio.endpoint` | String | — | `MINIO` 时必填 | — | MinIO 地址 |
-| `MB_FILE_STORAGE_MINIO_ACCESS_KEY` | `mb.file.storage.minio.access-key` | String | — | `MINIO` 时必填 | 🔐 | MinIO accessKey |
-| `MB_FILE_STORAGE_MINIO_SECRET_KEY` | `mb.file.storage.minio.secret-key` | String | — | `MINIO` 时必填 | 🔐 | MinIO secretKey |
-| `MB_FILE_STORAGE_MINIO_BUCKET` | `mb.file.storage.minio.bucket` | String | `metabuild` | — | — | bucket 名 |
+| `MB_FILE_STORAGE_OSS_ENDPOINT` | `mb.file.storage.oss.endpoint` | String | — | `OSS` 时必填 | — | 阿里云 OSS endpoint |
+| `MB_FILE_STORAGE_OSS_ACCESS_KEY` | `mb.file.storage.oss.access-key` | String | — | `OSS` 时必填 | 🔐 | 阿里云 OSS accessKey |
+| `MB_FILE_STORAGE_OSS_SECRET_KEY` | `mb.file.storage.oss.secret-key` | String | — | `OSS` 时必填 | 🔐 | 阿里云 OSS secretKey |
+| `MB_FILE_STORAGE_OSS_BUCKET` | `mb.file.storage.oss.bucket` | String | `metabuild` | — | — | bucket 名 |
 | `SPRING_SERVLET_MULTIPART_MAX_FILE_SIZE` | `spring.servlet.multipart.max-file-size` | DataSize | `10MB` | — | — | 单文件上传上限 |
 | `SPRING_SERVLET_MULTIPART_MAX_REQUEST_SIZE` | `spring.servlet.multipart.max-request-size` | DataSize | `20MB` | — | — | 单请求总上限 |
 
@@ -182,6 +181,14 @@
 | `MB_RATE_LIMIT_PER_IP_QPS` | `mb.rate-limit.per-ip-qps` | int | `100` | — | — | 按 IP QPS |
 | `MB_RATE_LIMIT_PER_USER_QPS` | `mb.rate-limit.per-user-qps` | int | `200` | — | — | 按登录用户 QPS |
 | `MB_RATE_LIMIT_BURST_CAPACITY` | `mb.rate-limit.burst-capacity` | int | `50` | — | — | 突发容量 |
+
+**登录端点专用限流**：
+
+| 配置 | 默认值 | 说明 |
+|------|--------|------|
+| `mb.iam.login.rate-limit.per-ip-per-minute` | `30` | 每 IP 每分钟最大登录尝试次数 |
+
+超限后返回 `429 Too Many Requests` + `Retry-After` header。此限流独立于全局 per-IP QPS（全局 100 QPS 对登录场景过于宽松，登录接口需要更严格的限制以防暴力破解）。
 
 ### 9.2.8 定时任务（ShedLock）
 
@@ -315,7 +322,6 @@ sa-token:
   active-timeout: -1
   is-concurrent: true
   is-share: false
-  token-style: jwt
   auto-renew: false
 
 mb:
@@ -468,11 +474,11 @@ mb:
       mode: ${MB_FILE_STORAGE_MODE:LOCAL}
       local:
         base-path: ${MB_FILE_STORAGE_LOCAL_BASE_PATH:/var/mb/files}
-      minio:
-        endpoint: ${MB_FILE_STORAGE_MINIO_ENDPOINT:}
-        access-key: ${MB_FILE_STORAGE_MINIO_ACCESS_KEY:}
-        secret-key: ${MB_FILE_STORAGE_MINIO_SECRET_KEY:}
-        bucket: ${MB_FILE_STORAGE_MINIO_BUCKET:metabuild}
+      oss:
+        endpoint: ${MB_FILE_STORAGE_OSS_ENDPOINT:}
+        access-key: ${MB_FILE_STORAGE_OSS_ACCESS_KEY:}
+        secret-key: ${MB_FILE_STORAGE_OSS_SECRET_KEY:}
+        bucket: ${MB_FILE_STORAGE_OSS_BUCKET:metabuild}
   mail:
     enabled: ${MB_MAIL_ENABLED:false}
     from: ${MB_MAIL_FROM:}
@@ -579,15 +585,15 @@ public class MetaBuildApplication {
 public record MbFileStorageProperties(
     @NotNull Mode mode,
     @Valid Local local,
-    @Valid Minio minio
+    @Valid Oss oss
 ) {
-    public enum Mode { LOCAL, MINIO }
+    public enum Mode { LOCAL, OSS }
 
     public record Local(
         @NotBlank String basePath
     ) {}
 
-    public record Minio(
+    public record Oss(
         String endpoint,
         String accessKey,
         String secretKey,
@@ -595,7 +601,7 @@ public record MbFileStorageProperties(
     ) {
         @Override
         public String toString() {
-            return "Minio[endpoint=%s, accessKey=***, secretKey=***, bucket=%s]"
+            return "Oss[endpoint=%s, accessKey=***, secretKey=***, bucket=%s]"
                 .formatted(endpoint, bucket);
         }
     }
@@ -682,7 +688,7 @@ Binding to target [Bindable@xxx type = MbCorsProperties] failed:
 有些校验 jakarta.validation 不好表达：
 
 - "prod profile 下 `sa-token.jwt-secret-key` 必填"（Sa-Token 的 `SaTokenConfig` 不是我们的 record，加不了 `@Validated`）
-- "`MB_FILE_STORAGE_MODE=MINIO` 时 minio.access-key/secret-key 必填"（跨字段条件约束）
+- "`MB_FILE_STORAGE_MODE=OSS` 时 oss.access-key/secret-key 必填"（跨字段条件约束）
 - "`MB_MAIL_ENABLED=true` 时 mail.host/username/password/from 必填"
 
 用 `ApplicationContextInitializer` 在 context 初始化时检查：
@@ -717,10 +723,10 @@ public class ProfileConfigValidator implements ApplicationContextInitializer<Con
 
         // 2. 文件存储(跨字段条件)
         String storageMode = env.getProperty("mb.file.storage.mode", "LOCAL");
-        if ("MINIO".equals(storageMode)) {
-            requireNonBlank(env, "mb.file.storage.minio.endpoint", errors);
-            requireNonBlank(env, "mb.file.storage.minio.access-key", errors);
-            requireNonBlank(env, "mb.file.storage.minio.secret-key", errors);
+        if ("OSS".equals(storageMode)) {
+            requireNonBlank(env, "mb.file.storage.oss.endpoint", errors);
+            requireNonBlank(env, "mb.file.storage.oss.access-key", errors);
+            requireNonBlank(env, "mb.file.storage.oss.secret-key", errors);
         }
 
         // 3. 邮件(跨字段条件,mb.mail.enabled 决定整个 Properties 是否加载)
@@ -795,7 +801,7 @@ livenessProbe:
 
 ### 9.5.3 条件加载（可选 Properties）
 
-不是所有缺失配置都应该 fail-fast。**可选配置**（如邮件 / MinIO）应该在**启用时**才校验：
+不是所有缺失配置都应该 fail-fast。**可选配置**（如邮件 / 阿里云 OSS）应该在**启用时**才校验：
 
 ```java
 @ConfigurationProperties(prefix = "mb.mail")
@@ -809,10 +815,10 @@ public record MbMailProperties(
 
 `MbMailProperties` 只在 `mb.mail.enabled=true` 时加载，`@NotBlank` 校验才会触发。这样**邮件未启用时不需要配 SMTP**。
 
-同样的模式用于 MinIO：
+同样的模式用于阿里云 OSS：
 
 ```java
-// MbFileStorageProperties 的 Minio 内部 record 不能用 @ConditionalOnProperty
+// MbFileStorageProperties 的 Oss 内部 record 不能用 @ConditionalOnProperty
 // 改为在 ProfileConfigValidator 第二层处理(§9.5.2 代码中已覆盖)
 ```
 
@@ -827,8 +833,8 @@ public record MbMailProperties(
 | 数据库 | `SPRING_DATASOURCE_PASSWORD` | PostgreSQL 密码 |
 | Redis | `SPRING_DATA_REDIS_PASSWORD` | Redis 密码 |
 | Sa-Token | `MB_JWT_SECRET` | JWT 签名密钥 |
-| 文件存储(MinIO) | `MB_FILE_STORAGE_MINIO_ACCESS_KEY` | MinIO accessKey |
-| 文件存储(MinIO) | `MB_FILE_STORAGE_MINIO_SECRET_KEY` | MinIO secretKey |
+| 文件存储(阿里云 OSS) | `MB_FILE_STORAGE_OSS_ACCESS_KEY` | 阿里云 OSS accessKey |
+| 文件存储(阿里云 OSS) | `MB_FILE_STORAGE_OSS_SECRET_KEY` | 阿里云 OSS secretKey |
 | 邮件 | `SPRING_MAIL_PASSWORD` | SMTP 密码 |
 
 **合计 6 个敏感字段**。未来新增敏感字段时必须同步更新此清单。
@@ -870,34 +876,27 @@ git secrets --scan
 
 ```java
 // ❌ 错误:record 自动生成 toString 会打印密码
-public record MinioConfig(String endpoint, String accessKey, String secretKey, String bucket) {}
+public record OssConfig(String endpoint, String accessKey, String secretKey, String bucket) {}
 
 // log.info("storage: {}", config) 会输出:
-// "MinioConfig[endpoint=http://minio:9000, accessKey=ROOTUSER, secretKey=real_secret, bucket=metabuild]"
+// "OssConfig[endpoint=https://oss-cn-hangzhou.aliyuncs.com, accessKey=ROOTUSER, secretKey=real_secret, bucket=metabuild]"
 ```
 
 **正确做法**：手动覆盖 `toString()`：
 
 ```java
-public record MinioConfig(String endpoint, String accessKey, String secretKey, String bucket) {
+public record OssConfig(String endpoint, String accessKey, String secretKey, String bucket) {
     @Override
     public String toString() {
-        return "MinioConfig[endpoint=%s, accessKey=***, secretKey=***, bucket=%s]"
+        return "OssConfig[endpoint=%s, accessKey=***, secretKey=***, bucket=%s]"
             .formatted(endpoint, bucket);
     }
 }
 ```
 
-**ArchUnit 硬约束**（M1 落地）：
+**敏感配置 record 的 toString 脱敏**（文档约定，非 ArchUnit 硬规则）：
 
-```java
-@ArchTest
-static final ArchRule SENSITIVE_RECORDS_MUST_OVERRIDE_TOSTRING = classes()
-    .that().areRecords()
-    .and().containAnyFieldsThat(haveNameMatching("(?i).*(password|secret|accessKey|privateKey).*"))
-    .should().haveMethod("toString", String.class)
-    .because("含敏感字段的 record 必须手动覆盖 toString(§9.6.3)");
-```
+含敏感字段（password / secret / accessKey / privateKey）的 `@ConfigurationProperties` record 类，**应手动覆盖 `toString()` 方法**，将敏感字段替换为 `***`，防止日志泄漏。模板示范见 canonical reference。
 
 ### 9.6.4 禁止日志级别过低
 
@@ -963,7 +962,31 @@ v1 不做，等使用者反馈决定升级。
 
 ---
 
-## 9.8 AI 协作契约：新增配置项 checklist
+## 9.8 基础设施健康度策略
+
+meta-build 的核心基础设施依赖（PostgreSQL、Redis）是**必要基础设施**，不是可选组件。
+
+### 启动阶段（fail-fast）
+
+| 基础设施 | 启动检查 | 失败行为 |
+|----------|---------|---------|
+| PostgreSQL | Flyway migration + DataSource 初始化 | 启动失败，不接受流量 |
+| Redis | `RedisConnectionFactory` 初始化 + ping | 启动失败，不接受流量 |
+
+### 运行阶段（Actuator health + readiness）
+
+| 基础设施 | 健康检查 | 故障行为 |
+|----------|---------|---------|
+| PostgreSQL | `DataSourceHealthIndicator`（Spring Boot 自带） | health DOWN → readiness 失败 → k8s/负载均衡摘除 |
+| Redis | `RedisHealthIndicator`（Spring Boot 自带） | health DOWN → readiness 失败 → 摘除 |
+
+**告警**：health 状态变更时通过 `platform-notification` 模块发送告警（邮件/webhook），让运维及时知晓。
+
+**设计原则**：Redis 故障时不做 fail-open/fail-closed 的业务层判断——直接通过基础设施层的健康检查机制将应用从负载均衡摘除，整体停止服务。这比逐个 Service 捕获 Redis 异常更简洁、更可靠。
+
+---
+
+## 9.9 AI 协作契约：新增配置项 checklist
 
 **当 AI 或使用者给某个模块加一个新配置项时，必须完成以下步骤**：
 
@@ -984,13 +1007,13 @@ v1 不做，等使用者反馈决定升级。
 - [ ] **单元测试**：`MbXxxPropertiesTest` 验证绑定 + 约束生效（正例 + 负例）
 - [ ] **集成测试**（如涉及外部依赖）：在 `BaseIntegrationTest` 子类里通过 `@DynamicPropertySource` 注入测试值
 
-**ArchUnit 自动兜底**：`NO_AT_VALUE_ANNOTATION` / `PROPERTIES_MUST_BE_VALIDATED` / `SENSITIVE_RECORDS_MUST_OVERRIDE_TOSTRING` 三条规则自动覆盖部分 checklist 项。其他靠 code review。
+**ArchUnit 自动兜底**：`NO_AT_VALUE_ANNOTATION` / `PROPERTIES_MUST_BE_VALIDATED` 两条规则自动覆盖部分 checklist 项。敏感 record 的 `toString()` 脱敏为文档约定（§9.6.3），由 code review 守护。
 
 - [ ] **时间获取**：新增需要获取当前时间的代码时，注入 `Clock` Bean 而非直接调用 `Instant.now()`（`Clock` 是代码中注册的 Spring Bean，便于测试时替换，无需配置项）
 
 ---
 
-## 9.9 前后端配置的独立性
+## 9.10 前后端配置的独立性
 
 前端 `@mb/app-shell` 有自己的运行时配置（主题 / API base URL / feature flag），通过 **`VITE_*`** 环境变量注入（Vite 原生）。
 

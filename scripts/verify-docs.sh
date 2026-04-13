@@ -250,7 +250,7 @@ fi
 section "7. ADR 交叉引用更新"
 
 # 7 份 ADR 都应该有"拆分前/已拆分"的注解
-adrs=(0001 0002 0003 0004 0005 0006 0007 0008)
+adrs=(0001 0002 0003 0004 0005 0006 0007 0008 0009 0010 0011 0012)
 for adr in "${adrs[@]}"; do
     file=$(ls docs/adr/${adr}-*.md 2>/dev/null | head -1)
     if [ -n "$file" ]; then
@@ -346,6 +346,134 @@ if grep -q "@RequirePermission.*必须放在 Controller 层" docs/specs/backend/
     ok "05-security.md 明确 @RequirePermission 放 Controller 层"
 else
     fail "05-security.md 未明确 @RequirePermission 放 Controller 层"
+fi
+
+# === 10.1 M0 Review 翻转决策：正向关键词存在性（ADR-0009~0012）===
+section "10.1 M0 Review 翻转决策正向关键词（ADR-0009~0012）"
+
+# ADR-0009: mb_ 前缀
+if grep -q "mb_iam_user" docs/specs/backend/04-data-persistence.md; then
+    ok "04-data-persistence.md 使用 mb_iam_user 表名"
+else
+    fail "04-data-persistence.md 缺少 mb_iam_user 表名"
+fi
+
+if grep -q "mb_operation_log" docs/specs/backend/04-data-persistence.md; then
+    ok "04-data-persistence.md 使用 mb_operation_log 表名"
+else
+    fail "04-data-persistence.md 缺少 mb_operation_log 表名"
+fi
+
+if grep -q "mb_iam_user" docs/specs/backend/05-security.md; then
+    ok "05-security.md 使用 mb_iam_user 表名"
+else
+    fail "05-security.md 缺少 mb_iam_user 表名"
+fi
+
+# ADR-0010: @OperationLog + platform-oplog
+if grep -q "@OperationLog" docs/specs/backend/01-module-structure.md; then
+    ok "01-module-structure.md 包含 @OperationLog"
+else
+    fail "01-module-structure.md 缺少 @OperationLog"
+fi
+
+if grep -q "platform-oplog" docs/specs/backend/01-module-structure.md; then
+    ok "01-module-structure.md 包含 platform-oplog"
+else
+    fail "01-module-structure.md 缺少 platform-oplog"
+fi
+
+if grep -q "platform-oplog" docs/specs/backend/03-platform-modules.md; then
+    ok "03-platform-modules.md 包含 platform-oplog"
+else
+    fail "03-platform-modules.md 缺少 platform-oplog"
+fi
+
+if grep -q "@OperationLog" docs/specs/backend/05-security.md; then
+    ok "05-security.md 包含 @OperationLog"
+else
+    fail "05-security.md 缺少 @OperationLog"
+fi
+
+# ADR-0011: version 按需
+if grep -q "按需添加" docs/specs/backend/04-data-persistence.md; then
+    ok "04-data-persistence.md 包含 version 按需添加"
+else
+    fail "04-data-persistence.md 缺少 version 按需添加说明"
+fi
+
+# ADR-0012: Clock Bean 编码建议（已从 ArchUnit 硬规则降级为文档引导）
+if grep -q "Clock Bean" docs/specs/backend/08-archunit-rules.md; then
+    ok "08-archunit-rules.md 包含 Clock Bean 编码建议"
+else
+    fail "08-archunit-rules.md 缺少 Clock Bean 编码建议"
+fi
+
+if grep -q "Clock" docs/specs/backend/04-data-persistence.md; then
+    ok "04-data-persistence.md 包含 Clock Bean 时间策略"
+else
+    fail "04-data-persistence.md 缺少 Clock Bean 时间策略"
+fi
+
+if grep -q "Clock.systemUTC" docs/specs/backend/08-archunit-rules.md; then
+    ok "08-archunit-rules.md 包含 Clock.systemUTC 示例"
+else
+    fail "08-archunit-rules.md 缺少 Clock.systemUTC 示例"
+fi
+
+# SERVICE_JOOQ_WHITELIST（C8 Review 新增）
+if grep -q "SERVICE_JOOQ_WHITELIST" docs/specs/backend/08-archunit-rules.md; then
+    ok "08-archunit-rules.md 包含 SERVICE_JOOQ_WHITELIST"
+else
+    fail "08-archunit-rules.md 缺少 SERVICE_JOOQ_WHITELIST"
+fi
+
+# === 10.2 M0 Review 翻转决策：旧关键词零残留 ===
+section "10.2 M0 Review 翻转决策旧关键词零残留"
+
+# sys_ 表名零残留（合法语境：ADR 历史引用、"从 sys_ 改为 mb_" 说明性文字）
+SYS_LEGIT='ADR-0009\|从 sys_\|sys_ 前缀\|sys_ →\|sys_ 改\|原命名'
+bad_sys=$(grep -rn "sys_iam_\|sys_audit_\|sys_operation_\|sys_dict_\|sys_config_\|sys_file_\|sys_notification_\|sys_job_\|sys_monitor_" docs/specs/backend/ 2>/dev/null | \
+    grep -v "$SYS_LEGIT" || true)
+if [ -n "$bad_sys" ]; then
+    fail "sys_ 表名在后端 spec 中有非合法残留:"
+    echo "$bad_sys"
+else
+    ok "sys_ 表名在后端 spec 中零残留"
+fi
+
+# @Audit 注解零残留（合法语境：ADR 历史引用、"@Audit → @OperationLog" 说明性文字、审计日志 v1.5 说明）
+# 注意：只检查作为 Java 注解的 @Audit，不检查 "audit" 普通英文单词
+AUDIT_LEGIT='ADR-0010\|→ @OperationLog\|@Audit →\|原命名\|platform-audit →'
+bad_audit=$(grep -rn "@Audit[^F]" docs/specs/backend/ 2>/dev/null | \
+    grep -v "$AUDIT_LEGIT" || true)
+if [ -n "$bad_audit" ]; then
+    fail "@Audit 注解在后端 spec 中有非合法残留:"
+    echo "$bad_audit"
+else
+    ok "@Audit 注解在后端 spec 中零残留"
+fi
+
+# platform-audit 模块名零残留（合法语境：ADR 历史引用、重命名说明）
+PAUDIT_LEGIT='ADR-0010\|→ platform-oplog\|platform-audit →\|原命名'
+bad_paudit=$(grep -rn "platform-audit" docs/specs/backend/ 2>/dev/null | \
+    grep -v "$PAUDIT_LEGIT" || true)
+if [ -n "$bad_paudit" ]; then
+    fail "platform-audit 在后端 spec 中有非合法残留:"
+    echo "$bad_paudit"
+else
+    ok "platform-audit 在后端 spec 中零残留"
+fi
+
+# infrastructure 包名零残留（合法语境：说明性文字"不拆 infrastructure"、"去掉 infrastructure"）
+INFRA_LEGIT='不拆\|去掉\|infrastructure 残留\|没有 infrastructure\|infrastructure）\|验证.*infrastructure\|无 infrastructure\|Deprecated\|已被.*替代\|@Deprecated\|// .*"\.\.infrastructure\.\."'
+bad_infra=$(grep -rn "\.infrastructure\.\|/infrastructure/" docs/specs/backend/ 2>/dev/null | \
+    grep -v "$INFRA_LEGIT" || true)
+if [ -n "$bad_infra" ]; then
+    fail "infrastructure 包名在后端 spec 中有非合法残留:"
+    echo "$bad_infra"
+else
+    ok "infrastructure 包名在后端 spec 中零残留"
 fi
 
 # === 总结 ===
