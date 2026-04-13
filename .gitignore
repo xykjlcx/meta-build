@@ -59,5 +59,12 @@ coverage/
 playwright-report/
 test-results/
 
+# ===== Docker 本地数据 =====
+pg-data/
+redis-data/
+
+# ===== Playwright MCP =====
+.playwright-mcp/
+
 # ===== 其他 OS =====
 Thumbs.db
