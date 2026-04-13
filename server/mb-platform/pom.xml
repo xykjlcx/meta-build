@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metabuild</groupId>
+        <artifactId>meta-build</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>mb-platform</artifactId>
+    <packaging>pom</packaging>
+    <name>mb-platform</name>
+    <description>平台业务层（8 个子模块，M4 实现）</description>
+
+    <!-- M4 时添加子模块：platform-iam, platform-oplog, platform-file, ... -->
+</project>

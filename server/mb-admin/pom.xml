@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metabuild</groupId>
+        <artifactId>meta-build</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>mb-admin</artifactId>
+    <name>mb-admin</name>
+    <description>Spring Boot 启动入口 + 集成测试 + ArchUnit 测试（Batch B 实现）</description>
+
+    <!-- Batch B 时添加完整依赖 -->
+</project>
