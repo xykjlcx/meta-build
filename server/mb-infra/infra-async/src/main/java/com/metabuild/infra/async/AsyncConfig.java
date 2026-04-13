@@ -1,8 +1,8 @@
 package com.metabuild.infra.async;
 
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -15,7 +15,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 /**
  * 异步线程池配置：core=4, max=8, queue=200, CallerRunsPolicy。
  */
-@Configuration
+@AutoConfiguration
 @EnableAsync
 public class AsyncConfig implements AsyncConfigurer {
 

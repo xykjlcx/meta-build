@@ -16,6 +16,9 @@ public interface CurrentUser {
     boolean hasPermission(String code);
     boolean hasAllPermissions(String... codes);
     boolean hasAnyPermission(String... codes);
+    Set<String> roles();
+    boolean hasRole(String roleCode);
+    boolean isAdmin();
     DataScopeType dataScopeType();
     Set<Long> dataScopeDeptIds();
     boolean isSystem();

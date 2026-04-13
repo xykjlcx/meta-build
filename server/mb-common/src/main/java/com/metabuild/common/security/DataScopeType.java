@@ -6,10 +6,12 @@ package com.metabuild.common.security;
 public enum DataScopeType {
     /** 全部数据 */
     ALL,
-    /** 本部门及子部门 */
-    DEPT_AND_CHILDREN,
+    /** 自定义部门集合 */
+    CUSTOM_DEPT,
     /** 仅本部门 */
-    DEPT_ONLY,
+    OWN_DEPT,
+    /** 本部门及子部门 */
+    OWN_DEPT_AND_CHILD,
     /** 仅本人 */
-    SELF_ONLY
+    SELF
 }

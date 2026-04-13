@@ -33,8 +33,8 @@ mb:
   jooq:
     slow-query-threshold-ms: ${MB_JOOQ_SLOW_QUERY_THRESHOLD_MS:500}
   id:
-    worker: ${MB_ID_WORKER:0}
-    datacenter: ${MB_ID_DATACENTER:0}
+    worker: ${MB_ID_WORKER:1}
+    datacenter: ${MB_ID_DATACENTER:1}
 
 # Actuator
 management:

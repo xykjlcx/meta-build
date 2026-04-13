@@ -8,4 +8,12 @@ import java.util.Set;
 public record DataScope(
     DataScopeType type,
     Set<Long> deptIds
-) {}
+) {
+    public static DataScope all() {
+        return new DataScope(DataScopeType.ALL, Set.of());
+    }
+
+    public static DataScope self() {
+        return new DataScope(DataScopeType.SELF, Set.of());
+    }
+}
