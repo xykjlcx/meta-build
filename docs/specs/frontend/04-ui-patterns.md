@@ -1,6 +1,6 @@
 ## 04 - L3 业务组件库 ui-patterns
 
-> **关注点**：L3 `@mb/ui-patterns` 的隔离哲学、7 个核心业务组件 props API、TanStack Table / RHF / Zod 隔离边界、不硬编码业务语义的硬约束、Storybook 规范、L3 白名单依赖。
+> **关注点**：L3 `@mb/ui-patterns` 的隔离哲学、8 个核心业务组件 props API、TanStack Table / RHF / Zod 隔离边界、不硬编码业务语义的硬约束、Storybook 规范、L3 白名单依赖。
 >
 > L3 是 L2 原子组件之上的"业务复合层"——隔离 TanStack Table / React Hook Form 等业务基础设施，但**不持有任何具体业务语义**（订单 / 客户 / 商品等业务词汇永不进 L3）。
 
@@ -10,7 +10,7 @@
 
 ### 1.1 一句话定位
 
-`@mb/ui-patterns` 是 meta-build 前端的**业务基础设施隔离层**，提供 7 个高频复合组件（NxTable / NxForm / NxFilter / NxDrawer / NxBar / NxLoading / ApiSelect），所有组件源码作为使用者资产存在，对上层屏蔽 TanStack Table / React Hook Form / Zod / date-fns 等业务基础设施 API。
+`@mb/ui-patterns` 是 meta-build 前端的**业务基础设施隔离层**，提供 8 个高频复合组件（NxTable / NxForm / NxFilter / NxDrawer / NxBar / NxLoading / ApiSelect / NxTree），所有组件源码作为使用者资产存在，对上层屏蔽 TanStack Table / React Hook Form / Zod / date-fns 等业务基础设施 API。
 
 ### 1.2 核心约定速查
 
@@ -31,7 +31,7 @@
 
 | 子任务 | milestone |
 |---|---|
-| 7 个核心组件最小可用版本 | [M3] |
+| 8 个核心组件最小可用版本 | [M3] |
 | 全部组件 Storybook stories | [M3] |
 | Vitest 单元测试覆盖 | [M3] |
 | 组件 props 类型生成的 TS 文档 | [M3] |
@@ -90,7 +90,7 @@ client/packages/
 
 ---
 
-## 3. 7 个核心业务组件清单
+## 3. 8 个核心业务组件清单
 
 | # | 组件 | 文件 | 基础设施 | 职责 |
 |---|---|---|---|---|
@@ -101,6 +101,7 @@ client/packages/
 | 5 | `NxBar` | `nx-bar.tsx` | 无（纯 React + L2） | 批量操作栏：固定底栏 + 选中数量显示 + 操作按钮集 |
 | 6 | `NxLoading` | `nx-loading.tsx` | 无（纯 React + L2） | 加载状态容器：骨架屏 + 空状态 + 错误态 + 重试按钮（三态合一） |
 | 7 | `ApiSelect` | `api-select.tsx` | TanStack Query 动态 import + L2 Combobox | 异步下拉：基于 `@mb/api-sdk` + 搜索 + 分页 + 缓存 |
+| 8 | `NxTree` | `nx-tree.tsx` | 无（纯 React + L2） | 树形展示/选择：节点渲染 + 拖拽排序 + 展开折叠 + 自定义节点渲染（菜单管理 UI 使用，见 [07 §11](./07-menu-permission.md#11-菜单管理-ui-代码示例-m3m4)） |
 
 ### 3.1 不在 L3 范围
 
@@ -431,8 +432,10 @@ export interface NxLoadingProps {
   retryLabel?: React.ReactNode;
   /** 重试回调 */
   onRetry?: () => void;
-  /** 加载样式类型 */
-  variant?: 'skeleton' | 'spinner';
+  /** 加载样式类型：skeleton（通用骨架）、spinner（旋转指示器）、skeleton-table（表格骨架）、skeleton-detail（详情页骨架） */
+  variant?: 'skeleton' | 'spinner' | 'skeleton-table' | 'skeleton-detail';
+  /** skeleton-table / skeleton-detail 时的行数（默认 5） */
+  rows?: number;
   /** 默认子元素（loading / error / empty 都为 false 时显示） */
   children?: React.ReactNode;
 }
@@ -1028,7 +1031,9 @@ export interface NxLoadingProps {
   emptyText: React.ReactNode;
   retryLabel?: React.ReactNode;
   onRetry?: () => void;
-  variant?: 'skeleton' | 'spinner';
+  variant?: 'skeleton' | 'spinner' | 'skeleton-table' | 'skeleton-detail';
+  /** skeleton-table / skeleton-detail 时的行数（默认 5） */
+  rows?: number;
   children?: React.ReactNode;
   className?: string;
 }
@@ -1044,6 +1049,7 @@ export function NxLoading(props: NxLoadingProps): React.JSX.Element {
     retryLabel,
     onRetry,
     variant = 'skeleton',
+    rows = 5,
     children,
     className,
   } = props;
@@ -1061,6 +1067,25 @@ export function NxLoading(props: NxLoadingProps): React.JSX.Element {
             <Skeleton className="h-4 w-5/6" />
             <Skeleton className="h-4 w-4/6" />
           </>
+        ) : variant === 'skeleton-table' ? (
+          // 表格骨架：表头 + N 行（06-routing-and-data.md pendingComponent 使用）
+          <div className="space-y-2">
+            <Skeleton className="h-10 w-full" /> {/* 表头 */}
+            {Array.from({ length: rows }, (_, i) => (
+              <Skeleton key={i} className="h-8 w-full" />
+            ))}
+          </div>
+        ) : variant === 'skeleton-detail' ? (
+          // 详情页骨架：标题 + N 行字段
+          <div className="space-y-4">
+            <Skeleton className="h-8 w-1/3" /> {/* 标题 */}
+            {Array.from({ length: rows }, (_, i) => (
+              <div key={i} className="flex gap-4">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-48" />
+              </div>
+            ))}
+          </div>
         ) : (
           <span className="text-sm text-muted-foreground">{loadingText}</span>
         )}

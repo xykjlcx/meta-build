@@ -310,7 +310,7 @@ n3_keywords=(
     "DSLCONTEXT_ONLY_IN_REPOSITORY"
     "UserApi"
     "编排 Service"
-    "from(UserRecord)"
+    "from(MbIamUserRecord)"
 )
 
 for kw in "${n3_keywords[@]}"; do

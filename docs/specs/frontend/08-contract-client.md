@@ -345,7 +345,7 @@ export function createAuthorizationMiddleware(
 }
 ```
 
-**token 来源**：登录成功后写入 `localStorage`（key: `mb_token`），`getToken` 直接读取 `localStorage.getItem('mb_token')`。
+**token 来源**：登录成功后写入 `localStorage`（access token key: `mb_access_token`，refresh token key: `mb_refresh_token`），`getToken` 直接读取 `localStorage.getItem('mb_access_token')`。
 
 ### 4.3 Accept-Language（和 i18n 运行时语言同步）
 
@@ -404,7 +404,7 @@ import { configureApiSdk } from '@mb/api-sdk';
 
 configureApiSdk({
   basePath: '/api',
-  getToken: () => localStorage.getItem('mb_token'),
+  getToken: () => localStorage.getItem('mb_access_token'),
   getLanguage: () => i18nStore.getState().language,
   onUnauthenticated: () => router.navigate({ to: '/auth/login' }),
   onForbidden: (err) => toast.error(err.title ?? 'Forbidden'),
@@ -701,7 +701,8 @@ function LoginPage(): React.ReactElement {
 
   const onSubmit = form.handleSubmit(async (cmd) => {
     const result = await authApi.login(cmd);
-    localStorage.setItem('mb_token', result.token);
+    localStorage.setItem('mb_access_token', result.accessToken);
+    localStorage.setItem('mb_refresh_token', result.refreshToken);
     // 刷新路由（触发 _authed beforeLoad 重新 ensureQueryData）
     await router.invalidate();
   });
@@ -925,7 +926,7 @@ Content-Type: application/problem+json
 1. `createErrorMiddleware.post` 发现 `!response.ok`
 2. 解析 ProblemDetail → 构造 `ProblemDetailError`
 3. `dispatch(err)` 看到 `status === 401` → 调 `onUnauthenticated()`
-4. `@mb/app-shell` 的 `onUnauthenticated` 实现：清 `localStorage.removeItem('mb_token')` + `router.navigate({ to: '/auth/login' })`
+4. `@mb/app-shell` 的 `onUnauthenticated` 实现：清 `localStorage.removeItem('mb_access_token')` + `localStorage.removeItem('mb_refresh_token')` + `router.navigate({ to: '/auth/login' })`
 5. `throw err`，上层 `useMutation` 进入 error 状态（但不触发 `onError`，因为已经在跳转）
 
 <!-- verify: cd client && pnpm generate:api-sdk && pnpm -F web-admin tsc --noEmit && pnpm dlx dependency-cruiser --config .dependency-cruiser.cjs packages apps -->

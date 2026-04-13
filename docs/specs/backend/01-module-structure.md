@@ -16,7 +16,7 @@ server 端采用 **6 层 Maven multi-module** 结构，依赖严格单向（ADR-
 server/
 ├── mb-common/          # 零 Spring 依赖，纯工具层
 ├── mb-schema/          # 数据库契约层（Flyway SQL + jOOQ 生成代码）★ ADR-0004 新增
-├── mb-infra/           # 基础设施层 (10 个子模块 pom parent)
+├── mb-infra/           # 基础设施层 (11 个子模块 pom parent)
 ├── mb-platform/        # 平台业务层 (8 个平台模块 pom parent)
 ├── mb-business/        # 使用者扩展位 + M5 canonical reference ★ ADR-0004 新增
 ├── mb-admin/           # Spring Boot 启动入口 + Flyway runtime + 集成测试 + ArchUnit 测试
@@ -163,7 +163,7 @@ server/
 - `mb-common` **零 mb-\* 依赖**，且不依赖 Spring / jOOQ / JJWT / Sa-Token
 - `mb-schema` **零 mb-\* 依赖**，只依赖 `org.jooq` runtime + PostgreSQL 驱动
 - `mb-infra` 依赖 `mb-common`，**不依赖** `mb-schema` / `mb-platform` / `mb-business` / `mb-admin`
-- `mb-infra` 的 10 个子模块之间**默认互不依赖**（保持职责正交）。所有跨子模块的共享概念（`CurrentUser` / `DataScope` / `LoginResult` 等）**必须放 `mb-common.security` 或 `mb-common.dto`**。方案 E 验证了这一点——原本"需要 infra-jooq 依赖 infra-security"的直觉，靠把公共抽象下沉到 `mb-common` 就能消除
+- `mb-infra` 的 11 个子模块之间**默认互不依赖**（保持职责正交）。所有跨子模块的共享概念（`CurrentUser` / `DataScope` / `LoginResult` 等）**必须放 `mb-common.security` 或 `mb-common.dto`**。方案 E 验证了这一点——原本"需要 infra-jooq 依赖 infra-security"的直觉，靠把公共抽象下沉到 `mb-common` 就能消除
 - `mb-platform` 依赖 `mb-common + mb-infra + mb-schema`
 - `mb-platform` 子模块之间**禁止直接 Maven 依赖**，跨模块只能通过对方的 `api` 子包（由 Maven pom 白名单 + ArchUnit 规则双保险）
 - `mb-business` 依赖 `mb-common + mb-infra + mb-schema + mb-platform::api`（只允许 api 包）
@@ -466,8 +466,8 @@ public class ModuleBoundaryRule {
 | # | 类名 | 形态 | 来源 | 包位置 | 角色 |
 |---|---|---|---|---|---|
 | 1 | `mb_iam_user` | Flyway SQL | 手写 | `mb-schema/src/main/resources/db/migration/` | 数据库表 |
-| 2 | `UserRecord` | jOOQ 生成 | codegen | `com.metabuild.schema.tables.records` | **Service 层的数据载体**（不手写）|
-| 3 | `UserView` | record | 手写 | `com.metabuild.platform.iam.api.dto` | API 响应 DTO（脱敏，带 `from(UserRecord)` 静态工厂）|
+| 2 | `MbIamUserRecord` | jOOQ 生成 | codegen | `com.metabuild.schema.tables.records` | **Service 层的数据载体**（不手写）|
+| 3 | `UserView` | record | 手写 | `com.metabuild.platform.iam.api.dto` | API 响应 DTO（脱敏，带 `from(MbIamUserRecord)` 静态工厂）|
 | 4 | `UserCreateCommand` | record | 手写 | 同上 | API 创建请求 |
 | 5 | `UserUpdateEmailCommand` | record | 手写 | 同上 | API 更新请求（业务动作命名）|
 | 6 | `UserQuery` | record | 手写 | 同上 | API 查询条件 |
@@ -478,7 +478,7 @@ public class ModuleBoundaryRule {
 | 11 | `UserController` | class | 手写 | `com.metabuild.platform.iam.web` | HTTP 入口（`@RequirePermission` 位置）|
 
 **关键说明**：
-- **不引入独立 `User` 领域 record**。Service 看到的是 `UserRecord`（jOOQ 生成）
+- **不引入独立 `User` 领域 record**。Service 看到的是 `MbIamUserRecord`（jOOQ 生成）
 - 理由：符合 jOOQ 官方"反对过度分层"哲学，避免重复映射层
 - 业务不变量通过**数据库约束 + Service 层校验 + ArchUnit** 保证，不是通过独立领域类型
 
@@ -495,7 +495,7 @@ public class ModuleBoundaryRule {
 | ✅ 调 Service，返回 View | 通常一行 `return userService.create(cmd);` |
 | ❌ 业务逻辑 | 在 Service 层 |
 | ❌ 事务 | 在 Service 层 |
-| ❌ 直接 import `DSLContext` / `UserRecord` | 通过 Service 间接用 |
+| ❌ 直接 import `DSLContext` / `MbIamUserRecord` | 通过 Service 间接用 |
 
 #### Service 层
 
@@ -506,7 +506,7 @@ public class ModuleBoundaryRule {
 | ✅ 动态权限检查 | `currentUser.hasPermission(String)` 程序性调用（非注解）|
 | ✅ 编排多个 Repository / 其他 Service / 跨模块 API | 业务流程的主要发生地 |
 | ✅ 事件发布 | `events.publishEvent(new UserCreatedEvent(...))` |
-| ✅ import `UserRecord`（数据类型）| 通过 `mb-schema.*` 包，不是 `org.jooq.*` |
+| ✅ import `MbIamUserRecord`（数据类型）| 通过 `mb-schema.*` 包，不是 `org.jooq.*` |
 | ❌ import `DSLContext` / `Field` / `Condition` | 由 ArchUnit 强制 |
 | ❌ 写 jOOQ DSL 查询 | 查询必须在 Repository 里 |
 | ❌ 直接调 `record.store()` / `record.insert()` | 通过 `repository.save(record)` 包装 |
@@ -573,7 +573,7 @@ import com.metabuild.common.pagination.PageResult;
 import com.metabuild.common.pagination.SortParser;
 import com.metabuild.platform.iam.api.dto.UserQuery;
 import com.metabuild.platform.iam.api.dto.UserView;
-import com.metabuild.schema.tables.records.UserRecord;
+import com.metabuild.schema.tables.records.MbIamUserRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;              // ← Repository 是唯一允许 import 这些的地方
@@ -594,11 +594,11 @@ public class UserRepository {
 
     // ---------- 查询 ----------
 
-    public Optional<UserRecord> findById(Long id) {
+    public Optional<MbIamUserRecord> findById(Long id) {
         return Optional.ofNullable(dsl.fetchOne(MB_IAM_USER, MB_IAM_USER.ID.eq(id)));
     }
 
-    public Optional<UserRecord> findByUsername(String username) {
+    public Optional<MbIamUserRecord> findByUsername(String username) {
         return Optional.ofNullable(dsl.fetchOne(MB_IAM_USER, MB_IAM_USER.USERNAME.eq(username)));
     }
 
@@ -617,7 +617,7 @@ public class UserRepository {
         Condition where = buildCondition(query);
 
         long total = dsl.selectCount().from(MB_IAM_USER).where(where).fetchOne(0, long.class);
-        List<UserRecord> records = dsl.selectFrom(MB_IAM_USER)
+        List<MbIamUserRecord> records = dsl.selectFrom(MB_IAM_USER)
             .where(where)
             .orderBy(orderBy)
             .limit(pagination.size())
@@ -644,19 +644,19 @@ public class UserRepository {
 
     // ---------- 构造 / 保存 / 删除 ----------
 
-    public UserRecord newRecord() {
+    public MbIamUserRecord newRecord() {
         return dsl.newRecord(MB_IAM_USER);
     }
 
     /**
      * 保存（插入或更新）。内部走 M4.2 原生路径，自动触发 Settings + RecordListener.
      */
-    public UserRecord save(UserRecord record) {
+    public MbIamUserRecord save(MbIamUserRecord record) {
         record.store();  // 新记录 INSERT，已有 UPDATE + 乐观锁
         return record;
     }
 
-    public int delete(UserRecord record) {
+    public int delete(MbIamUserRecord record) {
         return record.delete();
     }
 }
@@ -674,7 +674,7 @@ import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.UserApi;
 import com.metabuild.platform.iam.api.dto.*;
 import com.metabuild.platform.iam.api.event.UserCreatedEvent;
-import com.metabuild.schema.tables.records.UserRecord;  // ← 数据类型，不是 org.jooq.*
+import com.metabuild.schema.tables.records.MbIamUserRecord;  // ← 数据类型，不是 org.jooq.*
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -699,14 +699,14 @@ public class UserService implements UserApi {
         }
 
         // 通过 Repository 构造 Record（不直接用 DSLContext）
-        UserRecord record = userRepository.newRecord();
+        MbIamUserRecord record = userRepository.newRecord();
         record.setUsername(cmd.username());
         record.setEmail(cmd.email());
         record.setPasswordHash(passwordEncoder.encode(cmd.password()));
         record.setStatus(1);
 
         // 通过 Repository 保存
-        UserRecord saved = userRepository.save(record);
+        MbIamUserRecord saved = userRepository.save(record);
 
         // 发事件
         events.publishEvent(new UserCreatedEvent(saved.getId(), currentUser.userId()));
@@ -716,7 +716,7 @@ public class UserService implements UserApi {
 
     @Transactional
     public UserView updateEmail(Long userId, UserUpdateEmailCommand cmd) {
-        UserRecord record = userRepository.findById(userId)
+        MbIamUserRecord record = userRepository.findById(userId)
             .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
 
         // 动态权限（不是注解）：只能改自己的邮箱，或有 update 权限
@@ -725,7 +725,7 @@ public class UserService implements UserApi {
         }
 
         record.setEmail(cmd.newEmail());
-        UserRecord saved = userRepository.save(record);
+        MbIamUserRecord saved = userRepository.save(record);
         return UserView.from(saved);
     }
 
@@ -809,7 +809,7 @@ public class UserController {
 
 | 后缀 | 角色 | 例子 |
 |---|---|---|
-| `*Record` | jOOQ 生成的数据行（不手写）| `UserRecord` / `OrderMainRecord` |
+| `*Record` | jOOQ 生成的数据行（不手写）| `MbIamUserRecord` / `BizOrderMainRecord` |
 | `*View` | API 响应 DTO | `UserView` / `OrderDetailView` |
 | `*Command` | 写操作请求（Create/Update/Delete/业务动作）| `UserCreateCommand` / `UserUpdateEmailCommand` / `OrderSubmitCommand` / `UserLockCommand` |
 | `*Query` | 读操作查询参数 | `UserQuery` / `OrderQuery` |

@@ -15,9 +15,9 @@
 | **5 层 package** | meta-build 前端的 pnpm workspace 5 层结构：L1 tokens → L2 primitives → L3 patterns → L4 app-shell → L5 web-admin | [01-layer-structure.md §2](./01-layer-structure.md) |
 | **脚手架模式** | meta-build 的分发定位：git 模板仓库（不是 npm 依赖库），使用者 clone 后 L1-L5 全部源码都是自己的资产，可随意修改 | [01-layer-structure.md §3](./01-layer-structure.md) |
 | **千人千面** | 同一份业务代码通过切换 L1 主题 + L4 布局壳实现视觉和布局的完全定制，覆盖 80% 定制场景 | [09-customization-workflow.md §6](./09-customization-workflow.md) |
-| **双树权限架构** | 路由树（代码扫描产物、只读、sys_route_tree）+ 菜单树（运维自由组织、引用路由树、sys_menu）双树解耦 | [07-menu-permission.md §3](./07-menu-permission.md) |
-| **路由树** | `sys_route_tree` 表；前端 Vite 插件扫描 `routes/**/*.tsx` 和 `meta.buttons` 生成的 `route-tree.json`，后端启动时 upsert；代码是单一事实源 | [07-menu-permission.md §4](./07-menu-permission.md) |
-| **菜单树** | `sys_menu` 表；运维在后台自由组织的菜单结构，每个节点通过 `route_ref_id` 引用路由树节点（directory 节点为 NULL） | [07-menu-permission.md §5](./07-menu-permission.md) |
+| **双树权限架构** | 路由树（代码扫描产物、只读、mb_iam_route_tree）+ 菜单树（运维自由组织、引用路由树、mb_iam_menu）双树解耦 | [07-menu-permission.md §3](./07-menu-permission.md) |
+| **路由树** | `mb_iam_route_tree` 表；前端 Vite 插件扫描 `routes/**/*.tsx` 和 `meta.buttons` 生成的 `route-tree.json`，后端启动时 upsert；代码是单一事实源 | [07-menu-permission.md §4](./07-menu-permission.md) |
+| **菜单树** | `mb_iam_menu` 表；运维在后台自由组织的菜单结构，每个节点通过 `route_ref_id` 引用路由树节点（directory 节点为 NULL） | [07-menu-permission.md §5](./07-menu-permission.md) |
 | **stale 标记** | 路由树节点的 `is_stale` 字段，表示"代码侧已不再出现"的 fallback 状态（**非**运维软删除；M4.2 后端已去通用软删除） | [07-menu-permission.md §4.4](./07-menu-permission.md) |
 | **反向 import** | 低层 package 依赖高层 package 的非法模式（例：L2 import L3）；单向跨级 import（L5 直接 import L2）是合法的 | [10-quality-gates.md §2.2](./10-quality-gates.md) |
 | **单向跨级 import** | 高层 package 跳过中间层直接 import 低层（例：L5 直接 import L2 Button）；在 5 层架构里**合法**，不是反向 import | [01-layer-structure.md §4](./01-layer-structure.md) |
@@ -25,7 +25,7 @@
 | **认证门面** | `useCurrentUser` / `useAuth` hook 在 L4 app-shell 统一管理当前用户状态；features/** 禁止直调 `@mb/api-sdk/auth/*` | [05-app-shell.md §5](./05-app-shell.md) |
 | **路由守卫** | `requireAuth({ permission })` 工厂函数，用于 TanStack Router 的 `beforeLoad`；通过 `ensureQueryData` 异步获取当前用户；权限不足 fallback 到登录页 | [06-routing-and-data.md §3](./06-routing-and-data.md) |
 | **ensureQueryData** | TanStack Query 的异步缓存保证方法：先查 QueryClient 缓存，命中且未 stale 则直接返回，否则发起请求后返回。在 `beforeLoad` 中用于保证路由守卫能拿到用户数据 | [06-routing-and-data.md §2.4](./06-routing-and-data.md) |
-| **代码权威原则** | 权限点定义在代码里（`requireAuth` / `meta.buttons`），数据库 `sys_route_tree.code` 必须在代码清单内；CI 校验 | [07-menu-permission.md §6](./07-menu-permission.md) |
+| **代码权威原则** | 权限点定义在代码里（`requireAuth` / `meta.buttons`），数据库 `mb_iam_route_tree.code` 必须在代码清单内；CI 校验 | [07-menu-permission.md §6](./07-menu-permission.md) |
 | **AppPermission** | TypeScript 联合类型，列出所有合法的权限码；`type AppPermission = 'order.read' \| 'order.create' \| ...`；编译期保证 `requireAuth` 参数合法 | [07-menu-permission.md §6.2](./07-menu-permission.md) |
 
 ### L1 主题 / Token 概念
@@ -87,7 +87,7 @@
 graph LR
     tokens[&commat;mb/ui-tokens<br/>L1 设计令牌]
     primitives[&commat;mb/ui-primitives<br/>L2 30 原子组件]
-    patterns[&commat;mb/ui-patterns<br/>L3 7 业务组件]
+    patterns[&commat;mb/ui-patterns<br/>L3 8 业务组件]
     shell[&commat;mb/app-shell<br/>L4 布局 Provider 壳]
     sdk[&commat;mb/api-sdk<br/>契约生成物]
     admin[apps/web-admin<br/>L5 业务代码]
@@ -196,8 +196,8 @@ HTTP 请求 → 后端
 | `requireAuth({ permission })` 路由守卫 | `@RequirePermission(...)` 注解 | 共享同一份 `AppPermission` code 清单；CI 校验 | [06-routing-and-data.md §3](./06-routing-and-data.md) + [07-menu-permission.md §6.2](./07-menu-permission.md) | [backend/05-security.md §2](../backend/05-security.md) |
 | `useCurrentUser()` hook | `CurrentUser` 门面接口 | 当前用户信息的读门面；前后端对称 | [05-app-shell.md §5.1](./05-app-shell.md) | [backend/05-security.md §6](../backend/05-security.md) |
 | `useAuth().login/logout` hook | `AuthFacade` 门面接口 | 登录/登出/强制注销的写门面 | [05-app-shell.md §5.2](./05-app-shell.md) | [backend/05-security.md §6.6](../backend/05-security.md) |
-| `useMenu()` hook + 双树架构 | `sys_menu` + `sys_route_tree` 表 + `MenuApi` | 菜单树查询 + 路由树启动同步 | [07-menu-permission.md](./07-menu-permission.md) 全文 | [backend/03-platform-modules.md](../backend/03-platform-modules.md) platform-iam |
-| Vite 插件生成 `route-tree.json` | 后端启动时 `RouteTreeSyncRunner` 读取并 upsert 到 `sys_route_tree` | 路由树代码扫描同步；代码是单一事实源 | [07-menu-permission.md §4.2](./07-menu-permission.md) | [backend/03-platform-modules.md](../backend/03-platform-modules.md) platform-iam |
+| `useMenu()` hook + 双树架构 | `mb_iam_menu` + `mb_iam_route_tree` 表 + `MenuApi` | 菜单树查询 + 路由树启动同步 | [07-menu-permission.md](./07-menu-permission.md) 全文 | [backend/03-platform-modules.md](../backend/03-platform-modules.md) platform-iam |
+| Vite 插件生成 `route-tree.json` | 后端启动时 `RouteTreeSyncRunner` 读取并 upsert 到 `mb_iam_route_tree` | 路由树代码扫描同步；代码是单一事实源 | [07-menu-permission.md §4.2](./07-menu-permission.md) | [backend/03-platform-modules.md](../backend/03-platform-modules.md) platform-iam |
 | `@mb/api-sdk` 自动生成 | `springdoc-openapi` + OpenAPI 3.1 | 契约驱动的唯一路径 | [08-contract-client.md §2](./08-contract-client.md) | [backend/06-api-and-contract.md](../backend/06-api-and-contract.md) |
 | `Accept-Language` 拦截器 | `MessageSource` + `LocaleResolver` | 前后端 i18n 协同；数据库业务数据按 locale 返回 | [05-app-shell.md §7.6](./05-app-shell.md) + [08-contract-client.md §4.3](./08-contract-client.md) | [backend/06-api-and-contract.md §4](../backend/06-api-and-contract.md) |
 | `ProblemDetailError` 反序列化 + 全局错误中间件 | `GlobalExceptionHandler` + RFC 9457 | 错误响应的统一格式；前端按 type/status 分发 | [08-contract-client.md §5](./08-contract-client.md) | [backend/06-api-and-contract.md §3](../backend/06-api-and-contract.md) |

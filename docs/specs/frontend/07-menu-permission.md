@@ -1,6 +1,6 @@
 # 07 - 菜单与权限双树架构
 
-> **关注点**：菜单/路由/权限的双树架构 + 路由树 `sys_route_tree` + 菜单树 `sys_menu` + 权限一致性 + 孤儿处理 + 菜单管理 UI + 前后端 code 共享清单。
+> **关注点**：菜单/路由/权限的双树架构 + 路由树 `mb_iam_route_tree` + 菜单树 `mb_iam_menu` + 权限一致性 + 孤儿处理 + 菜单管理 UI + 前后端 code 共享清单。
 >
 > **本文件吸收**：brainstorming 决策"菜单 / 路由 / 权限双树架构"（决策 5）+ 千人千面 MUST #3（路由必须声明权限）+ MUST #6（数据库存储的文案永不走 i18n）+ project memory `project_frontend_permission_dual_tree.md`。
 >
@@ -16,10 +16,10 @@ meta-build 的菜单/权限体系采用 **路由树 + 菜单树双树架构**—
 
 | 树 | 表名 | 来源 | 写入者 | 读取者 | 结构 |
 |---|------|------|--------|--------|------|
-| **路由树** | `sys_route_tree` | 前端代码扫描产物 | 后端启动时 upsert（自动）| 运维只读、菜单管理时被引用 | 两级（`menu` → `button`） |
-| **菜单树** | `sys_menu` | 运维手动配置 | 运维通过菜单管理 UI | 前端 `useMenu()` 渲染侧边栏 | 任意嵌套（`directory` / `menu` / `button` 节点） |
+| **路由树** | `mb_iam_route_tree` | 前端代码扫描产物 | 后端启动时 upsert（自动）| 运维只读、菜单管理时被引用 | 两级（`menu` → `button`） |
+| **菜单树** | `mb_iam_menu` | 运维手动配置 | 运维通过菜单管理 UI | 前端 `useMenu()` 渲染侧边栏 | 任意嵌套（`directory` / `menu` / `button` 节点） |
 
-**关联**：`sys_role_menu` 只关联到菜单节点；权限检查时通过 `sys_menu.route_ref_id` JOIN 到 `sys_route_tree.code` 拿到最终权限点清单。
+**关联**：`mb_iam_role_menu` 只关联到菜单节点；权限检查时通过 `mb_iam_menu.route_ref_id` JOIN 到 `mb_iam_route_tree.code` 拿到最终权限点清单。
 
 ### 1.2 决策依据（一句话）
 
@@ -30,7 +30,7 @@ meta-build 的菜单/权限体系采用 **路由树 + 菜单树双树架构**—
 | 阶段 | 内容 |
 |------|------|
 | `[M3]` | 前端 Vite 扫描插件 + `route-tree.json` 生成 + `useMenu()` hook + 菜单管理 UI 的 L5 features |
-| `[M4]` | 后端 `sys_route_tree` / `sys_menu` / `sys_role_menu` 表 + 启动时 upsert 同步 + `MenuApi` Controller |
+| `[M4]` | 后端 `mb_iam_route_tree` / `mb_iam_menu` / `mb_iam_role_menu` 表 + 启动时 upsert 同步 + `MenuApi` Controller |
 | `[M3+M4]` | 前后端联调（菜单管理 UI + 孤儿灰化 + 权限点 CI 校验） |
 
 ---
@@ -89,7 +89,7 @@ CREATE TABLE sys_menu (
 | 单表 / 伪拆分 | 双树 |
 |--------------|------|
 | 代码改 → 同步表 → drift 风险 | 代码改 → 启动时 upsert → 自动同步（**通过引用关系天然一致**） |
-| 运维改菜单层次会污染权限点 | 运维只能改 `sys_menu`，`sys_route_tree` 只读 |
+| 运维改菜单层次会污染权限点 | 运维只能改 `mb_iam_menu`，`mb_iam_route_tree` 只读 |
 | 权限点和菜单层次互相阻塞 | 两张表各自演化 |
 | 同步靠 CI 脚本（工程补丁） | 同步靠引用关系（架构解决） |
 
@@ -102,17 +102,17 @@ graph LR
   subgraph 代码扫描产物
     A[apps/web-admin/src/routes/<br/>**.tsx]
     A -- "Vite 插件扫描<br/>requireAuth + meta.buttons" --> B[build/route-tree.json]
-    B -- "后端启动时 upsert" --> C[(sys_route_tree<br/>menu / button)]
+    B -- "后端启动时 upsert" --> C[(mb_iam_route_tree<br/>menu / button)]
   end
 
   subgraph 运维配置
-    D[(sys_menu<br/>directory / menu / button)]
+    D[(mb_iam_menu<br/>directory / menu / button)]
     D -. "route_ref_id<br/>引用" .-> C
   end
 
   subgraph 角色授权
-    E[(sys_role)]
-    F[(sys_role_menu)]
+    E[(mb_iam_role)]
+    F[(mb_iam_role_menu)]
     E -- "角色" --> F
     F -- "关联菜单节点" --> D
   end
@@ -132,14 +132,14 @@ graph LR
 
 **核心要点**：
 
-- **路由树是代码反映**：`sys_route_tree` 的内容由前端代码 `routes/**/*.tsx` 决定，运维只读
-- **菜单树是运维资产**：`sys_menu` 的内容由运维通过菜单管理 UI 决定，可任意嵌套
-- **关联是引用而不是冗余**：`sys_menu.route_ref_id` 指向 `sys_route_tree.id`，`sys_role_menu` 只关联菜单节点；最终权限点通过 JOIN 推导，**任何一处改动不需要同步另一处**
+- **路由树是代码反映**：`mb_iam_route_tree` 的内容由前端代码 `routes/**/*.tsx` 决定，运维只读
+- **菜单树是运维资产**：`mb_iam_menu` 的内容由运维通过菜单管理 UI 决定，可任意嵌套
+- **关联是引用而不是冗余**：`mb_iam_menu.route_ref_id` 指向 `mb_iam_route_tree.id`，`mb_iam_role_menu` 只关联菜单节点；最终权限点通过 JOIN 推导，**任何一处改动不需要同步另一处**
 - **孤儿降级而非崩溃**：路由树节点被代码删除时标记为 stale（`is_stale=true`），菜单管理 UI 灰化对应节点 + 提示重新绑定，运行时 `useMenu()` 过滤掉灰化节点
 
 ---
 
-## 4. 路由树 sys_route_tree [M3+M4]
+## 4. 路由树 mb_iam_route_tree [M3+M4]
 
 ### 4.1 表结构
 
@@ -147,7 +147,7 @@ graph LR
 
 ```sql
 -- mb-schema/src/main/resources/db/migration/V20260801_001__iam_route_tree.sql
-CREATE TABLE sys_iam_route_tree (
+CREATE TABLE mb_iam_route_tree (
     id              BIGINT       PRIMARY KEY,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
     kind            VARCHAR(16)  NOT NULL,         -- 'menu' | 'button'
@@ -165,11 +165,11 @@ CREATE TABLE sys_iam_route_tree (
     updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX uk_sys_iam_route_tree_tenant_code
-    ON sys_iam_route_tree (tenant_id, code);
+CREATE UNIQUE INDEX uk_mb_iam_route_tree_tenant_code
+    ON mb_iam_route_tree (tenant_id, code);
 
-CREATE INDEX idx_sys_iam_route_tree_parent
-    ON sys_iam_route_tree (tenant_id, parent_code)
+CREATE INDEX idx_mb_iam_route_tree_parent
+    ON mb_iam_route_tree (tenant_id, parent_code)
     WHERE is_stale = FALSE;
 ```
 
@@ -179,7 +179,7 @@ CREATE INDEX idx_sys_iam_route_tree_parent
 |------|------|------|
 | `kind` | `'menu'`（页面）或 `'button'`（按钮权限） | 扫描时根据是 `requireAuth` 还是 `meta.buttons[]` 判断 |
 | `code` | 权限点字符串，对应前端 `requireAuth({ permission })` + 后端 `@RequirePermission` | 代码里显式声明 |
-| `default_name` | 代码里声明的默认名（运维通常会在 `sys_menu` 里覆盖） | 路由文件的 `meta.title` 或 `meta.buttons[].label` |
+| `default_name` | 代码里声明的默认名（运维通常会在 `mb_iam_menu` 里覆盖） | 路由文件的 `meta.title` 或 `meta.buttons[].label` |
 | `path` | 路由路径（仅 menu 有） | 路由文件的 file-based path（TanStack Router 推导） |
 | `parent_code` | button 归属的 menu code（menu 节点为 NULL） | `meta.buttons[]` 所在路由的 `requireAuth.permission` |
 | `description` | 节点描述，给运维 picker 用 | 路由文件 `meta.description` 或紧邻的 JSDoc 注释 |
@@ -362,7 +362,7 @@ function derivePathFromFile(file: string, routesDir: string): string {
 
 ### 4.3 后端启动时 upsert 同步逻辑
 
-后端 `mb-platform/platform-iam` 启动时通过 `RouteTreeSyncRunner` 读取 `route-tree.json` 并 upsert 到 `sys_iam_route_tree`：
+后端 `mb-platform/platform-iam` 启动时通过 `RouteTreeSyncRunner` 读取 `route-tree.json` 并 upsert 到 `mb_iam_route_tree`：
 
 ```java
 // mb-platform/platform-iam/.../infrastructure/RouteTreeSyncRunner.java
@@ -372,22 +372,22 @@ public class RouteTreeSyncRunner implements ApplicationRunner {
 
     private final RouteTreeRepository routeTreeRepository;
     private final ObjectMapper objectMapper;
-
-    @Value("${mb.route-tree.path:classpath:route-tree.json}")
-    private Resource routeTreeResource;
+    private final MbRouteTreeProperties properties;   // @ConfigurationProperties("mb.route-tree")
+    private final Clock clock;                          // 全局 Clock Bean（ADR-0012）
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) throws Exception {
+        Resource routeTreeResource = properties.getPath();  // 默认 classpath:route-tree.json
         if (!routeTreeResource.exists()) {
-            log.warn("route-tree.json not found, skipping sys_iam_route_tree sync");
+            log.warn("route-tree.json not found, skipping mb_iam_route_tree sync");
             return;
         }
         RouteTreeFile file;
         try (InputStream in = routeTreeResource.getInputStream()) {
             file = objectMapper.readValue(in, RouteTreeFile.class);
         }
-        Instant now = Instant.now();
+        Instant now = Instant.now(clock);
         Set<String> seenCodes = new HashSet<>();
         for (RouteTreeNodeDto node : file.nodes()) {
             routeTreeRepository.upsertByCode(node, now);
@@ -418,17 +418,17 @@ public class RouteTreeSyncRunner implements ApplicationRunner {
 
 ---
 
-## 5. 菜单树 sys_menu [M3+M4]
+## 5. 菜单树 mb_iam_menu [M3+M4]
 
 ### 5.1 表结构
 
 ```sql
 -- mb-schema/src/main/resources/db/migration/V20260801_002__iam_menu.sql
-CREATE TABLE sys_iam_menu (
+CREATE TABLE mb_iam_menu (
     id              BIGINT       PRIMARY KEY,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
     parent_id       BIGINT,                       -- 菜单树自己的父子关系，和路由树无关
-    route_ref_id    BIGINT,                       -- 引用 sys_iam_route_tree.id；directory 节点为 NULL
+    route_ref_id    BIGINT,                       -- 引用 mb_iam_route_tree.id；directory 节点为 NULL
     kind            VARCHAR(16)  NOT NULL,        -- 'directory' | 'menu' | 'button'（冗余便于查询）
     name            VARCHAR(128) NOT NULL,        -- 普通 VARCHAR，数据库数据不走 i18n（MUST #6）
     icon            VARCHAR(256),                 -- lucide 图标 key 或 http(s) URL
@@ -441,11 +441,11 @@ CREATE TABLE sys_iam_menu (
     updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_sys_iam_menu_tenant_parent
-    ON sys_iam_menu (tenant_id, parent_id);
+CREATE INDEX idx_mb_iam_menu_tenant_parent
+    ON mb_iam_menu (tenant_id, parent_id);
 
-CREATE INDEX idx_sys_iam_menu_tenant_route_ref
-    ON sys_iam_menu (tenant_id, route_ref_id);
+CREATE INDEX idx_mb_iam_menu_tenant_route_ref
+    ON mb_iam_menu (tenant_id, route_ref_id);
 ```
 
 ### 5.2 任意嵌套 + route_ref_id 引用
@@ -455,37 +455,37 @@ CREATE INDEX idx_sys_iam_menu_tenant_route_ref
 | 节点类型 | `route_ref_id` | `parent_id` | 含义 |
 |---------|---------------|-------------|------|
 | `directory` | NULL | 任意（顶层为 NULL） | 仅作分组容器，不对应任何路由 |
-| `menu` | 引用 `sys_iam_route_tree.id`（且对应 `kind='menu'`） | 任意 | 对应一个页面入口 |
-| `button` | 引用 `sys_iam_route_tree.id`（且对应 `kind='button'`） | 必须是某个 menu 节点 | 不在侧边栏渲染，仅参与权限判断 |
+| `menu` | 引用 `mb_iam_route_tree.id`（且对应 `kind='menu'`） | 任意 | 对应一个页面入口 |
+| `button` | 引用 `mb_iam_route_tree.id`（且对应 `kind='button'`） | 必须是某个 menu 节点 | 不在侧边栏渲染，仅参与权限判断 |
 
 **任意嵌套的体现**：运维可以把"订单管理"菜单从"配置中心"目录调到"客户管理"目录下，只需改一行 `parent_id`：
 
 ```sql
 -- 把订单管理菜单从"配置中心"调到"客户管理"
-UPDATE sys_iam_menu
-SET parent_id = (SELECT id FROM sys_iam_menu WHERE name = '客户管理'),
+UPDATE mb_iam_menu
+SET parent_id = (SELECT id FROM mb_iam_menu WHERE name = '客户管理'),
     sort_order = 0
 WHERE id = 12345;
 ```
 
 这个改动**不影响**：
-- 路由树（`sys_iam_route_tree` 完全无感）
-- 角色授权（`sys_role_menu` 仍指向同一个 menu 节点 id）
+- 路由树（`mb_iam_route_tree` 完全无感）
+- 角色授权（`mb_iam_role_menu` 仍指向同一个 menu 节点 id）
 - 代码（routes/orders/index.tsx 完全无感）
 
 ### 5.3 数据库 name 不走 i18n（数据库数据的 i18n 边界）
 
-`sys_iam_menu.name` 是普通 `VARCHAR`，**不通过 i18n key 翻译**——这是千人千面 MUST #6 的边界划线：
+`mb_iam_menu.name` 是普通 `VARCHAR`，**不通过 i18n key 翻译**——这是千人千面 MUST #6 的边界划线：
 
 | 数据类型 | 是否走 i18n | 来源 | 例子 |
 |---------|-----------|------|------|
 | **代码里的静态文案** | ✅ 必须走 i18n | 开发者代码 | 按钮标签 / 表格列头 / Toast 提示 / 错误码标题 |
-| **数据库存储的业务数据** | ❌ **永远不走** i18n | 运维/用户输入 | `sys_iam_menu.name` / 字典选项值 / 业务字段值 |
+| **数据库存储的业务数据** | ❌ **永远不走** i18n | 运维/用户输入 | `mb_iam_menu.name` / 字典选项值 / 业务字段值 |
 
 理由：
 
 1. **数据是运维资产**——运维输入"订单管理"就是"订单管理"，由运维决定如何命名，i18n 只翻译开发者写的代码
-2. **多语言 = 多套数据**——v1.5 真的需要双语菜单时，做法是 `sys_iam_menu.name_zh` / `name_en` 双字段或用一张关联表，**不是**把数据字段塞进 i18n 字典
+2. **多语言 = 多套数据**——v1.5 真的需要双语菜单时，做法是 `mb_iam_menu.name_zh` / `name_en` 双字段或用一张关联表，**不是**把数据字段塞进 i18n 字典
 3. **避免 i18n 字典爆炸**——如果每条数据都要进字典，字典就变成数据库的 mirror，丧失意义
 
 完整 i18n 工程边界见 [05-app-shell.md §7](./05-app-shell.md)。
@@ -497,8 +497,8 @@ WHERE id = 12345;
 | 操作 | 影响 |
 |------|------|
 | 新建 directory 节点 | 仅产生分组，无 route 关联 |
-| 新建 menu 节点（绑定 `sys_iam_route_tree` 中的某个 `kind='menu'` 节点） | 侧边栏多出一个入口 |
-| 改名 / 改图标 / 改排序 / 改可见性 | 仅改 `sys_iam_menu` 的字段 |
+| 新建 menu 节点（绑定 `mb_iam_route_tree` 中的某个 `kind='menu'` 节点） | 侧边栏多出一个入口 |
+| 改名 / 改图标 / 改排序 / 改可见性 | 仅改 `mb_iam_menu` 的字段 |
 | 移动节点（改 `parent_id`） | 树结构变化，前端 `useMenu()` 重新拉取后立即生效 |
 | 删除节点 | 物理 DELETE；该节点关联的角色权限同时失效 |
 
@@ -507,7 +507,7 @@ WHERE id = 12345;
 | 禁止操作 | 原因 |
 |---------|------|
 | 直接编辑 `route_ref_id` 让它指向不存在的路由树节点 | 由后端 service 层校验：`route_ref_id` 必须存在且 `is_stale=false` |
-| 自由输入权限 code | 权限点是代码权威，运维只能从 `sys_iam_route_tree` picker 选择 |
+| 自由输入权限 code | 权限点是代码权威，运维只能从 `mb_iam_route_tree` picker 选择 |
 | 把 button 节点的 parent 改成不是 menu 的节点 | 后端校验：button 节点的 parent 必须是 menu 节点 |
 
 ---
@@ -521,7 +521,7 @@ WHERE id = 12345;
 | 角色 | 能做的事 |
 |------|---------|
 | **开发者** | 在前端 `requireAuth({ permission: 'xxx' })` + 后端 `@RequirePermission("xxx")` 同时声明权限点 |
-| **运维** | 把已存在的权限点（`sys_iam_route_tree.code`）通过菜单管理 UI 的 picker 加进菜单树 |
+| **运维** | 把已存在的权限点（`mb_iam_route_tree.code`）通过菜单管理 UI 的 picker 加进菜单树 |
 | **管理员** | 通过角色管理 UI 把菜单节点分配给角色 |
 
 ### 6.2 AppPermission TS 联合类型
@@ -591,7 +591,7 @@ CI 任务 `pnpm check:permissions` 校验三个不变量：
 
 | 不变量 | 校验方式 | 失败后果 |
 |--------|---------|---------|
-| 数据库 `sys_iam_route_tree.code` ⊆ `ALL_APP_PERMISSIONS` | 启动时由 `RouteTreeSyncRunner` 校验，发现孤儿 `code` 时拒绝启动 | 后端启动失败 |
+| 数据库 `mb_iam_route_tree.code` ⊆ `ALL_APP_PERMISSIONS` | 启动时由 `RouteTreeSyncRunner` 校验，发现孤儿 `code` 时拒绝启动 | 后端启动失败 |
 | `route-tree.json` 里所有 code ⊆ 后端 `@RequirePermission` 扫描结果 | CI 脚本读 `route-tree.json` + 解析后端注解 | CI fail |
 | 前端代码里 `requireAuth({ permission: 'xxx' })` 的字符串 ⊆ `AppPermission` 联合类型 | TypeScript strict + 联合类型 | `tsc` fail |
 
@@ -635,18 +635,18 @@ main().catch((err) => {
 
 ### 6.4 权限点命名约定
 
-**格式**：`<module>.<action>`（点分隔）
+**格式**：**点分隔字符串，推荐三段式 `<module>.<resource>.<action>`，二段式 `<module>.<action>` 也合法**（与后端 [05-security.md §2.1](../backend/05-security.md#21-权限点命名规范) 一致）。
 
 **action 词表**：
 
-| action | 适用场景 | 例子 |
-|---|---|---|
-| `list` | 集合页（表格/列表） | `order.list`、`user.list` |
-| `view` | 单体聚合页 | `dashboard.view`、`settings.view` |
-| `detail` | 详情页 | `order.detail`、`user.detail` |
-| `create` | 新建页/操作 | `order.create` |
-| `edit` | 编辑页/操作 | `order.edit` |
-| `delete` | 删除按钮 | `order.delete` |
+| action | 适用场景 | 例子（三段式） | 例子（二段式） |
+|---|---|---|---|
+| `list` | 集合页（表格/列表） | `iam.user.list`、`iam.menu.list` | `order.list` |
+| `view` | 单体聚合页 | `report.dashboard.view` | `dashboard.view` |
+| `detail` | 详情页 | `iam.user.detail` | `order.detail` |
+| `create` | 新建页/操作 | `iam.menu.create` | `order.create` |
+| `edit` | 编辑页/操作 | `iam.menu.update` | `order.edit` |
+| `delete` | 删除按钮 | `iam.user.delete` | `order.delete` |
 
 **设计原则**：
 
@@ -658,17 +658,17 @@ main().catch((err) => {
 
 ---
 
-## 7. 角色关联 sys_role_menu
+## 7. 角色关联 mb_iam_role_menu
 
 ### 7.1 关联表结构
 
 ```sql
 -- mb-schema/src/main/resources/db/migration/V20260801_003__iam_role_menu.sql
-CREATE TABLE sys_iam_role_menu (
+CREATE TABLE mb_iam_role_menu (
     id              BIGINT       PRIMARY KEY,
     tenant_id       BIGINT       NOT NULL DEFAULT 0,
-    role_id         BIGINT       NOT NULL,        -- → sys_iam_role.id
-    menu_id         BIGINT       NOT NULL,        -- → sys_iam_menu.id
+    role_id         BIGINT       NOT NULL,        -- → mb_iam_role.id
+    menu_id         BIGINT       NOT NULL,        -- → mb_iam_menu.id
     version         INT          NOT NULL DEFAULT 0,
     created_by      BIGINT,
     created_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -676,11 +676,11 @@ CREATE TABLE sys_iam_role_menu (
     updated_at      TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE UNIQUE INDEX uk_sys_iam_role_menu_tenant_role_menu
-    ON sys_iam_role_menu (tenant_id, role_id, menu_id);
+CREATE UNIQUE INDEX uk_mb_iam_role_menu_tenant_role_menu
+    ON mb_iam_role_menu (tenant_id, role_id, menu_id);
 ```
 
-**关键设计**：`sys_iam_role_menu` **只关联到菜单节点**（`menu_id`），不直接关联权限点 `code`。这样运维改菜单结构时不需要同步授权数据。
+**关键设计**：`mb_iam_role_menu` **只关联到菜单节点**（`menu_id`），不直接关联权限点 `code`。这样运维改菜单结构时不需要同步授权数据。
 
 ### 7.2 权限清单查询（JOIN 路径）
 
@@ -698,10 +698,10 @@ SELECT DISTINCT
     rt.code        AS permission_code,
     rt.kind        AS route_kind,
     rt.path        AS route_path
-FROM sys_iam_user_role ur
-JOIN sys_iam_role_menu rm ON rm.role_id = ur.role_id
-JOIN sys_iam_menu m       ON m.id = rm.menu_id      AND m.visible = TRUE
-LEFT JOIN sys_iam_route_tree rt
+FROM mb_iam_user_role ur
+JOIN mb_iam_role_menu rm ON rm.role_id = ur.role_id
+JOIN mb_iam_menu m       ON m.id = rm.menu_id      AND m.visible = TRUE
+LEFT JOIN mb_iam_route_tree rt
                           ON rt.id = m.route_ref_id AND rt.is_stale = FALSE
 WHERE ur.user_id = ?
   AND ur.tenant_id = ?
@@ -1063,11 +1063,11 @@ export const MenuTreeNodeRow: React.FC<MenuTreeNodeProps> = ({ node, onRebind })
 ### 10.3 重新绑定 UI 流程
 
 1. 运维点击孤儿菜单旁的 ⚠️ 按钮 → 弹出重新绑定对话框
-2. 对话框内嵌"路由树 picker"（见 §11.3），运维从 `sys_iam_route_tree`（且 `is_stale=false`）中选一个新的 `kind='menu'` 节点
+2. 对话框内嵌"路由树 picker"（见 §11.3），运维从 `mb_iam_route_tree`（且 `is_stale=false`）中选一个新的 `kind='menu'` 节点
 3. 后端 `MenuApi.rebindRoute(menuId, newRouteRefId)` 校验：
    - 新 `route_ref_id` 存在且未被标记为 stale
    - 新 `route_ref_id` 的 `kind` 与原节点 `kind` 一致（menu↔menu / button↔button）
-4. 校验通过 → 更新 `sys_iam_menu.route_ref_id`，菜单恢复正常显示
+4. 校验通过 → 更新 `mb_iam_menu.route_ref_id`，菜单恢复正常显示
 
 ---
 
@@ -1085,7 +1085,8 @@ import * as React from 'react';
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { menuApi } from '@mb/api-sdk';
-import { NxTree, NxButton } from '@mb/ui-patterns';
+import { NxTree } from '@mb/ui-patterns';
+import { Button } from '@mb/ui-primitives';
 import { MenuTreeNodeRow } from './menu-tree-view';
 import { MenuNodeEditDrawer } from './menu-node-edit-drawer';
 import { AddNodeDialog } from './add-node-dialog';
@@ -1108,9 +1109,9 @@ export const MenuManagementPage: React.FC = () => {
       <section className="border rounded-md p-4">
         <header className="flex items-center justify-between mb-4">
           <h2>{t('menuTreeTitle')}</h2>
-          <NxButton onClick={() => setAddingParentId(null)}>
+          <Button onClick={() => setAddingParentId(null)}>
             {t('addRootNode')}
-          </NxButton>
+          </Button>
         </header>
         {tree.data && (
           <NxTree
@@ -1159,7 +1160,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
-import { NxDialog, NxForm, NxRadioGroup, NxInput, NxButton } from '@mb/ui-patterns';
+import { NxForm } from '@mb/ui-patterns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, RadioGroup, RadioGroupItem, Input, Button } from '@mb/ui-primitives';
 import { RouteTreePicker } from './route-tree-picker';
 import { menuApi } from '@mb/api-sdk';
 
@@ -1206,29 +1208,30 @@ export const AddNodeDialog: React.FC<AddNodeDialogProps> = ({ open, parentId, on
   const kind = form.watch('kind');
 
   return (
-    <NxDialog open={open} title={t('addNodeTitle')} onClose={onClose}>
-      <NxForm onSubmit={onSubmit}>
-        <NxRadioGroup
-          name="kind"
-          control={form.control}
-          options={[
-            { value: 'directory', label: t('kindDirectory') },
-            { value: 'menu', label: t('kindMenu') }
-          ]}
-        />
-        <NxInput name="name" control={form.control} label={t('fieldName')} />
-        {kind === 'menu' ? (
-          <RouteTreePicker
-            control={form.control}
-            name="routeRefId"
-            kindFilter="menu"
-            label={t('fieldBoundRoute')}
-          />
-        ) : null}
-        <NxInput name="iconKey" control={form.control} label={t('fieldIcon')} optional />
-        <NxButton type="submit">{t('confirmCreate')}</NxButton>
-      </NxForm>
-    </NxDialog>
+    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{t('addNodeTitle')}</DialogTitle>
+        </DialogHeader>
+        <NxForm onSubmit={onSubmit}>
+          <RadioGroup value={form.watch('kind')} onValueChange={(v) => form.setValue('kind', v as 'directory' | 'menu')}>
+            <RadioGroupItem value="directory" label={t('kindDirectory')} />
+            <RadioGroupItem value="menu" label={t('kindMenu')} />
+          </RadioGroup>
+          <Input {...form.register('name')} placeholder={t('fieldName')} />
+          {kind === 'menu' ? (
+            <RouteTreePicker
+              control={form.control}
+              name="routeRefId"
+              kindFilter="menu"
+              label={t('fieldBoundRoute')}
+            />
+          ) : null}
+          <Input {...form.register('iconKey')} placeholder={t('fieldIcon')} />
+          <Button type="submit">{t('confirmCreate')}</Button>
+        </NxForm>
+      </DialogContent>
+    </Dialog>
   );
 };
 ```
@@ -1241,7 +1244,7 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Controller, type Control, type FieldValues, type Path } from 'react-hook-form';
 import { menuApi } from '@mb/api-sdk';
-import { NxSelect } from '@mb/ui-patterns';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@mb/ui-primitives';
 
 export interface RouteTreePickerProps<TForm extends FieldValues> {
   control: Control<TForm>;
@@ -1270,14 +1273,24 @@ export function RouteTreePicker<TForm extends FieldValues>(
       control={control}
       name={name}
       render={({ field, fieldState }) => (
-        <NxSelect
-          label={label}
-          value={field.value}
-          onChange={field.onChange}
-          options={options}
-          loading={routes.isLoading}
-          error={fieldState.error?.message}
-        />
+        <div>
+          <label className="text-sm font-medium">{label}</label>
+          <Select value={String(field.value ?? '')} onValueChange={(v) => field.onChange(Number(v))}>
+            <SelectTrigger>
+              <SelectValue placeholder={label} />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((opt) => (
+                <SelectItem key={opt.value} value={String(opt.value)}>
+                  {opt.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {fieldState.error?.message && (
+            <p className="text-sm text-destructive">{fieldState.error.message}</p>
+          )}
+        </div>
       )}
     />
   );
@@ -1314,7 +1327,7 @@ export function RouteTreePicker<TForm extends FieldValues>(
 
 | 维度 | 前端 | 后端 |
 |------|------|------|
-| 入口 | `useCurrentUser()` hook（在 `@mb/app-shell`） | `CurrentUser` 组件（在 `mb-infra/infra-security`） |
+| 入口 | `useCurrentUser()` hook（在 `@mb/app-shell`） | `CurrentUser` 接口（在 `mb-common.security`，实现在 `infra-security.SaTokenCurrentUser`） |
 | 提供能力 | `userId` / `username` / `tenantId` / `permissions` / `hasPermission(code)` / `dataScope` | `userId()` / `username()` / `tenantId()` / `hasPermission()` / `dataScopeType()` / `dataScopeDeptIds()` |
 | 业务层禁令 | features/** 不得直接 import `@mb/api-sdk/auth/*` 的状态接口（见 [08-contract-client.md §6](./08-contract-client.md)） | 业务层不得 import `cn.dev33.satoken.*`（ArchUnit `BUSINESS_MUST_NOT_DEPEND_ON_SA_TOKEN`，见 [../backend/05-security.md](../backend/05-security.md)） |
 | 数据流 | 登录成功后存入 localStorage + TanStack Query cache | 登录时 `AuthFacade.doLogin()` 把权限 / dataScope 写入 Sa-Token session |
@@ -1329,7 +1342,7 @@ export function RouteTreePicker<TForm extends FieldValues>(
 
 - 前端 i18n 翻译"代码里的静态文案"（按钮、表头）
 - 后端 i18n 翻译"错误码标题/详情"（ProblemDetail 的 `title` / `detail`）
-- **`sys_iam_menu.name` 永远不走任何一边的 i18n**——它是数据库数据，由运维输入
+- **`mb_iam_menu.name` 永远不走任何一边的 i18n**——它是数据库数据，由运维输入
 
 <!-- verify: cd client && pnpm check:permissions && pnpm -F web-admin tsc --noEmit -->
 
@@ -1357,9 +1370,9 @@ export function RouteTreePicker<TForm extends FieldValues>(
 |------|----------|----------|
 | 谁是权限点的权威？ | 代码（路由树是代码扫描产物，运维只读） | 数据库（运维可写，代码靠 CI 校验） |
 | 代码删了一个权限点，DB 里的记录如何处理？ | 启动时 `RouteTreeSyncRunner` 自动 `is_stale=true`，菜单 UI 灰化 | 需要手动同步脚本 / CI 任务 |
-| 运维改菜单层次，会污染权限点吗？ | 不会。`sys_iam_menu` 完全独立于 `sys_iam_route_tree` | 会。`parent_id` 同时承担"权限继承"和"菜单层次"两个语义 |
-| 同一个权限点想出现在多个菜单位置（如订单管理在配置中心也有快捷入口） | 直接在 `sys_iam_menu` 创建第二条记录指向同一个 `route_ref_id` | 复制权限点行 → 数据冗余，授权数据撕裂 |
-| 多租户时代谁是 tenant 隔离的边界？ | `sys_iam_menu` 按 tenant 隔离；`sys_iam_route_tree` 全局共享（代码即契约） | 整张表都按 tenant 隔离 → 多租户复制路由代码记录 |
+| 运维改菜单层次，会污染权限点吗？ | 不会。`mb_iam_menu` 完全独立于 `mb_iam_route_tree` | 会。`parent_id` 同时承担"权限继承"和"菜单层次"两个语义 |
+| 同一个权限点想出现在多个菜单位置（如订单管理在配置中心也有快捷入口） | 直接在 `mb_iam_menu` 创建第二条记录指向同一个 `route_ref_id` | 复制权限点行 → 数据冗余，授权数据撕裂 |
+| 多租户时代谁是 tenant 隔离的边界？ | `mb_iam_menu` 按 tenant 隔离；`mb_iam_route_tree` 全局共享（代码即契约） | 整张表都按 tenant 隔离 → 多租户复制路由代码记录 |
 
 ### 13.3 表面"复杂度"的真相
 
@@ -1386,9 +1399,9 @@ export function RouteTreePicker<TForm extends FieldValues>(
 
 | 关注点 | 确定性还是不确定性 | 归属 |
 |--------|----------------|------|
-| 系统能做什么操作（权限点） | 确定性（代码反映） | `sys_iam_route_tree` |
-| 用户看到的是什么菜单 | 不确定性（运维主观决定） | `sys_iam_menu` |
-| 谁能做什么操作 | 不确定性（管理员授权决定） | `sys_iam_role_menu` |
+| 系统能做什么操作（权限点） | 确定性（代码反映） | `mb_iam_route_tree` |
+| 用户看到的是什么菜单 | 不确定性（运维主观决定） | `mb_iam_menu` |
+| 谁能做什么操作 | 不确定性（管理员授权决定） | `mb_iam_role_menu` |
 
 把确定性和不确定性混在一张表，就是把"代码自动同步"和"运维手动配置"混在一起，最终的代价是"每次代码变更都要担心运维数据被破坏"或"每次运维改动都要担心代码权限被污染"。
 

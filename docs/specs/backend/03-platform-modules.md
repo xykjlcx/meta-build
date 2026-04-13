@@ -631,19 +631,21 @@ CREATE TABLE biz_order_main (
     tenant_id     BIGINT       NOT NULL DEFAULT 0,
     order_no      VARCHAR(64)  NOT NULL,
     user_id       BIGINT       NOT NULL,
-    owner_dept_id BIGINT,                          -- 数据权限关联列（DataScopeRegistry 按此字段过滤）
+    owner_dept_id BIGINT       NOT NULL,            -- 数据权限关联列（DataScopeRegistry 按此字段过滤）
     status        SMALLINT     NOT NULL DEFAULT 0,
     total_amount  DECIMAL(18,2) NOT NULL,
     version       INT          NOT NULL DEFAULT 0,
-    created_by    BIGINT,
+    created_by    BIGINT       NOT NULL,
     created_at    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_by    BIGINT,
+    updated_by    BIGINT       NOT NULL,
     updated_at    TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE UNIQUE INDEX uk_biz_order_tenant_no
     ON biz_order_main (tenant_id, order_no);
-CREATE INDEX idx_biz_order_tenant_user ON biz_order_main (tenant_id, user_id);
+CREATE INDEX idx_biz_order_tenant_user    ON biz_order_main (tenant_id, user_id);
+CREATE INDEX idx_biz_order_tenant_dept    ON biz_order_main (tenant_id, owner_dept_id);
+CREATE INDEX idx_biz_order_tenant_created ON biz_order_main (tenant_id, created_at DESC);
 ```
 
 **步骤 7：在 `mb-business/pom.xml` 注册新 module**

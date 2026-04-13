@@ -139,13 +139,21 @@
 |---|---|---|---|---|---|---|
 | `MB_JWT_SECRET` | `sa-token.jwt-secret-key` | String | — | **prod** | 🔐 | JWT 签名密钥（最少 32 字符，§9.5）|
 | `SA_TOKEN_TOKEN_NAME` | `sa-token.token-name` | String | `Authorization` | — | — | token header / cookie 名 |
-| `SA_TOKEN_TIMEOUT` | `sa-token.timeout` | long(秒) | `2592000` | — | — | token 有效期（30 天）|
-| `SA_TOKEN_ACTIVE_TIMEOUT` | `sa-token.active-timeout` | long(秒) | `-1` | — | — | 不检查活跃度 |
+| `SA_TOKEN_TIMEOUT` | `sa-token.timeout` | long(秒) | `1800` | — | — | access token 有效期（30 分钟，与 05-security.md §1.0.1 一致） |
+| `SA_TOKEN_ACTIVE_TIMEOUT` | `sa-token.active-timeout` | long(秒) | `-1` | — | — | 不检查活跃度（双 token 机制下由 refresh token 续期） |
 | `SA_TOKEN_IS_CONCURRENT` | `sa-token.is-concurrent` | boolean | `true` | — | — | 允许同账号多端登录 |
 | `SA_TOKEN_IS_SHARE` | `sa-token.is-share` | boolean | `false` | — | — | 多端共享 token |
 | `SA_TOKEN_TOKEN_PREFIX` | `sa-token.token-prefix` | String | `Bearer` | — | — | token 前缀 |
 | `SA_TOKEN_AUTO_RENEW` | `sa-token.auto-renew` | boolean | `false` | — | — | 不自动续签 |
 | `SA_TOKEN_IS_LOG` | `sa-token.is-log` | boolean | `false` | — | — | Sa-Token 内部日志（prod 必须 false，dev 可 true）|
+
+### 9.2.4a 滑块验证码（infra-captcha）
+
+| Env Var | yml 键 | 类型 | 默认值 | 必填 | 敏感 | 说明 |
+|---|---|---|---|---|---|---|
+| `MB_CAPTCHA_ENABLED` | `mb.captcha.enabled` | boolean | `true` | — | — | 是否启用滑块验证码 |
+| `MB_CAPTCHA_EXPIRE_SECONDS` | `mb.captcha.expire-seconds` | int | `300` | — | — | 验证码过期时间（秒） |
+| `MB_CAPTCHA_TOLERANCE_PX` | `mb.captcha.tolerance-px` | int | `5` | — | — | x 坐标验证容差（像素） |
 
 ### 9.2.5 文件存储（local / 阿里云 OSS 切换）
 
@@ -206,7 +214,7 @@
 | `LOGGING_LEVEL_COM_METABUILD` | `logging.level.com.metabuild` | String | `INFO` | — | — | 项目日志级别（dev 用 `DEBUG`）|
 | `MB_OBSERVABILITY_LOG_JSON_ENABLED` | `mb.observability.log-json-enabled` | boolean | `false`(dev) / `true`(prod) | — | — | JSON encoder 开关 |
 | `MB_OBSERVABILITY_TRACE_SAMPLING_RATE` | `mb.observability.trace-sampling-rate` | double | `1.0`(dev) / `0.1`(prod) | — | — | Micrometer tracing 采样率 |
-| `MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE` | `management.endpoints.web.exposure.include` | String | dev: `*` / prod: `health,info,prometheus,readiness,liveness` | — | — | Actuator 暴露端点 |
+| `MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE` | `management.endpoints.web.exposure.include` | String | `health,info,prometheus,readiness,liveness`（共享默认，dev override 为 `*`） | — | — | Actuator 暴露端点 |
 
 ### 9.2.10 CORS（白名单）
 
@@ -243,8 +251,11 @@
 | `MB_IAM_PASSWORD_REQUIRE_SPECIAL` | `mb.iam.password.require-special` | boolean | `false` | — | — | 必须含特殊字符 |
 | `MB_IAM_PASSWORD_HISTORY_COUNT` | `mb.iam.password.history-count` | int | `5` | — | — | 密码历史不重用数量 |
 | `MB_IAM_PASSWORD_MAX_AGE_DAYS` | `mb.iam.password.max-age-days` | int | `0` | — | — | 过期天数，`0` = 不过期 |
-| `MB_IAM_PASSWORD_LOCKOUT_THRESHOLD` | `mb.iam.password.lockout-threshold` | int | `5` | — | — | 连续失败锁定阈值 |
-| `MB_IAM_PASSWORD_LOCKOUT_DURATION_MINUTES` | `mb.iam.password.lockout-duration-minutes` | int | `30` | — | — | 锁定持续时长 |
+| `MB_IAM_PASSWORD_CAPTCHA_THRESHOLD` | `mb.iam.password.captcha-threshold` | int | `3` | — | — | 连续失败多少次后要求滑块验证码 |
+| `MB_IAM_PASSWORD_DELAY_THRESHOLD` | `mb.iam.password.delay-threshold` | int | `5` | — | — | 连续失败多少次后开始延迟 |
+| `MB_IAM_PASSWORD_SHORT_DELAY_SECONDS` | `mb.iam.password.short-delay-seconds` | int | `30` | — | — | 5-9 次失败的延迟时间（秒） |
+| `MB_IAM_PASSWORD_LONG_DELAY_SECONDS` | `mb.iam.password.long-delay-seconds` | int | `300` | — | — | 10+ 次失败的延迟时间（秒） |
+| `MB_IAM_PASSWORD_FAIL_COUNT_TTL_MINUTES` | `mb.iam.password.fail-count-ttl-minutes` | int | `30` | — | — | 失败计数器 TTL |
 | `MB_IAM_PASSWORD_RESET_TOKEN_TTL_MINUTES` | `mb.iam.password.reset-token-ttl-minutes` | int | `15` | — | — | 忘密 token 有效期 |
 
 ### 9.2.13 分页配置（`mb.api.pagination.*`，详见 [06-api-and-contract.md §12](./06-api-and-contract.md)）
@@ -271,7 +282,7 @@
 | profile | 加载规则 | 职责 |
 |---|---|---|
 | `application.yml` | 所有 profile 共享 | 跨环境默认值（如 HikariCP 默认池大小 / 缓存 TTL / CORS method 白名单），**禁止含敏感或环境相关值** |
-| `application-dev.yml` | `spring.profiles.active=dev` | 本地开发：写死 localhost 连接 + 宽松 CORS + DEBUG 日志 + 全部 Actuator 端点 |
+| `application-dev.yml` | `spring.profiles.active=dev` | 本地开发：写死 localhost 连接 + 宽松 CORS + DEBUG 日志 + 全部 Actuator 端点（override 共享默认） |
 | `application-test.yml` | `@ActiveProfiles("test")` | 集成测试：`BaseIntegrationTest` + Testcontainers 动态注入 `spring.datasource.*` 和 `spring.data.redis.*` |
 | `application-prod.yml` | `spring.profiles.active=prod` | 生产：**所有敏感和环境相关字段走 `${MB_*}` / `${SPRING_*}` env var**，不写任何具体值 |
 
@@ -318,7 +329,7 @@ spring:
 sa-token:
   token-name: Authorization
   token-prefix: Bearer
-  timeout: 2592000
+  timeout: 1800          # access token 30 分钟（与 05-security.md §1.0.1 一致）
   active-timeout: -1
   is-concurrent: true
   is-share: false
@@ -354,6 +365,12 @@ server:
   port: 8080
   servlet:
     context-path: /
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,readiness,liveness
 
 logging:
   level:
@@ -396,7 +413,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "*"   # dev 放开所有 Actuator 端点（共享 yml 安全默认只放 5 个）
   endpoint:
     configprops:
       show-values: always   # dev 显示全部配置

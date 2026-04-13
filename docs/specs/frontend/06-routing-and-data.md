@@ -14,7 +14,7 @@
 |---|------|------|
 | 1 | 路由声明位置 | **`apps/web-admin/src/routes/**/*.tsx` 是唯一合法位置**（MUST NOT #5）。其他位置写 `createFileRoute(...)` = `routeTree.gen.ts` 看不到 = 路由不生效 |
 | 2 | 路由树生成 | `@tanstack/router-vite-plugin` 在 `vite dev` / `vite build` 时扫描 `routes/` 自动生成 `apps/web-admin/src/routeTree.gen.ts`，**入 git** |
-| 3 | 路由守卫 | 工厂函数 `requireAuth({ permission })` 返回 `beforeLoad` 函数，在 `loader` 之前运行；权限不足 `throw redirect({ to: '/auth/login' })` |
+| 3 | 路由守卫 | 工厂函数 `requireAuth({ permission })` 返回 `beforeLoad` 函数，在 `loader` 之前运行；未登录 → `throw redirect({ to: '/auth/login' })`；已登录但无权限 → `throw new ForbiddenError()` 显示 403 页面 |
 | 4 | 数据加载 | **双层**：路由 `loader` 拿首屏数据（保证 SSR / preload 友好），组件内 `useQuery` 复用同一 `queryKey`（拿到列表后跳详情走缓存） |
 | 5 | URL 状态 | `validateSearch: z.object({...})` Zod schema 校验，编译期类型推导，禁止裸 `new URLSearchParams` |
 | 6 | TanStack Query 默认值 | `staleTime: 5*60*1000` / `gcTime: 30*60*1000` / `retry: 1` / `refetchOnWindowFocus: false` |

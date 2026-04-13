@@ -484,7 +484,7 @@ export const Route = createFileRoute('/_authed/orders/')({
 | 工具 | 拦截点 |
 |------|-------|
 | TypeScript strict | `permission` 类型是 `AppPermission` 联合类型，IDE 自动补全合法权限点，拼错即类型错误 |
-| CI 校验 | 数据库 `sys_route_tree.code` 必须是 `AppPermission` 的子集（详见 [07 §6.3](./07-menu-permission.md#63-ci-校验数据库-code-必须在代码清单内)） |
+| CI 校验 | 数据库 `mb_iam_route_tree.code` 必须是 `AppPermission` 的子集（详见 [07 §6.3](./07-menu-permission.md#63-ci-校验数据库-code-必须在代码清单内)） |
 | 约定 + PR review | `_authed/**` 下没有 `beforeLoad: requireAuth(...)` 的路由被打回 |
 
 **详见**：
@@ -563,7 +563,7 @@ const buttonVariants = cva('inline-flex items-center', {
 | 类型 | 例子 | 是否走 i18n |
 |------|------|-----------|
 | **代码中的静态文案** | 按钮"保存"、表格列头"订单号"、Toast"操作成功"、表单错误 | ✅ **必须**走 `t('...')` |
-| **数据库存储的运维数据** | `sys_menu.name`（菜单名"订单管理"）、`sys_dict_item.label`（字典选项）、用户输入的业务数据 | ❌ **永不**走 i18n，直接渲染 |
+| **数据库存储的运维数据** | `mb_iam_menu.name`（菜单名"订单管理"）、`mb_dict_item.label`（字典选项）、用户输入的业务数据 | ❌ **永不**走 i18n，直接渲染 |
 | **后端返回的错误消息** | `ProblemDetail.title` / `detail` | ⚠ 走后端 i18n（`Accept-Language` 协商，由 `MessageSource` 渲染），前端拿到的已经是目标语言，**不**做二次 `t(...)` |
 
 **为什么数据库文案不 i18n**：数据库里的菜单名是"运维数据"——运维在菜单管理页用中文录入"订单管理"，这是运维的选择，系统不应该硬加一层翻译覆盖它。如果未来某个企业要多语言菜单，那是他们的菜单管理页加一个"菜单名英文"字段的事，不是前端 i18n 的职责。详见 [07-menu-permission.md §5.3](./07-menu-permission.md#53-数据库-name-不走-i18n数据库数据的-i18n-边界)。

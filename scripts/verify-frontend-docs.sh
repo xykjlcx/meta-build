@@ -173,8 +173,8 @@ done
 section "5. 双树架构关键词在 07-menu-permission.md"
 
 dual_tree_keywords=(
-    "sys_iam_route_tree"
-    "sys_iam_menu"
+    "mb_iam_route_tree"
+    "mb_iam_menu"
     "route_ref_id"
     "AppPermission"
     "useMenu"

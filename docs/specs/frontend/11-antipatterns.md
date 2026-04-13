@@ -395,7 +395,7 @@ function MenuItem({ menu }: { menu: SysMenu }) {
 
 ```sql
 -- 菜单 name 就是普通 VARCHAR，运维填什么就是什么
-CREATE TABLE sys_menu (
+CREATE TABLE mb_iam_menu (
     id BIGINT PRIMARY KEY,
     name VARCHAR(64) NOT NULL, -- 直接存运维填的字符串
     icon VARCHAR(64),
@@ -417,12 +417,12 @@ function MenuItem({ menu }: { menu: SysMenu }) { return <span>{menu.name}</span>
 | 表单字段标签 | `<Label>用户名</Label>` | ✅ |
 | 错误提示 | `toast.error('密码不正确')` | ✅ |
 | 表格列头 | `header: '订单号'` | ✅ |
-| 数据库菜单名 | `sys_menu.name = '订单管理'` | ❌ |
-| 数据库字典选项 | `sys_dict_item.label = '已付款'` | ❌ |
-| 业务数据 | `sys_user.nickname = '张三'` | ❌ |
+| 数据库菜单名 | `mb_iam_menu.name = '订单管理'` | ❌ |
+| 数据库字典选项 | `mb_dict_item.label = '已付款'` | ❌ |
+| 业务数据 | `mb_iam_user.nickname = '张三'` | ❌ |
 | 用户填写的内容 | `order.remark = '加急'` | ❌ |
 
-**真要多语言菜单怎么办**：在使用者自己的项目里加 `sys_menu_i18n` 表（运维 UI 提供"添加翻译"按钮），不放进 meta-build 底座。底座只保证最简模型。
+**真要多语言菜单怎么办**：在使用者自己的项目里加 `mb_iam_menu_i18n` 表（运维 UI 提供"添加翻译"按钮），不放进 meta-build 底座。底座只保证最简模型。
 
 ### 6.4 防御机制
 
@@ -435,7 +435,7 @@ function MenuItem({ menu }: { menu: SysMenu }) { return <span>{menu.name}</span>
 ### 6.5 引用
 
 - MUST #6 的边界：代码静态文案走 i18n，数据库存储的文案永不走 i18n
-- 详见 [05-app-shell.md §7 i18n 完整工程](./05-app-shell.md) + [07-menu-permission.md §5 菜单树 sys_menu](./07-menu-permission.md)
+- 详见 [05-app-shell.md §7 i18n 完整工程](./05-app-shell.md) + [07-menu-permission.md §5 菜单树 mb_iam_menu](./07-menu-permission.md)
 
 ---
 
@@ -558,7 +558,7 @@ async function syncMenuFromCode() {
 
 ```sql
 -- 树 1：路由树（代码扫描产物，运维只读）
-CREATE TABLE sys_route_tree (
+CREATE TABLE mb_iam_route_tree (
     id BIGINT PRIMARY KEY,
     parent_id BIGINT,
     type SMALLINT,              -- 1=menu 页面 2=button 权限点
@@ -569,18 +569,18 @@ CREATE TABLE sys_route_tree (
 );
 
 -- 树 2：菜单树（运维自由配置）
-CREATE TABLE sys_menu (
+CREATE TABLE mb_iam_menu (
     id BIGINT PRIMARY KEY,
     parent_id BIGINT,           -- 任意嵌套
     name VARCHAR(64),           -- 运维填的显示名（不走 i18n，见 §6）
     icon VARCHAR(64),
     sort INT,
-    route_ref_id BIGINT,        -- 指向 sys_route_tree.id（directory 节点为 NULL）
-    FOREIGN KEY (route_ref_id) REFERENCES sys_route_tree(id)
+    route_ref_id BIGINT,        -- 指向 mb_iam_route_tree.id（directory 节点为 NULL）
+    FOREIGN KEY (route_ref_id) REFERENCES mb_iam_route_tree(id)
 );
 ```
 
-Vite 插件构建时扫 `routes/**/*.tsx`，后端启动时读 `build/route-tree.json` 自动 upsert → 代码和路由树零 drift。运维只能改 `sys_menu`，`sys_route_tree` 只读。
+Vite 插件构建时扫 `routes/**/*.tsx`，后端启动时读 `build/route-tree.json` 自动 upsert → 代码和路由树零 drift。运维只能改 `mb_iam_menu`，`mb_iam_route_tree` 只读。
 
 **为什么不退化为单表**：代码结构和业务组织是两个独立的演化轴，演化频率和演化主体完全不同。物理隔离两棵树才是真正的单一职责。
 
@@ -794,7 +794,7 @@ function OrderListPage() { return <div>订单列表</div>; }
 - **TanStack Router 的 routeTree.gen.ts 扫不到**：Vite 插件只扫 `apps/web-admin/src/routes/**/*.tsx`，features 里的 `createFileRoute` 不会被识别，路由根本注册不上
 - **看似有路由，访问 404**：开发者写完后访问 `/orders` 直接 404，调试时不知道哪里出错
 - **类型推导失效**：`<Link to="/orders">` 类型补全依赖 `routeTree.gen.ts`，路由没注册 → 类型不存在
-- **双树架构的路由树扫描也漏**：Vite 插件扫 routes 提取 `requireAuth`，features 里的路由不会进入 `sys_route_tree`，权限点缺失
+- **双树架构的路由树扫描也漏**：Vite 插件扫 routes 提取 `requireAuth`，features 里的路由不会进入 `mb_iam_route_tree`，权限点缺失
 
 ### 11.3 正确做法
 

@@ -19,9 +19,9 @@
 - 主键: `id BIGINT NOT NULL`（Snowflake 生成）
 - 外键: `<引用实体>_id BIGINT`（例: `user_id`, `role_id`）
 - 审计字段（所有表必须有）:
-  - `created_by BIGINT`
+  - `created_by BIGINT NOT NULL`
   - `created_at TIMESTAMP WITH TIME ZONE NOT NULL`
-  - `updated_by BIGINT`
+  - `updated_by BIGINT NOT NULL`
   - `updated_at TIMESTAMP WITH TIME ZONE NOT NULL`
 - 多租户: `tenant_id BIGINT NOT NULL DEFAULT 0`（ADR-007）
 - 乐观锁: `version INT NOT NULL DEFAULT 0`（**按需添加**，仅在需要乐观锁的表上，如订单、余额等并发更新场景；只追加不更新的表（如 `mb_operation_log`）不加此字段；jOOQ Settings 中 `withExecuteWithOptimisticLockingExcludeUnversioned(true)` 确保无 version 字段的表自动跳过乐观锁）
@@ -84,28 +84,25 @@ public class IdGeneratorConfig {
 
 #### Flyway 模板
 
+完整的 `mb_iam_user` DDL 见 [05-security.md §8.7.1](./05-security.md)（含密码安全字段 `password_updated_at`、`must_change_password` 等），此处只展示字段命名规范示例：
+
 ```sql
 -- mb-schema/src/main/resources/db/migration/V20260601_001__iam_user.sql
+-- 完整 DDL 见 05-security.md §8.7.1，以下为字段命名规范速览
 CREATE TABLE mb_iam_user (
-    id            BIGINT       PRIMARY KEY,
-    tenant_id     BIGINT       NOT NULL DEFAULT 0,
-    username      VARCHAR(64)  NOT NULL,
-    password_hash VARCHAR(128) NOT NULL,
-    email         VARCHAR(128),
-    dept_id       BIGINT,
-    status        SMALLINT     NOT NULL DEFAULT 1,
-    version       INT          NOT NULL DEFAULT 0,
-    created_by    BIGINT,
+    id            BIGINT       PRIMARY KEY,            -- Snowflake 生成
+    tenant_id     BIGINT       NOT NULL DEFAULT 0,     -- 多租户预留
+    username      VARCHAR(64)  NOT NULL,               -- snake_case 字段名
+    password_hash VARCHAR(128) NOT NULL,               -- bcrypt $2a$12$... 共 60 字节
+    email         VARCHAR(255),                        -- 与 05-security.md §8.7.1 一致
+    dept_id       BIGINT,                              -- 外键命名: <引用实体>_id
+    status        SMALLINT     NOT NULL DEFAULT 1,     -- 枚举用 SMALLINT
+    -- ... 完整字段列表见 05-security.md §8.7.1 ...
+    created_by    BIGINT       NOT NULL,               -- 审计字段 NOT NULL
     created_at    TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_by    BIGINT,
+    updated_by    BIGINT       NOT NULL,
     updated_at    TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
-
-CREATE UNIQUE INDEX uk_mb_iam_user_tenant_username
-    ON mb_iam_user (tenant_id, username);
-
-CREATE INDEX idx_mb_iam_user_tenant_dept
-    ON mb_iam_user (tenant_id, dept_id);
 ```
 
 ## 5. Flyway 脚本组织 [M1+M4]
@@ -451,7 +448,7 @@ jOOQ 在 Configuration 层提供两种乐观锁模式：
 | **优化模式** | 有 `version` 字段（通过 codegen 配置识别）| UPDATE 的 WHERE 子句自动加 `version = <fetched>`，一条 SQL 完成 |
 | 标准模式 | 无 version 字段 | UPDATE 前先 `SELECT ... FOR UPDATE` 对比所有字段 |
 
-**meta-build 使用优化模式**（所有业务表都有 `version INTEGER NOT NULL DEFAULT 0` 字段）。
+**meta-build 对有 `version` 字段的表使用优化模式**（`version` 按需添加，仅并发更新场景；无 `version` 字段的表通过 `ExcludeUnversioned` 配置自动跳过乐观锁，见 §1）。
 
 #### 8.5.2 Settings 配置（`DSLContextConfig`）
 
@@ -509,10 +506,10 @@ public class DSLContextConfig {
 // UserService.updateEmail（N3 修正：Service 通过 Repository 访问，不直接持有 DSLContext）
 @Transactional
 public UserView updateEmail(Long userId, UserUpdateEmailCommand cmd) {
-    UserRecord record = userRepository.findById(userId)
+    MbIamUserRecord record = userRepository.findById(userId)
         .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
     record.setEmail(cmd.newEmail());
-    UserRecord saved = userRepository.save(record);  // Repository 内部调 record.store()
+    MbIamUserRecord saved = userRepository.save(record);  // Repository 内部调 record.store()
     return UserView.from(saved);
     // Repository.save() 内部执行:
     //   UPDATE mb_iam_user
@@ -631,12 +628,19 @@ public class AuditFieldsRecordListener implements RecordListener {
 
 **owner_dept_id 自动填充**：INSERT 时从 `CurrentUser.deptId()` 获取当前用户所属部门 ID 并写入。该字段写入后不可变（UPDATE 时不修改），语义为"数据创建时的归属部门"，不随创建人调岗更新。无认证上下文时（系统任务），由业务层显式指定。
 
+RecordListener INSERT 时从 `CurrentUser.deptId()` 获取部门 ID。如果 `deptId()` 返回 null（不应发生——用户部门为必填字段），**抛出 `IllegalStateException`** 而非静默写入 0。
+
 `AuditFieldsRecordListener.insertStart` 中追加：
 
 ```java
 // owner_dept_id：数据权限归属部门，INSERT 时写入后不可变
 if (currentUser.isAuthenticated()) {
-    trySetField(record, "owner_dept_id", currentUser.deptId());
+    Long deptId = currentUser.deptId();
+    if (deptId == null) {
+        throw new IllegalStateException(
+            "当前用户 deptId 为 null，无法填充 owner_dept_id。用户部门为必填字段，出现此异常说明是 bug。");
+    }
+    trySetField(record, "owner_dept_id", deptId);
 }
 // 无认证上下文（系统任务）不自动填充，由业务层显式指定
 ```
@@ -784,7 +788,7 @@ public class JooqHelper {
 // 单条:直接 Record API(最常用)
 @Transactional
 public UserView createUser(UserCreateCommand cmd) {
-    UserRecord record = dsl.newRecord(MB_IAM_USER);
+    MbIamUserRecord record = dsl.newRecord(MB_IAM_USER);
     record.setId(snowflake.nextId());
     record.setUsername(cmd.username());
     record.setEmail(cmd.email());
@@ -799,7 +803,7 @@ public UserView createUser(UserCreateCommand cmd) {
 // 批量 N 条:走 helper
 @Transactional
 public void importUsers(List<UserCreateCommand> cmds) {
-    List<UserRecord> records = cmds.stream()
+    List<MbIamUserRecord> records = cmds.stream()
         .map(this::buildRecord)
         .collect(toList());
     jooqHelper.batchInsert(records);
@@ -1278,7 +1282,7 @@ public class UserRepository {
             .fetchOne(0, long.class);
 
         // 3. 分页查询
-        List<UserRecord> records = dsl.selectFrom(MB_IAM_USER)
+        List<MbIamUserRecord> records = dsl.selectFrom(MB_IAM_USER)
             .orderBy(orderBy)
             .limit(query.size())
             .offset(query.offset())
@@ -1311,7 +1315,7 @@ public PageResult<UserView> pageByStatus(PageQuery query, int status) {
         .where(where)
         .fetchOne(0, long.class);
 
-    List<UserRecord> records = dsl.selectFrom(MB_IAM_USER)
+    List<MbIamUserRecord> records = dsl.selectFrom(MB_IAM_USER)
         .where(where)
         .orderBy(orderBy)
         .limit(query.size())

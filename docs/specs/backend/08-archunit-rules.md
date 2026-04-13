@@ -16,7 +16,7 @@
 2. **自研模块边界规则**：跨模块访问、jOOQ 隔离、Sa-Token 隔离等（核心守护）
 3. **自研代码细节规则**：事务边界、时区、@CacheEvict 等
 
-M1 启动 3 条最基础的规则，M4 补全到 23 条（含 GeneralCodingRules 零成本规则）。
+M1 启动 3 条最基础的规则，M4 补全到 27 条（含 GeneralCodingRules 零成本规则 + 09-config-management.md 定义的 3 条配置管理规则）。
 
 ## 2. M1 启动 3 条规则 [M1]
 
@@ -50,6 +50,10 @@ M1 启动 3 条最基础的规则，M4 补全到 23 条（含 GeneralCodingRules
 | 21 | `WRITE_OPS_ONLY_VIA_RECORD_OR_HELPER` | 业务层写操作只走 Record.store() 或 JooqHelper | 本章 §6 M4 jOOQ 写操作硬约束 |
 | 22 | `NO_MANUAL_VERSION_INCREMENT` | 业务层禁止手动操作 version 字段 | 本章 §6 M4 jOOQ 写操作硬约束 |
 | 23 | `NO_MANUAL_AUDIT_FIELDS` | 业务层禁止手动设置审计字段 | 本章 §6 M4 jOOQ 写操作硬约束 |
+| 24 | `NO_AT_VALUE_ANNOTATION` | 禁止 `@Value` 注入配置（必须用 `@ConfigurationProperties`） | [09-config-management.md §9.5](./09-config-management.md) |
+| 25 | `PROPERTIES_MUST_BE_VALIDATED` | `@ConfigurationProperties` 类必须加 `@Validated` | [09-config-management.md §9.5](./09-config-management.md) |
+| 26 | `NO_CONFIG_HARDCODED` | 禁止硬编码配置值（评估替代方案：Checkstyle/PMD） [M4 评估] | [09-config-management.md §9.1](./09-config-management.md) |
+| 27 | `NO_JDBC_TEMPLATE_IN_BUSINESS` | 业务层（platform/business）禁止使用 JdbcTemplate / NamedParameterJdbcTemplate / DataSource.getConnection()（会绕过 DataScopeVisitListener 数据权限拦截） | [05-security.md §7](./05-security.md) |
 
 > **注意**：原规则 `REPOSITORIES_MUST_EXTEND_DATA_SCOPED` 已被方案 E 移除（详见 ADR-0007）。数据权限改由 `DataScopeVisitListener` 单点拦截，不再需要 Repository 继承基类。等价的守护规则是新的 `NO_RAW_SQL_FETCH`——只要业务层不走 `@PlainSQL` 字符串 SQL，VisitListener 就不会被绕过。
 >
@@ -244,6 +248,11 @@ public class ArchitectureTest {
     static final ArchRule only_jakarta_nullable =
         CodingStyleRule.ONLY_JAKARTA_NULLABLE;
 
+    // === JDBC 隔离 ===
+    @ArchTest
+    static final ArchRule no_jdbc_template_in_business =
+        JdbcIsolationRule.NO_JDBC_TEMPLATE_IN_BUSINESS;
+
     // === GeneralCodingRules 零成本规则 ===
     @ArchTest
     static final ArchRule no_field_injection = GeneralCodingRulesBundle.NO_FIELD_INJECTION;
@@ -374,6 +383,20 @@ static final ArchRule NO_MANUAL_AUDIT_FIELDS = noClasses()
 ### NO_RAW_SQL_FETCH
 
 （**已存在**，见 [05-security.md §7.9](05-security.md)，本节不重复定义。）
+
+### NO_JDBC_TEMPLATE_IN_BUSINESS
+
+业务层禁止直接使用 JDBC，所有数据库访问必须走 jOOQ DSL（确保 DataScopeVisitListener 生效）。
+
+```java
+// NO_JDBC_TEMPLATE_IN_BUSINESS [M4]
+// 业务层禁止直接使用 JDBC，所有数据库访问必须走 jOOQ DSL（确保 DataScopeVisitListener 生效）
+public static final ArchRule NO_JDBC_TEMPLATE_IN_BUSINESS = noClasses()
+    .that().resideInAnyPackage("com.metabuild.platform..", "com.metabuild.business..")
+    .should().dependOnClassesThat().haveFullyQualifiedName("org.springframework.jdbc.core.JdbcTemplate")
+    .orShould().dependOnClassesThat().haveFullyQualifiedName("org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate")
+    .because("业务层所有数据库访问必须走 jOOQ DSL，确保 DataScopeVisitListener 数据权限拦截生效。直连 JDBC 会绕过数据权限。");
+```
 
 ---
 
