@@ -1,0 +1,33 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "jsx": "react-jsx",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@mb/ui-tokens": ["packages/ui-tokens/src/index.ts"],
+      "@mb/ui-tokens/*": ["packages/ui-tokens/src/*"],
+      "@mb/ui-primitives": ["packages/ui-primitives/src/index.ts"],
+      "@mb/ui-primitives/*": ["packages/ui-primitives/src/*"],
+      "@mb/ui-patterns": ["packages/ui-patterns/src/index.ts"],
+      "@mb/ui-patterns/*": ["packages/ui-patterns/src/*"],
+      "@mb/app-shell": ["packages/app-shell/src/index.ts"],
+      "@mb/app-shell/*": ["packages/app-shell/src/*"],
+      "@mb/api-sdk": ["packages/api-sdk/src/index.ts"],
+      "@mb/api-sdk/*": ["packages/api-sdk/src/*"]
+    }
+  },
+  "exclude": ["node_modules", "dist", "build"]
+}
