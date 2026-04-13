@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metabuild</groupId>
+        <artifactId>meta-build</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>mb-infra</artifactId>
+    <packaging>pom</packaging>
+    <name>mb-infra</name>
+    <description>基础设施层（11 个子模块）</description>
+
+    <modules>
+        <module>infra-security</module>
+        <module>infra-cache</module>
+        <module>infra-jooq</module>
+        <module>infra-exception</module>
+        <module>infra-i18n</module>
+        <module>infra-async</module>
+        <module>infra-rate-limit</module>
+        <module>infra-websocket</module>
+        <module>infra-observability</module>
+        <module>infra-archunit</module>
+        <module>infra-captcha</module>
+    </modules>
+
+    <!-- 所有 infra 子模块共享 mb-common 依赖 -->
+    <dependencies>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>mb-common</artifactId>
+        </dependency>
+    </dependencies>
+</project>
