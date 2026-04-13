@@ -1,6 +1,6 @@
 ## 03 - L2 原子组件库 ui-primitives
 
-> **关注点**：L2 `@mb/ui-primitives` 的隔离哲学、29 个原子组件清单、shadcn 式文案 props 约定、CVA variants 风格、Storybook 规范、L2 白名单依赖。
+> **关注点**：L2 `@mb/ui-primitives` 的隔离哲学、30 个原子组件清单、shadcn 式文案 props 约定、CVA variants 风格、Storybook 规范、L2 白名单依赖。
 >
 > L2 是 meta-build 千人千面的"骨架层"——上层永不直接 import Radix，所有底层 UI 库的更换由 L2 内部消化。
 
@@ -10,7 +10,7 @@
 
 ### 1.1 一句话定位
 
-`@mb/ui-primitives` 是 meta-build 前端的**底层 UI 库隔离层**，提供 29 个 shadcn 风格的原子组件，所有组件源码作为使用者资产存在，由使用者直接修改 `*.tsx` 文件完成定制（**不是**通过 theme override 或 props 注入样式）。
+`@mb/ui-primitives` 是 meta-build 前端的**底层 UI 库隔离层**，提供 30 个 shadcn 风格的原子组件，所有组件源码作为使用者资产存在，由使用者直接修改 `*.tsx` 文件完成定制（**不是**通过 theme override 或 props 注入样式）。
 
 ### 1.2 核心约定速查
 
@@ -30,7 +30,7 @@
 
 | 子任务 | milestone |
 |---|---|
-| 29 个原子组件最小可用版本 | [M2] |
+| 30 个原子组件最小可用版本 | [M2] |
 | 全部组件 Storybook stories | [M2] |
 | Vitest 单元测试覆盖 | [M2] |
 | Visual Regression 快照 | [M6] |
@@ -106,7 +106,7 @@ packages:
 
 ---
 
-## 3. 29 个原子组件清单
+## 3. 30 个原子组件清单
 
 按职责分 4 类。每个组件 1-2 行说明 + 底层 Radix 原语来源。所有组件都遵循 §4 的 API 约定。
 
@@ -148,7 +148,7 @@ packages:
 | 22 | `NavigationMenu` | `navigation-menu.tsx` | `@radix-ui/react-navigation-menu` | 顶部导航菜单（多级展开） |
 | 23 | `Command` | `command.tsx` | `cmdk` | 命令面板（Cmd+K 风格） |
 
-### 3.4 展示类（6 个）[M2]
+### 3.4 展示类（7 个）[M2]
 
 | # | 组件 | 文件 | Radix 原语 | 职责 |
 |---|---|---|---|---|
@@ -158,8 +158,9 @@ packages:
 | 27 | `Separator` | `separator.tsx` | `@radix-ui/react-separator` | 分隔线（横 / 竖） |
 | 28 | `Skeleton` | `skeleton.tsx` | 无（动画 `<div>`） | 骨架屏占位 |
 | 29 | `Accordion` | `accordion.tsx` | `@radix-ui/react-accordion` | 折叠面板（FAQ 等） |
+| 30 | `Table` | `table.tsx` | 无（语义化 `<table>`） | 表格容器（含 TableHeader / TableBody / TableRow / TableHead / TableCell 子组件），L3 NxTable 的底层原子 |
 
-> **总计 29 个原子组件**，每个组件对应一个文件。`Card` / `Dialog` / `AlertDialog` / `Drawer` 等会导出多个子组件（`Card` / `CardHeader` / `CardContent` / `CardFooter`），统一打包在同一文件内导出。文件清单与决策表保持 1:1。
+> **总计 30 个原子组件**，每个组件对应一个文件。`Card` / `Dialog` / `AlertDialog` / `Drawer` / `Table` 等会导出多个子组件（`Card` / `CardHeader` / `CardContent` / `CardFooter`），统一打包在同一文件内导出。文件清单与决策表保持 1:1。
 
 ### 3.5 不在 L2 范围
 

@@ -182,6 +182,7 @@ dual_tree_keywords=(
     "meta.buttons"
     "parent_code"
     "禁止退化为单表"
+    "action 词表"
 )
 
 for kw in "${dual_tree_keywords[@]}"; do

@@ -100,9 +100,9 @@ export interface SidebarLayoutProps {
 export function SidebarLayout({ children }: SidebarLayoutProps) {
   return (
     <div className="flex h-screen bg-background text-foreground">
-      <Sidebar className="w-[var(--sidebar-width)] border-r border-border" />
+      <Sidebar className="w-[var(--size-sidebar-width)] border-r border-border" />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <Header className="h-[var(--header-height)] border-b border-border" />
+        <Header className="h-[var(--size-header-height)] border-b border-border" />
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
     </div>
@@ -183,7 +183,6 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { I18nextProvider } from "react-i18next";
 import { GlobalErrorBoundary } from "@mb/app-shell/error";
 import { ThemeProvider } from "@mb/app-shell/theme";
 import { ToastContainer } from "@mb/app-shell/feedback";
@@ -1022,46 +1021,43 @@ TypeScript 直接从 JSON 文件推导类型（需要 `tsconfig.json` 的 `resol
 
 #### 类型声明
 
-```typescript
-// packages/app-shell/src/i18n/i18next.d.ts
-import type common from "./zh-CN/common.json";
-import type shell from "./zh-CN/shell.json";
-
-/**
- * 扩展 i18next 的 CustomTypeOptions，让 t('shell:action.logout') 这类调用获得类型补全。
- *
- * 机制：TypeScript module augmentation——
- * - 直接从 zh-CN JSON 文件推导类型（resolveJsonModule: true）
- * - 注入 i18next 的 CustomTypeOptions
- * - 零额外依赖、零构建步骤
- *
- * L5 业务字典的类型扩展在 apps/web-admin/src/i18n/i18next.d.ts 中声明。
- */
-declare module "i18next" {
-  interface CustomTypeOptions {
-    defaultNS: "common";
-    resources: {
-      common: typeof common;
-      shell: typeof shell;
-    };
-  }
-}
-```
+类型声明收敛到 L5（`apps/web-admin/src/i18n/i18next.d.ts`），统一 import L4 的 `common`/`shell` + L5 自己的业务 JSON。L4 不单独声明——避免 TypeScript interface merge 时 `resources` 属性冲突。
 
 ```typescript
 // apps/web-admin/src/i18n/i18next.d.ts
+// ——唯一的 i18next 类型声明入口，L4 不单独声明 declare module "i18next"
+
+// L4 框架字典
+import type common from "@mb/app-shell/i18n/zh-CN/common.json";
+import type shell from "@mb/app-shell/i18n/zh-CN/shell.json";
+
+// L5 业务字典
 import type order from "./zh-CN/order.json";
 import type customer from "./zh-CN/customer.json";
 import type product from "./zh-CN/product.json";
 import type settings from "./zh-CN/settings.json";
 
 /**
- * L5 业务字典类型扩展。
+ * 扩展 i18next 的 CustomTypeOptions，让 t('shell:action.logout') / t('order:columns.orderNo')
+ * 这类调用获得类型补全。
+ *
+ * 机制：TypeScript module augmentation——
+ * - 直接从 zh-CN JSON 文件推导类型（resolveJsonModule: true）
+ * - 注入 i18next 的 CustomTypeOptions
+ * - 零额外依赖、零构建步骤
+ *
+ * L4 的 common/shell 和 L5 的业务字典在此统一声明，
+ * 避免 L4/L5 各写一份 declare module 导致 interface merge 时 resources 属性冲突。
  * 新增业务模块字典时在此加一行 import + 一行 resources 声明。
  */
 declare module "i18next" {
   interface CustomTypeOptions {
+    defaultNS: "common";
     resources: {
+      // L4 框架字典
+      common: typeof common;
+      shell: typeof shell;
+      // L5 业务字典
       order: typeof order;
       customer: typeof customer;
       product: typeof product;
@@ -1333,8 +1329,7 @@ packages/app-shell/
     │   ├── index.ts
     │   ├── i18n-instance.ts            # §7.1
     │   ├── use-language.ts             # §7.4
-    │   ├── i18next.d.ts                # §7.7（module augmentation，零构建步骤）
-    │   ├── zh-CN/
+    │   ├── zh-CN/                      # §7.7 类型声明已收敛到 L5（apps/web-admin/src/i18n/i18next.d.ts）
     │   │   ├── shell.json              # §7.2
     │   │   └── common.json
     │   └── en-US/

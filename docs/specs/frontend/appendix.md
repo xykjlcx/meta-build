@@ -74,7 +74,7 @@
 | 术语 | 定义 | 详见 |
 |---|---|---|
 | **ProblemDetail** | RFC 9457 标准的错误响应格式；后端 `GlobalExceptionHandler` 返回 + 前端 `ProblemDetailError` 反序列化 + 按 type/status 分发到 Toast/Dialog/登录页 | [08-contract-client.md §5](./08-contract-client.md) |
-| **PageResult** | 分页响应的共享类型：`{ content: T[], totalElements: number, page: number, size: number }`；前后端共享 | [08-contract-client.md §5.4](./08-contract-client.md) |
+| **PageResult** | 分页响应的共享类型：`{ content: T[], totalElements: number, totalPages: number, page: number, size: number }`；前后端共享 | [08-contract-client.md §5.4](./08-contract-client.md) |
 | **api-sdk 拦截器** | 前端 HTTP 请求全局拦截器：自动注入 Authorization / Accept-Language / X-Request-ID header | [08-contract-client.md §4](./08-contract-client.md) |
 
 ---
@@ -86,7 +86,7 @@
 ```mermaid
 graph LR
     tokens[&commat;mb/ui-tokens<br/>L1 设计令牌]
-    primitives[&commat;mb/ui-primitives<br/>L2 29 原子组件]
+    primitives[&commat;mb/ui-primitives<br/>L2 30 原子组件]
     patterns[&commat;mb/ui-patterns<br/>L3 7 业务组件]
     shell[&commat;mb/app-shell<br/>L4 布局 Provider 壳]
     sdk[&commat;mb/api-sdk<br/>契约生成物]

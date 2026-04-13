@@ -633,6 +633,29 @@ main().catch((err) => {
 
 <!-- verify: cd client && pnpm check:permissions -->
 
+### 6.4 权限点命名约定
+
+**格式**：`<module>.<action>`（点分隔）
+
+**action 词表**：
+
+| action | 适用场景 | 例子 |
+|---|---|---|
+| `list` | 集合页（表格/列表） | `order.list`、`user.list` |
+| `view` | 单体聚合页 | `dashboard.view`、`settings.view` |
+| `detail` | 详情页 | `order.detail`、`user.detail` |
+| `create` | 新建页/操作 | `order.create` |
+| `edit` | 编辑页/操作 | `order.edit` |
+| `delete` | 删除按钮 | `order.delete` |
+
+**设计原则**：
+
+> **"分配了页面权限 = 页面完整可见"**。运维只理解页面和按钮，不理解接口。给了 `dashboard.view`，仪表盘所有内容必须正常展示，不允许出现组件级 403 降级。
+
+**一套权限两层执行**：
+
+> 同一个权限点被前端路由守卫和后端 `@RequirePermission` 共同消费，运维只分配一次。后端 `@RequirePermission` 只打在 Controller 入口，Service 内部调用不检查调用者权限。
+
 ---
 
 ## 7. 角色关联 sys_role_menu
@@ -1294,7 +1317,7 @@ export function RouteTreePicker<TForm extends FieldValues>(
 | 入口 | `useCurrentUser()` hook（在 `@mb/app-shell`） | `CurrentUser` 组件（在 `mb-infra/infra-security`） |
 | 提供能力 | `userId` / `username` / `tenantId` / `permissions` / `hasPermission(code)` / `dataScope` | `userId()` / `username()` / `tenantId()` / `hasPermission()` / `dataScopeType()` / `dataScopeDeptIds()` |
 | 业务层禁令 | features/** 不得直接 import `@mb/api-sdk/auth/*` 的状态接口（见 [08-contract-client.md §6](./08-contract-client.md)） | 业务层不得 import `cn.dev33.satoken.*`（ArchUnit `BUSINESS_MUST_NOT_DEPEND_ON_SA_TOKEN`，见 [../backend/05-security.md](../backend/05-security.md)） |
-| 数据流 | 登录成功后存入 zustand store + React context | 登录时 `AuthFacade.doLogin()` 把权限 / dataScope 写入 Sa-Token session |
+| 数据流 | 登录成功后存入 localStorage + TanStack Query cache | 登录时 `AuthFacade.doLogin()` 把权限 / dataScope 写入 Sa-Token session |
 
 **对称性**：前后端都通过门面隔离了"认证框架的具体实现"——前端业务代码不知道 Sa-Token 的存在，后端业务代码也不知道。
 

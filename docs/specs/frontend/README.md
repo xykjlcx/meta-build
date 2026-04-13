@@ -20,7 +20,7 @@ meta-build 前端 = **给 AI 执行的不可动摇的契约 + 千人千面的定
 |------|-------|-------|
 | [01-layer-structure.md](./01-layer-structure.md) | 5 层 package 结构 + 依赖方向 + 脚手架定位 + 每层白名单 | **从这里开始** / 加新 package / 调依赖方向 |
 | [02-ui-tokens-theme.md](./02-ui-tokens-theme.md) | L1 CSS Variables + Theme + 扁平命名 + 完整性校验脚本 | 改主题 / 加新主题 / 调整语义 token |
-| [03-ui-primitives.md](./03-ui-primitives.md) | L2 29 原子组件 + Radix 隔离哲学 + Storybook 规范 | 改原子组件 / 加新 variant |
+| [03-ui-primitives.md](./03-ui-primitives.md) | L2 30 原子组件 + Radix 隔离哲学 + Storybook 规范 | 改原子组件 / 加新 variant |
 | [04-ui-patterns.md](./04-ui-patterns.md) | L3 7 业务组件 API + TanStack Table/RHF 隔离 | 改业务组件 / 加新复合组件 |
 | [05-app-shell.md](./05-app-shell.md) | L4 布局 + Provider + 认证门面 + 完整 i18n 工程 | 改布局 / 改 i18n / 改全局 UI |
 | [06-routing-and-data.md](./06-routing-and-data.md) | TanStack Router 文件路由 + TanStack Query + 路由守卫 | 加新路由 / 调数据加载 |
@@ -64,7 +64,7 @@ meta-build 前端 = **给 AI 执行的不可动摇的契约 + 千人千面的定
 client/
 ├── packages/
 │   ├── ui-tokens/          # L1 设计令牌 + Theme Registry（纯 CSS Variables）
-│   ├── ui-primitives/      # L2 29 原子组件（隔离 Radix/shadcn）
+│   ├── ui-primitives/      # L2 30 原子组件（隔离 Radix/shadcn）
 │   ├── ui-patterns/        # L3 7 业务组件（隔离 TanStack Table/RHF）
 │   ├── app-shell/          # L4 布局 + Provider + 认证门面 + i18n 机制
 │   └── api-sdk/            # 契约生成物（不入 git，OpenAPI Generator 产物）
@@ -143,7 +143,7 @@ client/
 |-----|------|------|
 | — | 前端暂无独立 ADR | **双树权限架构** 的 ADR 将在 M0 spec 定稿后单独讨论是否补写（memory 已记录决策和"禁止退化为单表"的承诺）|
 
-后端 ADR 见 [docs/adr/](../../adr/)（目前 0001-0008 全部为后端决策）。
+后端 ADR 见 [docs/adr/](../../adr/)（目前 0001-0012 全部为后端决策）。
 
 ---
 

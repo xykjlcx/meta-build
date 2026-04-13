@@ -99,20 +99,20 @@ declare module "@tanstack/react-router" {
 // apps/web-admin/src/routes/__root.tsx
 import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
 import type { QueryClient } from "@tanstack/react-query";
-import type { CurrentUser } from "@mb/app-shell/auth";
 import { GlobalErrorPage } from "@mb/app-shell/error";
 import { GlobalNotFoundPage } from "@mb/app-shell/error";
 import { GlobalLoading } from "@mb/app-shell/loading";
 
 /**
  * 根路由的 RouterContext。
- * 通过 createRouter({ context: { queryClient, currentUser } }) 注入，
- * 子路由的 beforeLoad / loader 通过 ({ context }) 访问。
+ * 通过 createRouter({ context: { queryClient } }) 注入。
+ *
+ * 注意：currentUser 不在根 context 中——它由 _authed.tsx 布局路由的
+ * beforeLoad 返回值通过 TanStack Router 的 context 扩展机制自动注入到
+ * 所有受保护的子路由 context 中。详见 §2.4 _authed.tsx 骨架。
  */
 export interface RouterContext {
   queryClient: QueryClient;
-  /** 由 L4 的 useCurrentUser() 暴露的 currentUser snapshot；未登录时为 null */
-  currentUser: CurrentUser | null;
 }
 
 export const Route = createRootRouteWithContext<RouterContext>()({
@@ -176,6 +176,7 @@ function AuthedLayout() {
 import { redirect } from "@tanstack/react-router";
 import type { ParsedLocation } from "@tanstack/react-router";
 import type { RouterContext } from "../router/context";
+import type { CurrentUser } from "../auth/use-current-user";
 import type { AppPermission } from "@mb/api-sdk";
 
 export interface RequireAuthOptions {
@@ -187,17 +188,30 @@ export interface RequireAuthOptions {
 }
 
 /**
+ * _authed 布局路由的 beforeLoad 返回 { currentUser } 后，
+ * TanStack Router 自动把它合并到子路由的 context 中。
+ * 所以 requireAuth 接收的 context 是 RouterContext & { currentUser: CurrentUser }。
+ */
+interface AuthedContext extends RouterContext {
+  currentUser: CurrentUser;
+}
+
+/**
  * 路由守卫工厂。返回一个 beforeLoad 函数，在 loader 之前同步执行。
  *
- * 用法（在 routes/_authed/_authed.tsx 或单个路由文件里）：
+ * 用法（在 routes/_authed 的子路由文件里）：
  *   beforeLoad: requireAuth({ permission: 'order.read' })
+ *
+ * 前提：本函数在 _authed 布局路由的子路由中使用，
+ * _authed.tsx 的 beforeLoad 已经通过 ensureQueryData 获取用户数据
+ * 并返回 { currentUser }，TanStack Router 自动将其扩展到子路由 context。
  *
  * 决策来源：brainstorming 阶段确认"前端 requireAuth ↔ 后端 @RequirePermission" 共享同一份 AppPermission 清单。
  * 详见 docs/specs/frontend/07-menu-permission.md §6（权限一致性）和
  *       docs/specs/backend/05-security.md §2（@RequirePermission）。
  */
 export function requireAuth(options: RequireAuthOptions = {}) {
-  return ({ context, location }: { context: RouterContext; location: ParsedLocation }) => {
+  return ({ context, location }: { context: AuthedContext; location: ParsedLocation }) => {
     const { currentUser } = context;
 
     // 第 1 道：未登录 → 跳登录页（带 redirect 参数）
@@ -226,7 +240,7 @@ export class ForbiddenError extends Error {
 
 ### 3.2 与 useCurrentUser 的关系
 
-- `requireAuth` 在**路由层**运行（`beforeLoad` 是路由生命周期的一部分），通过 `RouterContext.currentUser` 拿到当前用户的快照
+- `requireAuth` 在**路由层**运行（`beforeLoad` 是路由生命周期的一部分），通过 `_authed` 布局路由扩展到子路由 context 中的 `currentUser` 拿到当前用户的快照
 - `useCurrentUser()` 在**组件层**运行（详见 [05 §5.1](./05-app-shell.md#51-usecurrentuser-hook)），从 `QueryClient` 缓存里读同一份数据
 - 数据源是统一的：`_authed.tsx` 的 `beforeLoad` 通过 `await queryClient.ensureQueryData({ queryKey: ['auth', 'me'] })` 拿到当前用户快照并传入子路由 context，每次登录/登出后调用 `router.invalidate()` 刷新
 
@@ -705,10 +719,15 @@ function OrderListPage() {
       <NxTable<OrderView>
         columns={columns}
         data={data.content}
-        totalElements={data.totalElements}
-        page={search.page}
-        size={search.size}
-        onPageChange={(page) => navigate({ search: (prev) => ({ ...prev, page }) })}
+        pagination={{
+          page: search.page,
+          size: search.size,
+          totalElements: data.totalElements,
+          totalPages: data.totalPages,
+        }}
+        onPaginationChange={(next) =>
+          navigate({ search: (prev) => ({ ...prev, page: next.page }) })
+        }
         onRowClick={(order) => navigate({ to: "/orders/$id", params: { id: order.id } })}
       />
     </div>
@@ -780,7 +799,7 @@ function OrderDetailPage() {
 | 前端 | 后端 |
 |------|------|
 | `requireAuth({ permission: 'order.read' })` | `@RequirePermission("order.read")`（详见 [backend/05-security.md §2](../backend/05-security.md#2-权限模型-currentuser--requirepermission)） |
-| `RouterContext.currentUser`（来自 `useCurrentUser`） | `CurrentUser` 门面（详见 [backend/05-security.md §6](../backend/05-security.md#6-currentuser-门面层设计adr-0005)） |
+| `_authed` 布局路由 context 扩展的 `currentUser`（来自 `ensureQueryData`，对应 `useCurrentUser`） | `CurrentUser` 门面（详见 [backend/05-security.md §6](../backend/05-security.md#6-currentuser-门面层设计adr-0005)） |
 | `ordersApi.list({ page: 1, size: 20 })` | `GET /api/v1/orders?page=1&size=20`，返回 `PageResult<OrderView>`（详见 [backend/06-api-and-contract.md §3](../backend/06-api-and-contract.md#3-响应格式混合方案-m4)） |
 | `errorComponent` 接 `ProblemDetailError` | 后端 `RFC 9457 ProblemDetail`（详见 [backend/06-api-and-contract.md §3](../backend/06-api-and-contract.md#3-响应格式混合方案-m4)） |
 | `notFound()` 触发 `notFoundComponent` | 后端 `NotFoundException` → `404 ProblemDetail`（详见 [backend/06-api-and-contract.md §1](../backend/06-api-and-contract.md#1-异常基类层次-m4)） |

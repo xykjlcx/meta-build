@@ -131,7 +131,7 @@ client/packages/
 | 任何业务 API 路径（如 `/api/orders` / `/api/customers`） | 业务接口 |
 | 默认中文文案（"暂无数据" "加载中" "操作成功"） | i18n 由使用方调用 |
 
-**只允许出现**：通用 props 名（`dataSource` / `columns` / `value` / `onChange` / `loading` / `emptyText` / `errorText` / `pageSize` 等）
+**只允许出现**：通用 props 名（`dataSource` / `columns` / `value` / `onChange` / `loading` / `emptyText` / `errorText` / `size` / `page` 等）
 
 ### 4.2 反面写法
 
@@ -157,7 +157,7 @@ export const NxLoading = ({ children }: Props) => {
 export interface NxTableProps<TData> {
   data: TData[];                       // 通用泛型
   columns: ColumnDef<TData>[];         // 通用泛型
-  pagination?: PaginationState;        // 通用 state
+  pagination?: NxTablePagination;      // 通用 state
   emptyText?: React.ReactNode;         // 文案由调用方传
 }
 
@@ -232,9 +232,10 @@ import type {
 import type * as React from 'react';
 
 export interface NxTablePagination {
-  pageIndex: number;
-  pageSize: number;
-  total: number;
+  page: number;           // 从 1 开始，与后端 PageResult 一致
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }
 
 export interface NxTableProps<TData> {
@@ -253,7 +254,7 @@ export interface NxTableProps<TData> {
   /** 分页（传 undefined 表示禁用分页） */
   pagination?: NxTablePagination;
   /** 分页变更回调 */
-  onPaginationChange?: (next: PaginationState) => void;
+  onPaginationChange?: (next: NxTablePagination) => void;
   /** 排序状态（受控） */
   sorting?: SortingState;
   /** 排序变更回调 */
@@ -458,14 +459,14 @@ export interface ApiSelectFetchParams {
   /** 当前页 */
   page: number;
   /** 每页数量 */
-  pageSize: number;
+  size: number;
 }
 
 export interface ApiSelectFetchResult<TValue = string> {
   /** 选项列表 */
   options: ApiSelectOption<TValue>[];
   /** 总数（用于判断是否还有下一页） */
-  total: number;
+  totalElements: number;
 }
 
 export interface ApiSelectProps<TValue = string> {
@@ -482,7 +483,7 @@ export interface ApiSelectProps<TValue = string> {
   /** 空状态文案 */
   emptyText: React.ReactNode;
   /** 每页数量 */
-  pageSize?: number;
+  size?: number;
   /** debounce 间隔（毫秒） */
   debounceMs?: number;
   /** 缓存 key（同 key 的请求会缓存） */
@@ -637,7 +638,7 @@ export const WithPagination: Story = {
   args: {
     data: demoData,
     columns: demoColumns,
-    pagination: { pageIndex: 0, pageSize: 10, total: 100 },
+    pagination: { page: 1, size: 10, totalElements: 100, totalPages: 10 },
     onPaginationChange: () => {},
   },
 };
@@ -738,14 +739,14 @@ describe('L3 业务语义扫描', () => {
 ### 9.1 修改现有业务组件 [使用者动作]
 
 ```text
-场景：把 NxTable 的默认 pageSize 从 10 改成 20
+场景：把 NxTable 的默认 size 从 10 改成 20
 
 1. 打开 client/packages/ui-patterns/src/nx-table.tsx
 2. 找到 useReactTable 的 initialState.pagination
-3. 修改 pageSize: 10 → pageSize: 20
+3. 修改 size: 10 → size: 20
 4. 运行 pnpm -F @mb/ui-patterns test
 5. 启动 pnpm -F @mb/ui-patterns storybook 验证
-6. 全站 NxTable 默认 pageSize 自动变化（除非调用方显式传 pagination）
+6. 全站 NxTable 默认 size 自动变化（除非调用方显式传 pagination）
 ```
 
 ### 9.2 添加新业务组件 [使用者动作]
@@ -808,9 +809,10 @@ import {
 } from '@mb/ui-primitives';
 
 export interface NxTablePagination {
-  pageIndex: number;
-  pageSize: number;
-  total: number;
+  page: number;           // 从 1 开始，与后端 PageResult 一致
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }
 
 export interface NxTableProps<TData> {
@@ -821,7 +823,7 @@ export interface NxTableProps<TData> {
   emptyText?: React.ReactNode;
   onRowClick?: (row: TData) => void;
   pagination?: NxTablePagination;
-  onPaginationChange?: (next: PaginationState) => void;
+  onPaginationChange?: (next: NxTablePagination) => void;
   sorting?: SortingState;
   onSortingChange?: (next: SortingState) => void;
   rowSelection?: RowSelectionState;
@@ -852,12 +854,13 @@ export function NxTable<TData>(props: NxTableProps<TData>): React.JSX.Element {
     className,
   } = props;
 
+  // NxTablePagination.page 从 1 开始，TanStack Table 的 pageIndex 从 0 开始
   const tablePagination = React.useMemo<PaginationState>(
     () => ({
-      pageIndex: pagination?.pageIndex ?? 0,
-      pageSize: pagination?.pageSize ?? 10,
+      pageIndex: (pagination?.page ?? 1) - 1,
+      pageSize: pagination?.size ?? 10,
     }),
-    [pagination?.pageIndex, pagination?.pageSize],
+    [pagination?.page, pagination?.size],
   );
 
   const table = useReactTable<TData>({
@@ -869,7 +872,7 @@ export function NxTable<TData>(props: NxTableProps<TData>): React.JSX.Element {
     getSortedRowModel: sorting ? getSortedRowModel() : undefined,
     manualPagination: pagination !== undefined,
     pageCount: pagination
-      ? Math.max(1, Math.ceil(pagination.total / pagination.pageSize))
+      ? pagination.totalPages
       : undefined,
     state: {
       pagination: tablePagination,
@@ -878,7 +881,13 @@ export function NxTable<TData>(props: NxTableProps<TData>): React.JSX.Element {
     },
     onPaginationChange: (updater) => {
       const next = resolveUpdater(updater, tablePagination);
-      onPaginationChange?.(next);
+      // TanStack 内部 pageIndex(0-based) → NxTablePagination.page(1-based)
+      onPaginationChange?.({
+        page: next.pageIndex + 1,
+        size: next.pageSize,
+        totalElements: pagination?.totalElements ?? 0,
+        totalPages: pagination?.totalPages ?? 1,
+      });
     },
     onSortingChange: (updater) => {
       const next = resolveUpdater(updater, sorting ?? []);
@@ -954,18 +963,20 @@ export function NxTable<TData>(props: NxTableProps<TData>): React.JSX.Element {
       {pagination ? (
         <div className="flex items-center justify-end gap-2 text-sm text-muted-foreground">
           <span>
-            {pagination.pageIndex * pagination.pageSize + 1}-
-            {Math.min((pagination.pageIndex + 1) * pagination.pageSize, pagination.total)} /{' '}
-            {pagination.total}
+            {(pagination.page - 1) * pagination.size + 1}-
+            {Math.min(pagination.page * pagination.size, pagination.totalElements)} /{' '}
+            {pagination.totalElements}
           </span>
           <Button
             variant="outline"
             size="sm"
-            disabled={pagination.pageIndex === 0}
+            disabled={pagination.page <= 1}
             onClick={() =>
               onPaginationChange?.({
-                pageIndex: pagination.pageIndex - 1,
-                pageSize: pagination.pageSize,
+                page: pagination.page - 1,
+                size: pagination.size,
+                totalElements: pagination.totalElements,
+                totalPages: pagination.totalPages,
               })
             }
             aria-label="prev"
@@ -975,11 +986,13 @@ export function NxTable<TData>(props: NxTableProps<TData>): React.JSX.Element {
           <Button
             variant="outline"
             size="sm"
-            disabled={(pagination.pageIndex + 1) * pagination.pageSize >= pagination.total}
+            disabled={pagination.page >= pagination.totalPages}
             onClick={() =>
               onPaginationChange?.({
-                pageIndex: pagination.pageIndex + 1,
-                pageSize: pagination.pageSize,
+                page: pagination.page + 1,
+                size: pagination.size,
+                totalElements: pagination.totalElements,
+                totalPages: pagination.totalPages,
               })
             }
             aria-label="next"

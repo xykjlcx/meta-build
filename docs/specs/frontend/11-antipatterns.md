@@ -78,7 +78,7 @@ export function StatusBadge({ status }: { status: 'paid' | 'pending' | 'canceled
 }
 ```
 
-`bg-success` 在 `tailwind.config.ts` 里映射到 `var(--color-success)`，最终消费 [02-ui-tokens-theme.md §3 语义 token 完整清单](./02-ui-tokens-theme.md) 定义的源数据。
+`bg-success` 在 `tailwind-theme.css` 的 `@theme` 指令中映射到 `var(--color-success)`，最终消费 [02-ui-tokens-theme.md §3 语义 token 完整清单](./02-ui-tokens-theme.md) 定义的源数据。
 
 ### 2.4 防御机制
 
