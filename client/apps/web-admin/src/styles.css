@@ -1,5 +1,7 @@
 @import "tailwindcss";
+@import "tw-animate-css";
 @import "@mb/ui-tokens/tailwind-theme.css";
+@import "@mb/ui-tokens/themes/index.css";
 
 body {
   margin: 0;

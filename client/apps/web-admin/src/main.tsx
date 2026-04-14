@@ -1,6 +1,10 @@
+import { initTheme } from '@mb/ui-tokens';
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
+
+// 在 React 渲染前应用主题，避免闪烁
+initTheme();
 
 function LoginPage() {
   return (
