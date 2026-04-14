@@ -7,7 +7,8 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./auth": "./src/apis/auth-api.ts"
+    "./auth": "./src/apis/auth-api.ts",
+    "./types": "./src/types/index.ts"
   },
   "scripts": {
     "test": "vitest run",
