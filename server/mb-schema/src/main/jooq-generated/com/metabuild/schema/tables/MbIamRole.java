@@ -7,6 +7,12 @@ package com.metabuild.schema.tables;
 import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamDept.MbIamDeptPath;
+import com.metabuild.schema.tables.MbIamMenu.MbIamMenuPath;
+import com.metabuild.schema.tables.MbIamRoleDataScopeDept.MbIamRoleDataScopeDeptPath;
+import com.metabuild.schema.tables.MbIamRoleMenu.MbIamRoleMenuPath;
+import com.metabuild.schema.tables.MbIamUser.MbIamUserPath;
+import com.metabuild.schema.tables.MbIamUserRole.MbIamUserRolePath;
 import com.metabuild.schema.tables.records.MbIamRoleRecord;
 
 import java.time.OffsetDateTime;
@@ -16,10 +22,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -154,6 +164,39 @@ public class MbIamRole extends TableImpl<MbIamRoleRecord> {
         this(DSL.name("mb_iam_role"), null);
     }
 
+    public <O extends Record> MbIamRole(Table<O> path, ForeignKey<O, MbIamRoleRecord> childPath, InverseForeignKey<O, MbIamRoleRecord> parentPath) {
+        super(path, childPath, parentPath, MB_IAM_ROLE);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbIamRolePath extends MbIamRole implements Path<MbIamRoleRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbIamRolePath(Table<O> path, ForeignKey<O, MbIamRoleRecord> childPath, InverseForeignKey<O, MbIamRoleRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbIamRolePath(Name alias, Table<MbIamRoleRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbIamRolePath as(String alias) {
+            return new MbIamRolePath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbIamRolePath as(Name alias) {
+            return new MbIamRolePath(alias, this);
+        }
+
+        @Override
+        public MbIamRolePath as(Table<?> alias) {
+            return new MbIamRolePath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -167,6 +210,69 @@ public class MbIamRole extends TableImpl<MbIamRoleRecord> {
     @Override
     public UniqueKey<MbIamRoleRecord> getPrimaryKey() {
         return Keys.MB_IAM_ROLE_PKEY;
+    }
+
+    private transient MbIamRoleDataScopeDeptPath _mbIamRoleDataScopeDept;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_iam_role_data_scope_dept</code> table
+     */
+    public MbIamRoleDataScopeDeptPath mbIamRoleDataScopeDept() {
+        if (_mbIamRoleDataScopeDept == null)
+            _mbIamRoleDataScopeDept = new MbIamRoleDataScopeDeptPath(this, null, Keys.MB_IAM_ROLE_DATA_SCOPE_DEPT__FK_IAM_ROLE_DSD_ROLE.getInverseKey());
+
+        return _mbIamRoleDataScopeDept;
+    }
+
+    private transient MbIamRoleMenuPath _mbIamRoleMenu;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_iam_role_menu</code> table
+     */
+    public MbIamRoleMenuPath mbIamRoleMenu() {
+        if (_mbIamRoleMenu == null)
+            _mbIamRoleMenu = new MbIamRoleMenuPath(this, null, Keys.MB_IAM_ROLE_MENU__FK_IAM_ROLE_MENU_ROLE.getInverseKey());
+
+        return _mbIamRoleMenu;
+    }
+
+    private transient MbIamUserRolePath _mbIamUserRole;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_iam_user_role</code> table
+     */
+    public MbIamUserRolePath mbIamUserRole() {
+        if (_mbIamUserRole == null)
+            _mbIamUserRole = new MbIamUserRolePath(this, null, Keys.MB_IAM_USER_ROLE__FK_IAM_USER_ROLE_ROLE.getInverseKey());
+
+        return _mbIamUserRole;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>public.mb_iam_dept</code> table
+     */
+    public MbIamDeptPath mbIamDept() {
+        return mbIamRoleDataScopeDept().mbIamDept();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>public.mb_iam_menu</code> table
+     */
+    public MbIamMenuPath mbIamMenu() {
+        return mbIamRoleMenu().mbIamMenu();
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>public.mb_iam_user</code> table
+     */
+    public MbIamUserPath mbIamUser() {
+        return mbIamUserRole().mbIamUser();
     }
 
     @Override

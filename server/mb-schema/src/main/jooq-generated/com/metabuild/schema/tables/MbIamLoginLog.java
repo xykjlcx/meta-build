@@ -7,6 +7,7 @@ package com.metabuild.schema.tables;
 import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamUser.MbIamUserPath;
 import com.metabuild.schema.tables.records.MbIamLoginLogRecord;
 
 import java.time.OffsetDateTime;
@@ -16,10 +17,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -123,6 +128,39 @@ public class MbIamLoginLog extends TableImpl<MbIamLoginLogRecord> {
         this(DSL.name("mb_iam_login_log"), null);
     }
 
+    public <O extends Record> MbIamLoginLog(Table<O> path, ForeignKey<O, MbIamLoginLogRecord> childPath, InverseForeignKey<O, MbIamLoginLogRecord> parentPath) {
+        super(path, childPath, parentPath, MB_IAM_LOGIN_LOG);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbIamLoginLogPath extends MbIamLoginLog implements Path<MbIamLoginLogRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbIamLoginLogPath(Table<O> path, ForeignKey<O, MbIamLoginLogRecord> childPath, InverseForeignKey<O, MbIamLoginLogRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbIamLoginLogPath(Name alias, Table<MbIamLoginLogRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbIamLoginLogPath as(String alias) {
+            return new MbIamLoginLogPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbIamLoginLogPath as(Name alias) {
+            return new MbIamLoginLogPath(alias, this);
+        }
+
+        @Override
+        public MbIamLoginLogPath as(Table<?> alias) {
+            return new MbIamLoginLogPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -136,6 +174,23 @@ public class MbIamLoginLog extends TableImpl<MbIamLoginLogRecord> {
     @Override
     public UniqueKey<MbIamLoginLogRecord> getPrimaryKey() {
         return Keys.MB_IAM_LOGIN_LOG_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbIamLoginLogRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_IAM_LOGIN_LOG__FK_IAM_LOGIN_LOG_USER);
+    }
+
+    private transient MbIamUserPath _mbIamUser;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_user</code> table.
+     */
+    public MbIamUserPath mbIamUser() {
+        if (_mbIamUser == null)
+            _mbIamUser = new MbIamUserPath(this, Keys.MB_IAM_LOGIN_LOG__FK_IAM_LOGIN_LOG_USER, null);
+
+        return _mbIamUser;
     }
 
     @Override

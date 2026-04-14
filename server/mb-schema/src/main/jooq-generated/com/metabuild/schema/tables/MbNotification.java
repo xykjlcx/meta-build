@@ -7,6 +7,8 @@ package com.metabuild.schema.tables;
 import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamUser.MbIamUserPath;
+import com.metabuild.schema.tables.MbNotificationRead.MbNotificationReadPath;
 import com.metabuild.schema.tables.records.MbNotificationRecord;
 
 import java.time.OffsetDateTime;
@@ -16,10 +18,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -148,6 +154,39 @@ public class MbNotification extends TableImpl<MbNotificationRecord> {
         this(DSL.name("mb_notification"), null);
     }
 
+    public <O extends Record> MbNotification(Table<O> path, ForeignKey<O, MbNotificationRecord> childPath, InverseForeignKey<O, MbNotificationRecord> parentPath) {
+        super(path, childPath, parentPath, MB_NOTIFICATION);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbNotificationPath extends MbNotification implements Path<MbNotificationRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbNotificationPath(Table<O> path, ForeignKey<O, MbNotificationRecord> childPath, InverseForeignKey<O, MbNotificationRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbNotificationPath(Name alias, Table<MbNotificationRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbNotificationPath as(String alias) {
+            return new MbNotificationPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbNotificationPath as(Name alias) {
+            return new MbNotificationPath(alias, this);
+        }
+
+        @Override
+        public MbNotificationPath as(Table<?> alias) {
+            return new MbNotificationPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -161,6 +200,36 @@ public class MbNotification extends TableImpl<MbNotificationRecord> {
     @Override
     public UniqueKey<MbNotificationRecord> getPrimaryKey() {
         return Keys.MB_NOTIFICATION_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbNotificationRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_NOTIFICATION__FK_NOTIFICATION_SENDER);
+    }
+
+    private transient MbIamUserPath _mbIamUser;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_user</code> table.
+     */
+    public MbIamUserPath mbIamUser() {
+        if (_mbIamUser == null)
+            _mbIamUser = new MbIamUserPath(this, Keys.MB_NOTIFICATION__FK_NOTIFICATION_SENDER, null);
+
+        return _mbIamUser;
+    }
+
+    private transient MbNotificationReadPath _mbNotificationRead;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_notification_read</code> table
+     */
+    public MbNotificationReadPath mbNotificationRead() {
+        if (_mbNotificationRead == null)
+            _mbNotificationRead = new MbNotificationReadPath(this, null, Keys.MB_NOTIFICATION_READ__FK_NOTIFICATION_READ_NOTIFICATION.getInverseKey());
+
+        return _mbNotificationRead;
     }
 
     @Override

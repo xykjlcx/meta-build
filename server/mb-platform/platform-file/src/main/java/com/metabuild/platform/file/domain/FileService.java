@@ -115,7 +115,7 @@ public class FileService {
         record.setContentType(contentType);
         record.setFileExtension(extension);
         record.setSha256(sha256);
-        record.setUploaderId(currentUser.isAuthenticated() ? currentUser.userId() : 0L);
+        record.setUploaderId(currentUser.isAuthenticated() ? currentUser.userId() : null);
         record.setOwnerDeptId(currentUser.isAuthenticated() && currentUser.deptId() != null
             ? currentUser.deptId() : 0L);
         record.setVersion(0);

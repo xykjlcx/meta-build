@@ -67,7 +67,7 @@ public class MenuService implements MenuApi {
     @Transactional
     public Long createMenu(MenuCreateCommand request) {
         var record = new MbIamMenuRecord();
-        record.setParentId(request.parentId() != null ? request.parentId() : 0L);
+        record.setParentId(request.parentId()); // null 表示顶级菜单
         record.setName(request.name());
         record.setPermissionCode(request.permissionCode());
         record.setMenuType(request.menuType());

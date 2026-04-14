@@ -7,6 +7,7 @@ package com.metabuild.schema.tables;
 import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamUser.MbIamUserPath;
 import com.metabuild.schema.tables.records.MbIamPasswordHistoryRecord;
 
 import java.time.OffsetDateTime;
@@ -16,10 +17,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -105,6 +110,39 @@ public class MbIamPasswordHistory extends TableImpl<MbIamPasswordHistoryRecord> 
         this(DSL.name("mb_iam_password_history"), null);
     }
 
+    public <O extends Record> MbIamPasswordHistory(Table<O> path, ForeignKey<O, MbIamPasswordHistoryRecord> childPath, InverseForeignKey<O, MbIamPasswordHistoryRecord> parentPath) {
+        super(path, childPath, parentPath, MB_IAM_PASSWORD_HISTORY);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbIamPasswordHistoryPath extends MbIamPasswordHistory implements Path<MbIamPasswordHistoryRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbIamPasswordHistoryPath(Table<O> path, ForeignKey<O, MbIamPasswordHistoryRecord> childPath, InverseForeignKey<O, MbIamPasswordHistoryRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbIamPasswordHistoryPath(Name alias, Table<MbIamPasswordHistoryRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbIamPasswordHistoryPath as(String alias) {
+            return new MbIamPasswordHistoryPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbIamPasswordHistoryPath as(Name alias) {
+            return new MbIamPasswordHistoryPath(alias, this);
+        }
+
+        @Override
+        public MbIamPasswordHistoryPath as(Table<?> alias) {
+            return new MbIamPasswordHistoryPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -118,6 +156,23 @@ public class MbIamPasswordHistory extends TableImpl<MbIamPasswordHistoryRecord> 
     @Override
     public UniqueKey<MbIamPasswordHistoryRecord> getPrimaryKey() {
         return Keys.MB_IAM_PASSWORD_HISTORY_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbIamPasswordHistoryRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_IAM_PASSWORD_HISTORY__FK_IAM_PASSWORD_HISTORY_USER);
+    }
+
+    private transient MbIamUserPath _mbIamUser;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_user</code> table.
+     */
+    public MbIamUserPath mbIamUser() {
+        if (_mbIamUser == null)
+            _mbIamUser = new MbIamUserPath(this, Keys.MB_IAM_PASSWORD_HISTORY__FK_IAM_PASSWORD_HISTORY_USER, null);
+
+        return _mbIamUser;
     }
 
     @Override

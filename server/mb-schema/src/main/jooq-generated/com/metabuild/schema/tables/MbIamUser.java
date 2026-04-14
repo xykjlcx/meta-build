@@ -7,6 +7,15 @@ package com.metabuild.schema.tables;
 import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbFileMetadata.MbFileMetadataPath;
+import com.metabuild.schema.tables.MbIamDept.MbIamDeptPath;
+import com.metabuild.schema.tables.MbIamLoginLog.MbIamLoginLogPath;
+import com.metabuild.schema.tables.MbIamPasswordHistory.MbIamPasswordHistoryPath;
+import com.metabuild.schema.tables.MbIamRole.MbIamRolePath;
+import com.metabuild.schema.tables.MbIamUserRole.MbIamUserRolePath;
+import com.metabuild.schema.tables.MbNotification.MbNotificationPath;
+import com.metabuild.schema.tables.MbNotificationRead.MbNotificationReadPath;
+import com.metabuild.schema.tables.MbOperationLog.MbOperationLogPath;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
 
 import java.time.OffsetDateTime;
@@ -16,10 +25,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -174,6 +187,39 @@ public class MbIamUser extends TableImpl<MbIamUserRecord> {
         this(DSL.name("mb_iam_user"), null);
     }
 
+    public <O extends Record> MbIamUser(Table<O> path, ForeignKey<O, MbIamUserRecord> childPath, InverseForeignKey<O, MbIamUserRecord> parentPath) {
+        super(path, childPath, parentPath, MB_IAM_USER);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbIamUserPath extends MbIamUser implements Path<MbIamUserRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbIamUserPath(Table<O> path, ForeignKey<O, MbIamUserRecord> childPath, InverseForeignKey<O, MbIamUserRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbIamUserPath(Name alias, Table<MbIamUserRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbIamUserPath as(String alias) {
+            return new MbIamUserPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbIamUserPath as(Name alias) {
+            return new MbIamUserPath(alias, this);
+        }
+
+        @Override
+        public MbIamUserPath as(Table<?> alias) {
+            return new MbIamUserPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -187,6 +233,122 @@ public class MbIamUser extends TableImpl<MbIamUserRecord> {
     @Override
     public UniqueKey<MbIamUserRecord> getPrimaryKey() {
         return Keys.MB_IAM_USER_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbIamUserRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_IAM_USER__FK_IAM_USER_DEPT);
+    }
+
+    private transient MbIamDeptPath _mbIamDept;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_dept</code> table.
+     */
+    public MbIamDeptPath mbIamDept() {
+        if (_mbIamDept == null)
+            _mbIamDept = new MbIamDeptPath(this, Keys.MB_IAM_USER__FK_IAM_USER_DEPT, null);
+
+        return _mbIamDept;
+    }
+
+    private transient MbFileMetadataPath _mbFileMetadata;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_file_metadata</code> table
+     */
+    public MbFileMetadataPath mbFileMetadata() {
+        if (_mbFileMetadata == null)
+            _mbFileMetadata = new MbFileMetadataPath(this, null, Keys.MB_FILE_METADATA__FK_FILE_METADATA_UPLOADER.getInverseKey());
+
+        return _mbFileMetadata;
+    }
+
+    private transient MbIamLoginLogPath _mbIamLoginLog;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_iam_login_log</code> table
+     */
+    public MbIamLoginLogPath mbIamLoginLog() {
+        if (_mbIamLoginLog == null)
+            _mbIamLoginLog = new MbIamLoginLogPath(this, null, Keys.MB_IAM_LOGIN_LOG__FK_IAM_LOGIN_LOG_USER.getInverseKey());
+
+        return _mbIamLoginLog;
+    }
+
+    private transient MbIamPasswordHistoryPath _mbIamPasswordHistory;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_iam_password_history</code> table
+     */
+    public MbIamPasswordHistoryPath mbIamPasswordHistory() {
+        if (_mbIamPasswordHistory == null)
+            _mbIamPasswordHistory = new MbIamPasswordHistoryPath(this, null, Keys.MB_IAM_PASSWORD_HISTORY__FK_IAM_PASSWORD_HISTORY_USER.getInverseKey());
+
+        return _mbIamPasswordHistory;
+    }
+
+    private transient MbIamUserRolePath _mbIamUserRole;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_iam_user_role</code> table
+     */
+    public MbIamUserRolePath mbIamUserRole() {
+        if (_mbIamUserRole == null)
+            _mbIamUserRole = new MbIamUserRolePath(this, null, Keys.MB_IAM_USER_ROLE__FK_IAM_USER_ROLE_USER.getInverseKey());
+
+        return _mbIamUserRole;
+    }
+
+    private transient MbNotificationReadPath _mbNotificationRead;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_notification_read</code> table
+     */
+    public MbNotificationReadPath mbNotificationRead() {
+        if (_mbNotificationRead == null)
+            _mbNotificationRead = new MbNotificationReadPath(this, null, Keys.MB_NOTIFICATION_READ__FK_NOTIFICATION_READ_USER.getInverseKey());
+
+        return _mbNotificationRead;
+    }
+
+    private transient MbNotificationPath _mbNotification;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_notification</code> table
+     */
+    public MbNotificationPath mbNotification() {
+        if (_mbNotification == null)
+            _mbNotification = new MbNotificationPath(this, null, Keys.MB_NOTIFICATION__FK_NOTIFICATION_SENDER.getInverseKey());
+
+        return _mbNotification;
+    }
+
+    private transient MbOperationLogPath _mbOperationLog;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_operation_log</code> table
+     */
+    public MbOperationLogPath mbOperationLog() {
+        if (_mbOperationLog == null)
+            _mbOperationLog = new MbOperationLogPath(this, null, Keys.MB_OPERATION_LOG__FK_OPERATION_LOG_USER.getInverseKey());
+
+        return _mbOperationLog;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>public.mb_iam_role</code> table
+     */
+    public MbIamRolePath mbIamRole() {
+        return mbIamUserRole().mbIamRole();
     }
 
     @Override

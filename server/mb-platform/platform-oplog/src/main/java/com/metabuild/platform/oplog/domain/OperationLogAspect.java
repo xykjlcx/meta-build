@@ -83,7 +83,7 @@ public class OperationLogAspect {
                 record.setUsername(currentUser.username());
                 record.setTenantId(currentUser.tenantId());
             } else {
-                record.setUserId(0L);
+                record.setUserId(null);
                 record.setUsername("anonymous");
                 record.setTenantId(0L);
             }

@@ -7,6 +7,7 @@ package com.metabuild.schema.tables;
 import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamUser.MbIamUserPath;
 import com.metabuild.schema.tables.records.MbOperationLogRecord;
 
 import java.time.OffsetDateTime;
@@ -16,10 +17,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -67,7 +72,7 @@ public class MbOperationLog extends TableImpl<MbOperationLogRecord> {
     /**
      * The column <code>public.mb_operation_log.user_id</code>.
      */
-    public final TableField<MbOperationLogRecord, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<MbOperationLogRecord, Long> USER_ID = createField(DSL.name("user_id"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.mb_operation_log.username</code>.
@@ -163,6 +168,39 @@ public class MbOperationLog extends TableImpl<MbOperationLogRecord> {
         this(DSL.name("mb_operation_log"), null);
     }
 
+    public <O extends Record> MbOperationLog(Table<O> path, ForeignKey<O, MbOperationLogRecord> childPath, InverseForeignKey<O, MbOperationLogRecord> parentPath) {
+        super(path, childPath, parentPath, MB_OPERATION_LOG);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbOperationLogPath extends MbOperationLog implements Path<MbOperationLogRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbOperationLogPath(Table<O> path, ForeignKey<O, MbOperationLogRecord> childPath, InverseForeignKey<O, MbOperationLogRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbOperationLogPath(Name alias, Table<MbOperationLogRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbOperationLogPath as(String alias) {
+            return new MbOperationLogPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbOperationLogPath as(Name alias) {
+            return new MbOperationLogPath(alias, this);
+        }
+
+        @Override
+        public MbOperationLogPath as(Table<?> alias) {
+            return new MbOperationLogPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -176,6 +214,23 @@ public class MbOperationLog extends TableImpl<MbOperationLogRecord> {
     @Override
     public UniqueKey<MbOperationLogRecord> getPrimaryKey() {
         return Keys.MB_OPERATION_LOG_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbOperationLogRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_OPERATION_LOG__FK_OPERATION_LOG_USER);
+    }
+
+    private transient MbIamUserPath _mbIamUser;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_user</code> table.
+     */
+    public MbIamUserPath mbIamUser() {
+        if (_mbIamUser == null)
+            _mbIamUser = new MbIamUserPath(this, Keys.MB_OPERATION_LOG__FK_OPERATION_LOG_USER, null);
+
+        return _mbIamUser;
     }
 
     @Override

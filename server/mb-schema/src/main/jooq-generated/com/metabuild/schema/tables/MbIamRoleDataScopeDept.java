@@ -6,15 +6,23 @@ package com.metabuild.schema.tables;
 
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamDept.MbIamDeptPath;
+import com.metabuild.schema.tables.MbIamRole.MbIamRolePath;
 import com.metabuild.schema.tables.records.MbIamRoleDataScopeDeptRecord;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -90,6 +98,39 @@ public class MbIamRoleDataScopeDept extends TableImpl<MbIamRoleDataScopeDeptReco
         this(DSL.name("mb_iam_role_data_scope_dept"), null);
     }
 
+    public <O extends Record> MbIamRoleDataScopeDept(Table<O> path, ForeignKey<O, MbIamRoleDataScopeDeptRecord> childPath, InverseForeignKey<O, MbIamRoleDataScopeDeptRecord> parentPath) {
+        super(path, childPath, parentPath, MB_IAM_ROLE_DATA_SCOPE_DEPT);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbIamRoleDataScopeDeptPath extends MbIamRoleDataScopeDept implements Path<MbIamRoleDataScopeDeptRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbIamRoleDataScopeDeptPath(Table<O> path, ForeignKey<O, MbIamRoleDataScopeDeptRecord> childPath, InverseForeignKey<O, MbIamRoleDataScopeDeptRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbIamRoleDataScopeDeptPath(Name alias, Table<MbIamRoleDataScopeDeptRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbIamRoleDataScopeDeptPath as(String alias) {
+            return new MbIamRoleDataScopeDeptPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbIamRoleDataScopeDeptPath as(Name alias) {
+            return new MbIamRoleDataScopeDeptPath(alias, this);
+        }
+
+        @Override
+        public MbIamRoleDataScopeDeptPath as(Table<?> alias) {
+            return new MbIamRoleDataScopeDeptPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -98,6 +139,35 @@ public class MbIamRoleDataScopeDept extends TableImpl<MbIamRoleDataScopeDeptReco
     @Override
     public UniqueKey<MbIamRoleDataScopeDeptRecord> getPrimaryKey() {
         return Keys.MB_IAM_ROLE_DATA_SCOPE_DEPT_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbIamRoleDataScopeDeptRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_IAM_ROLE_DATA_SCOPE_DEPT__FK_IAM_ROLE_DSD_DEPT, Keys.MB_IAM_ROLE_DATA_SCOPE_DEPT__FK_IAM_ROLE_DSD_ROLE);
+    }
+
+    private transient MbIamDeptPath _mbIamDept;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_dept</code> table.
+     */
+    public MbIamDeptPath mbIamDept() {
+        if (_mbIamDept == null)
+            _mbIamDept = new MbIamDeptPath(this, Keys.MB_IAM_ROLE_DATA_SCOPE_DEPT__FK_IAM_ROLE_DSD_DEPT, null);
+
+        return _mbIamDept;
+    }
+
+    private transient MbIamRolePath _mbIamRole;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_role</code> table.
+     */
+    public MbIamRolePath mbIamRole() {
+        if (_mbIamRole == null)
+            _mbIamRole = new MbIamRolePath(this, Keys.MB_IAM_ROLE_DATA_SCOPE_DEPT__FK_IAM_ROLE_DSD_ROLE, null);
+
+        return _mbIamRole;
     }
 
     @Override

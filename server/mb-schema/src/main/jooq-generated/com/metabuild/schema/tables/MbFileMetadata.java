@@ -7,6 +7,7 @@ package com.metabuild.schema.tables;
 import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamUser.MbIamUserPath;
 import com.metabuild.schema.tables.records.MbFileMetadataRecord;
 
 import java.time.OffsetDateTime;
@@ -16,10 +17,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -102,7 +107,7 @@ public class MbFileMetadata extends TableImpl<MbFileMetadataRecord> {
     /**
      * The column <code>public.mb_file_metadata.uploader_id</code>.
      */
-    public final TableField<MbFileMetadataRecord, Long> UPLOADER_ID = createField(DSL.name("uploader_id"), SQLDataType.BIGINT.nullable(false), this, "");
+    public final TableField<MbFileMetadataRecord, Long> UPLOADER_ID = createField(DSL.name("uploader_id"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.mb_file_metadata.owner_dept_id</code>.
@@ -163,6 +168,39 @@ public class MbFileMetadata extends TableImpl<MbFileMetadataRecord> {
         this(DSL.name("mb_file_metadata"), null);
     }
 
+    public <O extends Record> MbFileMetadata(Table<O> path, ForeignKey<O, MbFileMetadataRecord> childPath, InverseForeignKey<O, MbFileMetadataRecord> parentPath) {
+        super(path, childPath, parentPath, MB_FILE_METADATA);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbFileMetadataPath extends MbFileMetadata implements Path<MbFileMetadataRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbFileMetadataPath(Table<O> path, ForeignKey<O, MbFileMetadataRecord> childPath, InverseForeignKey<O, MbFileMetadataRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbFileMetadataPath(Name alias, Table<MbFileMetadataRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbFileMetadataPath as(String alias) {
+            return new MbFileMetadataPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbFileMetadataPath as(Name alias) {
+            return new MbFileMetadataPath(alias, this);
+        }
+
+        @Override
+        public MbFileMetadataPath as(Table<?> alias) {
+            return new MbFileMetadataPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -176,6 +214,23 @@ public class MbFileMetadata extends TableImpl<MbFileMetadataRecord> {
     @Override
     public UniqueKey<MbFileMetadataRecord> getPrimaryKey() {
         return Keys.MB_FILE_METADATA_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbFileMetadataRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_FILE_METADATA__FK_FILE_METADATA_UPLOADER);
+    }
+
+    private transient MbIamUserPath _mbIamUser;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_user</code> table.
+     */
+    public MbIamUserPath mbIamUser() {
+        if (_mbIamUser == null)
+            _mbIamUser = new MbIamUserPath(this, Keys.MB_FILE_METADATA__FK_FILE_METADATA_UPLOADER, null);
+
+        return _mbIamUser;
     }
 
     @Override

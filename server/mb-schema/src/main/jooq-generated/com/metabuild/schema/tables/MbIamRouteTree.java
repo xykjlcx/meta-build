@@ -7,6 +7,7 @@ package com.metabuild.schema.tables;
 import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamRouteTree.MbIamRouteTreePath;
 import com.metabuild.schema.tables.records.MbIamRouteTreeRecord;
 
 import java.time.OffsetDateTime;
@@ -16,10 +17,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -67,7 +72,7 @@ public class MbIamRouteTree extends TableImpl<MbIamRouteTreeRecord> {
     /**
      * The column <code>public.mb_iam_route_tree.parent_id</code>.
      */
-    public final TableField<MbIamRouteTreeRecord, Long> PARENT_ID = createField(DSL.name("parent_id"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.BIGINT)), this, "");
+    public final TableField<MbIamRouteTreeRecord, Long> PARENT_ID = createField(DSL.name("parent_id"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.mb_iam_route_tree.path</code>.
@@ -168,6 +173,39 @@ public class MbIamRouteTree extends TableImpl<MbIamRouteTreeRecord> {
         this(DSL.name("mb_iam_route_tree"), null);
     }
 
+    public <O extends Record> MbIamRouteTree(Table<O> path, ForeignKey<O, MbIamRouteTreeRecord> childPath, InverseForeignKey<O, MbIamRouteTreeRecord> parentPath) {
+        super(path, childPath, parentPath, MB_IAM_ROUTE_TREE);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbIamRouteTreePath extends MbIamRouteTree implements Path<MbIamRouteTreeRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbIamRouteTreePath(Table<O> path, ForeignKey<O, MbIamRouteTreeRecord> childPath, InverseForeignKey<O, MbIamRouteTreeRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbIamRouteTreePath(Name alias, Table<MbIamRouteTreeRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbIamRouteTreePath as(String alias) {
+            return new MbIamRouteTreePath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbIamRouteTreePath as(Name alias) {
+            return new MbIamRouteTreePath(alias, this);
+        }
+
+        @Override
+        public MbIamRouteTreePath as(Table<?> alias) {
+            return new MbIamRouteTreePath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -181,6 +219,24 @@ public class MbIamRouteTree extends TableImpl<MbIamRouteTreeRecord> {
     @Override
     public UniqueKey<MbIamRouteTreeRecord> getPrimaryKey() {
         return Keys.MB_IAM_ROUTE_TREE_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbIamRouteTreeRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_IAM_ROUTE_TREE__FK_IAM_ROUTE_TREE_PARENT);
+    }
+
+    private transient MbIamRouteTreePath _mbIamRouteTree;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_route_tree</code>
+     * table.
+     */
+    public MbIamRouteTreePath mbIamRouteTree() {
+        if (_mbIamRouteTree == null)
+            _mbIamRouteTree = new MbIamRouteTreePath(this, Keys.MB_IAM_ROUTE_TREE__FK_IAM_ROUTE_TREE_PARENT, null);
+
+        return _mbIamRouteTree;
     }
 
     @Override

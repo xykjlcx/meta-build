@@ -7,6 +7,9 @@ package com.metabuild.schema.tables;
 import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamMenu.MbIamMenuPath;
+import com.metabuild.schema.tables.MbIamRole.MbIamRolePath;
+import com.metabuild.schema.tables.MbIamRoleMenu.MbIamRoleMenuPath;
 import com.metabuild.schema.tables.records.MbIamMenuRecord;
 
 import java.time.OffsetDateTime;
@@ -16,10 +19,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -67,7 +74,7 @@ public class MbIamMenu extends TableImpl<MbIamMenuRecord> {
     /**
      * The column <code>public.mb_iam_menu.parent_id</code>.
      */
-    public final TableField<MbIamMenuRecord, Long> PARENT_ID = createField(DSL.name("parent_id"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.BIGINT)), this, "");
+    public final TableField<MbIamMenuRecord, Long> PARENT_ID = createField(DSL.name("parent_id"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.mb_iam_menu.name</code>.
@@ -153,6 +160,39 @@ public class MbIamMenu extends TableImpl<MbIamMenuRecord> {
         this(DSL.name("mb_iam_menu"), null);
     }
 
+    public <O extends Record> MbIamMenu(Table<O> path, ForeignKey<O, MbIamMenuRecord> childPath, InverseForeignKey<O, MbIamMenuRecord> parentPath) {
+        super(path, childPath, parentPath, MB_IAM_MENU);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbIamMenuPath extends MbIamMenu implements Path<MbIamMenuRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbIamMenuPath(Table<O> path, ForeignKey<O, MbIamMenuRecord> childPath, InverseForeignKey<O, MbIamMenuRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbIamMenuPath(Name alias, Table<MbIamMenuRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbIamMenuPath as(String alias) {
+            return new MbIamMenuPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbIamMenuPath as(Name alias) {
+            return new MbIamMenuPath(alias, this);
+        }
+
+        @Override
+        public MbIamMenuPath as(Table<?> alias) {
+            return new MbIamMenuPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -166,6 +206,44 @@ public class MbIamMenu extends TableImpl<MbIamMenuRecord> {
     @Override
     public UniqueKey<MbIamMenuRecord> getPrimaryKey() {
         return Keys.MB_IAM_MENU_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbIamMenuRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_IAM_MENU__FK_IAM_MENU_PARENT);
+    }
+
+    private transient MbIamMenuPath _mbIamMenu;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_menu</code> table.
+     */
+    public MbIamMenuPath mbIamMenu() {
+        if (_mbIamMenu == null)
+            _mbIamMenu = new MbIamMenuPath(this, Keys.MB_IAM_MENU__FK_IAM_MENU_PARENT, null);
+
+        return _mbIamMenu;
+    }
+
+    private transient MbIamRoleMenuPath _mbIamRoleMenu;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_iam_role_menu</code> table
+     */
+    public MbIamRoleMenuPath mbIamRoleMenu() {
+        if (_mbIamRoleMenu == null)
+            _mbIamRoleMenu = new MbIamRoleMenuPath(this, null, Keys.MB_IAM_ROLE_MENU__FK_IAM_ROLE_MENU_MENU.getInverseKey());
+
+        return _mbIamRoleMenu;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>public.mb_iam_role</code> table
+     */
+    public MbIamRolePath mbIamRole() {
+        return mbIamRoleMenu().mbIamRole();
     }
 
     @Override

@@ -7,6 +7,7 @@ package com.metabuild.schema.tables;
 import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbDictType.MbDictTypePath;
 import com.metabuild.schema.tables.records.MbDictDataRecord;
 
 import java.time.OffsetDateTime;
@@ -16,10 +17,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -153,6 +158,39 @@ public class MbDictData extends TableImpl<MbDictDataRecord> {
         this(DSL.name("mb_dict_data"), null);
     }
 
+    public <O extends Record> MbDictData(Table<O> path, ForeignKey<O, MbDictDataRecord> childPath, InverseForeignKey<O, MbDictDataRecord> parentPath) {
+        super(path, childPath, parentPath, MB_DICT_DATA);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbDictDataPath extends MbDictData implements Path<MbDictDataRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbDictDataPath(Table<O> path, ForeignKey<O, MbDictDataRecord> childPath, InverseForeignKey<O, MbDictDataRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbDictDataPath(Name alias, Table<MbDictDataRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbDictDataPath as(String alias) {
+            return new MbDictDataPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbDictDataPath as(Name alias) {
+            return new MbDictDataPath(alias, this);
+        }
+
+        @Override
+        public MbDictDataPath as(Table<?> alias) {
+            return new MbDictDataPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -166,6 +204,23 @@ public class MbDictData extends TableImpl<MbDictDataRecord> {
     @Override
     public UniqueKey<MbDictDataRecord> getPrimaryKey() {
         return Keys.MB_DICT_DATA_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbDictDataRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_DICT_DATA__FK_DICT_DATA_DICT_TYPE);
+    }
+
+    private transient MbDictTypePath _mbDictType;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_dict_type</code> table.
+     */
+    public MbDictTypePath mbDictType() {
+        if (_mbDictType == null)
+            _mbDictType = new MbDictTypePath(this, Keys.MB_DICT_DATA__FK_DICT_DATA_DICT_TYPE, null);
+
+        return _mbDictType;
     }
 
     @Override

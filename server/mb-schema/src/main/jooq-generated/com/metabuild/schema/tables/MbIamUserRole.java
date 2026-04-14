@@ -6,15 +6,23 @@ package com.metabuild.schema.tables;
 
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamRole.MbIamRolePath;
+import com.metabuild.schema.tables.MbIamUser.MbIamUserPath;
 import com.metabuild.schema.tables.records.MbIamUserRoleRecord;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -88,6 +96,39 @@ public class MbIamUserRole extends TableImpl<MbIamUserRoleRecord> {
         this(DSL.name("mb_iam_user_role"), null);
     }
 
+    public <O extends Record> MbIamUserRole(Table<O> path, ForeignKey<O, MbIamUserRoleRecord> childPath, InverseForeignKey<O, MbIamUserRoleRecord> parentPath) {
+        super(path, childPath, parentPath, MB_IAM_USER_ROLE);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbIamUserRolePath extends MbIamUserRole implements Path<MbIamUserRoleRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbIamUserRolePath(Table<O> path, ForeignKey<O, MbIamUserRoleRecord> childPath, InverseForeignKey<O, MbIamUserRoleRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbIamUserRolePath(Name alias, Table<MbIamUserRoleRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbIamUserRolePath as(String alias) {
+            return new MbIamUserRolePath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbIamUserRolePath as(Name alias) {
+            return new MbIamUserRolePath(alias, this);
+        }
+
+        @Override
+        public MbIamUserRolePath as(Table<?> alias) {
+            return new MbIamUserRolePath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -96,6 +137,35 @@ public class MbIamUserRole extends TableImpl<MbIamUserRoleRecord> {
     @Override
     public UniqueKey<MbIamUserRoleRecord> getPrimaryKey() {
         return Keys.MB_IAM_USER_ROLE_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbIamUserRoleRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_IAM_USER_ROLE__FK_IAM_USER_ROLE_ROLE, Keys.MB_IAM_USER_ROLE__FK_IAM_USER_ROLE_USER);
+    }
+
+    private transient MbIamRolePath _mbIamRole;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_role</code> table.
+     */
+    public MbIamRolePath mbIamRole() {
+        if (_mbIamRole == null)
+            _mbIamRole = new MbIamRolePath(this, Keys.MB_IAM_USER_ROLE__FK_IAM_USER_ROLE_ROLE, null);
+
+        return _mbIamRole;
+    }
+
+    private transient MbIamUserPath _mbIamUser;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_user</code> table.
+     */
+    public MbIamUserPath mbIamUser() {
+        if (_mbIamUser == null)
+            _mbIamUser = new MbIamUserPath(this, Keys.MB_IAM_USER_ROLE__FK_IAM_USER_ROLE_USER, null);
+
+        return _mbIamUser;
     }
 
     @Override

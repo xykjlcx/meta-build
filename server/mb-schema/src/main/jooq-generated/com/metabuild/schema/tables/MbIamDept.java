@@ -7,6 +7,10 @@ package com.metabuild.schema.tables;
 import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamDept.MbIamDeptPath;
+import com.metabuild.schema.tables.MbIamRole.MbIamRolePath;
+import com.metabuild.schema.tables.MbIamRoleDataScopeDept.MbIamRoleDataScopeDeptPath;
+import com.metabuild.schema.tables.MbIamUser.MbIamUserPath;
 import com.metabuild.schema.tables.records.MbIamDeptRecord;
 
 import java.time.OffsetDateTime;
@@ -16,10 +20,14 @@ import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
 import org.jooq.Index;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -67,7 +75,7 @@ public class MbIamDept extends TableImpl<MbIamDeptRecord> {
     /**
      * The column <code>public.mb_iam_dept.parent_id</code>.
      */
-    public final TableField<MbIamDeptRecord, Long> PARENT_ID = createField(DSL.name("parent_id"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.BIGINT)), this, "");
+    public final TableField<MbIamDeptRecord, Long> PARENT_ID = createField(DSL.name("parent_id"), SQLDataType.BIGINT, this, "");
 
     /**
      * The column <code>public.mb_iam_dept.name</code>.
@@ -148,6 +156,39 @@ public class MbIamDept extends TableImpl<MbIamDeptRecord> {
         this(DSL.name("mb_iam_dept"), null);
     }
 
+    public <O extends Record> MbIamDept(Table<O> path, ForeignKey<O, MbIamDeptRecord> childPath, InverseForeignKey<O, MbIamDeptRecord> parentPath) {
+        super(path, childPath, parentPath, MB_IAM_DEPT);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbIamDeptPath extends MbIamDept implements Path<MbIamDeptRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbIamDeptPath(Table<O> path, ForeignKey<O, MbIamDeptRecord> childPath, InverseForeignKey<O, MbIamDeptRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbIamDeptPath(Name alias, Table<MbIamDeptRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbIamDeptPath as(String alias) {
+            return new MbIamDeptPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbIamDeptPath as(Name alias) {
+            return new MbIamDeptPath(alias, this);
+        }
+
+        @Override
+        public MbIamDeptPath as(Table<?> alias) {
+            return new MbIamDeptPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -161,6 +202,56 @@ public class MbIamDept extends TableImpl<MbIamDeptRecord> {
     @Override
     public UniqueKey<MbIamDeptRecord> getPrimaryKey() {
         return Keys.MB_IAM_DEPT_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbIamDeptRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_IAM_DEPT__FK_IAM_DEPT_LEADER, Keys.MB_IAM_DEPT__FK_IAM_DEPT_PARENT);
+    }
+
+    private transient MbIamUserPath _mbIamUser;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_user</code> table.
+     */
+    public MbIamUserPath mbIamUser() {
+        if (_mbIamUser == null)
+            _mbIamUser = new MbIamUserPath(this, Keys.MB_IAM_DEPT__FK_IAM_DEPT_LEADER, null);
+
+        return _mbIamUser;
+    }
+
+    private transient MbIamDeptPath _mbIamDept;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_dept</code> table.
+     */
+    public MbIamDeptPath mbIamDept() {
+        if (_mbIamDept == null)
+            _mbIamDept = new MbIamDeptPath(this, Keys.MB_IAM_DEPT__FK_IAM_DEPT_PARENT, null);
+
+        return _mbIamDept;
+    }
+
+    private transient MbIamRoleDataScopeDeptPath _mbIamRoleDataScopeDept;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_iam_role_data_scope_dept</code> table
+     */
+    public MbIamRoleDataScopeDeptPath mbIamRoleDataScopeDept() {
+        if (_mbIamRoleDataScopeDept == null)
+            _mbIamRoleDataScopeDept = new MbIamRoleDataScopeDeptPath(this, null, Keys.MB_IAM_ROLE_DATA_SCOPE_DEPT__FK_IAM_ROLE_DSD_DEPT.getInverseKey());
+
+        return _mbIamRoleDataScopeDept;
+    }
+
+    /**
+     * Get the implicit many-to-many join path to the
+     * <code>public.mb_iam_role</code> table
+     */
+    public MbIamRolePath mbIamRole() {
+        return mbIamRoleDataScopeDept().mbIamRole();
     }
 
     @Override

@@ -45,7 +45,7 @@ public class DeptService implements DeptApi {
     @Transactional
     public Long createDept(DeptCreateCommand request) {
         var record = new MbIamDeptRecord();
-        record.setParentId(request.parentId() != null ? request.parentId() : 0L);
+        record.setParentId(request.parentId()); // null 表示根部门
         record.setName(request.name());
         record.setLeaderUserId(request.leaderUserId());
         record.setSortOrder(request.sortOrder() != null ? request.sortOrder() : 0);

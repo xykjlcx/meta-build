@@ -6,15 +6,23 @@ package com.metabuild.schema.tables;
 
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
+import com.metabuild.schema.tables.MbIamMenu.MbIamMenuPath;
+import com.metabuild.schema.tables.MbIamRole.MbIamRolePath;
 import com.metabuild.schema.tables.records.MbIamRoleMenuRecord;
 
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.ForeignKey;
+import org.jooq.InverseForeignKey;
 import org.jooq.Name;
+import org.jooq.Path;
 import org.jooq.PlainSQL;
 import org.jooq.QueryPart;
+import org.jooq.Record;
 import org.jooq.SQL;
 import org.jooq.Schema;
 import org.jooq.Select;
@@ -88,6 +96,39 @@ public class MbIamRoleMenu extends TableImpl<MbIamRoleMenuRecord> {
         this(DSL.name("mb_iam_role_menu"), null);
     }
 
+    public <O extends Record> MbIamRoleMenu(Table<O> path, ForeignKey<O, MbIamRoleMenuRecord> childPath, InverseForeignKey<O, MbIamRoleMenuRecord> parentPath) {
+        super(path, childPath, parentPath, MB_IAM_ROLE_MENU);
+    }
+
+    /**
+     * A subtype implementing {@link Path} for simplified path-based joins.
+     */
+    public static class MbIamRoleMenuPath extends MbIamRoleMenu implements Path<MbIamRoleMenuRecord> {
+
+        private static final long serialVersionUID = 1L;
+        public <O extends Record> MbIamRoleMenuPath(Table<O> path, ForeignKey<O, MbIamRoleMenuRecord> childPath, InverseForeignKey<O, MbIamRoleMenuRecord> parentPath) {
+            super(path, childPath, parentPath);
+        }
+        private MbIamRoleMenuPath(Name alias, Table<MbIamRoleMenuRecord> aliased) {
+            super(alias, aliased);
+        }
+
+        @Override
+        public MbIamRoleMenuPath as(String alias) {
+            return new MbIamRoleMenuPath(DSL.name(alias), this);
+        }
+
+        @Override
+        public MbIamRoleMenuPath as(Name alias) {
+            return new MbIamRoleMenuPath(alias, this);
+        }
+
+        @Override
+        public MbIamRoleMenuPath as(Table<?> alias) {
+            return new MbIamRoleMenuPath(alias.getQualifiedName(), this);
+        }
+    }
+
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
@@ -96,6 +137,35 @@ public class MbIamRoleMenu extends TableImpl<MbIamRoleMenuRecord> {
     @Override
     public UniqueKey<MbIamRoleMenuRecord> getPrimaryKey() {
         return Keys.MB_IAM_ROLE_MENU_PKEY;
+    }
+
+    @Override
+    public List<ForeignKey<MbIamRoleMenuRecord, ?>> getReferences() {
+        return Arrays.asList(Keys.MB_IAM_ROLE_MENU__FK_IAM_ROLE_MENU_MENU, Keys.MB_IAM_ROLE_MENU__FK_IAM_ROLE_MENU_ROLE);
+    }
+
+    private transient MbIamMenuPath _mbIamMenu;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_menu</code> table.
+     */
+    public MbIamMenuPath mbIamMenu() {
+        if (_mbIamMenu == null)
+            _mbIamMenu = new MbIamMenuPath(this, Keys.MB_IAM_ROLE_MENU__FK_IAM_ROLE_MENU_MENU, null);
+
+        return _mbIamMenu;
+    }
+
+    private transient MbIamRolePath _mbIamRole;
+
+    /**
+     * Get the implicit join path to the <code>public.mb_iam_role</code> table.
+     */
+    public MbIamRolePath mbIamRole() {
+        if (_mbIamRole == null)
+            _mbIamRole = new MbIamRolePath(this, Keys.MB_IAM_ROLE_MENU__FK_IAM_ROLE_MENU_ROLE, null);
+
+        return _mbIamRole;
     }
 
     @Override
