@@ -27,6 +27,7 @@ import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
 import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.MbUserWechatBinding;
 
 import org.jooq.Index;
 import org.jooq.OrderField;
@@ -79,6 +80,8 @@ public class Indexes {
     public static final Index IDX_NOTIFICATION_TIME = Internal.createIndex(DSL.name("idx_notification_time"), MbNotification.MB_NOTIFICATION, new OrderField[] { MbNotification.MB_NOTIFICATION.TENANT_ID, MbNotification.MB_NOTIFICATION.CREATED_AT.desc() }, false);
     public static final Index IDX_PASSWORD_HISTORY_USER = Internal.createIndex(DSL.name("idx_password_history_user"), MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY, new OrderField[] { MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY.USER_ID, MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY.CREATED_AT.desc() }, false);
     public static final Index IDX_ROUTE_TREE_PARENT = Internal.createIndex(DSL.name("idx_route_tree_parent"), MbIamRouteTree.MB_IAM_ROUTE_TREE, new OrderField[] { MbIamRouteTree.MB_IAM_ROUTE_TREE.TENANT_ID, MbIamRouteTree.MB_IAM_ROUTE_TREE.PARENT_ID }, false);
+    public static final Index IDX_WECHAT_BINDING_OPENID = Internal.createIndex(DSL.name("idx_wechat_binding_openid"), MbUserWechatBinding.MB_USER_WECHAT_BINDING, new OrderField[] { MbUserWechatBinding.MB_USER_WECHAT_BINDING.APP_ID, MbUserWechatBinding.MB_USER_WECHAT_BINDING.OPEN_ID }, false);
+    public static final Index IDX_WECHAT_BINDING_USER = Internal.createIndex(DSL.name("idx_wechat_binding_user"), MbUserWechatBinding.MB_USER_WECHAT_BINDING, new OrderField[] { MbUserWechatBinding.MB_USER_WECHAT_BINDING.TENANT_ID, MbUserWechatBinding.MB_USER_WECHAT_BINDING.USER_ID }, false);
     public static final Index UK_CONFIG_TENANT_KEY = Internal.createIndex(DSL.name("uk_config_tenant_key"), MbConfig.MB_CONFIG, new OrderField[] { MbConfig.MB_CONFIG.TENANT_ID, MbConfig.MB_CONFIG.CONFIG_KEY }, true);
     public static final Index UK_DICT_DATA_TYPE_VALUE = Internal.createIndex(DSL.name("uk_dict_data_type_value"), MbDictData.MB_DICT_DATA, new OrderField[] { MbDictData.MB_DICT_DATA.TENANT_ID, MbDictData.MB_DICT_DATA.DICT_TYPE_ID, MbDictData.MB_DICT_DATA.VALUE }, true);
     public static final Index UK_DICT_TYPE_TENANT_CODE = Internal.createIndex(DSL.name("uk_dict_type_tenant_code"), MbDictType.MB_DICT_TYPE, new OrderField[] { MbDictType.MB_DICT_TYPE.TENANT_ID, MbDictType.MB_DICT_TYPE.CODE }, true);

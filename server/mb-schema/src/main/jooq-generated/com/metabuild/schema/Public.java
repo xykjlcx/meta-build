@@ -27,6 +27,7 @@ import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
 import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.MbUserWechatBinding;
 
 import java.util.Arrays;
 import java.util.List;
@@ -165,6 +166,11 @@ public class Public extends SchemaImpl {
     public final MbNotificationRead MB_NOTIFICATION_READ = MbNotificationRead.MB_NOTIFICATION_READ;
 
     /**
+     * 微信绑定关系
+     */
+    public final MbUserWechatBinding MB_USER_WECHAT_BINDING = MbUserWechatBinding.MB_USER_WECHAT_BINDING;
+
+    /**
      * No further instances allowed
      */
     private Public() {
@@ -202,7 +208,8 @@ public class Public extends SchemaImpl {
             MbLogOperation.MB_LOG_OPERATION,
             MbNotification.MB_NOTIFICATION,
             MbNotificationLog.MB_NOTIFICATION_LOG,
-            MbNotificationRead.MB_NOTIFICATION_READ
+            MbNotificationRead.MB_NOTIFICATION_READ,
+            MbUserWechatBinding.MB_USER_WECHAT_BINDING
         );
     }
 }

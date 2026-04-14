@@ -68,6 +68,15 @@ sa-token:
 mb:
   app:
     base-url: ${MB_APP_BASE_URL:http://localhost:5173}
+  wechat:
+    mp:
+      app-id: ${MB_WECHAT_MP_APP_ID:}
+      app-secret: ${MB_WECHAT_MP_APP_SECRET:}
+      template-notice: ${MB_WECHAT_MP_TEMPLATE_NOTICE:}
+    mini:
+      app-id: ${MB_WECHAT_MINI_APP_ID:}
+      app-secret: ${MB_WECHAT_MINI_APP_SECRET:}
+      template-notice: ${MB_WECHAT_MINI_TEMPLATE_NOTICE:}
   jooq:
     slow-query-threshold-ms: ${MB_JOOQ_SLOW_QUERY_THRESHOLD_MS:500}
   id:

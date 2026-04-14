@@ -27,6 +27,7 @@ import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
 import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.MbUserWechatBinding;
 
 
 /**
@@ -149,4 +150,9 @@ public class Tables {
      * 通知已读记录（追加表）
      */
     public static final MbNotificationRead MB_NOTIFICATION_READ = MbNotificationRead.MB_NOTIFICATION_READ;
+
+    /**
+     * 微信绑定关系
+     */
+    public static final MbUserWechatBinding MB_USER_WECHAT_BINDING = MbUserWechatBinding.MB_USER_WECHAT_BINDING;
 }

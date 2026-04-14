@@ -27,6 +27,7 @@ import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
 import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.MbUserWechatBinding;
 import com.metabuild.schema.tables.records.BizNoticeAttachmentRecord;
 import com.metabuild.schema.tables.records.BizNoticeRecipientRecord;
 import com.metabuild.schema.tables.records.BizNoticeRecord;
@@ -50,6 +51,7 @@ import com.metabuild.schema.tables.records.MbLogOperationRecord;
 import com.metabuild.schema.tables.records.MbNotificationLogRecord;
 import com.metabuild.schema.tables.records.MbNotificationReadRecord;
 import com.metabuild.schema.tables.records.MbNotificationRecord;
+import com.metabuild.schema.tables.records.MbUserWechatBindingRecord;
 
 import org.jooq.ForeignKey;
 import org.jooq.TableField;
@@ -92,6 +94,8 @@ public class Keys {
     public static final UniqueKey<MbNotificationRecord> MB_NOTIFICATION_PKEY = Internal.createUniqueKey(MbNotification.MB_NOTIFICATION, DSL.name("mb_notification_pkey"), new TableField[] { MbNotification.MB_NOTIFICATION.ID }, true);
     public static final UniqueKey<MbNotificationLogRecord> MB_NOTIFICATION_LOG_PKEY = Internal.createUniqueKey(MbNotificationLog.MB_NOTIFICATION_LOG, DSL.name("mb_notification_log_pkey"), new TableField[] { MbNotificationLog.MB_NOTIFICATION_LOG.ID }, true);
     public static final UniqueKey<MbNotificationReadRecord> MB_NOTIFICATION_READ_PKEY = Internal.createUniqueKey(MbNotificationRead.MB_NOTIFICATION_READ, DSL.name("mb_notification_read_pkey"), new TableField[] { MbNotificationRead.MB_NOTIFICATION_READ.NOTIFICATION_ID, MbNotificationRead.MB_NOTIFICATION_READ.USER_ID }, true);
+    public static final UniqueKey<MbUserWechatBindingRecord> MB_USER_WECHAT_BINDING_PKEY = Internal.createUniqueKey(MbUserWechatBinding.MB_USER_WECHAT_BINDING, DSL.name("mb_user_wechat_binding_pkey"), new TableField[] { MbUserWechatBinding.MB_USER_WECHAT_BINDING.ID }, true);
+    public static final UniqueKey<MbUserWechatBindingRecord> MB_USER_WECHAT_BINDING_TENANT_ID_USER_ID_PLATFORM_APP_ID_KEY = Internal.createUniqueKey(MbUserWechatBinding.MB_USER_WECHAT_BINDING, DSL.name("mb_user_wechat_binding_tenant_id_user_id_platform_app_id_key"), new TableField[] { MbUserWechatBinding.MB_USER_WECHAT_BINDING.TENANT_ID, MbUserWechatBinding.MB_USER_WECHAT_BINDING.USER_ID, MbUserWechatBinding.MB_USER_WECHAT_BINDING.PLATFORM, MbUserWechatBinding.MB_USER_WECHAT_BINDING.APP_ID }, true);
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
