@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback, Button, Separator } from '@mb/ui-primitives';
 import { LogOut, User } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth, useCurrentUser } from '../auth';
 import { LanguageSwitcher } from './language-switcher';
@@ -7,9 +8,11 @@ import { ThemeSwitcher } from './theme-switcher';
 
 /**
  * 顶部 Header 栏（用于 SidebarLayout）。
- * 右侧工具栏：语言切换 + 主题切换 + 用户头像 + 退出。
+ * 右侧工具栏：语言切换 + 主题切换 + [可选通知插槽] + 用户头像 + 退出。
+ *
+ * notificationSlot 由 L5 注入，L4 不依赖任何业务 API。
  */
-export function Header() {
+export function Header({ notificationSlot }: { notificationSlot?: ReactNode }) {
   const { t } = useTranslation('shell');
   const user = useCurrentUser();
   const { logout, isLoggingOut } = useAuth();
@@ -23,6 +26,7 @@ export function Header() {
       <div className="flex items-center gap-1">
         <LanguageSwitcher />
         <ThemeSwitcher />
+        {notificationSlot}
         <Separator orientation="vertical" className="mx-1 h-5" />
         <div className="flex items-center gap-2">
           <Avatar size="sm">

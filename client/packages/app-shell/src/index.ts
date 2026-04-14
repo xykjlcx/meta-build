@@ -39,6 +39,10 @@ export { BasicLayout, SidebarLayout, TopLayout } from './layouts';
 
 // components
 export { BreadcrumbNav, type BreadcrumbEntry } from './components/breadcrumb-nav';
+export {
+  NotificationBadge,
+  type NotificationBadgeProps,
+} from './components/notification-badge';
 
 // error
 export { GlobalErrorBoundary, GlobalErrorPage, GlobalNotFoundPage } from './error';
