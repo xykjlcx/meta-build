@@ -6,10 +6,10 @@
 
 ## 当前状态
 
-- **M3 已完成**，在 main 上（commit `1ce0679`，11 commits）
+- **M3 已完成 + 契约对齐补丁已合入**，在 main 上（commit `701d85a`，含 M4 合流后的契约对齐修复）
 - L3 业务组件 + L4 应用壳层 + L5 文件路由 + api-sdk 全部就绪
-- 质量门禁 12 项全绿：build / check:types / test（267）/ check:theme（3×54）/ check:i18n / check:business-words / lint / lint:css / check:deps / check:env / storybook:build（L2+L3）/ vite build
-- M4 后端在独立 worktree `~/06-meta-build-m4/` 并行开发中
+- 质量门禁 12 项全绿：build / check:types / test（271 = L2:197 + L3:55 + api-sdk:19）/ check:theme（3×54）/ check:i18n / check:business-words / lint / lint:css / check:deps / check:env / storybook:build（L2+L3）/ vite build
+- M4 后端已完成，代码已合入 main
 
 ---
 
@@ -20,25 +20,30 @@
 ```
 packages/api-sdk/src/
 ├── index.ts                    → barrel export（类型 + 错误 + 配置 + API 门面）
-├── config.ts                   → configureApiSdk() + getClient()（单例模式）
-├── http-client.ts              → 基于原生 fetch 的 HttpClient + 拦截器链
+├── config.ts                   → configureApiSdk() + getClient()（单例模式，含 tryRefreshToken）
+├── http-client.ts              → 基于原生 fetch 的 HttpClient + 拦截器链 + 401 自动 refresh retry
 ├── errors.ts                   → ProblemDetailError（RFC 9457）+ isProblemDetail 类型守卫
 ├── interceptors/
+│   ├── index.ts                → barrel export
 │   ├── auth.ts                 → Authorization: Bearer token
 │   ├── language.ts             → Accept-Language header
 │   ├── request-id.ts           → X-Request-ID (crypto.randomUUID)
-│   └── error.ts                → 401/403/5xx 错误分发
+│   └── error.ts                → 401 throw（不直接跳登录）/ 403 / 5xx 错误分发
 ├── types/
+│   ├── index.ts                → barrel export
 │   ├── common.ts               → PageResult<T>, ProblemDetail
-│   ├── auth.ts                 → LoginCommand, LoginResult, CurrentUserDto
-│   ├── menu.ts                 → MenuNodeDto, UserMenuPayload
-│   └── permission.ts           → AppPermission 联合类型 + ALL_APP_PERMISSIONS
-└── apis/
-    ├── auth-api.ts             → authApi（login/logout/getCurrentUser）
-    └── menu-api.ts             → menuApi（queryCurrentUserMenu）
+│   ├── auth.ts                 → LoginCommand, RefreshCommand, LoginView, UserSummary, CurrentUserView
+│   ├── menu.ts                 → MenuNodeDto, CurrentUserMenuView
+│   └── permission.ts           → AppPermission 联合类型（42 个）+ ALL_APP_PERMISSIONS
+├── apis/
+│   ├── index.ts                → barrel export
+│   ├── auth-api.ts             → authApi（login / logout / refresh / getCurrentUser）
+│   └── menu-api.ts             → menuApi（queryCurrentUserMenu / tree / getById）
+└── __tests__/
+    └── interceptors.test.ts    → 19 tests（含 401 refresh retry 4 个新增）
 ```
 
-**关键设计**：零运行时依赖，M3 手写类型，M5 切换 OpenAPI 生成时拦截器代码复用。
+**关键设计**：零运行时依赖，手写类型已对齐后端（M4 契约对齐后），M5 切换 OpenAPI 生成时拦截器代码复用。
 
 ### L3 `@mb/ui-patterns`（8 个业务组件）
 
@@ -127,7 +132,7 @@ apps/web-admin/src/
 │   └── i18next.d.ts            → TypeScript module augmentation（shell + common）
 ├── mock/
 │   ├── browser.ts              → MSW setupWorker（dev only）
-│   └── handlers.ts             → 4 个 mock handler（login/logout/me/menu）
+│   └── handlers.ts             → 6 个 mock handler（login/logout/refresh/me/menus·current-user/menus）
 └── styles.css                  → Tailwind + tokens + themes（M2 不变）
 ```
 
@@ -153,12 +158,12 @@ scripts/
 
 | 交付物 | 说明 |
 |--------|------|
-| HTTP 客户端 | 基于原生 fetch + 拦截器链（零运行时依赖） |
+| HTTP 客户端 | 基于原生 fetch + 拦截器链 + 401 自动 refresh retry（零运行时依赖） |
 | 4 个拦截器 | auth / language / request-id / error |
 | ProblemDetailError | RFC 9457 + isProblemDetail 类型守卫 |
-| 类型定义 | PageResult / ProblemDetail / LoginCommand / CurrentUserDto / MenuNodeDto / AppPermission |
-| API 门面 | authApi（3 方法）+ menuApi（1 方法） |
-| 单元测试 | 15 tests |
+| 类型定义 | PageResult / ProblemDetail / LoginCommand / RefreshCommand / LoginView / UserSummary / CurrentUserView / MenuNodeDto / CurrentUserMenuView / AppPermission（42 个权限码） |
+| API 门面 | authApi（4 方法：login / logout / refresh / getCurrentUser）+ menuApi（3 方法：queryCurrentUserMenu / tree / getById） |
+| 单元测试 | 19 tests（含 refresh retry / refresh failure / concurrent refresh / no-refresh-configured） |
 
 ### L3：8 个业务组件
 
@@ -197,7 +202,7 @@ scripts/
 | Provider 树 | 6 层严格顺序（ErrorBoundary → QueryClient → I18n → Theme → Router → Toast） |
 | 认证守卫 | _authed layout route + ensureQueryData |
 | 页面 | login + forgot-password + dashboard（占位） |
-| MSW mock | 4 handler（dev only，import.meta.env.PROD 跳过） |
+| MSW mock | 6 handler（login / logout / refresh / me / menus/current-user / menus，含错误场景 mock） |
 | i18n 注册 | registerBusinessResources + i18next.d.ts 类型增强 |
 
 ### 质量门禁
@@ -206,7 +211,7 @@ scripts/
 |------|------|------|
 | 生产构建 | `pnpm build` | ✅（545KB JS + 16KB CSS） |
 | 类型检查 | `pnpm check:types` | ✅ 零错误 |
-| 单元测试 | `pnpm test` | ✅ 267 tests（L2=197, L3=55, api-sdk=15） |
+| 单元测试 | `pnpm test` | ✅ 271 tests（L2=197, L3=55, api-sdk=19） |
 | 主题完整性 | `pnpm check:theme` | ✅ 3×54 |
 | i18n 完整性 | `pnpm check:i18n` | ✅ |
 | 业务词汇 | `pnpm check:business-words` | ✅ |
@@ -223,7 +228,7 @@ scripts/
 
 M5 需要 M3（前端）+ M4（后端）都完成：
 - M3 ✅ 已完成
-- M4 🔄 在 worktree 并行中（`~/06-meta-build-m4/`）
+- M4 ✅ 已完成（已合入 main，含契约对齐修复）
 
 ### M5 核心任务
 
@@ -265,7 +270,7 @@ M5 需要 M3（前端）+ M4（后端）都完成：
 
 | 决策 | 结论 | 备注 |
 |------|------|------|
-| api-sdk HTTP 客户端 | 原生 fetch（零依赖） | M5 切换 OpenAPI 生成后用 typescript-fetch |
+| api-sdk HTTP 客户端 | 原生 fetch（零依赖）+ 401 自动 refresh retry | M5 切换 OpenAPI 生成后用 typescript-fetch，拦截器+refresh 逻辑复用 |
 | L3 隔离 | 零业务/零 i18n/零 API | check:business-words + dep-cruiser 双重守护 |
 | Toast 方案 | Sonner（命令式 `toast()`） | L2 导出 `<Toaster />`，L5 `import { toast } from 'sonner'` |
 | Dialog 命令式 | M3 占位（DialogContainer = null） | M5 按需实现 ConfirmDialogHost |
@@ -288,6 +293,57 @@ M5 需要 M3（前端）+ M4（后端）都完成：
 
 ---
 
+## 契约对齐补丁（M4 合流后）
+
+> M3 完成后与 M4 后端做了一轮 4 角色联合审查（API 契约官 / 安全架构师 / 全栈集成者 / DBA），发现并修复了 4 Critical + 5 Important 问题。以下是对 M3 交付物的增量变更。
+
+### api-sdk 类型变更
+
+| 变更 | 旧 | 新 |
+|------|----|-----|
+| 权限码分隔符 | 点号 `iam.user.list` | **冒号** `iam:user:list` |
+| 权限码数量 | 8 个（仅 IAM） | **42 个**（覆盖全部后端模块） |
+| LoginResult | `{ accessToken, refreshToken }` | **LoginView** `{ accessToken, refreshToken, expiresInSeconds, user: UserSummary }` |
+| CurrentUserDto | 手写估计 | **CurrentUserView**（对齐后端 `GET /auth/me` 响应） |
+| MenuNodeDto.kind | `'directory' \| 'menu' \| 'button'` | **menuType** `'DIRECTORY' \| 'MENU' \| 'BUTTON'` |
+| MenuNodeDto.path / isOrphan | 存在 | **移除**（后端无此字段） |
+| MenuNodeDto 新增 | — | **sortOrder** + **visible** |
+| UserMenuPayload | `{ tree, permissions }` 在 api-sdk | **CurrentUserMenuView** `{ tree, permissions }` 在 api-sdk |
+
+### 新增 API 端点
+
+| 端点 | 说明 |
+|------|------|
+| `GET /api/v1/auth/me` | 获取当前用户信息（后端 M4 后补） |
+| `GET /api/v1/menus/current-user` | 获取当前用户菜单树 + 权限列表（后端 M4 后补） |
+| `POST /api/v1/auth/refresh` | Token 刷新（前端 api-sdk 新增调用） |
+
+### 401 自动 refresh 机制
+
+- http-client 层捕获 401 → 调 `tryRefreshToken()` → 成功用新 token 重试原请求 → 失败才跳登录
+- `tryRefreshToken` 用原生 fetch 直接调 `/auth/refresh`，绕过 http-client 避免死锁
+- 并发 401 共享同一个 refresh Promise 防止重复刷新
+- 配置在 `main.tsx` 的 `configureApiSdk({ tryRefreshToken: ... })`
+
+### useCurrentUser 恢复为 API 调用模式
+
+- 不再依赖登录时的缓存注入
+- 直接调 `GET /auth/me`，5 分钟 staleTime
+- `_authed.tsx` 的 `ensureQueryData` 使用同一 queryKey `['auth', 'me']`
+
+### MSW mock 增强
+
+- 登录失败（username='error' → 401）、账户锁定（'locked' → 423）
+- Refresh token 过期（'expired-refresh-token' → 401）
+- 403 权限不足（`X-Mock-Forbidden` header）
+- 菜单数据：三层嵌套 + BUTTON 类型 + visible:false 节点
+
+### 测试变更
+
+- api-sdk tests: 15 → **19**（新增 refresh retry / refresh failure / concurrent refresh / no-refresh-configured 4 个测试）
+
+---
+
 ## 常用命令
 
 ```bash
@@ -297,10 +353,10 @@ cd client && pnpm dev                                     # dev server（localho
 cd client && pnpm build                                   # 生产构建
 
 # 测试
-cd client && pnpm test                                    # 全量测试（267 tests）
+cd client && pnpm test                                    # 全量测试（271 tests）
 cd client && pnpm -F @mb/ui-primitives test               # L2 单元测试（197 tests）
 cd client && pnpm -F @mb/ui-patterns test                 # L3 单元测试（55 tests）
-cd client && pnpm -F @mb/api-sdk test                     # api-sdk 测试（15 tests）
+cd client && pnpm -F @mb/api-sdk test                     # api-sdk 测试（19 tests）
 
 # Storybook
 cd client && pnpm storybook                               # L2 Storybook（localhost:6006）

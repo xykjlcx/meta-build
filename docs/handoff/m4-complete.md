@@ -220,6 +220,20 @@ M5 需要 M3（前端）+ M4（后端）都完成：
 
 ---
 
+## 契约对齐补丁（M4 合流后联合审查）
+
+M4 合流后前后端联合审查，新增 2 个端点 + 2 处修复：
+
+| 变更 | 说明 |
+|------|------|
+| `GET /api/v1/auth/me` | 新增端点，返回 `CurrentUserView`（userId/username/nickname/roles/permissions/deptId/isAdmin），前端 `useCurrentUser` hook 消费 |
+| `GET /api/v1/menus/current-user` | 新增端点，返回 `List<CurrentUserMenuView>`（嵌套树结构），前端 `useMenu` hook 消费 |
+| `CurrentUserView.isAdmin` 加 `@JsonProperty("isAdmin")` | 修复 Jackson 默认将 `isAdmin` 序列化为 `admin` 的问题，确保前端字段名一致 |
+| `MenuService.toResponse` parentId 0→null 转换 | 根节点 parentId 在数据库为 0，转换为 null 返回前端，避免前端树构建时找不到 parent=0 的节点 |
+| `MenuRepository.findByRoleIds` | 新增方法，按角色 ID 集合查询菜单（`current-user` 端点依赖），替代原先只有 `findAll` 的实现 |
+
+---
+
 ## 常用命令
 
 ```bash
