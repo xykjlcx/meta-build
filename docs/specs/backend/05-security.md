@@ -1176,7 +1176,7 @@ public class DataScopeConfig {
             // === platform 层受保护表 ===
             registry.register("mb_iam_user",       "dept_id");
             registry.register("mb_iam_dept",       "parent_id");  // 部门树自身按 parent_id 受限
-            registry.register("mb_operation_log",  "dept_id");
+            registry.register("mb_log_operation",  "dept_id");
 
             // === canonical reference（M5 填入）===
             registry.register("biz_order_main", "owner_dept_id");
@@ -2307,7 +2307,7 @@ public class AuthService {
 
 ```java
 // import com.metabuild.common.security.CurrentUser;
-// import com.metabuild.platform.oplog.OperationLog;  // 操作日志注解
+// import com.metabuild.platform.log.OperationLog;  // 操作日志注解
 
 /**
  * 认证相关端点。

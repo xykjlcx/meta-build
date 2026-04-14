@@ -15,7 +15,7 @@
 | # | 模块 | 职责 | 对外 api 接口 | nxboot 对应 |
 |---|------|------|--------------|------------|
 | 1 | `platform-iam` | 用户/角色/菜单/部门/权限/数据范围/在线用户/认证/登录日志 | `UserApi`, `RoleApi`, `MenuApi`, `DeptApi`, `AuthApi`, `PermissionApi` | user + role + menu + dept + auth + online + login-log |
-| 2 | `platform-oplog` | 操作日志（**`@OperationLog` 注解 + AOP + `mb_operation_log`**） | `OperationLogApi` | audit + log |
+| 2 | `platform-log` | 操作日志（**`@OperationLog` 注解 + AOP + `mb_log_operation`**） | `OperationLogApi` | audit + log |
 | 3 | `platform-file` | 文件上传 + 本地/阿里云 OSS 存储 + 附件元数据 | `FileApi`, `FileStorage` | file |
 | 4 | `platform-notification` | 通知公告 + 站内信 + 邮件 + 短信 + Webhook | `NotificationApi` | notice（扩展） |
 | 5 | `platform-dict` | 字典 + 枚举管理 | `DictApi` | dict |
@@ -107,14 +107,14 @@ CREATE UNIQUE INDEX uk_mb_file_tenant_sha256
     ON mb_file_metadata (tenant_id, sha256);
 ```
 
-### 2.3 platform-oplog 的具体实现（[P0]）
+### 2.3 platform-log 的具体实现（[P0]）
 
 **定位**：操作日志，记录 Controller 入参/返回值级别的用户操作，不做字段级 before/after 快照。
 
 **AOP 注解驱动**（注解标注在 **Controller 层**，不在 Service 层）：
 
 ```java
-// platform-oplog/src/main/java/com/metabuild/platform/oplog/api/OperationLog.java
+// platform-log/src/main/java/com/metabuild/platform/oplog/api/OperationLog.java
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OperationLog {
@@ -166,12 +166,12 @@ public class UserController {
 - 记录执行耗时（`System.nanoTime()` 差值换算毫秒）
 - 捕获方法抛出的异常，status 记为 `FAILURE`，error_message 填异常消息
 
-**操作日志表** `mb_operation_log`：
+**操作日志表** `mb_log_operation`：
 
 > 注意：操作日志是只追加不更新的表，**没有 version / updated_by / updated_at 字段**。
 
 ```sql
-CREATE TABLE mb_operation_log (
+CREATE TABLE mb_log_operation (
     id              BIGINT PRIMARY KEY,
     tenant_id       BIGINT NOT NULL DEFAULT 0,
     user_id         BIGINT NOT NULL,
@@ -191,14 +191,14 @@ CREATE TABLE mb_operation_log (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
-CREATE INDEX idx_mb_operation_log_tenant_user ON mb_operation_log (tenant_id, user_id);
-CREATE INDEX idx_mb_operation_log_tenant_action ON mb_operation_log (tenant_id, action);
-CREATE INDEX idx_mb_operation_log_created_at ON mb_operation_log (created_at);
+CREATE INDEX idx_mb_log_operation_tenant_user ON mb_log_operation (tenant_id, user_id);
+CREATE INDEX idx_mb_log_operation_tenant_action ON mb_log_operation (tenant_id, action);
+CREATE INDEX idx_mb_log_operation_created_at ON mb_log_operation (created_at);
 ```
 
 **`OperationLogWriter`**（异步写入组件）：
 ```java
-// platform-oplog/src/main/java/com/metabuild/platform/oplog/domain/OperationLogWriter.java
+// platform-log/src/main/java/com/metabuild/platform/oplog/domain/OperationLogWriter.java
 @Component
 @RequiredArgsConstructor
 public class OperationLogWriter {
@@ -578,8 +578,8 @@ mkdir -p server/mb-business/business-order/src/test/java/com/metabuild/business/
         <!-- 跨模块依赖：需要 iam 的 UserApi 和 file 的 FileApi -->
         <dependency><groupId>com.metabuild</groupId><artifactId>platform-iam</artifactId></dependency>
         <dependency><groupId>com.metabuild</groupId><artifactId>platform-file</artifactId></dependency>
-        <!-- 需要操作日志？依赖 platform-oplog 的 api -->
-        <dependency><groupId>com.metabuild</groupId><artifactId>platform-oplog</artifactId></dependency>
+        <!-- 需要操作日志？依赖 platform-log 的 api -->
+        <dependency><groupId>com.metabuild</groupId><artifactId>platform-log</artifactId></dependency>
     </dependencies>
 </project>
 ```
@@ -610,7 +610,7 @@ public interface OrderApi {
  * 跨模块依赖（由 pom.xml 和 ArchUnit 规则双保险）：
  * - platform-iam::api   （需要 UserApi 查询用户）
  * - platform-file::api  （需要 FileApi 存储订单附件）
- * - platform-oplog::api （需要 OperationLog 注解记录操作日志）
+ * - platform-log::api （需要 OperationLog 注解记录操作日志）
  *
  * 发布的领域事件：
  * - OrderCreatedEvent

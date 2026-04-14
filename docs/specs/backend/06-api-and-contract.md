@@ -165,7 +165,7 @@ mb-platform/platform-iam/src/main/resources/messages/
 ├── iam_zh_CN.properties
 └── iam_en_US.properties
 
-mb-platform/platform-oplog/src/main/resources/messages/
+mb-platform/platform-log/src/main/resources/messages/
 ├── oplog_zh_CN.properties
 └── oplog_en_US.properties
 ```
@@ -515,7 +515,7 @@ List<SortField<?>> orderBy = SortParser.builder()
     .parse(query.sort());
 ```
 
-**`forTable(Table)` 约定**：自动注册 `id` / `createdAt` / `updatedAt` 三个通用字段（meta-build schema 规范强制所有表包含，见 [04-data-persistence.md §5.3](./04-data-persistence.md)）。通过 `table.field("id")` 反射查找，找不到就跳过（如 `mb_operation_log` 可能没有 `updated_at`）。
+**`forTable(Table)` 约定**：自动注册 `id` / `createdAt` / `updatedAt` 三个通用字段（meta-build schema 规范强制所有表包含，见 [04-data-persistence.md §5.3](./04-data-persistence.md)）。通过 `table.field("id")` 反射查找，找不到就跳过（如 `mb_log_operation` 可能没有 `updated_at`）。
 
 **敏感字段绝不自动注册**：`forTable` 只注册 3 个约定字段，`password_hash` / `email`（PII 场景）/ `api_key` 等敏感字段必须业务层明确 `.allow()` 才能加入白名单，默认不可排序。
 

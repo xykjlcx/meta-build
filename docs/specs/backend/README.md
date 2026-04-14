@@ -137,7 +137,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | 2 | Service 层**只能**通过 `CurrentUser` 门面访问当前用户；登录/登出/强制注销等认证写操作**只能**通过 `AuthFacade` 门面 | [05-security.md §6 CurrentUser 门面层](./05-security.md#6-currentuser-门面层设计adr-0005) + [§6.6 AuthFacade](./05-security.md#66-authfacade登录登出技术门面) |
 | 3 | 所有表必须有 `tenant_id / created_by / created_at / updated_by / updated_at` 字段；`version` 字段按需添加（仅需要乐观锁的表）| [04-data-persistence.md §1 表/字段命名规范](./04-data-persistence.md#1-表字段命名规范-m1m4) |
 | 4 | 跨模块异步通信用 `@EventListener` + `@Async` + `@TransactionalEventListener(AFTER_COMMIT)` | [01-module-structure.md §2.4 跨模块通信 Spring 原生事件机制](./01-module-structure.md#24-跨模块通信spring-原生事件机制) |
-| 5 | 操作日志用 `@OperationLog` 注解 + AOP 自动写入 `mb_operation_log` | [03-platform-modules.md §2.3 platform-oplog 的具体实现](./03-platform-modules.md#23-platform-oplog-的具体实现p0) |
+| 5 | 操作日志用 `@OperationLog` 注解 + AOP 自动写入 `mb_log_operation` | [03-platform-modules.md §2.3 platform-log 的具体实现](./03-platform-modules.md#23-platform-log-的具体实现p0) |
 | 6 | 定时任务用 `@Scheduled` + `@SchedulerLock`（ShedLock 分布式锁） | [03-platform-modules.md §2.1 platform-job 的具体技术选择](./03-platform-modules.md#21-platform-job-的具体技术选择p0) |
 | 7 | 跨模块依赖**必须**在 pom.xml 里显式声明（PR review 可见） | [01-module-structure.md §2.3 跨模块访问规则](./01-module-structure.md#23-跨模块访问规则) |
 | 8 | Flyway migration 文件放在 `mb-schema/src/main/resources/db/migration/`，命名用时间戳 `V<yyyymmdd>_<nnn>__<module>_<table>.sql`（ADR-0008） | [04-data-persistence.md §5 Flyway 脚本组织](./04-data-persistence.md#5-flyway-脚本组织-m1m4) + [ADR-0008](../../adr/0008-flyway-migration命名用时间戳.md) |
@@ -165,7 +165,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | [0007](../../adr/0007-继承遗产前先问原生哲学.md) | **继承遗产前先问新技术栈的原生哲学**（元方法论，方案 E 数据权限重构） | 已采纳 |
 | [0008](../../adr/0008-flyway-migration命名用时间戳.md) | **Flyway migration 命名从数字分段切换到时间戳**（ADR-0007 元方法论的第二次落地 + "一致性 > 局部优化"次级元原则） | 已采纳 |
 | [0009](../../adr/0009-表前缀sys改mb.md) | **平台表前缀从 sys_ 切换到 mb_** | 已采纳 |
-| [0010](../../adr/0010-审计日志改操作日志.md) | **v1 用操作日志替代审计日志**（platform-audit → platform-oplog，@Audit → @OperationLog） | 已采纳 |
+| [0010](../../adr/0010-审计日志改操作日志.md) | **v1 用操作日志替代审计日志**（platform-audit → platform-log，@Audit → @OperationLog） | 已采纳 |
 | [0011](../../adr/0011-version字段按需添加.md) | **version 字段按需添加**（不再强制所有表） | 已采纳 |
 | [0012](../../adr/0012-全局时间策略clock-bean.md) | **全局时间策略**（Clock Bean + 文档引导） | 已采纳 |
 

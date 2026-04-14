@@ -51,7 +51,7 @@ server/mb-platform/
 │   │   └── session/       → OnlineUserService + LoginLogService + LoginLogRepository
 │   ├── config/            → MbIamPasswordProperties（14 个配置项）+ IamAutoConfiguration
 │   └── web/               → 5 Controllers（全部 @RequirePermission）
-├── platform-oplog/        → @OperationLog 注解 + AOP + 异步写入（追加表）
+├── platform-log/        → @OperationLog 注解 + AOP + 异步写入（追加表）
 ├── platform-dict/         → DictType + DictData CRUD + @Cacheable
 ├── platform-config/       → key-value CRUD + CacheEvictSupport(afterCommit)
 ├── platform-file/         → FileStorage 接口 + LocalFileStorage（SHA-256 分级目录 + 租户隔离）

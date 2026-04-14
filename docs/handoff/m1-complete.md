@@ -116,7 +116,7 @@ apps/web-admin     → Vite + React 19 + Tailwind v4，Mock 登录页
 
 2. **8 个 platform 模块**
    - platform-iam：用户/角色/菜单/部门 CRUD + 数据权限
-   - platform-oplog：操作日志（@OperationLog 注解 + AOP）
+   - platform-log：操作日志（@OperationLog 注解 + AOP）
    - platform-file：文件上传/下载（本地 + OSS 切换）
    - platform-notification：站内通知
    - platform-dict：数据字典

@@ -9,7 +9,7 @@
 #### 表名
 
 - **命名方式**: snake_case，模块前缀 + 领域 + 实体
-- **平台表**: `mb_<域>_<实体>`（例: `mb_iam_user`, `mb_iam_role`, `mb_operation_log`）
+- **平台表**: `mb_<域>_<实体>`（例: `mb_iam_user`, `mb_iam_role`, `mb_log_operation`）
 - **业务表**: `biz_<域>_<实体>`（例: `biz_order_main`, `biz_order_item`，用于 M5 canonical reference）
 - **关联表**: `mb_iam_user_role`, `mb_iam_role_menu`
 
@@ -24,7 +24,7 @@
   - `updated_by BIGINT NOT NULL`
   - `updated_at TIMESTAMP WITH TIME ZONE NOT NULL`
 - 多租户: `tenant_id BIGINT NOT NULL DEFAULT 0`（ADR-007）
-- 乐观锁: `version INT NOT NULL DEFAULT 0`（**按需添加**，仅在需要乐观锁的表上，如订单、余额等并发更新场景；只追加不更新的表（如 `mb_operation_log`）不加此字段；jOOQ Settings 中 `withExecuteWithOptimisticLockingExcludeUnversioned(true)` 确保无 version 字段的表自动跳过乐观锁）
+- 乐观锁: `version INT NOT NULL DEFAULT 0`（**按需添加**，仅在需要乐观锁的表上，如订单、余额等并发更新场景；只追加不更新的表（如 `mb_log_operation`）不加此字段；jOOQ Settings 中 `withExecuteWithOptimisticLockingExcludeUnversioned(true)` 确保无 version 字段的表自动跳过乐观锁）
 - 数据权限归属: `owner_dept_id BIGINT NOT NULL`（**需要数据权限的表必须添加**，RecordListener INSERT 时自动从 `CurrentUser.deptId()` 填充；创建后不可变，不随人员调岗更新；详见 [05-security.md §7 方案 E](./05-security.md)）
 
 ## 2. 主键策略 Snowflake [M1]
@@ -154,7 +154,7 @@ mb-schema/src/main/resources/db/migration/
 ├── V20260601_004__iam_dept.sql
 ├── V20260601_005__iam_user_role.sql
 ├── V20260601_006__iam_role_menu.sql
-├── V20260602_001__oplog_operation_log.sql   # platform-oplog
+├── V20260602_001__oplog_operation_log.sql   # platform-log
 ├── V20260602_002__file_metadata.sql         # platform-file
 ├── V20260603_001__notification.sql          # platform-notification
 ├── V20260603_002__dict.sql                  # platform-dict
@@ -611,7 +611,7 @@ public class AuditFieldsRecordListener implements RecordListener {
 
     /**
      * 反射式字段设置:如果 record 有指定字段就 set,否则静默跳过.
-     * 允许某些表没有全部审计字段(比如 mb_operation_log 本身不需要 updated_by).
+     * 允许某些表没有全部审计字段(比如 mb_log_operation 本身不需要 updated_by).
      */
     private void trySetField(Record record, String fieldName, Object value) {
         Field<?> field = record.field(fieldName);

@@ -121,7 +121,7 @@ server/
 ├── mb-platform/
 │   ├── pom.xml                               # parent pom
 │   ├── platform-iam/                         # 用户/角色/菜单/部门/权限/数据范围/会话
-│   ├── platform-oplog/                       # 操作日志
+│   ├── platform-log/                       # 操作日志
 │   ├── platform-file/                        # 文件上传/存储
 │   ├── platform-notification/                # 通知/站内信/邮件/短信
 │   ├── platform-dict/                        # 字典管理
@@ -237,7 +237,7 @@ com.metabuild.platform.iam/
 
 #### 规则 1：Maven 层 pom 白名单
 
-`platform-oplog` 的 `pom.xml` 默认只依赖：
+`platform-log` 的 `pom.xml` 默认只依赖：
 ```xml
 <dependencies>
     <dependency><groupId>com.metabuild</groupId><artifactId>mb-common</artifactId></dependency>
@@ -249,7 +249,7 @@ com.metabuild.platform.iam/
 </dependencies>
 ```
 
-如果 `platform-oplog` 需要调用 `platform-iam` 的 `UserApi`，必须**显式**在 pom 里添加：
+如果 `platform-log` 需要调用 `platform-iam` 的 `UserApi`，必须**显式**在 pom 里添加：
 ```xml
 <dependency><groupId>com.metabuild</groupId><artifactId>platform-iam</artifactId></dependency>
 ```
@@ -258,7 +258,7 @@ com.metabuild.platform.iam/
 
 #### 规则 2：ArchUnit 层只能 import api 子包
 
-即使 `platform-oplog` 在 pom 里依赖了 `platform-iam`，仍然**只能** `import com.metabuild.platform.iam.api.*`，不能 `import com.metabuild.platform.iam.domain.*`（domain 内部实现，含 Service / Repository）。
+即使 `platform-log` 在 pom 里依赖了 `platform-iam`，仍然**只能** `import com.metabuild.platform.iam.api.*`，不能 `import com.metabuild.platform.iam.domain.*`（domain 内部实现，含 Service / Repository）。
 
 ArchUnit 规则会拦截违规：
 
@@ -355,7 +355,7 @@ public record UserCreatedEvent(User user) {}
 graph TB
     subgraph "platform"
         iam[platform-iam]
-        audit[platform-oplog]
+        audit[platform-log]
         file[platform-file]
         notification[platform-notification]
         dict[platform-dict]
@@ -407,7 +407,7 @@ nxboot 里 `RoleService.listForExport()` 直接读 menu 表，通过 `MenuReposi
 
 **双保险机制（Maven + ArchUnit，ADR-0003 已移除 Spring Modulith）**：
 
-1. **Maven 层 pom 白名单**：`platform-oplog/pom.xml` 默认不依赖 `platform-iam`。如要用 `UserApi`，必须在 pom 里显式声明依赖（PR review 可见）
+1. **Maven 层 pom 白名单**：`platform-log/pom.xml` 默认不依赖 `platform-iam`。如要用 `UserApi`，必须在 pom 里显式声明依赖（PR review 可见）
 2. **ArchUnit 规则**：即使 pom 允许依赖，跨模块仍只能 `import com.metabuild.platform.<X>.api.*`，禁止 import `domain` / `web` 子包
 3. **循环依赖检测**：`slices().should().beFreeOfCycles()`
 

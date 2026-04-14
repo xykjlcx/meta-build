@@ -178,7 +178,7 @@
 | 模块 | 核心内容 |
 |------|---------|
 | `platform-iam` | `UserApi` / `RoleApi` / `MenuApi` / `DeptApi` / `AuthApi` / `PermissionApi` + 对应 api/domain/web + `@OperationLog` 注解装饰 + **方案 E 的 `DataScopeLoader`**（登录时展开数据范围的业务计算） |
-| `platform-oplog` | `OperationLogApi` + `@OperationLog` 注解 + `OperationLogAspect` + 异步写入 `mb_operation_log` + 敏感字段脱敏 |
+| `platform-log` | `OperationLogApi` + `@OperationLog` 注解 + `OperationLogAspect` + 异步写入 `mb_log_operation` + 敏感字段脱敏 |
 | `platform-file` | `FileApi` + `FileStorage` 接口 + `LocalFileStorage` + `AliyunOssFileStorage`（可选）+ 秒传 |
 | `platform-notification` | `NotificationApi` + 通知公告 + 站内信 + 邮件/短信 adapter（可选） |
 | `platform-dict` | `DictApi` + 字典 CRUD + 本地缓存 + 事件刷新 |
@@ -247,7 +247,7 @@
 | **DataScopeRegistry**（方案 E） | 数据权限受保护表的**集中注册中心**（`infra-jooq`）。使用者在 `@Configuration` 里声明"表名 → 部门字段名"映射，`DataScopeVisitListener` 读取此映射决定哪些查询要注入 where 条件 |
 | **DataScopeVisitListener**（方案 E） | 数据权限的**唯一拦截点**。jOOQ 全局 VisitListener，在 SQL AST 构建层自动对注册过的表注入 `dept_id IN (...)` 条件。替代 nxboot 的 `DataScopeAspect` + `DataScopedRepository` 基类双保险（详见 ADR-0007） |
 | **BypassDataScope** | 显式跳过数据权限的注解。实现是 `BypassDataScopeAspect`（`infra-jooq`）——一个窄范围 AOP 切面，只持有一个 `boolean` ThreadLocal 标记，`@BypassDataScope` 方法返回时 try-finally 清理。注解必须填 `reason` 说明 bypass 理由 |
-| **@OperationLog** | 自定义操作日志注解（ADR-0006 P0.6），AOP 拦截写入 `mb_operation_log` |
+| **@OperationLog** | 自定义操作日志注解（ADR-0006 P0.6），AOP 拦截写入 `mb_log_operation` |
 | **ShedLock** | 分布式定时任务锁库，防止多实例重复执行 `@Scheduled` 任务 |
 | **FileStorage** | 文件存储抽象接口（ADR-0006 P0.5），实现类：`LocalFileStorage` / `AliyunOssFileStorage` |
 | **HikariCP** | Spring Boot 默认的 JDBC 连接池，见 7.8 节的基线配置 |

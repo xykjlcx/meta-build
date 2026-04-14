@@ -582,7 +582,7 @@ private String sanitizeHtml(String html) {
 | 步骤 | 内容 | Notice 对应 |
 |------|------|------------|
 | 1 | 目录结构 | `mb-business/business-notice/` |
-| 2 | pom.xml | parent=mb-business, deps: mb-common, mb-schema, infra-security, infra-jooq, infra-exception, infra-sse, platform-oplog, platform-file, platform-notification, jsoup, fastexcel |
+| 2 | pom.xml | parent=mb-business, deps: mb-common, mb-schema, infra-security, infra-jooq, infra-exception, infra-sse, platform-log, platform-file, platform-notification, jsoup, fastexcel |
 | 3 | Java 包 | `com.metabuild.business.notice.{api,domain,web,config}` |
 | 4 | NoticeApi 接口 | api 包下，定义跨模块调用契约 |
 | 5 | package-info.java | 声明允许的依赖（ArchUnit 强制） |

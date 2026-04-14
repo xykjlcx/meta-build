@@ -132,18 +132,12 @@ public class OperationLogAspect {
         return value.length() > maxLen ? value.substring(0, maxLen) + "..." : value;
     }
 
+    /**
+     * 获取客户端 IP。
+     * 项目已配置 server.forward-headers-strategy: FRAMEWORK，
+     * ForwardedHeaderFilter 会将真实 IP 写入 remoteAddr，无需手动读 XFF。
+     */
     private String getClientIp(HttpServletRequest request) {
-        String ip = request.getHeader("X-Forwarded-For");
-        if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("X-Real-IP");
-        }
-        if (ip == null || ip.isBlank() || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        // 多级代理时取第一个 IP
-        if (ip != null && ip.contains(",")) {
-            ip = ip.split(",")[0].trim();
-        }
-        return ip;
+        return request.getRemoteAddr();
     }
 }
