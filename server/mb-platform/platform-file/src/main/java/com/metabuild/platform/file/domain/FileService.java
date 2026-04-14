@@ -18,9 +18,11 @@ import java.io.InputStream;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.HexFormat;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 /**
  * 文件业务服务（上传/下载/删除）。
@@ -29,23 +31,34 @@ import java.util.NoSuchElementException;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class FileService {
+
+    /** 允许上传的文件扩展名白名单（小写）。 */
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
+        "jpg", "jpeg", "png", "gif", "webp", "pdf", "zip", "json"
+    );
 
     private final FileStorage fileStorage;
     private final FileRepository fileRepository;
     private final MbFileProperties properties;
     private final SnowflakeIdGenerator idGenerator;
     private final CurrentUser currentUser;
+    private final Clock clock;
 
     @Transactional
     public FileUploadResponse upload(MultipartFile file) {
-        // 1. MIME 类型校验
+        // 1. 扩展名校验
+        String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "";
+        validateExtension(originalFilename);
+
+        // 2. MIME 类型校验
         String contentType = file.getContentType();
         if (contentType == null || !properties.allowedTypes().contains(contentType)) {
             throw new IllegalArgumentException("不支持的文件类型: " + contentType);
         }
 
-        // 2. 文件大小校验
+        // 3. 文件大小校验
         long maxBytes = (long) properties.maxSizeMb() * 1024 * 1024;
         if (file.getSize() > maxBytes) {
             throw new IllegalArgumentException("文件超过最大限制: " + properties.maxSizeMb() + "MB");
@@ -90,8 +103,8 @@ public class FileService {
         record.setVersion(0);
         record.setCreatedBy(currentUser.userIdOrSystem());
         record.setUpdatedBy(currentUser.userIdOrSystem());
-        record.setCreatedAt(OffsetDateTime.now());
-        record.setUpdatedAt(OffsetDateTime.now());
+        record.setCreatedAt(OffsetDateTime.now(clock));
+        record.setUpdatedAt(OffsetDateTime.now(clock));
 
         fileRepository.insert(record);
         return toResponse(record);
@@ -129,6 +142,18 @@ public class FileService {
             return HexFormat.of().formatHex(digest.digest());
         } catch (NoSuchAlgorithmException | IOException e) {
             throw new RuntimeException("SHA-256 计算失败", e);
+        }
+    }
+
+    /** 校验文件扩展名是否在白名单内。 */
+    private void validateExtension(String filename) {
+        String ext = "";
+        int dotIdx = filename.lastIndexOf('.');
+        if (dotIdx >= 0) {
+            ext = filename.substring(dotIdx + 1).toLowerCase();
+        }
+        if (!ALLOWED_EXTENSIONS.contains(ext)) {
+            throw new IllegalArgumentException("不允许的文件扩展名: " + ext);
         }
     }
 

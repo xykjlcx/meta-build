@@ -16,15 +16,13 @@ import com.metabuild.schema.tables.records.MbIamPasswordHistoryRecord;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jooq.DSLContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.List;
-
-import static com.metabuild.schema.tables.MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY;
 
 /**
  * 用户领域服务。
@@ -36,10 +34,11 @@ import static com.metabuild.schema.tables.MbIamPasswordHistory.MB_IAM_PASSWORD_H
 public class UserService implements UserApi {
 
     private final UserRepository userRepository;
+    private final PasswordHistoryRepository passwordHistoryRepository;
     private final PasswordEncoder passwordEncoder;
     private final PasswordPolicy passwordPolicy;
     private final CurrentUser currentUser;
-    private final DSLContext dsl;
+    private final Clock clock;
 
     @Override
     public UserResponse getById(Long id) {
@@ -75,7 +74,7 @@ public class UserService implements UserApi {
         record.setOwnerDeptId(request.deptId() != null ? request.deptId() : 0L);
         record.setStatus((short) 1);
         record.setMustChangePassword(false);
-        record.setPasswordUpdatedAt(OffsetDateTime.now());
+        record.setPasswordUpdatedAt(OffsetDateTime.now(clock));
         record.setCreatedBy(currentUser.userIdOrSystem());
         record.setUpdatedBy(currentUser.userIdOrSystem());
         record.setVersion(0);
@@ -138,7 +137,7 @@ public class UserService implements UserApi {
 
         // 更新密码
         record.setPasswordHash(passwordEncoder.encode(request.newPassword()));
-        record.setPasswordUpdatedAt(OffsetDateTime.now());
+        record.setPasswordUpdatedAt(OffsetDateTime.now(clock));
         record.setMustChangePassword(false);
         record.setUpdatedBy(userId);
         record.setVersion(record.getVersion() + 1);
@@ -154,7 +153,7 @@ public class UserService implements UserApi {
         passwordPolicy.validate(newPassword);
 
         record.setPasswordHash(passwordEncoder.encode(newPassword));
-        record.setPasswordUpdatedAt(OffsetDateTime.now());
+        record.setPasswordUpdatedAt(OffsetDateTime.now(clock));
         record.setMustChangePassword(true);
         record.setUpdatedBy(currentUser.userIdOrSystem());
         record.setVersion(record.getVersion() + 1);
@@ -164,12 +163,7 @@ public class UserService implements UserApi {
 
     /** 检查密码历史，防止重用最近 N 条密码 */
     private void checkPasswordHistory(Long userId, String newPassword) {
-        List<String> recentHashes = dsl.select(MB_IAM_PASSWORD_HISTORY.PASSWORD_HASH)
-            .from(MB_IAM_PASSWORD_HISTORY)
-            .where(MB_IAM_PASSWORD_HISTORY.USER_ID.eq(userId))
-            .orderBy(MB_IAM_PASSWORD_HISTORY.CREATED_AT.desc())
-            .limit(passwordPolicy.historyCount())
-            .fetchInto(String.class);
+        List<String> recentHashes = passwordHistoryRepository.findRecentHashes(userId, passwordPolicy.historyCount());
 
         boolean isReused = recentHashes.stream()
             .anyMatch(hash -> passwordEncoder.matches(newPassword, hash));
@@ -184,8 +178,8 @@ public class UserService implements UserApi {
         var histRecord = new MbIamPasswordHistoryRecord();
         histRecord.setUserId(userId);
         histRecord.setPasswordHash(passwordHash);
-        histRecord.setCreatedAt(OffsetDateTime.now());
-        dsl.insertInto(MB_IAM_PASSWORD_HISTORY).set(histRecord).execute();
+        histRecord.setCreatedAt(OffsetDateTime.now(clock));
+        passwordHistoryRepository.insert(histRecord);
     }
 
     private UserResponse toResponse(MbIamUserRecord r) {

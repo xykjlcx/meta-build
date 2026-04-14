@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.NoSuchElementException;
 import java.util.Set;
@@ -21,12 +22,14 @@ import java.util.Set;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class NotificationService {
 
     private final NotificationRepository repository;
     private final NotificationReadRepository readRepository;
     private final SnowflakeIdGenerator idGenerator;
     private final CurrentUser currentUser;
+    private final Clock clock;
 
     /**
      * 分页查询通知列表（携带当前用户已读状态）。
@@ -57,8 +60,8 @@ public class NotificationService {
         record.setVersion(0);
         record.setCreatedBy(currentUser.userIdOrSystem());
         record.setUpdatedBy(currentUser.userIdOrSystem());
-        record.setCreatedAt(OffsetDateTime.now());
-        record.setUpdatedAt(OffsetDateTime.now());
+        record.setCreatedAt(OffsetDateTime.now(clock));
+        record.setUpdatedAt(OffsetDateTime.now(clock));
         repository.insert(record);
         return record.getId();
     }
@@ -76,7 +79,7 @@ public class NotificationService {
         MbNotificationReadRecord readRecord = new MbNotificationReadRecord();
         readRecord.setNotificationId(notificationId);
         readRecord.setUserId(userId);
-        readRecord.setReadAt(OffsetDateTime.now());
+        readRecord.setReadAt(OffsetDateTime.now(clock));
         readRepository.insert(readRecord);
     }
 

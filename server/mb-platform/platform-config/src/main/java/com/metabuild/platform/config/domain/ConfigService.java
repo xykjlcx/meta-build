@@ -4,51 +4,51 @@ import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
-import com.metabuild.infra.cache.CacheEvictSupport;
 import com.metabuild.platform.config.api.dto.ConfigResponse;
 import com.metabuild.platform.config.api.dto.ConfigSetRequest;
 import com.metabuild.schema.tables.records.MbConfigRecord;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.NoSuchElementException;
 
 /**
- * 系统配置业务服务（get/set/delete + Redis 缓存）。
- * 缓存 key 规范：config:{key}
+ * 系统配置业务服务（get/set/delete + Spring Cache）。
+ * 缓存名：config，key 为配置键（configKey）。
+ * TTL 由 mb.cache.defaultTtlSeconds 统一控制（默认 3600 秒）。
  */
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ConfigService {
 
-    private static final String CACHE_PREFIX = "config:";
-    private static final long CACHE_TTL_SECONDS = 3600L;
-
     private final ConfigRepository repository;
-    private final CacheEvictSupport cacheEvictSupport;
-    private final StringRedisTemplate redisTemplate;
     private final SnowflakeIdGenerator idGenerator;
     private final CurrentUser currentUser;
+    private final Clock clock;
 
     public PageResult<ConfigResponse> list(PageQuery query) {
         return repository.findPage(query).map(this::toResponse);
     }
 
+    /**
+     * 按 key 查询配置项，结果缓存到 Spring Cache（Redis）。
+     * 缓存未命中时查 DB 并自动写入缓存。
+     */
+    @Cacheable(cacheNames = "config", key = "#configKey")
     public ConfigResponse getByKey(String configKey) {
-        // 先查 Redis
-        String cached = redisTemplate.opsForValue().get(CACHE_PREFIX + configKey);
-        if (cached != null) {
-            // 缓存命中：从 DB 取完整信息（简化实现：不缓存整个 DTO，避免序列化依赖）
-        }
         return repository.findByKey(configKey)
             .map(this::toResponse)
             .orElseThrow(() -> new NoSuchElementException("配置项不存在: " + configKey));
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "config", key = "#req.configKey()")
     public void set(ConfigSetRequest req) {
         MbConfigRecord record = new MbConfigRecord();
         // 检查是否已存在（复用原 id）
@@ -61,7 +61,7 @@ public class ConfigService {
             () -> {
                 record.setId(idGenerator.nextId());
                 record.setCreatedBy(currentUser.userIdOrSystem());
-                record.setCreatedAt(OffsetDateTime.now());
+                record.setCreatedAt(OffsetDateTime.now(clock));
             }
         );
         record.setTenantId(0L);
@@ -71,16 +71,15 @@ public class ConfigService {
         record.setRemark(req.remark());
         record.setVersion(0);
         record.setUpdatedBy(currentUser.userIdOrSystem());
-        record.setUpdatedAt(OffsetDateTime.now());
+        record.setUpdatedAt(OffsetDateTime.now(clock));
 
         repository.upsert(record);
-        cacheEvictSupport.evictAfterCommit(CACHE_PREFIX + req.configKey());
     }
 
     @Transactional
+    @CacheEvict(cacheNames = "config", key = "#configKey")
     public void deleteByKey(String configKey) {
         repository.deleteByKey(configKey);
-        cacheEvictSupport.evictAfterCommit(CACHE_PREFIX + configKey);
     }
 
     private ConfigResponse toResponse(MbConfigRecord r) {

@@ -109,12 +109,6 @@ public class RoleService implements RoleApi {
         log.info("分配角色: userId={}, roleIds={}", userId, request.roleIds());
     }
 
-    @Transactional
-    public void assignMenusToRole(Long roleId, List<Long> menuIds) {
-        // 委托给 MenuService，此处只做日志
-        log.info("分配菜单到角色: roleId={}, menuCount={}", roleId, menuIds.size());
-    }
-
     private RoleResponse toResponse(MbIamRoleRecord r) {
         return new RoleResponse(
             r.getId(),

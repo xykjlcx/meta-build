@@ -69,12 +69,12 @@ public class AuthService implements AuthApi {
             }
         }
 
-        // 3. 登录保护延迟（失败次数超过延迟阈值）
+        // 3. 登录保护：失败次数超过延迟阈值时直接拒绝，返回 429
         if (failCount >= passwordPolicy.delayThreshold()) {
-            int delay = failCount >= passwordPolicy.delayThreshold() * 2
+            int delaySeconds = failCount >= passwordPolicy.delayThreshold() * 2
                 ? passwordPolicy.longDelaySeconds()
                 : passwordPolicy.shortDelaySeconds();
-            applyLoginDelay(delay);
+            throw new BusinessException("iam.auth.tooManyFailures", 429, delaySeconds);
         }
 
         // 4. 查询用户
@@ -145,15 +145,6 @@ public class AuthService implements AuthApi {
     private void incrementFailCount(String key) {
         redisTemplate.opsForValue().increment(key);
         redisTemplate.expire(key, Duration.ofMinutes(passwordPolicy.failCountTtlMinutes()));
-    }
-
-    /** 简单睡眠延迟（生产可用队列替换） */
-    private void applyLoginDelay(int seconds) {
-        try {
-            Thread.sleep(seconds * 1000L);
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-        }
     }
 
     /** 从角色列表中解析最宽松的数据权限范围 */

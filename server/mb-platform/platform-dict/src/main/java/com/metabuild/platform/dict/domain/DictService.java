@@ -28,6 +28,7 @@ import java.util.NoSuchElementException;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class DictService {
 
     private static final String CACHE_TYPE_PREFIX = "dict:type:";

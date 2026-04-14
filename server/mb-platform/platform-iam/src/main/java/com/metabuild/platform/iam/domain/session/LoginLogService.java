@@ -3,15 +3,13 @@ package com.metabuild.platform.iam.domain.session;
 import com.metabuild.schema.tables.records.MbIamLoginLogRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jooq.DSLContext;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
-
-import static com.metabuild.schema.tables.MbIamLoginLog.MB_IAM_LOGIN_LOG;
 
 /**
  * 登录日志服务（异步写入，不影响主流程）。
@@ -21,7 +19,8 @@ import static com.metabuild.schema.tables.MbIamLoginLog.MB_IAM_LOGIN_LOG;
 @RequiredArgsConstructor
 public class LoginLogService {
 
-    private final DSLContext dsl;
+    private final LoginLogRepository loginLogRepository;
+    private final Clock clock;
 
     /** 记录登录成功日志（异步） */
     @Async
@@ -44,8 +43,8 @@ public class LoginLogService {
             record.setUsername(username);
             record.setSuccess(success);
             record.setFailureReason(failureReason);
-            record.setCreatedAt(OffsetDateTime.now());
-            dsl.insertInto(MB_IAM_LOGIN_LOG).set(record).execute();
+            record.setCreatedAt(OffsetDateTime.now(clock));
+            loginLogRepository.insert(record);
         } catch (Exception e) {
             log.error("写入登录日志失败: username={}, error={}", username, e.getMessage(), e);
         }

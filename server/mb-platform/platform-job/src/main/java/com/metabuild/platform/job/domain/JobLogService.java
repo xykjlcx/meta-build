@@ -7,7 +7,9 @@ import com.metabuild.platform.job.api.dto.JobLogResponse;
 import com.metabuild.schema.tables.records.MbJobLogRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
 
 /**
@@ -15,10 +17,12 @@ import java.time.OffsetDateTime;
  */
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class JobLogService {
 
     private final JobLogRepository repository;
     private final SnowflakeIdGenerator idGenerator;
+    private final Clock clock;
 
     /**
      * 分页查询任务日志。
@@ -30,6 +34,7 @@ public class JobLogService {
     /**
      * 写入一条成功的任务日志。
      */
+    @Transactional
     public void logSuccess(String jobName, OffsetDateTime startTime, OffsetDateTime endTime) {
         MbJobLogRecord record = new MbJobLogRecord();
         record.setId(idGenerator.nextId());
@@ -38,13 +43,14 @@ public class JobLogService {
         record.setStartTime(startTime);
         record.setEndTime(endTime);
         record.setDurationMs(endTime.toInstant().toEpochMilli() - startTime.toInstant().toEpochMilli());
-        record.setCreatedAt(OffsetDateTime.now());
+        record.setCreatedAt(OffsetDateTime.now(clock));
         repository.insert(record);
     }
 
     /**
      * 写入一条失败的任务日志。
      */
+    @Transactional
     public void logFailure(String jobName, OffsetDateTime startTime, OffsetDateTime endTime, String errorMessage) {
         MbJobLogRecord record = new MbJobLogRecord();
         record.setId(idGenerator.nextId());
@@ -55,7 +61,7 @@ public class JobLogService {
         record.setDurationMs(endTime.toInstant().toEpochMilli() - startTime.toInstant().toEpochMilli());
         record.setErrorMessage(errorMessage != null && errorMessage.length() > 1000
             ? errorMessage.substring(0, 1000) : errorMessage);
-        record.setCreatedAt(OffsetDateTime.now());
+        record.setCreatedAt(OffsetDateTime.now(clock));
         repository.insert(record);
     }
 

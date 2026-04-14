@@ -6,12 +6,14 @@ import com.metabuild.platform.oplog.api.dto.OperationLogResponse;
 import com.metabuild.schema.tables.records.MbOperationLogRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * 操作日志业务服务（仅查询，追加表无写业务方法）。
  */
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OperationLogService {
 
     private final OperationLogRepository repository;
