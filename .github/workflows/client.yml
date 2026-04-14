@@ -28,6 +28,17 @@ jobs:
         working-directory: client
         run: pnpm install --frozen-lockfile
 
+      # api-sdk 生成（从 openapi-v1.json 生成 TanStack Query hooks）
+      - name: Generate api-sdk
+        working-directory: client
+        run: pnpm generate:api-sdk
+
+      # drift 检测：确认生成代码没有未提交的变更
+      - name: Check api-sdk drift
+        run: |
+          git diff --exit-code -- client/packages/api-sdk/src/generated/ || \
+            (echo "ERROR: api-sdk generated code is out of sync with openapi-v1.json" && exit 1)
+
       - name: TypeScript strict check
         working-directory: client
         run: pnpm check:types
