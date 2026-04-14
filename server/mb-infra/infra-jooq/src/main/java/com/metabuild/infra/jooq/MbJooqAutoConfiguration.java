@@ -4,9 +4,9 @@ import com.metabuild.common.security.CurrentUser;
 import org.jooq.impl.DefaultConfiguration;
 import org.jooq.impl.DefaultExecuteListenerProvider;
 import org.jooq.impl.DefaultRecordListenerProvider;
-import org.jooq.impl.DefaultVisitListenerProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.jooq.DefaultConfigurationCustomizer;
 import org.springframework.boot.autoconfigure.jooq.JooqAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.beans.factory.ObjectProvider;
@@ -21,16 +21,23 @@ import java.time.Clock;
 @EnableAspectJAutoProxy
 public class MbJooqAutoConfiguration {
 
-    // ---- 已有 Bean ----
+    // ---- 慢查询监控 ----
 
     @Bean
     public SlowQueryListener slowQueryListener(MbJooqProperties props) {
         return new SlowQueryListener(props.slowQueryThresholdMs());
     }
 
+    /**
+     * 将 SlowQueryListener 注册到 jOOQ Configuration。
+     *
+     * <p>Spring Boot 的 JooqAutoConfiguration 自动收集 ExecuteListenerProvider 类型的 Bean，
+     * 但因为 MbJooqAutoConfiguration 在 JooqAutoConfiguration 之后加载，需通过
+     * DefaultConfigurationCustomizer 确保注册。
+     */
     @Bean
-    public DefaultExecuteListenerProvider slowQueryListenerProvider(SlowQueryListener listener) {
-        return new DefaultExecuteListenerProvider(listener);
+    public DefaultConfigurationCustomizer slowQueryListenerCustomizer(SlowQueryListener listener) {
+        return config -> config.set(new DefaultExecuteListenerProvider(listener));
     }
 
     // ---- 数据权限 ----
@@ -44,21 +51,25 @@ public class MbJooqAutoConfiguration {
     }
 
     /**
-     * 数据权限 SQL 拦截器：在 SELECT 构建阶段注入部门过滤条件。
+     * 数据权限 SQL 拦截器：在 renderStart 阶段（SQL 渲染前）注入部门过滤条件。
+     *
+     * <p>使用 ExecuteListener 而非 VisitListener，因为 ExecuteListener.renderStart() 在
+     * SQL 字符串生成前触发，addConditions() 此时可有效影响 PreparedStatement 的 SQL 内容。
+     * VisitListener 的 clauseEnd 触发时 SQL 可能已渲染，addConditions() 无法影响已生成的 SQL。
      */
     @Bean
-    public DataScopeVisitListener dataScopeVisitListener(
+    public DataScopeVisitListener dataScopeExecuteListener(
             DataScopeRegistry registry,
             ObjectProvider<CurrentUser> currentUserProvider) {
         return new DataScopeVisitListener(registry, currentUserProvider);
     }
 
     /**
-     * 将 DataScopeVisitListener 注册到 jOOQ VisitListener 链。
+     * 将 DataScopeExecuteListener 注册到 jOOQ Configuration。
      */
     @Bean
-    public DefaultVisitListenerProvider dataScopeVisitListenerProvider(DataScopeVisitListener listener) {
-        return new DefaultVisitListenerProvider(listener);
+    public DefaultConfigurationCustomizer dataScopeExecuteListenerCustomizer(DataScopeVisitListener listener) {
+        return config -> config.set(new DefaultExecuteListenerProvider(listener));
     }
 
     /**
@@ -82,10 +93,13 @@ public class MbJooqAutoConfiguration {
     }
 
     /**
-     * 将 AuditFieldsRecordListener 注册到 jOOQ RecordListener 链。
+     * 将 AuditFieldsRecordListener 注册到 jOOQ Configuration。
+     *
+     * <p>Spring Boot 的 JooqAutoConfiguration 不自动处理 RecordListenerProvider，
+     * 必须通过 DefaultConfigurationCustomizer 手动注册。
      */
     @Bean
-    public DefaultRecordListenerProvider auditFieldsRecordListenerProvider(AuditFieldsRecordListener listener) {
-        return new DefaultRecordListenerProvider(listener);
+    public DefaultConfigurationCustomizer auditFieldsRecordListenerCustomizer(AuditFieldsRecordListener listener) {
+        return config -> config.set(new DefaultRecordListenerProvider(listener));
     }
 }

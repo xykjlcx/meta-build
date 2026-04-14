@@ -3,7 +3,7 @@ package com.metabuild.platform.file.domain;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.file.api.FileStorage;
-import com.metabuild.platform.file.api.dto.FileUploadResponse;
+import com.metabuild.platform.file.api.dto.FileUploadView;
 import com.metabuild.platform.file.config.MbFileProperties;
 import com.metabuild.schema.tables.records.MbFileMetadataRecord;
 import lombok.RequiredArgsConstructor;
@@ -47,8 +47,12 @@ public class FileService {
     private final CurrentUser currentUser;
     private final Clock clock;
 
+    /**
+     * 处理来自 Controller 的 MultipartFile 上传。
+     * 此处负责从 MultipartFile 提取参数后委托给 {@link #doUploadStream}。
+     */
     @Transactional
-    public FileUploadResponse upload(MultipartFile file) {
+    public FileUploadView upload(MultipartFile file) {
         // 1. 扩展名校验
         String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "";
         validateExtension(originalFilename);
@@ -65,39 +69,49 @@ public class FileService {
             throw new IllegalArgumentException("文件超过最大限制: " + properties.maxSizeMb() + "MB");
         }
 
-        // 3. 计算 SHA-256
+        // 4. 计算 SHA-256
         String sha256 = computeSha256(file);
 
-        // 4. 查重：相同 sha256 + 相同租户才复用，跨租户不复用
+        // 5. 查重：相同 sha256 + 相同租户才复用，跨租户不复用
         Long tenantId = currentUser.isAuthenticated() ? currentUser.tenantId() : 0L;
         if (tenantId == null) tenantId = 0L;
         final Long resolvedTenantId = tenantId;
+        final String resolvedContentType = contentType;
+        final long fileSize = file.getSize();
+        final String cleanedOriginalName = StringUtils.cleanPath(originalFilename);
+
         return fileRepository.findBySha256AndTenant(sha256, resolvedTenantId)
             .map(existing -> toResponse(existing))
-            .orElseGet(() -> doUpload(file, sha256, contentType, resolvedTenantId));
+            .orElseGet(() -> {
+                try (InputStream in = file.getInputStream()) {
+                    return doUploadStream(cleanedOriginalName, in, resolvedContentType, fileSize, sha256, resolvedTenantId);
+                } catch (IOException e) {
+                    throw new RuntimeException("读取文件流失败", e);
+                }
+            });
     }
 
-    private FileUploadResponse doUpload(MultipartFile file, String sha256, String contentType, Long tenantId) {
-        // 5. 存储文件
-        String storedPath = fileStorage.store(file, sha256);
+    private FileUploadView doUploadStream(String originalName, InputStream input,
+                                          String contentType, long size,
+                                          String sha256, Long tenantId) {
+        // 通过 FileStorage 接口存储（与 HTTP 传输层解耦）
+        String storedPath = fileStorage.store(originalName, input, contentType, size, sha256);
 
-        // 6. 获取文件扩展名
-        String originalName = StringUtils.cleanPath(file.getOriginalFilename() != null
-            ? file.getOriginalFilename() : "unknown");
+        // 提取文件扩展名
         String extension = "";
         int dotIdx = originalName.lastIndexOf('.');
         if (dotIdx >= 0) {
             extension = originalName.substring(dotIdx + 1);
         }
 
-        // 7. 保存元数据
+        // 保存元数据
         MbFileMetadataRecord record = new MbFileMetadataRecord();
         record.setId(idGenerator.nextId());
         record.setTenantId(tenantId);
         record.setOriginalName(originalName);
         record.setStoredName(sha256);
         record.setFilePath(storedPath);
-        record.setFileSize(file.getSize());
+        record.setFileSize(size);
         record.setContentType(contentType);
         record.setFileExtension(extension);
         record.setSha256(sha256);
@@ -171,8 +185,8 @@ public class FileService {
         }
     }
 
-    private FileUploadResponse toResponse(MbFileMetadataRecord r) {
-        return new FileUploadResponse(
+    private FileUploadView toResponse(MbFileMetadataRecord r) {
+        return new FileUploadView(
             r.getId(), r.getOriginalName(), r.getFilePath(),
             r.getFileSize(), r.getContentType(), r.getSha256(), r.getCreatedAt()
         );

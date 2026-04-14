@@ -16,12 +16,23 @@ public class MockCurrentUser implements CurrentUser {
     private final String username;
     private final Set<String> permissions;
     private final boolean admin;
+    private final Long deptId;
+    private final DataScopeType dataScopeType;
+    private final Set<Long> dataScopeDeptIds;
 
     public MockCurrentUser(Long userId, String username, Set<String> permissions, boolean admin) {
+        this(userId, username, permissions, admin, 0L, admin ? DataScopeType.ALL : DataScopeType.SELF, Set.of());
+    }
+
+    public MockCurrentUser(Long userId, String username, Set<String> permissions, boolean admin,
+                           Long deptId, DataScopeType dataScopeType, Set<Long> dataScopeDeptIds) {
         this.userId = userId;
         this.username = username;
         this.permissions = permissions;
         this.admin = admin;
+        this.deptId = deptId;
+        this.dataScopeType = dataScopeType;
+        this.dataScopeDeptIds = dataScopeDeptIds;
     }
 
     // ───────── 工厂方法 ─────────
@@ -39,6 +50,12 @@ public class MockCurrentUser implements CurrentUser {
     /** 带权限集合的普通用户 */
     public static MockCurrentUser userWithPermissions(Long id, String username, String... perms) {
         return new MockCurrentUser(id, username, Set.of(perms), false);
+    }
+
+    /** 指定数据权限范围的用户（供 DataScope 集成测试使用） */
+    public static MockCurrentUser userWithDataScope(Long id, String username, Long deptId,
+                                                    DataScopeType scopeType, Set<Long> scopeDeptIds) {
+        return new MockCurrentUser(id, username, Set.of(), false, deptId, scopeType, scopeDeptIds);
     }
 
     // ───────── CurrentUser 接口实现 ─────────
@@ -60,7 +77,7 @@ public class MockCurrentUser implements CurrentUser {
 
     @Override
     public Long deptId() {
-        return 0L;
+        return deptId;
     }
 
     @Override
@@ -107,12 +124,12 @@ public class MockCurrentUser implements CurrentUser {
 
     @Override
     public DataScopeType dataScopeType() {
-        return admin ? DataScopeType.ALL : DataScopeType.SELF;
+        return dataScopeType;
     }
 
     @Override
     public Set<Long> dataScopeDeptIds() {
-        return Set.of();
+        return dataScopeDeptIds;
     }
 
     @Override

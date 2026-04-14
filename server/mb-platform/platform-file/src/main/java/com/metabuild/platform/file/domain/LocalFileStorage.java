@@ -4,7 +4,6 @@ import com.metabuild.platform.file.api.FileStorage;
 import com.metabuild.platform.file.config.MbFileProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +24,7 @@ public class LocalFileStorage implements FileStorage {
     private final MbFileProperties properties;
 
     @Override
-    public String store(MultipartFile file, String sha256) {
+    public String store(String filename, InputStream input, String contentType, long size, String sha256) {
         // SHA-256 分级目录结构
         String level1 = sha256.substring(0, 2);
         String level2 = sha256.substring(2, 4);
@@ -36,9 +35,7 @@ public class LocalFileStorage implements FileStorage {
             Files.createDirectories(targetPath.getParent());
             // 若文件已存在（完全相同的 SHA-256），跳过写入（去重）
             if (!Files.exists(targetPath)) {
-                try (InputStream in = file.getInputStream()) {
-                    Files.copy(in, targetPath, StandardCopyOption.REPLACE_EXISTING);
-                }
+                Files.copy(input, targetPath, StandardCopyOption.REPLACE_EXISTING);
             }
         } catch (IOException e) {
             throw new RuntimeException("文件存储失败: " + sha256, e);

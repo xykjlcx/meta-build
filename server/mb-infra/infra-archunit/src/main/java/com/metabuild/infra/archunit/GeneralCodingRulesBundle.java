@@ -19,8 +19,7 @@ public final class GeneralCodingRulesBundle {
      * 使用构造函数注入（搭配 @RequiredArgsConstructor）。
      */
     public static final ArchRule NO_FIELD_INJECTION =
-        GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION
-            .allowEmptyShould(true);
+        GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION;
 
     /**
      * 禁止使用 System.out/System.err 输出。

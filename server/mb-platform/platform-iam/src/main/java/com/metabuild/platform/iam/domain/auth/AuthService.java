@@ -11,7 +11,7 @@ import com.metabuild.common.security.LoginResult;
 import com.metabuild.common.security.SessionData;
 import com.metabuild.infra.captcha.CaptchaService;
 import com.metabuild.platform.iam.api.AuthApi;
-import com.metabuild.platform.iam.api.dto.LoginRequest;
+import com.metabuild.platform.iam.api.dto.LoginCommand;
 import com.metabuild.platform.iam.domain.dept.DeptRepository;
 import com.metabuild.platform.iam.domain.permission.PermissionService;
 import com.metabuild.platform.iam.domain.role.RoleRepository;
@@ -28,7 +28,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -57,7 +56,7 @@ public class AuthService implements AuthApi {
 
     @Override
     @Transactional
-    public LoginResult login(LoginRequest request) {
+    public LoginResult login(LoginCommand request) {
         String username = request.username();
         String failKey = FAIL_COUNT_KEY_PREFIX + username;
 
@@ -242,9 +241,8 @@ public class AuthService implements AuthApi {
             case OWN_DEPT -> userDeptId != null ? Set.of(userDeptId) : Set.of();
             case OWN_DEPT_AND_CHILD -> {
                 if (userDeptId == null) yield Set.of();
-                Set<Long> deptIds = new HashSet<>();
-                collectDeptIdsRecursively(userDeptId, deptIds);
-                yield deptIds;
+                // 使用 WITH RECURSIVE CTE 一次性查询，避免 N+1
+                yield new HashSet<>(deptRepository.findAllChildDeptIds(userDeptId));
             }
             case CUSTOM_DEPT -> {
                 // 聚合用户所有角色对应的自定义部门 ID
@@ -255,17 +253,4 @@ public class AuthService implements AuthApi {
         };
     }
 
-    /** 迭代收集指定部门及其所有子孙部门 ID。 */
-    private void collectDeptIdsRecursively(Long deptId, Set<Long> result) {
-        result.add(deptId);
-        List<Long> childIds = deptRepository.findByParentId(deptId)
-            .stream()
-            .map(d -> d.getId())
-            .toList();
-        for (Long childId : childIds) {
-            if (!result.contains(childId)) {
-                collectDeptIdsRecursively(childId, result);
-            }
-        }
-    }
 }

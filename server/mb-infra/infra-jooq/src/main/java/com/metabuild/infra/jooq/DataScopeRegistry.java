@@ -1,7 +1,9 @@
 package com.metabuild.infra.jooq;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -40,5 +42,14 @@ public class DataScopeRegistry {
      */
     public boolean isRegistered(String tableName) {
         return tableColumnMap.containsKey(tableName.toLowerCase());
+    }
+
+    /**
+     * 获取所有已注册的表名集合。
+     *
+     * @return 已注册表名的不可变集合
+     */
+    public Set<String> getRegisteredTables() {
+        return Collections.unmodifiableSet(tableColumnMap.keySet());
     }
 }
