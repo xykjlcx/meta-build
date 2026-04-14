@@ -1259,3 +1259,28 @@ Task 4 (脚手架) ──→ Task 5 (DDL) ──→ Task 6 (CRUD) ──→ Task
 7. 并行：Task 10 + Task 11
 8. Task 12
 9. Task 13（依赖 Task 3 + Task 12）
+
+---
+
+## M5 后续计划（Plan A 完成后）
+
+M5 共拆分为 3 个独立计划，按顺序执行：
+
+| 计划 | 范围 | 依赖 | 状态 |
+|------|------|------|------|
+| **Plan A**（本文档） | OpenAPI 管线 + Notice 后端 | 无 | 执行中 |
+| **Plan B** | SSE 基础设施 + 通知渠道（站内信 + 邮件 + 微信公众号 + 小程序） | 依赖 Plan A | 待写 |
+| **Plan C** | Notice 前端（orval hooks + 页面 + E2E）+ 实时能力（踢人下线/广播/权限推送） | 依赖 Plan A + B | 待写 |
+
+**Plan A 完成后**：
+1. 告知用户 Plan A 已完成
+2. 读 spec `docs/superpowers/specs/2026-04-14-m5-notice-module-design.md` 的 Phase 3-6 段落
+3. 用 `superpowers:writing-plans` 写 Plan B
+4. 执行 Plan B
+5. 写 Plan C → 执行 Plan C
+
+**Plan B 和 Plan C 的并行可能性**：
+- Plan B（SSE + 通知渠道）是纯后端
+- Plan C 的前端部分不依赖通知渠道（只依赖 Plan A 的后端 API + orval SDK）
+- Plan C 的 E2E 和实时能力部分依赖 Plan B
+- 所以 Plan B 和 Plan C 前端部分可以并行，但 Plan C 的 E2E 必须等 Plan B
