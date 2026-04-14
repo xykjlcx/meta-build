@@ -33,11 +33,10 @@ function AuthedLayout() {
 
   // L5 注入未读计数查询函数给 L4 的 NotificationBadge
   const unreadQueryFn = useCallback(async () => {
-    const result = await customInstance<{ data: { count?: number } }>(
-      '/api/v1/notices/unread-count',
-      { method: 'GET' },
-    );
-    return result.data?.count ?? 0;
+    const result = await customInstance<{ count: number }>('/api/v1/notices/unread-count', {
+      method: 'GET',
+    });
+    return result.count ?? 0;
   }, []);
 
   return (

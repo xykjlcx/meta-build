@@ -20,8 +20,12 @@ export const Route = createFileRoute('/_authed/settings/wechat-bind')({
 });
 
 interface WechatBinding {
+  id: number;
   platform: string;
+  appId: string;
+  openId: string;
   nickname?: string;
+  avatarUrl?: string;
   boundAt?: string;
 }
 
@@ -30,14 +34,14 @@ function WechatBindPage() {
   const [bindings, setBindings] = useState<WechatBinding[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 查询绑定状态
+  // 查询绑定状态 — 后端返回 WeChatBindingView[] 直接体
   const fetchBindings = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await customInstance<{ data: WechatBinding[] }>('/api/v1/wechat/bindings', {
+      const result = await customInstance<WechatBinding[]>('/api/v1/wechat/bindings', {
         method: 'GET',
       });
-      setBindings(result.data ?? []);
+      setBindings(result ?? []);
     } catch {
       // 静默处理
     } finally {
@@ -45,25 +49,28 @@ function WechatBindPage() {
     }
   }, []);
 
-  // 公众号绑定 — 引导到微信 OAuth 授权页
+  // 公众号绑定 — 后端返回 { state: string }，前端拼接微信 OAuth URL
   const handleBindMP = useCallback(async () => {
     try {
-      const result = await customInstance<{ data: { authUrl: string } }>(
-        '/api/v1/wechat/mp/auth-url',
-        { method: 'GET' },
-      );
-      // 跳转微信授权页
-      window.location.href = result.data.authUrl;
+      const result = await customInstance<{ state: string }>('/api/v1/wechat/mp/oauth-state', {
+        method: 'GET',
+      });
+      // 用 state 拼接微信 OAuth 授权 URL（appId 由后端 WeChatProperties 管理，
+      // 前端通过 env 变量获取或由后端返回完整 URL。v1 先用 placeholder）
+      const appId = import.meta.env.VITE_WECHAT_MP_APP_ID ?? '';
+      const redirectUri = encodeURIComponent(`${window.location.origin}/api/v1/wechat/bind-mp`);
+      const authUrl = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${redirectUri}&response_type=code&scope=snsapi_userinfo&state=${result.state}#wechat_redirect`;
+      window.location.href = authUrl;
     } catch {
       toast.error(t('wechatError.authUrlFailed'));
     }
   }, [t]);
 
-  // 解绑
+  // 解绑 — 后端 DELETE /api/v1/wechat/unbind/{platform}（path variable）
   const handleUnbind = useCallback(
     async (platform: string) => {
       try {
-        await customInstance<void>(`/api/v1/wechat/unbind?platform=${platform}`, {
+        await customInstance<void>(`/api/v1/wechat/unbind/${platform}`, {
           method: 'DELETE',
         });
         toast.success(t('wechat.unbind'));
@@ -75,7 +82,7 @@ function WechatBindPage() {
     [fetchBindings, t],
   );
 
-  // 初始化加载 — 用 useEffect 而不是 useState 初始化
+  // 初始化加载
   useEffect(() => {
     fetchBindings();
   }, [fetchBindings]);
