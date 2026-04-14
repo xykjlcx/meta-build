@@ -94,125 +94,41 @@ export default defineConfig({
 });
 ```
 
-**mutator 函数** `client/packages/api-sdk/src/custom-instance.ts`：
+**mutator 函数** `client/packages/api-sdk/src/mutator/custom-instance.ts`：
 
-orval fetch 模式的 mutator 签名是 `(url: string, options: RequestInit) => Promise<T>`。mutator 作为最底层不应反向依赖上层（app-shell），直接操作 localStorage 和原生 fetch。
+orval 的 mutator 是一个**薄包装**，将所有请求委托给现有的 `HttpClient`（`getClient()`）。这样 orval 生成的代码和手写的 auth/menu API 走**同一套 HTTP 层**——同一个拦截器链、同一个 refresh 锁、同一个错误处理。零重复，零冲突。
 
 ```typescript
-import { nanoid } from 'nanoid';
-import { ProblemDetailError } from './errors';
+import { getClient } from '../config';
 
-// --- token / language 工具（不依赖 app-shell） ---
-const TOKEN_KEY = 'mb_access_token';
-const REFRESH_KEY = 'mb_refresh_token';
-const LANG_KEY = 'mb_i18n_lng';
-
-function getAccessToken(): string | null {
-  return localStorage.getItem(TOKEN_KEY);
-}
-function clearAuth(): void {
-  localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(REFRESH_KEY);
-}
-function getCurrentLanguage(): string {
-  return localStorage.getItem(LANG_KEY) ?? 'zh-CN';
-}
-
-// --- refresh 并发锁（多个 401 共享同一个 refresh promise）---
-let refreshPromise: Promise<string | null> | null = null;
-
-async function doRefresh(): Promise<string | null> {
-  const refreshToken = localStorage.getItem(REFRESH_KEY);
-  if (!refreshToken) return null;
-  try {
-    // 绕过 customInstance 避免死锁，直接用原生 fetch
-    const res = await fetch('/api/v1/auth/refresh', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ refreshToken }),
-    });
-    if (!res.ok) return null;
-    const data = await res.json();
-    localStorage.setItem(TOKEN_KEY, data.accessToken);
-    if (data.refreshToken) localStorage.setItem(REFRESH_KEY, data.refreshToken);
-    return data.accessToken;
-  } catch {
-    return null;
-  }
-}
-
-async function refreshAccessToken(): Promise<string | null> {
-  if (!refreshPromise) {
-    refreshPromise = doRefresh().finally(() => { refreshPromise = null; });
-  }
-  return refreshPromise;
-}
-
-// --- blob 响应类型判断 ---
-const BLOB_CONTENT_TYPES = [
-  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-  'application/octet-stream',
-];
-
-function isBlobResponse(contentType: string | null): boolean {
-  if (!contentType) return false;
-  return BLOB_CONTENT_TYPES.some(t => contentType.includes(t));
-}
-
-// --- mutator 主体（双参数签名：url + RequestInit）---
+/**
+ * orval mutator — 薄包装，委托给现有 HttpClient。
+ *
+ * 所有拦截器（auth token / Accept-Language / X-Request-ID / error / 401 refresh）
+ * 在 HttpClient 内部处理，mutator 不需要重复实现。
+ *
+ * 签名匹配 orval fetch 模式要求：(url: string, options: RequestInit) => Promise<T>
+ */
 export const customInstance = async <T>(
   url: string,
   options: RequestInit,
 ): Promise<T> => {
-  const token = getAccessToken();
-  const headers = new Headers(options.headers);
-
-  if (!headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json');
-  }
-  headers.set('Accept-Language', getCurrentLanguage());
-  headers.set('X-Request-ID', nanoid());
-  if (token) {
-    headers.set('Authorization', `Bearer ${token}`);
-  }
-
-  let response = await fetch(url, { ...options, headers });
-
-  // 401 → 尝试 refresh（共享锁，避免并发多次刷新）
-  if (response.status === 401 && token) {
-    const newToken = await refreshAccessToken();
-    if (newToken) {
-      headers.set('Authorization', `Bearer ${newToken}`);
-      response = await fetch(url, { ...options, headers });
-    } else {
-      clearAuth();
-      window.location.href = '/login';
-      throw new ProblemDetailError({ status: 401, title: 'Unauthorized', detail: 'Token expired' });
-    }
-  }
-
-  if (!response.ok) {
-    const problem = await response.json().catch(() => ({
-      status: response.status,
-      title: response.statusText,
-      detail: 'Unknown error',
-    }));
-    throw new ProblemDetailError(problem);
-  }
-
-  if (response.status === 204) return undefined as T;
-
-  // blob 响应（Excel 导出等）
-  const contentType = response.headers.get('Content-Type');
-  if (isBlobResponse(contentType)) {
-    return response.blob() as Promise<T>;
-  }
-
-  return response.json();
+  return getClient().request<T>(url, options);
 };
 
 export default customInstance;
 ```
+
+**为什么只需要 5 行**：`getClient()` 返回的 `HttpClient` 已经内置了全部横切逻辑（M3/M4 实现，19 个测试覆盖）：
+- Authorization header 注入（`createAuthInterceptor`）
+- Accept-Language header 注入（`createLanguageInterceptor`）
+- X-Request-ID header 注入（`createRequestIdInterceptor`）
+- 错误分发（`createErrorInterceptor` → ProblemDetailError）
+- 401 自动 refresh + retry（`tryRefreshToken` + 并发锁）
+- blob 响应处理（Content-Type 判断）
+- `configureApiSdk()` 一次性配置（`main.tsx` 中调用，不变）
+
+**架构一致性**：手写的 `authApi.login()` / `menuApi.queryCurrentUserMenu()` 和 orval 生成的 `useListNotices()` 全部走 `getClient().request()` → 同一个拦截器链 → 同一个 refresh 锁。不存在两套 HTTP 系统。
 
 ### 2.3 orval 迁移策略
 
