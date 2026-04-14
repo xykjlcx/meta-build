@@ -3,10 +3,10 @@
 // M2: 增加 theme-registry + apply-theme
 
 /**
- * 46 个语义 token 的名称常量——方便 TypeScript 代码引用。
+ * 54 个语义 token 的名称常量——方便 TypeScript 代码引用。
  */
 export const TOKEN_NAMES = {
-  // Colors (25)
+  // Colors (33)
   colorBackground: '--color-background',
   colorForeground: '--color-foreground',
   colorPrimary: '--color-primary',
@@ -32,6 +32,14 @@ export const TOKEN_NAMES = {
   colorBorder: '--color-border',
   colorInput: '--color-input',
   colorRing: '--color-ring',
+  colorSidebar: '--color-sidebar',
+  colorSidebarForeground: '--color-sidebar-foreground',
+  colorSidebarPrimary: '--color-sidebar-primary',
+  colorSidebarPrimaryForeground: '--color-sidebar-primary-foreground',
+  colorSidebarAccent: '--color-sidebar-accent',
+  colorSidebarAccentForeground: '--color-sidebar-accent-foreground',
+  colorSidebarBorder: '--color-sidebar-border',
+  colorSidebarRing: '--color-sidebar-ring',
   // Radius (4)
   radiusSm: '--radius-sm',
   radiusMd: '--radius-md',
@@ -60,7 +68,7 @@ export const TOKEN_NAMES = {
   fontHeading: '--font-heading',
 } as const;
 
-export const TOTAL_TOKENS = 46;
+export const TOTAL_TOKENS = 54;
 
 export { themeRegistry, type ThemeId, type ThemeMeta } from './theme-registry';
 export { applyTheme, loadTheme, initTheme, isValidTheme } from './apply-theme';
