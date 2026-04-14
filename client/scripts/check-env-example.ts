@@ -1,7 +1,9 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const ROOT = resolve(import.meta.dirname, '..');
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const ROOT = resolve(__dirname, '..');
 const ENV_FILE = join(ROOT, '.env.example');
 
 // 递归收集所有 .ts/.tsx 文件
