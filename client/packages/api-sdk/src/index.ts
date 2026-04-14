@@ -8,6 +8,10 @@ export { ALL_APP_PERMISSIONS } from './types/permission';
 // 错误
 export { ProblemDetailError, isProblemDetail } from './errors';
 
+// HTTP 客户端扩展
+export type { RequestOptions } from './http-client';
+export { triggerDownload } from './http-client';
+
 // 配置
 export { configureApiSdk } from './config';
 export type { ApiSdkConfig } from './config';
