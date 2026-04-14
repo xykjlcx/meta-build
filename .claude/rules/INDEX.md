@@ -75,6 +75,7 @@ scope: [后端/前端/全栈/构建/部署/流程]
 | 规则 | triggers | 来源 |
 |------|----------|------|
 | [多视角审查](multi-perspective-review.md) | review, 审查, 定稿, milestone 交付 | 0412 四维审查 + 0413 七角色走查，含两套验证过的角色清单 |
+| [计划必须 Review 后才能实施](plan-review-before-execution.md) | 计划, plan, 实施, execute, writing-plans, 并行, 串行 | 0414 M2+M4 计划审查均发现大量问题 |
 
 ---
 
