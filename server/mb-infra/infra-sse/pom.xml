@@ -37,6 +37,12 @@
             <artifactId>bucket4j-core</artifactId>
         </dependency>
 
+        <!-- Caffeine（限流桶缓存，防止 ConcurrentHashMap 无限增长） -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
         <!-- mb-common（CurrentUser 接口） -->
         <dependency>
             <groupId>com.metabuild</groupId>

@@ -153,6 +153,9 @@ public class WeChatBindingService {
      */
     @Transactional
     public void unbind(String platform) {
+        if (!"MP".equals(platform) && !"MINI".equals(platform)) {
+            throw new IllegalArgumentException("platform 必须是 MP 或 MINI");
+        }
         String appId = "MP".equals(platform) ? weChatProperties.mp().appId() : weChatProperties.mini().appId();
         boolean deleted = bindingRepository.unbind(currentUser.userId(), platform, appId, currentUser.tenantId());
         if (!deleted) {

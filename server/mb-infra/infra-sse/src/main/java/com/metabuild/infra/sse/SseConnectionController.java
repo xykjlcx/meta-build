@@ -1,5 +1,7 @@
 package com.metabuild.infra.sse;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import com.metabuild.common.security.CurrentUser;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
@@ -18,7 +20,6 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.time.Duration;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * SSE 连接端点。
@@ -37,8 +38,11 @@ public class SseConnectionController {
 
     private static final Logger log = LoggerFactory.getLogger(SseConnectionController.class);
 
-    /** 每用户限流桶：5 次/分钟 */
-    private static final ConcurrentHashMap<Long, Bucket> RATE_LIMIT_BUCKETS = new ConcurrentHashMap<>();
+    /** 每用户限流桶：5 次/分钟，2 分钟无访问自动清除（防内存泄漏） */
+    private static final Cache<Long, Bucket> RATE_LIMIT_BUCKETS = Caffeine.newBuilder()
+            .expireAfterAccess(Duration.ofMinutes(2))
+            .maximumSize(10_000)
+            .build();
 
     private final SseSessionRegistry registry;
     private final SseProperties properties;
@@ -50,7 +54,7 @@ public class SseConnectionController {
         Long userId = currentUser.userId();
 
         // 每用户每分钟 5 次建连限流（Bucket4j）
-        Bucket bucket = RATE_LIMIT_BUCKETS.computeIfAbsent(userId, id ->
+        Bucket bucket = RATE_LIMIT_BUCKETS.get(userId, id ->
                 Bucket.builder()
                         .addLimit(Bandwidth.classic(5, Refill.greedy(5, Duration.ofMinutes(1))))
                         .build());
