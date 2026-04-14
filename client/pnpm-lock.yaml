@@ -35,6 +35,9 @@ importers:
 
   apps/web-admin:
     dependencies:
+      '@hookform/resolvers':
+        specifier: ^3.9.0
+        version: 3.10.0(react-hook-form@7.72.1(react@19.2.5))
       '@mb/api-sdk':
         specifier: workspace:*
         version: link:../../packages/api-sdk
@@ -83,12 +86,18 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.5(react@19.2.5)
+      react-hook-form:
+        specifier: ^7.54.0
+        version: 7.72.1(react@19.2.5)
       react-i18next:
         specifier: ^14.1.0
         version: 14.1.3(i18next@23.16.8)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.0.0
