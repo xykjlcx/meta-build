@@ -1,8 +1,11 @@
 package com.metabuild.business.notice.domain;
 
+import com.metabuild.business.notice.api.RecipientView;
+import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.BypassDataScope;
 import lombok.RequiredArgsConstructor;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.InsertValuesStep4;
 import org.springframework.stereotype.Repository;
@@ -14,6 +17,7 @@ import java.util.List;
 import static com.metabuild.schema.tables.BizNoticeRecipient.BIZ_NOTICE_RECIPIENT;
 import static com.metabuild.schema.tables.MbIamUser.MB_IAM_USER;
 import static com.metabuild.schema.tables.MbIamUserRole.MB_IAM_USER_ROLE;
+import static org.jooq.impl.DSL.trueCondition;
 
 /**
  * 公告接收人数据访问层。
@@ -141,5 +145,90 @@ public class NoticeRecipientRepository {
             .where(MB_IAM_USER_ROLE.ROLE_ID.eq(roleId))
             .and(MB_IAM_USER.STATUS.eq((short) 1))
             .fetch(MB_IAM_USER.ID);
+    }
+
+    // ------ 已读/未读操作 ------
+
+    /**
+     * 标记已读（幂等：已读则跳过，仅对 read_at IS NULL 的行执行 UPDATE）。
+     *
+     * @param noticeId 公告 ID
+     * @param userId   用户 ID
+     * @param readAt   已读时间
+     * @return true=本次写入了已读，false=之前已读（幂等无操作）
+     */
+    public boolean markRead(Long noticeId, Long userId, OffsetDateTime readAt) {
+        int rows = dsl.update(BIZ_NOTICE_RECIPIENT)
+            .set(BIZ_NOTICE_RECIPIENT.READ_AT, readAt)
+            .where(BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(noticeId))
+            .and(BIZ_NOTICE_RECIPIENT.USER_ID.eq(userId))
+            .and(BIZ_NOTICE_RECIPIENT.READ_AT.isNull())
+            .execute();
+        return rows > 0;
+    }
+
+    /**
+     * 查询当前用户未读公告数量。
+     *
+     * @param userId 用户 ID
+     * @return 未读数量
+     */
+    public int unreadCount(Long userId) {
+        return dsl.selectCount()
+            .from(BIZ_NOTICE_RECIPIENT)
+            .where(BIZ_NOTICE_RECIPIENT.USER_ID.eq(userId))
+            .and(BIZ_NOTICE_RECIPIENT.READ_AT.isNull())
+            .fetchOne(0, int.class);
+    }
+
+    /**
+     * 分页查询公告接收人列表（支持 all/read/unread 筛选，JOIN 用户表获取用户名）。
+     *
+     * @param noticeId   公告 ID
+     * @param readStatus 已读状态筛选：all/read/unread
+     * @param page       页码（从 1 开始）
+     * @param size       每页条数
+     * @return 分页接收人视图
+     */
+    @BypassDataScope
+    public PageResult<RecipientView> findRecipients(Long noticeId, String readStatus, int page, int size) {
+        // 构造 readStatus 过滤条件
+        Condition readCondition = trueCondition();
+        if ("read".equalsIgnoreCase(readStatus)) {
+            readCondition = BIZ_NOTICE_RECIPIENT.READ_AT.isNotNull();
+        } else if ("unread".equalsIgnoreCase(readStatus)) {
+            readCondition = BIZ_NOTICE_RECIPIENT.READ_AT.isNull();
+        }
+
+        Condition baseCondition = BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(noticeId).and(readCondition);
+
+        // 查询总数
+        long total = dsl.selectCount()
+            .from(BIZ_NOTICE_RECIPIENT)
+            .join(MB_IAM_USER).on(BIZ_NOTICE_RECIPIENT.USER_ID.eq(MB_IAM_USER.ID))
+            .where(baseCondition)
+            .fetchOne(0, long.class);
+
+        int offset = (page - 1) * size;
+        List<RecipientView> content = dsl
+            .select(
+                BIZ_NOTICE_RECIPIENT.USER_ID,
+                MB_IAM_USER.USERNAME,
+                BIZ_NOTICE_RECIPIENT.READ_AT
+            )
+            .from(BIZ_NOTICE_RECIPIENT)
+            .join(MB_IAM_USER).on(BIZ_NOTICE_RECIPIENT.USER_ID.eq(MB_IAM_USER.ID))
+            .where(baseCondition)
+            .orderBy(BIZ_NOTICE_RECIPIENT.CREATED_AT.asc())
+            .limit(size)
+            .offset(offset)
+            .fetch(r -> new RecipientView(
+                r.get(BIZ_NOTICE_RECIPIENT.USER_ID),
+                r.get(MB_IAM_USER.USERNAME),
+                r.get(BIZ_NOTICE_RECIPIENT.READ_AT)
+            ));
+
+        int totalPages = total == 0 ? 0 : (int) Math.ceil((double) total / size);
+        return new PageResult<>(content, total, totalPages, page, size);
     }
 }

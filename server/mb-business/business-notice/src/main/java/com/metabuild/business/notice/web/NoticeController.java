@@ -8,6 +8,7 @@ import com.metabuild.business.notice.api.NoticePublishCommand;
 import com.metabuild.business.notice.api.NoticeQuery;
 import com.metabuild.business.notice.api.NoticeUpdateCommand;
 import com.metabuild.business.notice.api.NoticeView;
+import com.metabuild.business.notice.api.RecipientView;
 import com.metabuild.business.notice.domain.NoticeService;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.log.OperationLog;
@@ -22,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 公告管理 Controller。
@@ -128,5 +130,30 @@ public class NoticeController {
     @OperationLog(module = "notice", operation = "批量删除公告")
     public BatchResultView batchDelete(@Valid @RequestBody BatchIdsCommand cmd) {
         return noticeService.batchDelete(cmd);
+    }
+
+    @Operation(summary = "标记已读（登录用户均可调用，幂等）")
+    @PutMapping("/{id}/read")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void markRead(@Parameter(description = "公告 ID") @PathVariable Long id) {
+        noticeService.markRead(id);
+    }
+
+    @Operation(summary = "查询当前用户未读公告数量（登录用户均可调用）")
+    @GetMapping("/unread-count")
+    public Map<String, Integer> unreadCount() {
+        return Map.of("count", noticeService.unreadCount());
+    }
+
+    @Operation(summary = "查询公告接收人列表（分页）")
+    @GetMapping("/{id}/recipients")
+    @RequirePermission("notice:notice:detail")
+    public PageResult<RecipientView> recipients(
+        @Parameter(description = "公告 ID") @PathVariable Long id,
+        @Parameter(description = "已读状态：all/read/unread") @RequestParam(defaultValue = "all") String readStatus,
+        @Parameter(description = "页码（从 1 开始）") @RequestParam(defaultValue = "1") int page,
+        @Parameter(description = "每页条数") @RequestParam(defaultValue = "20") int size
+    ) {
+        return noticeService.recipients(id, readStatus, page, size);
     }
 }

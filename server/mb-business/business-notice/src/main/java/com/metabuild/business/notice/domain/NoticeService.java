@@ -9,6 +9,7 @@ import com.metabuild.business.notice.api.NoticeQuery;
 import com.metabuild.business.notice.api.NoticeTarget;
 import com.metabuild.business.notice.api.NoticeUpdateCommand;
 import com.metabuild.business.notice.api.NoticeView;
+import com.metabuild.business.notice.api.RecipientView;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.exception.BusinessException;
 import com.metabuild.common.exception.ConflictException;
@@ -23,6 +24,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Clock;
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -44,6 +47,7 @@ public class NoticeService {
     private final CurrentUser currentUser;
     private final SnowflakeIdGenerator idGenerator;
     private final ApplicationEventPublisher eventPublisher;
+    private final Clock clock;
 
     /**
      * 分页查询公告列表。
@@ -294,6 +298,41 @@ public class NoticeService {
 
         log.info("批量删除公告: success={}, skipped={}", success, skipped);
         return new BatchResultView(success, skipped);
+    }
+
+    // ------ 已读/未读 ------
+
+    /**
+     * 标记当前登录用户已读（幂等）。
+     *
+     * @param noticeId 公告 ID
+     */
+    @Transactional
+    public void markRead(Long noticeId) {
+        Long userId = currentUser.userId();
+        noticeRecipientRepository.markRead(noticeId, userId, OffsetDateTime.now(clock));
+    }
+
+    /**
+     * 查询当前登录用户的未读公告数量。
+     *
+     * @return 未读数量
+     */
+    public int unreadCount() {
+        return noticeRecipientRepository.unreadCount(currentUser.userId());
+    }
+
+    /**
+     * 分页查询公告接收人列表（需要管理权限）。
+     *
+     * @param noticeId   公告 ID
+     * @param readStatus 已读状态筛选：all/read/unread
+     * @param page       页码（从 1 开始）
+     * @param size       每页条数
+     * @return 分页接收人视图
+     */
+    public PageResult<RecipientView> recipients(Long noticeId, String readStatus, int page, int size) {
+        return noticeRecipientRepository.findRecipients(noticeId, readStatus, page, size);
     }
 
     // ------ 私有方法 ------
