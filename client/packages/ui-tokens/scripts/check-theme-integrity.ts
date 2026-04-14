@@ -7,6 +7,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { TOTAL_TOKENS } from '../src/index';
 import { themeRegistry } from '../src/theme-registry';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -66,6 +67,14 @@ const referenceVars = themeVarsMap.get(referenceId);
 if (!referenceVars) {
   console.error(`[FAIL] 基准主题 "${referenceId}" 不存在或无法解析`);
   process.exit(1);
+}
+
+// 断言基准主题的 token 数量与 TOTAL_TOKENS 一致，防止全局漏删
+if (referenceVars.length !== TOTAL_TOKENS) {
+  console.error(
+    `[FAIL] 基准主题 "${referenceId}" 包含 ${referenceVars.length} 个变量，预期 ${TOTAL_TOKENS} 个`,
+  );
+  hasError = true;
 }
 
 const referenceSet = new Set(referenceVars);

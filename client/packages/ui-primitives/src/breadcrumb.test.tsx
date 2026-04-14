@@ -25,7 +25,20 @@ describe('Breadcrumb', () => {
     expect(screen.getByText('首页')).toBeDefined();
   });
 
-  it('应该设置 aria-label', () => {
+  it('应该透传调用方的 aria-label', () => {
+    render(
+      <Breadcrumb aria-label="面包屑导航">
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="/">首页</BreadcrumbLink>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>,
+    );
+    expect(screen.getByRole('navigation').getAttribute('aria-label')).toBe('面包屑导航');
+  });
+
+  it('不传 aria-label 时不应有默认值', () => {
     render(
       <Breadcrumb>
         <BreadcrumbList>
@@ -35,7 +48,7 @@ describe('Breadcrumb', () => {
         </BreadcrumbList>
       </Breadcrumb>,
     );
-    expect(screen.getByRole('navigation').getAttribute('aria-label')).toBe('breadcrumb');
+    expect(screen.getByRole('navigation').getAttribute('aria-label')).toBeNull();
   });
 
   it('应该渲染分隔符', () => {

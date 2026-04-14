@@ -10,7 +10,7 @@ export interface BreadcrumbProps extends React.ComponentPropsWithoutRef<'nav'> {
 
 /** 面包屑导航根元素 */
 function Breadcrumb({ ref, ...props }: BreadcrumbProps) {
-  return <nav ref={ref} aria-label="breadcrumb" {...props} />;
+  return <nav ref={ref} {...props} />;
 }
 
 /** BreadcrumbList 组件属性 */

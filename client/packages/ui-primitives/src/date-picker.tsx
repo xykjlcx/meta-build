@@ -99,7 +99,7 @@ function DatePicker({
             className,
           )}
         >
-          {value ? formatDate(value) : placeholder ?? ''}
+          {value ? formatDate(value) : (placeholder ?? '')}
           <svg
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"

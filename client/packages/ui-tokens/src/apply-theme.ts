@@ -1,4 +1,4 @@
-import { themeRegistry, type ThemeId } from './theme-registry';
+import { type ThemeId, themeRegistry } from './theme-registry';
 
 const STORAGE_KEY = 'mb-theme';
 const validThemeIds = new Set<string>(themeRegistry.map((t) => t.id));

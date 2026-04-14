@@ -72,7 +72,8 @@ function Combobox({
             className,
           )}
         >
-          {selectedLabel ?? (placeholder ? <span className="text-muted-foreground">{placeholder}</span> : null)}
+          {selectedLabel ??
+            (placeholder ? <span className="text-muted-foreground">{placeholder}</span> : null)}
           <svg
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
