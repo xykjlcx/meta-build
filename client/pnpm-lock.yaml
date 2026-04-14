@@ -70,7 +70,11 @@ importers:
         specifier: ^5.4.0
         version: 5.4.21(lightningcss@1.32.0)
 
-  packages/api-sdk: {}
+  packages/api-sdk:
+    devDependencies:
+      vitest:
+        specifier: ^2.1.0
+        version: 2.1.9(jsdom@29.0.2)(lightningcss@1.32.0)
 
   packages/app-shell:
     dependencies:
