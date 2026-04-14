@@ -4,6 +4,10 @@
 package com.metabuild.schema;
 
 
+import com.metabuild.schema.tables.BizNotice;
+import com.metabuild.schema.tables.BizNoticeAttachment;
+import com.metabuild.schema.tables.BizNoticeRecipient;
+import com.metabuild.schema.tables.BizNoticeTarget;
 import com.metabuild.schema.tables.MbConfig;
 import com.metabuild.schema.tables.MbDictData;
 import com.metabuild.schema.tables.MbDictType;
@@ -22,6 +26,10 @@ import com.metabuild.schema.tables.MbJobLog;
 import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
 import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.records.BizNoticeAttachmentRecord;
+import com.metabuild.schema.tables.records.BizNoticeRecipientRecord;
+import com.metabuild.schema.tables.records.BizNoticeRecord;
+import com.metabuild.schema.tables.records.BizNoticeTargetRecord;
 import com.metabuild.schema.tables.records.MbConfigRecord;
 import com.metabuild.schema.tables.records.MbDictDataRecord;
 import com.metabuild.schema.tables.records.MbDictTypeRecord;
@@ -59,6 +67,10 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<BizNoticeRecord> BIZ_NOTICE_PKEY = Internal.createUniqueKey(BizNotice.BIZ_NOTICE, DSL.name("biz_notice_pkey"), new TableField[] { BizNotice.BIZ_NOTICE.ID }, true);
+    public static final UniqueKey<BizNoticeAttachmentRecord> BIZ_NOTICE_ATTACHMENT_PKEY = Internal.createUniqueKey(BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT, DSL.name("biz_notice_attachment_pkey"), new TableField[] { BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT.ID }, true);
+    public static final UniqueKey<BizNoticeRecipientRecord> BIZ_NOTICE_RECIPIENT_PKEY = Internal.createUniqueKey(BizNoticeRecipient.BIZ_NOTICE_RECIPIENT, DSL.name("biz_notice_recipient_pkey"), new TableField[] { BizNoticeRecipient.BIZ_NOTICE_RECIPIENT.ID }, true);
+    public static final UniqueKey<BizNoticeTargetRecord> BIZ_NOTICE_TARGET_PKEY = Internal.createUniqueKey(BizNoticeTarget.BIZ_NOTICE_TARGET, DSL.name("biz_notice_target_pkey"), new TableField[] { BizNoticeTarget.BIZ_NOTICE_TARGET.ID }, true);
     public static final UniqueKey<MbConfigRecord> MB_CONFIG_PKEY = Internal.createUniqueKey(MbConfig.MB_CONFIG, DSL.name("mb_config_pkey"), new TableField[] { MbConfig.MB_CONFIG.ID }, true);
     public static final UniqueKey<MbDictDataRecord> MB_DICT_DATA_PKEY = Internal.createUniqueKey(MbDictData.MB_DICT_DATA, DSL.name("mb_dict_data_pkey"), new TableField[] { MbDictData.MB_DICT_DATA.ID }, true);
     public static final UniqueKey<MbDictTypeRecord> MB_DICT_TYPE_PKEY = Internal.createUniqueKey(MbDictType.MB_DICT_TYPE, DSL.name("mb_dict_type_pkey"), new TableField[] { MbDictType.MB_DICT_TYPE.ID }, true);

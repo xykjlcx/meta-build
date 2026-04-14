@@ -4,6 +4,10 @@
 package com.metabuild.schema;
 
 
+import com.metabuild.schema.tables.BizNotice;
+import com.metabuild.schema.tables.BizNoticeAttachment;
+import com.metabuild.schema.tables.BizNoticeRecipient;
+import com.metabuild.schema.tables.BizNoticeTarget;
 import com.metabuild.schema.tables.MbConfig;
 import com.metabuild.schema.tables.MbDictData;
 import com.metabuild.schema.tables.MbDictType;
@@ -43,6 +47,26 @@ public class Public extends SchemaImpl {
      * The reference instance of <code>public</code>
      */
     public static final Public PUBLIC = new Public();
+
+    /**
+     * 通知公告
+     */
+    public final BizNotice BIZ_NOTICE = BizNotice.BIZ_NOTICE;
+
+    /**
+     * 公告附件关联
+     */
+    public final BizNoticeAttachment BIZ_NOTICE_ATTACHMENT = BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT;
+
+    /**
+     * 通知接收人（发布时从 target 展开到具体用户）
+     */
+    public final BizNoticeRecipient BIZ_NOTICE_RECIPIENT = BizNoticeRecipient.BIZ_NOTICE_RECIPIENT;
+
+    /**
+     * 通知目标（多态关联：全员/部门/角色/用户）
+     */
+    public final BizNoticeTarget BIZ_NOTICE_TARGET = BizNoticeTarget.BIZ_NOTICE_TARGET;
 
     /**
      * 系统配置表
@@ -150,6 +174,10 @@ public class Public extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.asList(
+            BizNotice.BIZ_NOTICE,
+            BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT,
+            BizNoticeRecipient.BIZ_NOTICE_RECIPIENT,
+            BizNoticeTarget.BIZ_NOTICE_TARGET,
             MbConfig.MB_CONFIG,
             MbDictData.MB_DICT_DATA,
             MbDictType.MB_DICT_TYPE,

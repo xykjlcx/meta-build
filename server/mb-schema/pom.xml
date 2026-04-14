@@ -149,7 +149,7 @@
                             <generator>
                                 <database>
                                     <name>org.jooq.meta.postgres.PostgresDatabase</name>
-                                    <includes>mb_.*</includes>
+                                    <includes>(mb_|biz_).*</includes>
                                     <excludes>flyway_schema_history</excludes>
                                     <inputSchema>public</inputSchema>
                                 </database>

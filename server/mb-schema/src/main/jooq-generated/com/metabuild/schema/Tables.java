@@ -4,6 +4,10 @@
 package com.metabuild.schema;
 
 
+import com.metabuild.schema.tables.BizNotice;
+import com.metabuild.schema.tables.BizNoticeAttachment;
+import com.metabuild.schema.tables.BizNoticeRecipient;
+import com.metabuild.schema.tables.BizNoticeTarget;
 import com.metabuild.schema.tables.MbConfig;
 import com.metabuild.schema.tables.MbDictData;
 import com.metabuild.schema.tables.MbDictType;
@@ -29,6 +33,26 @@ import com.metabuild.schema.tables.MbNotificationRead;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
 public class Tables {
+
+    /**
+     * 通知公告
+     */
+    public static final BizNotice BIZ_NOTICE = BizNotice.BIZ_NOTICE;
+
+    /**
+     * 公告附件关联
+     */
+    public static final BizNoticeAttachment BIZ_NOTICE_ATTACHMENT = BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT;
+
+    /**
+     * 通知接收人（发布时从 target 展开到具体用户）
+     */
+    public static final BizNoticeRecipient BIZ_NOTICE_RECIPIENT = BizNoticeRecipient.BIZ_NOTICE_RECIPIENT;
+
+    /**
+     * 通知目标（多态关联：全员/部门/角色/用户）
+     */
+    public static final BizNoticeTarget BIZ_NOTICE_TARGET = BizNoticeTarget.BIZ_NOTICE_TARGET;
 
     /**
      * 系统配置表
