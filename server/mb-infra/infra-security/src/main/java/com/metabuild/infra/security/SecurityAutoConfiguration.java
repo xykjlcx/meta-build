@@ -43,7 +43,11 @@ public class SecurityAutoConfiguration implements WebMvcConfigurer {
                 .excludePathPatterns(
                         "/api/v1/auth/login",
                         "/api/v1/auth/refresh",
-                        "/api/v1/public/**"
+                        "/api/v1/public/**",
+                        "/api-docs",
+                        "/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
                 );
     }
 }
