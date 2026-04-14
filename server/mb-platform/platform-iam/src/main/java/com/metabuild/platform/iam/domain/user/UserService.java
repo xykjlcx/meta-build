@@ -101,10 +101,8 @@ public class UserService implements UserApi {
             record.setOwnerDeptId(request.deptId());
         }
         if (request.status() != null) record.setStatus(request.status());
-        record.setUpdatedBy(currentUser.userIdOrSystem());
-        record.setVersion(record.getVersion() + 1);
 
-        int updated = userRepository.update(record);
+        int updated = userRepository.update(record, currentUser.userIdOrSystem());
         if (updated == 0) {
             throw new BusinessException("common.concurrentModification", 409);
         }
@@ -142,9 +140,7 @@ public class UserService implements UserApi {
         record.setPasswordHash(passwordEncoder.encode(request.newPassword()));
         record.setPasswordUpdatedAt(OffsetDateTime.now(clock));
         record.setMustChangePassword(false);
-        record.setUpdatedBy(userId);
-        record.setVersion(record.getVersion() + 1);
-        userRepository.update(record);
+        userRepository.update(record, userId);
         log.info("用户修改密码: userId={}", userId);
     }
 
@@ -158,9 +154,7 @@ public class UserService implements UserApi {
         record.setPasswordHash(passwordEncoder.encode(newPassword));
         record.setPasswordUpdatedAt(OffsetDateTime.now(clock));
         record.setMustChangePassword(true);
-        record.setUpdatedBy(currentUser.userIdOrSystem());
-        record.setVersion(record.getVersion() + 1);
-        userRepository.update(record);
+        userRepository.update(record, currentUser.userIdOrSystem());
         log.info("重置用户密码: userId={}", userId);
     }
 

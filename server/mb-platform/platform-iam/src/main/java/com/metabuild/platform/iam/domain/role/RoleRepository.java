@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
+import java.time.Clock;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +26,7 @@ import static com.metabuild.schema.tables.MbIamUserRole.MB_IAM_USER_ROLE;
 public class RoleRepository {
 
     private final DSLContext dsl;
+    private final Clock clock;
 
     public Optional<MbIamRoleRecord> findById(Long id) {
         return dsl.selectFrom(MB_IAM_ROLE)
@@ -67,11 +70,43 @@ public class RoleRepository {
         return record.getId();
     }
 
-    public int update(MbIamRoleRecord record) {
+    /**
+     * 乐观锁更新角色。
+     * Repository 层负责 version + 1 和 updated_at/updated_by。
+     */
+    public int update(MbIamRoleRecord record, Long updatedBy) {
         return dsl.update(MB_IAM_ROLE)
-            .set(record)
+            .set(MB_IAM_ROLE.NAME, record.getName())
+            .set(MB_IAM_ROLE.SORT_ORDER, record.getSortOrder())
+            .set(MB_IAM_ROLE.STATUS, record.getStatus())
+            .set(MB_IAM_ROLE.DATA_SCOPE, record.getDataScope())
+            .set(MB_IAM_ROLE.REMARK, record.getRemark())
+            .set(MB_IAM_ROLE.VERSION, MB_IAM_ROLE.VERSION.plus(1))
+            .set(MB_IAM_ROLE.UPDATED_BY, updatedBy)
+            .set(MB_IAM_ROLE.UPDATED_AT, OffsetDateTime.now(clock))
             .where(MB_IAM_ROLE.ID.eq(record.getId()))
-            .and(MB_IAM_ROLE.VERSION.eq(record.getVersion() - 1))
+            .and(MB_IAM_ROLE.VERSION.eq(record.getVersion()))
+            .execute();
+    }
+
+    /** 删除角色关联的用户角色记录 */
+    public void deleteUserRolesByRoleId(Long roleId) {
+        dsl.deleteFrom(MB_IAM_USER_ROLE)
+            .where(MB_IAM_USER_ROLE.ROLE_ID.eq(roleId))
+            .execute();
+    }
+
+    /** 删除角色关联的角色菜单记录 */
+    public void deleteRoleMenusByRoleId(Long roleId) {
+        dsl.deleteFrom(com.metabuild.schema.tables.MbIamRoleMenu.MB_IAM_ROLE_MENU)
+            .where(com.metabuild.schema.tables.MbIamRoleMenu.MB_IAM_ROLE_MENU.ROLE_ID.eq(roleId))
+            .execute();
+    }
+
+    /** 删除角色关联的数据权限部门记录 */
+    public void deleteDataScopeDeptsByRoleId(Long roleId) {
+        dsl.deleteFrom(MB_IAM_ROLE_DATA_SCOPE_DEPT)
+            .where(MB_IAM_ROLE_DATA_SCOPE_DEPT.ROLE_ID.eq(roleId))
             .execute();
     }
 

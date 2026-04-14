@@ -12,8 +12,10 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 import java.time.Duration;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 基于 Bucket4j 的限流拦截器
@@ -31,8 +33,11 @@ public class RateLimitInterceptor implements HandlerInterceptor {
 
     private final MbRateLimitProperties props;
 
-    /** 按 IP + 方法 key 存储的令牌桶 */
-    private final ConcurrentHashMap<String, Bucket> buckets = new ConcurrentHashMap<>();
+    /** 按 IP + 方法 key 存储的令牌桶（Caffeine 自动淘汰，防止内存无限增长） */
+    private final Cache<String, Bucket> buckets = Caffeine.newBuilder()
+        .maximumSize(10_000)
+        .expireAfterAccess(Duration.ofMinutes(10))
+        .build();
 
     @Override
     public boolean preHandle(@NonNull HttpServletRequest request,
@@ -71,7 +76,7 @@ public class RateLimitInterceptor implements HandlerInterceptor {
             bucketKey = "ip:" + clientIp;
         }
 
-        Bucket bucket = buckets.computeIfAbsent(bucketKey, k -> buildBucket(qps));
+        Bucket bucket = buckets.get(bucketKey, k -> buildBucket(qps));
 
         if (bucket.tryConsume(1)) {
             return true;
@@ -103,18 +108,12 @@ public class RateLimitInterceptor implements HandlerInterceptor {
     }
 
     /**
-     * 解析客户端真实 IP（兼容反向代理）
+     * 解析客户端真实 IP。
+     * 不直接读 X-Forwarded-For（攻击者可伪造绕过限流），
+     * 依赖 Spring Boot 的 ForwardedHeaderFilter（server.forward-headers-strategy=FRAMEWORK），
+     * 由框架层安全地将代理头转换为 remoteAddr。
      */
     private String resolveClientIp(HttpServletRequest request) {
-        String forwarded = request.getHeader("X-Forwarded-For");
-        if (forwarded != null && !forwarded.isBlank()) {
-            // 取第一个 IP（最原始客户端）
-            return forwarded.split(",")[0].trim();
-        }
-        String realIp = request.getHeader("X-Real-IP");
-        if (realIp != null && !realIp.isBlank()) {
-            return realIp;
-        }
         return request.getRemoteAddr();
     }
 }

@@ -2,6 +2,7 @@ package com.metabuild.platform.iam.domain.dept;
 
 import com.metabuild.common.exception.BusinessException;
 import com.metabuild.common.exception.NotFoundException;
+import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.DeptApi;
 import com.metabuild.platform.iam.api.dto.DeptCreateCommand;
@@ -28,6 +29,7 @@ public class DeptService implements DeptApi {
 
     private final DeptRepository deptRepository;
     private final CurrentUser currentUser;
+    private final SnowflakeIdGenerator idGenerator;
 
     @Override
     public DeptView getById(Long id) {
@@ -45,6 +47,7 @@ public class DeptService implements DeptApi {
     @Transactional
     public Long createDept(DeptCreateCommand request) {
         var record = new MbIamDeptRecord();
+        record.setId(idGenerator.nextId());
         record.setParentId(request.parentId()); // null 表示根部门
         record.setName(request.name());
         record.setLeaderUserId(request.leaderUserId());
@@ -66,6 +69,9 @@ public class DeptService implements DeptApi {
             .orElseThrow(() -> new NotFoundException("iam.dept.notFound", id));
         if (deptRepository.hasChildren(id)) {
             throw new BusinessException("iam.dept.hasChildren", 400);
+        }
+        if (deptRepository.hasUsers(id)) {
+            throw new BusinessException("iam.dept.hasUsers", 400);
         }
         deptRepository.deleteById(id);
         log.info("删除部门: deptId={}", id);

@@ -18,6 +18,11 @@
             <groupId>com.bucket4j</groupId>
             <artifactId>bucket4j-core</artifactId>
         </dependency>
+        <!-- Caffeine 缓存（限流桶淘汰，防止内存无限增长） -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
         <!-- Spring MVC（HandlerInterceptor + WebMvcConfigurer） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

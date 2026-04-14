@@ -5,6 +5,7 @@ import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.exception.BusinessException;
 import com.metabuild.common.exception.ConflictException;
 import com.metabuild.common.exception.NotFoundException;
+import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.RoleApi;
 import com.metabuild.platform.iam.api.dto.AssignRolesCommand;
@@ -30,6 +31,7 @@ public class RoleService implements RoleApi {
 
     private final RoleRepository roleRepository;
     private final CurrentUser currentUser;
+    private final SnowflakeIdGenerator idGenerator;
 
     @Override
     public RoleView getById(Long id) {
@@ -58,6 +60,7 @@ public class RoleService implements RoleApi {
         }
 
         var record = new MbIamRoleRecord();
+        record.setId(idGenerator.nextId());
         record.setName(request.name());
         record.setCode(request.code());
         record.setDataScope(request.dataScope() != null ? request.dataScope() : "SELF");
@@ -84,10 +87,8 @@ public class RoleService implements RoleApi {
         if (request.remark() != null) record.setRemark(request.remark());
         if (request.status() != null) record.setStatus(request.status());
         if (request.sortOrder() != null) record.setSortOrder(request.sortOrder());
-        record.setUpdatedBy(currentUser.userIdOrSystem());
-        record.setVersion(record.getVersion() + 1);
 
-        int updated = roleRepository.update(record);
+        int updated = roleRepository.update(record, currentUser.userIdOrSystem());
         if (updated == 0) {
             throw new BusinessException("common.concurrentModification", 409);
         }
@@ -98,6 +99,10 @@ public class RoleService implements RoleApi {
     public void deleteRole(Long id) {
         roleRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("iam.role.notFound", id));
+        // 显式清理关联数据（FK CASCADE 也会删，但显式操作意图更清晰）
+        roleRepository.deleteUserRolesByRoleId(id);
+        roleRepository.deleteRoleMenusByRoleId(id);
+        roleRepository.deleteDataScopeDeptsByRoleId(id);
         roleRepository.deleteById(id);
         log.info("删除角色: roleId={}", id);
     }

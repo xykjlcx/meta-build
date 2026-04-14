@@ -23,7 +23,6 @@ import java.time.OffsetDateTime;
 import java.util.HexFormat;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * 文件业务服务（上传/下载/删除）。
@@ -34,11 +33,6 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class FileService {
-
-    /** 允许上传的文件扩展名白名单（小写）。 */
-    private static final Set<String> ALLOWED_EXTENSIONS = Set.of(
-        "jpg", "jpeg", "png", "gif", "webp", "pdf", "zip", "json"
-    );
 
     private final FileStorage fileStorage;
     private final FileRepository fileRepository;
@@ -180,7 +174,7 @@ public class FileService {
         if (dotIdx >= 0) {
             ext = filename.substring(dotIdx + 1).toLowerCase();
         }
-        if (!ALLOWED_EXTENSIONS.contains(ext)) {
+        if (!properties.allowedExtensions().contains(ext)) {
             throw new IllegalArgumentException("不允许的文件扩展名: " + ext);
         }
     }

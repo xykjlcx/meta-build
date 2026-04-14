@@ -24,7 +24,8 @@ import java.util.List;
 public record MbFileProperties(
     String storagePath,
     int maxSizeMb,
-    List<String> allowedTypes
+    List<String> allowedTypes,
+    List<String> allowedExtensions
 ) {
     public MbFileProperties {
         if (storagePath == null || storagePath.isBlank()) {
@@ -40,6 +41,12 @@ public record MbFileProperties(
                 "application/vnd.ms-excel",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "text/plain", "text/csv"
+            );
+        }
+        if (allowedExtensions == null || allowedExtensions.isEmpty()) {
+            allowedExtensions = List.of(
+                "jpg", "jpeg", "png", "gif", "webp", "pdf", "zip", "json",
+                "xls", "xlsx", "csv", "txt"
             );
         }
     }

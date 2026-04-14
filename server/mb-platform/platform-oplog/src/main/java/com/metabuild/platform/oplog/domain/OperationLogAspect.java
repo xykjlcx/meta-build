@@ -30,6 +30,7 @@ public class OperationLogAspect {
     private final OperationLogWriter writer;
     private final CurrentUser currentUser;
     private final ObjectMapper objectMapper;
+    private final java.time.Clock clock;
 
     @Around("@annotation(operationLog)")
     public Object around(ProceedingJoinPoint joinPoint, OperationLog operationLog) throws Throwable {
@@ -97,7 +98,7 @@ public class OperationLogAspect {
             record.setDurationMs(durationMs);
             record.setSuccess(success);
             record.setErrorMessage(truncate(errorMessage, 500));
-            record.setCreatedAt(OffsetDateTime.now());
+            record.setCreatedAt(OffsetDateTime.now(clock));
 
             // 响应结果序列化（截断）
             if (result != null && success) {

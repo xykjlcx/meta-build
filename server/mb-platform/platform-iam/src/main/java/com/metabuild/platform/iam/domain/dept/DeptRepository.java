@@ -6,10 +6,13 @@ import org.jooq.DSLContext;
 import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
+import java.time.Clock;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static com.metabuild.schema.tables.MbIamDept.MB_IAM_DEPT;
+import static com.metabuild.schema.tables.MbIamUser.MB_IAM_USER;
 
 /**
  * 部门数据访问层。
@@ -19,6 +22,7 @@ import static com.metabuild.schema.tables.MbIamDept.MB_IAM_DEPT;
 public class DeptRepository {
 
     private final DSLContext dsl;
+    private final Clock clock;
 
     public Optional<MbIamDeptRecord> findById(Long id) {
         return dsl.selectFrom(MB_IAM_DEPT)
@@ -80,12 +84,30 @@ public class DeptRepository {
         return record.getId();
     }
 
-    public int update(MbIamDeptRecord record) {
+    /**
+     * 乐观锁更新部门。
+     * Repository 层负责 version + 1 和 updated_at/updated_by。
+     */
+    public int update(MbIamDeptRecord record, Long updatedBy) {
         return dsl.update(MB_IAM_DEPT)
-            .set(record)
+            .set(MB_IAM_DEPT.PARENT_ID, record.getParentId())
+            .set(MB_IAM_DEPT.NAME, record.getName())
+            .set(MB_IAM_DEPT.LEADER_USER_ID, record.getLeaderUserId())
+            .set(MB_IAM_DEPT.SORT_ORDER, record.getSortOrder())
+            .set(MB_IAM_DEPT.STATUS, record.getStatus())
+            .set(MB_IAM_DEPT.VERSION, MB_IAM_DEPT.VERSION.plus(1))
+            .set(MB_IAM_DEPT.UPDATED_BY, updatedBy)
+            .set(MB_IAM_DEPT.UPDATED_AT, OffsetDateTime.now(clock))
             .where(MB_IAM_DEPT.ID.eq(record.getId()))
-            .and(MB_IAM_DEPT.VERSION.eq(record.getVersion() - 1))
+            .and(MB_IAM_DEPT.VERSION.eq(record.getVersion()))
             .execute();
+    }
+
+    /** 检查部门下是否有用户（删除前校验） */
+    public boolean hasUsers(Long deptId) {
+        return dsl.fetchExists(
+            dsl.selectFrom(MB_IAM_USER).where(MB_IAM_USER.DEPT_ID.eq(deptId))
+        );
     }
 
     public void deleteById(Long id) {
