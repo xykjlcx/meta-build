@@ -6,6 +6,7 @@ import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.MenuApi;
 import com.metabuild.platform.iam.api.dto.MenuCreateCommand;
 import com.metabuild.platform.iam.api.dto.MenuView;
+import com.metabuild.platform.iam.domain.role.RoleRepository;
 import com.metabuild.schema.tables.records.MbIamMenuRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 public class MenuService implements MenuApi {
 
     private final MenuRepository menuRepository;
+    private final RoleRepository roleRepository;
     private final CurrentUser currentUser;
 
     @Override
@@ -45,6 +47,20 @@ public class MenuService implements MenuApi {
     @Override
     public List<MenuView> listByRoleId(Long roleId) {
         List<MbIamMenuRecord> menus = menuRepository.findByRoleId(roleId);
+        return buildTree(menus, 0L);
+    }
+
+    /**
+     * 获取当前用户可见的菜单树。
+     * 管理员返回全部菜单，普通用户按角色过滤。
+     */
+    public List<MenuView> currentUserMenuTree() {
+        if (currentUser.isAdmin()) {
+            // 管理员看全部菜单
+            return tree();
+        }
+        List<Long> roleIds = roleRepository.findRoleIdsByUserId(currentUser.userId());
+        List<MbIamMenuRecord> menus = menuRepository.findByRoleIds(roleIds);
         return buildTree(menus, 0L);
     }
 

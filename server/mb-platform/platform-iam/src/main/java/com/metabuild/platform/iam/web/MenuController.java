@@ -1,6 +1,8 @@
 package com.metabuild.platform.iam.web;
 
+import com.metabuild.common.security.CurrentUser;
 import com.metabuild.infra.security.RequirePermission;
+import com.metabuild.platform.iam.api.dto.CurrentUserMenuView;
 import com.metabuild.platform.iam.api.dto.MenuCreateCommand;
 import com.metabuild.platform.iam.api.dto.MenuView;
 import com.metabuild.platform.iam.domain.menu.MenuService;
@@ -20,6 +22,17 @@ import java.util.List;
 public class MenuController {
 
     private final MenuService menuService;
+    private final CurrentUser currentUser;
+
+    /**
+     * 获取当前用户可见的菜单树 + 权限列表（前端 useMenu 依赖）。
+     * 需要认证，不需要额外权限，登录即可访问。
+     */
+    @GetMapping("/current-user")
+    public CurrentUserMenuView currentUserMenu() {
+        List<MenuView> tree = menuService.currentUserMenuTree();
+        return new CurrentUserMenuView(tree, currentUser.permissions());
+    }
 
     @GetMapping
     @RequirePermission("iam:menu:list")

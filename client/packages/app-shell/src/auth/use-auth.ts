@@ -1,9 +1,19 @@
-import { type LoginCommand, authApi } from '@mb/api-sdk';
+import { type LoginCommand, type LoginView, authApi } from '@mb/api-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 
 const ACCESS_TOKEN_KEY = 'mb_access_token';
 const REFRESH_TOKEN_KEY = 'mb_refresh_token';
+
+/**
+ * 登录成功后缓存用户信息到 queryClient，
+ * 这样 useCurrentUser 可以直接读取，不需要额外的 /me 请求。
+ */
+function cacheLoginUser(queryClient: ReturnType<typeof useQueryClient>, result: LoginView) {
+  if (result.user) {
+    queryClient.setQueryData(['auth', 'currentUser'], result.user);
+  }
+}
 
 export function useAuth() {
   const queryClient = useQueryClient();
@@ -14,7 +24,7 @@ export function useAuth() {
     onSuccess: (result) => {
       localStorage.setItem(ACCESS_TOKEN_KEY, result.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, result.refreshToken);
-      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      cacheLoginUser(queryClient, result);
       const params = new URLSearchParams(window.location.search);
       const redirectTo = params.get('redirect') ?? '/';
       navigate({ to: redirectTo });

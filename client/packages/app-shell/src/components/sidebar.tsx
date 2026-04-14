@@ -1,5 +1,4 @@
 import { Button } from '@mb/ui-primitives';
-import { useNavigate } from '@tanstack/react-router';
 import { ChevronDown, ChevronRight, PanelLeft, PanelLeftClose } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -58,19 +57,16 @@ function MenuTreeItem({
   collapsed: boolean;
   depth: number;
 }) {
-  const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
 
   const handleClick = useCallback(() => {
-    if (node.kind === 'directory') {
+    if (node.menuType === 'DIRECTORY') {
       setExpanded((prev) => !prev);
-    } else if (node.path) {
-      navigate({ to: node.path });
     }
-  }, [node, navigate]);
+  }, [node]);
 
-  // button 类型菜单不在侧边栏渲染
-  if (node.kind === 'button') return null;
+  // BUTTON 类型菜单不在侧边栏渲染
+  if (node.menuType === 'BUTTON') return null;
 
   const hasChildren = node.children.length > 0;
   const paddingLeft = collapsed ? 8 : 12 + depth * 16;

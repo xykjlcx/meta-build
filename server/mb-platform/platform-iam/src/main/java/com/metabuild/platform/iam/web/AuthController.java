@@ -1,7 +1,9 @@
 package com.metabuild.platform.iam.web;
 
+import com.metabuild.common.security.CurrentUser;
 import com.metabuild.common.security.CurrentUserInfo;
 import com.metabuild.common.security.LoginResult;
+import com.metabuild.platform.iam.api.dto.CurrentUserView;
 import com.metabuild.platform.iam.api.dto.LoginCommand;
 import com.metabuild.platform.iam.api.dto.LoginView;
 import com.metabuild.platform.iam.api.dto.RefreshCommand;
@@ -19,6 +21,23 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final AuthService authService;
+    private final CurrentUser currentUser;
+
+    /**
+     * 获取当前登录用户信息（前端 useCurrentUser 依赖）。
+     * 需要认证，未登录返回 401。不需要额外权限，登录即可访问。
+     */
+    @GetMapping("/me")
+    public CurrentUserView me() {
+        return new CurrentUserView(
+            currentUser.userId(),
+            currentUser.username(),
+            currentUser.deptId(),
+            currentUser.permissions(),
+            currentUser.roles(),
+            currentUser.isAdmin()
+        );
+    }
 
     @PostMapping("/login")
     public LoginView login(@Valid @RequestBody LoginCommand request) {

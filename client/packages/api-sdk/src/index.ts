@@ -1,7 +1,7 @@
 // 类型
 export type { PageResult, ProblemDetail } from './types/common';
-export type { LoginCommand, LoginResult, CurrentUserDto } from './types/auth';
-export type { MenuNodeDto, UserMenuPayload } from './types/menu';
+export type { LoginCommand, LoginView, UserSummary, RefreshCommand, CurrentUserView } from './types/auth';
+export type { MenuNodeDto, CurrentUserMenuView } from './types/menu';
 export type { AppPermission } from './types/permission';
 export { ALL_APP_PERMISSIONS } from './types/permission';
 

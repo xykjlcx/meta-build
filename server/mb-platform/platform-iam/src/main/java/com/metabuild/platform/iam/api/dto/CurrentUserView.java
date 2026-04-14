@@ -1,0 +1,16 @@
+package com.metabuild.platform.iam.api.dto;
+
+import java.util.Set;
+
+/**
+ * 当前登录用户视图 DTO（GET /auth/me 响应）。
+ * 前端 useCurrentUser 依赖此结构。
+ */
+public record CurrentUserView(
+    Long userId,
+    String username,
+    Long deptId,
+    Set<String> permissions,
+    Set<String> roles,
+    boolean isAdmin
+) {}

@@ -44,6 +44,20 @@ public class MenuRepository {
             .fetch();
     }
 
+    /** 按多个角色 ID 查询可见菜单（去重） */
+    public List<MbIamMenuRecord> findByRoleIds(List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) return List.of();
+        return dsl.selectDistinct(MB_IAM_MENU.fields())
+            .from(MB_IAM_MENU)
+            .where(MB_IAM_MENU.ID.in(
+                dsl.selectDistinct(MB_IAM_ROLE_MENU.MENU_ID)
+                    .from(MB_IAM_ROLE_MENU)
+                    .where(MB_IAM_ROLE_MENU.ROLE_ID.in(roleIds))
+            ))
+            .orderBy(MB_IAM_MENU.SORT_ORDER.asc())
+            .fetchInto(MbIamMenuRecord.class);
+    }
+
     public Long insert(MbIamMenuRecord record) {
         dsl.insertInto(MB_IAM_MENU).set(record).execute();
         return record.getId();
