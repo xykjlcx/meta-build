@@ -8,7 +8,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./auth": "./src/apis/auth-api.ts",
-    "./types": "./src/types/index.ts"
+    "./types": "./src/types/index.ts",
+    "./mutator/*": "./src/mutator/*",
+    "./generated/*": "./src/generated/*"
   },
   "scripts": {
     "test": "vitest run",
