@@ -1,4 +1,349 @@
-/** 公告详情页 — Task 7 完整实现 */
+import { useCurrentUser } from '@mb/app-shell';
+import { triggerDownload } from '@mb/api-sdk';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Badge,
+  Button,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@mb/ui-primitives';
+import { useQueryClient } from '@tanstack/react-query';
+import { useNavigate, useParams } from '@tanstack/react-router';
+import { ArrowLeft, Copy, Download, FilePenLine, Send, Trash2, Undo2 } from 'lucide-react';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+import {
+  getDetailQueryKey,
+  getList4QueryKey,
+  getUnreadCountQueryKey,
+  useDelete2,
+  useDetail,
+  useDuplicate,
+  useMarkRead,
+  usePublish,
+  useRevoke,
+} from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
+import type { NoticeDetailView, NoticeTarget } from '@mb/api-sdk/generated/models';
+import { NOTICE_STATUS, type NoticeStatusValue } from '../constants';
+import { NoticeStatusBadge } from '../components/notice-status-badge';
+import { NotificationLogTab } from '../components/notification-log-tab';
+import { RecipientsTab } from '../components/recipients-tab';
+import { TargetSelector } from '../components/target-selector';
+import { sanitizeHtml } from '../utils/sanitize';
+
 export function NoticeDetailPage() {
-  return <div>Notice Detail (stub)</div>;
+  const { t } = useTranslation('notice');
+  const user = useCurrentUser();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { id } = useParams({ from: '/_authed/notices/$id' });
+  const noticeId = Number(id);
+
+  // 查询详情
+  const { data: detailResponse, isLoading } = useDetail(noticeId, {
+    query: { queryKey: getDetailQueryKey(noticeId) },
+  });
+
+  // orval 响应结构：{ data: NoticeDetailView, status, headers }
+  const notice: NoticeDetailView | undefined = (
+    detailResponse as { data?: NoticeDetailView } | undefined
+  )?.data;
+
+  // 标记已读
+  const markReadMutation = useMarkRead();
+  useEffect(() => {
+    if (noticeId && notice && !notice.read) {
+      markReadMutation.mutate(
+        { id: noticeId },
+        {
+          onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: getUnreadCountQueryKey() });
+            queryClient.invalidateQueries({ queryKey: getDetailQueryKey(noticeId) });
+            queryClient.invalidateQueries({ queryKey: getList4QueryKey() });
+          },
+        },
+      );
+    }
+    // 仅在 notice 加载完成时执行一次
+    // biome-ignore lint/correctness/useExhaustiveDependencies: 仅在 notice.id 变化时触发
+  }, [noticeId, notice?.id]);
+
+  // Mutations
+  const deleteMutation = useDelete2();
+  const publishMutation = usePublish();
+  const revokeMutation = useRevoke();
+  const duplicateMutation = useDuplicate();
+
+  // 确认框
+  const [confirmAction, setConfirmAction] = useState<'delete' | 'revoke' | null>(null);
+  const [targetSelectorOpen, setTargetSelectorOpen] = useState(false);
+
+  const invalidateAll = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: getList4QueryKey() });
+    queryClient.invalidateQueries({ queryKey: getUnreadCountQueryKey() });
+    queryClient.invalidateQueries({ queryKey: getDetailQueryKey(noticeId) });
+  }, [queryClient, noticeId]);
+
+  // 操作处理
+  const handleDelete = useCallback(() => {
+    deleteMutation.mutate(
+      { id: noticeId },
+      {
+        onSuccess: () => {
+          invalidateAll();
+          navigate({ to: '/notices' });
+        },
+      },
+    );
+    setConfirmAction(null);
+  }, [deleteMutation, noticeId, invalidateAll, navigate]);
+
+  const handleRevoke = useCallback(() => {
+    revokeMutation.mutate({ id: noticeId }, { onSuccess: invalidateAll });
+    setConfirmAction(null);
+  }, [revokeMutation, noticeId, invalidateAll]);
+
+  const handlePublish = useCallback(
+    (targets: NoticeTarget[]) => {
+      publishMutation.mutate(
+        { id: noticeId, data: { targets } },
+        {
+          onSuccess: () => {
+            invalidateAll();
+            toast.success(t('action.publish'));
+          },
+        },
+      );
+    },
+    [publishMutation, noticeId, invalidateAll, t],
+  );
+
+  const handleDuplicate = useCallback(() => {
+    duplicateMutation.mutate(
+      { id: noticeId },
+      {
+        onSuccess: (result) => {
+          invalidateAll();
+          toast.success(t('action.duplicate'));
+          const newId = (result as { data?: { id?: number } })?.data?.id;
+          if (newId) {
+            navigate({ to: '/notices/$id', params: { id: String(newId) } });
+          }
+        },
+      },
+    );
+  }, [duplicateMutation, noticeId, invalidateAll, navigate, t]);
+
+  // 附件下载
+  const handleDownloadAttachment = useCallback(
+    async (fileId: number, fileName: string) => {
+      try {
+        const response = await fetch(`/api/v1/files/${fileId}/download`);
+        const blob = await response.blob();
+        triggerDownload(blob, fileName);
+      } catch {
+        toast.error(t('upload.downloadFailed'));
+      }
+    },
+    [t],
+  );
+
+  if (isLoading || !notice) {
+    return <div className="p-6">{t('common:loading', { defaultValue: '加载中...' })}</div>;
+  }
+
+  const status = notice.status as NoticeStatusValue;
+
+  return (
+    <div className="space-y-6">
+      {/* 页头 */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/notices' })}>
+            <ArrowLeft className="size-4" />
+            {t('detail.backToList')}
+          </Button>
+          <h1 className="text-2xl font-bold">{notice.title}</h1>
+          <NoticeStatusBadge status={status} />
+        </div>
+
+        {/* 操作按钮 */}
+        <div className="flex items-center gap-2">
+          {/* 编辑 — 仅草稿 */}
+          {status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:update') && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => navigate({ to: '/notices', search: { edit: noticeId } })}
+            >
+              <FilePenLine className="mr-1 size-4" />
+              {t('action.edit')}
+            </Button>
+          )}
+
+          {/* 发布 — 仅草稿 */}
+          {status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:publish') && (
+            <Button size="sm" onClick={() => setTargetSelectorOpen(true)}>
+              <Send className="mr-1 size-4" />
+              {t('action.publish')}
+            </Button>
+          )}
+
+          {/* 撤回 — 仅已发布 */}
+          {status === NOTICE_STATUS.PUBLISHED && user.hasPermission('notice:notice:publish') && (
+            <Button variant="outline" size="sm" onClick={() => setConfirmAction('revoke')}>
+              <Undo2 className="mr-1 size-4" />
+              {t('action.revoke')}
+            </Button>
+          )}
+
+          {/* 复制为新建 — 已发布/已撤回 */}
+          {(status === NOTICE_STATUS.PUBLISHED || status === NOTICE_STATUS.REVOKED) &&
+            user.hasPermission('notice:notice:create') && (
+              <Button variant="outline" size="sm" onClick={handleDuplicate}>
+                <Copy className="mr-1 size-4" />
+                {t('action.duplicate')}
+              </Button>
+            )}
+
+          {/* 删除 — 草稿/已撤回 */}
+          {(status === NOTICE_STATUS.DRAFT || status === NOTICE_STATUS.REVOKED) &&
+            user.hasPermission('notice:notice:delete') && (
+              <Button variant="destructive" size="sm" onClick={() => setConfirmAction('delete')}>
+                <Trash2 className="mr-1 size-4" />
+                {t('action.delete')}
+              </Button>
+            )}
+        </div>
+      </div>
+
+      {/* Tab 内容 */}
+      <Tabs defaultValue="info">
+        <TabsList>
+          <TabsTrigger value="info">{t('detail.basicInfo')}</TabsTrigger>
+          <TabsTrigger value="recipients">{t('detail.recipients')}</TabsTrigger>
+          <TabsTrigger value="logs">{t('detail.notificationLog')}</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="info" className="space-y-4 pt-4">
+          {/* 元信息 */}
+          <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+            <div>
+              {t('common:creator', { defaultValue: '创建人' })}：{notice.createdByName}
+            </div>
+            <div>
+              {t('common:createdAt', { defaultValue: '创建时间' })}：
+              {notice.createdAt ? new Date(notice.createdAt).toLocaleString() : '-'}
+            </div>
+            {notice.startTime && (
+              <div>
+                {t('form.startTime')}：{new Date(notice.startTime).toLocaleString()}
+              </div>
+            )}
+            {notice.endTime && (
+              <div>
+                {t('form.endTime')}：{new Date(notice.endTime).toLocaleString()}
+              </div>
+            )}
+          </div>
+
+          {/* 已读率 */}
+          {notice.recipientCount !== undefined && notice.recipientCount > 0 && (
+            <div className="text-sm">
+              <Badge variant="outline">
+                {t('read.readRate', {
+                  read: notice.readCount ?? 0,
+                  total: notice.recipientCount,
+                })}
+              </Badge>
+            </div>
+          )}
+
+          {/* 富文本内容 — DOMPurify 净化 */}
+          <div
+            className="prose prose-sm max-w-none rounded-md border p-4"
+            // biome-ignore lint/security/noDangerouslySetInnerHtml: 已通过 DOMPurify 净化
+            dangerouslySetInnerHTML={{ __html: sanitizeHtml(notice.content ?? '') }}
+          />
+
+          {/* 附件列表 */}
+          {notice.attachments && notice.attachments.length > 0 && (
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">{t('detail.attachments')}</h3>
+              <ul className="space-y-1">
+                {notice.attachments.map((attachment) => (
+                  <li key={attachment.fileId} className="flex items-center gap-2 text-sm">
+                    <span>
+                      {t('form.attachments')} #{attachment.sortOrder ?? attachment.fileId}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() =>
+                        handleDownloadAttachment(
+                          attachment.fileId ?? 0,
+                          `attachment_${attachment.fileId}`,
+                        )
+                      }
+                    >
+                      <Download className="size-3.5" />
+                      {t('detail.download')}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="recipients" className="pt-4">
+          <RecipientsTab noticeId={noticeId} />
+        </TabsContent>
+
+        <TabsContent value="logs" className="pt-4">
+          <NotificationLogTab noticeId={noticeId} />
+        </TabsContent>
+      </Tabs>
+
+      {/* 目标选择器 */}
+      <TargetSelector
+        open={targetSelectorOpen}
+        onOpenChange={setTargetSelectorOpen}
+        onConfirm={handlePublish}
+      />
+
+      {/* 确认框 */}
+      <AlertDialog open={!!confirmAction} onOpenChange={(open) => !open && setConfirmAction(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction === 'delete' ? t('action.delete') : t('action.revoke')}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction === 'delete' ? t('confirm.delete') : t('confirm.revoke')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('action.cancel')}</AlertDialogCancel>
+            <AlertDialogAction
+              variant={confirmAction === 'delete' ? 'destructive' : 'default'}
+              onClick={confirmAction === 'delete' ? handleDelete : handleRevoke}
+            >
+              {confirmAction === 'delete' ? t('action.delete') : t('action.revoke')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
 }
