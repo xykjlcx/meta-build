@@ -5,7 +5,7 @@
     "dev": "pnpm -C apps/web-admin dev",
     "build": "pnpm -r build",
     "lint": "biome check .",
-    "lint:css": "stylelint 'packages/**/*.css' 'apps/**/*.css'",
+    "lint:css": "stylelint 'packages/**/*.css' 'apps/**/*.css' --ignore-pattern '**/dist/**'",
     "check:deps": "depcruise packages apps --config .dependency-cruiser.cjs",
     "check:types": "pnpm -r --parallel exec tsc --noEmit",
     "check:env": "tsx scripts/check-env-example.ts"
