@@ -68,6 +68,34 @@
             <groupId>com.metabuild</groupId>
             <artifactId>platform-iam</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>platform-oplog</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>platform-dict</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>platform-config</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>platform-file</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>platform-notification</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>platform-job</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>platform-monitor</artifactId>
+        </dependency>
 
         <!-- Spring Boot Starters -->
         <dependency>

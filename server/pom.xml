@@ -115,6 +115,41 @@
                 <artifactId>platform-iam</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.metabuild</groupId>
+                <artifactId>platform-oplog</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.metabuild</groupId>
+                <artifactId>platform-dict</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.metabuild</groupId>
+                <artifactId>platform-config</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.metabuild</groupId>
+                <artifactId>platform-file</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.metabuild</groupId>
+                <artifactId>platform-notification</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.metabuild</groupId>
+                <artifactId>platform-job</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.metabuild</groupId>
+                <artifactId>platform-monitor</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <!-- Lombok -->
             <dependency>

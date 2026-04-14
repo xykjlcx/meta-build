@@ -3,29 +3,14 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-
     <parent>
         <groupId>com.metabuild</groupId>
-        <artifactId>meta-build</artifactId>
+        <artifactId>mb-platform</artifactId>
         <version>${revision}</version>
     </parent>
-
-    <artifactId>mb-platform</artifactId>
-    <packaging>pom</packaging>
-    <name>mb-platform</name>
-    <description>平台业务层（8 个子模块，M4 实现）</description>
-
-    <modules>
-        <module>platform-iam</module>
-        <module>platform-oplog</module>
-        <module>platform-dict</module>
-        <module>platform-config</module>
-        <module>platform-file</module>
-        <module>platform-notification</module>
-        <module>platform-job</module>
-        <module>platform-monitor</module>
-    </modules>
-
+    <artifactId>platform-oplog</artifactId>
+    <name>platform-oplog</name>
+    <description>平台操作日志模块（@OperationLog 注解 + AOP 异步写入）</description>
     <dependencies>
         <dependency>
             <groupId>com.metabuild</groupId>
@@ -38,6 +23,23 @@
         <dependency>
             <groupId>com.metabuild</groupId>
             <artifactId>infra-jooq</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>

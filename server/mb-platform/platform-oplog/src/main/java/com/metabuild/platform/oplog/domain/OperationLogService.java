@@ -1,0 +1,42 @@
+package com.metabuild.platform.oplog.domain;
+
+import com.metabuild.common.dto.PageQuery;
+import com.metabuild.common.dto.PageResult;
+import com.metabuild.platform.oplog.api.dto.OperationLogResponse;
+import com.metabuild.schema.tables.records.MbOperationLogRecord;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+/**
+ * 操作日志业务服务（仅查询，追加表无写业务方法）。
+ */
+@Service
+@RequiredArgsConstructor
+public class OperationLogService {
+
+    private final OperationLogRepository repository;
+
+    /**
+     * 分页查询操作日志列表。
+     */
+    public PageResult<OperationLogResponse> list(PageQuery query) {
+        return repository.findPage(query).map(this::toResponse);
+    }
+
+    private OperationLogResponse toResponse(MbOperationLogRecord r) {
+        return new OperationLogResponse(
+            r.getId(),
+            r.getUserId(),
+            r.getUsername(),
+            r.getModule(),
+            r.getOperation(),
+            r.getMethod(),
+            r.getRequestUrl(),
+            r.getIp(),
+            r.getDurationMs(),
+            r.getSuccess(),
+            r.getErrorMessage(),
+            r.getCreatedAt()
+        );
+    }
+}
