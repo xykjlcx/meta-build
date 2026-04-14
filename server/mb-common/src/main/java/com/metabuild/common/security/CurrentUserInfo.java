@@ -9,7 +9,7 @@ public record CurrentUserInfo(
     Long userId,
     String username,
     Long deptId,
-    long tenantId,
+    Long tenantId,
     Set<String> permissions,
     DataScopeType dataScopeType,
     Set<Long> dataScopeDeptIds

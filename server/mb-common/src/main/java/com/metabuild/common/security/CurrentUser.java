@@ -11,7 +11,7 @@ public interface CurrentUser {
     Long userId();
     String username();
     Long deptId();
-    long tenantId();
+    Long tenantId();
     Set<String> permissions();
     boolean hasPermission(String code);
     boolean hasAllPermissions(String... codes);
