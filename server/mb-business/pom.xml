@@ -11,6 +11,11 @@
     </parent>
 
     <artifactId>mb-business</artifactId>
+    <packaging>pom</packaging>
     <name>mb-business</name>
-    <description>使用者扩展位（ADR-0004，v1 为空占位）</description>
+    <description>使用者扩展位 + canonical reference 业务模块（ADR-0004）</description>
+
+    <modules>
+        <module>business-notice</module>
+    </modules>
 </project>

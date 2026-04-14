@@ -97,6 +97,12 @@
             <artifactId>platform-monitor</artifactId>
         </dependency>
 
+        <!-- 内部模块 — business 业务层 -->
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>business-notice</artifactId>
+        </dependency>
+
         <!-- Spring Boot Starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

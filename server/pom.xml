@@ -40,6 +40,8 @@
         <archunit.version>1.3.0</archunit.version>
         <testcontainers.version>1.21.4</testcontainers.version>
         <logstash-logback.version>8.0</logstash-logback.version>
+        <fastexcel.version>1.1.0</fastexcel.version>
+        <jsoup.version>1.18.3</jsoup.version>
     </properties>
 
     <dependencyManagement>
@@ -151,6 +153,13 @@
                 <version>${revision}</version>
             </dependency>
 
+            <!-- business-notice -->
+            <dependency>
+                <groupId>com.metabuild</groupId>
+                <artifactId>business-notice</artifactId>
+                <version>${revision}</version>
+            </dependency>
+
             <!-- Lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
@@ -223,6 +232,20 @@
                 <groupId>net.logstash.logback</groupId>
                 <artifactId>logstash-logback-encoder</artifactId>
                 <version>${logstash-logback.version}</version>
+            </dependency>
+
+            <!-- FastExcel（Excel 导出） -->
+            <dependency>
+                <groupId>cn.idev.excel</groupId>
+                <artifactId>fastexcel</artifactId>
+                <version>${fastexcel.version}</version>
+            </dependency>
+
+            <!-- jsoup（HTML 净化） -->
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
