@@ -4,6 +4,7 @@ import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
+import com.metabuild.platform.notification.api.NotificationApi;
 import com.metabuild.platform.notification.api.dto.NotificationCreateCommand;
 import com.metabuild.platform.notification.api.dto.NotificationView;
 import com.metabuild.schema.tables.records.MbNotificationReadRecord;
@@ -23,7 +24,7 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class NotificationService {
+public class NotificationService implements NotificationApi {
 
     private final NotificationRepository repository;
     private final NotificationReadRepository readRepository;
@@ -46,6 +47,7 @@ public class NotificationService {
     /**
      * 创建通知。
      */
+    @Override
     @Transactional
     public Long create(NotificationCreateCommand req) {
         MbNotificationRecord record = new MbNotificationRecord();

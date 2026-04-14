@@ -414,6 +414,73 @@ public class NoticeRepository {
             .execute();
     }
 
+    /**
+     * 导出行 DTO，供 NoticeExportService 使用，不泄漏 jOOQ 类型。
+     */
+    public record NoticeExportRow(
+        String title, Short status, Boolean pinned,
+        OffsetDateTime startTime, OffsetDateTime endTime,
+        String createdByName, OffsetDateTime createdAt,
+        int readCount, int recipientCount
+    ) {}
+
+    /**
+     * 分批查询导出数据。
+     *
+     * @param query      查询条件
+     * @param fetchSize  单批大小
+     * @param offset     偏移量
+     * @return 导出行列表（可能为空，表示已到末尾）
+     */
+    public List<NoticeExportRow> findForExport(NoticeQuery query, int fetchSize, int offset) {
+        var conditions = buildConditions(query);
+
+        // 已读数子查询
+        var readCountField = DSL.field(
+            DSL.select(DSL.count())
+                .from(BIZ_NOTICE_RECIPIENT)
+                .where(BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(BIZ_NOTICE.ID))
+                .and(BIZ_NOTICE_RECIPIENT.READ_AT.isNotNull())
+        ).as("read_count");
+
+        // 接收人总数子查询
+        var recipientCountField = DSL.field(
+            DSL.select(DSL.count())
+                .from(BIZ_NOTICE_RECIPIENT)
+                .where(BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(BIZ_NOTICE.ID))
+        ).as("recipient_count");
+
+        return dsl.select(
+                BIZ_NOTICE.TITLE,
+                BIZ_NOTICE.STATUS,
+                BIZ_NOTICE.PINNED,
+                BIZ_NOTICE.START_TIME,
+                BIZ_NOTICE.END_TIME,
+                MB_IAM_USER.NICKNAME.as("created_by_name"),
+                BIZ_NOTICE.CREATED_AT,
+                readCountField,
+                recipientCountField
+            )
+            .from(BIZ_NOTICE)
+            .leftJoin(MB_IAM_USER).on(BIZ_NOTICE.CREATED_BY.eq(MB_IAM_USER.ID))
+            .where(conditions)
+            .orderBy(BIZ_NOTICE.CREATED_AT.desc())
+            .limit(fetchSize)
+            .offset(offset)
+            .fetch()
+            .map(r -> new NoticeExportRow(
+                r.get(BIZ_NOTICE.TITLE),
+                r.get(BIZ_NOTICE.STATUS),
+                r.get(BIZ_NOTICE.PINNED),
+                r.get(BIZ_NOTICE.START_TIME),
+                r.get(BIZ_NOTICE.END_TIME),
+                r.get("created_by_name", String.class),
+                r.get(BIZ_NOTICE.CREATED_AT),
+                r.get("read_count", Integer.class),
+                r.get("recipient_count", Integer.class)
+            ));
+    }
+
     // ------ 私有方法 ------
 
     /**

@@ -7,9 +7,6 @@ import com.metabuild.business.notice.api.NoticeQuery;
 import com.metabuild.common.security.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.impl.DSL;
 import org.springframework.stereotype.Service;
 
 import java.io.OutputStream;
@@ -18,10 +15,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import static com.metabuild.schema.tables.BizNotice.BIZ_NOTICE;
-import static com.metabuild.schema.tables.BizNoticeRecipient.BIZ_NOTICE_RECIPIENT;
-import static com.metabuild.schema.tables.MbIamUser.MB_IAM_USER;
 
 /**
  * 公告 Excel 导出服务。
@@ -53,7 +46,7 @@ public class NoticeExportService {
     private static final DateTimeFormatter DT_FORMAT =
         DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
-    private final DSLContext dsl;
+    private final NoticeRepository noticeRepository;
     private final CurrentUser currentUser;
 
     /**
@@ -63,23 +56,6 @@ public class NoticeExportService {
      * @param out   响应输出流
      */
     public void export(NoticeQuery query, OutputStream out) {
-        List<Condition> conditions = buildConditions(query);
-
-        // 已读数子查询（用于计算已读率）
-        var readCountField = DSL.field(
-            DSL.select(DSL.count())
-                .from(BIZ_NOTICE_RECIPIENT)
-                .where(BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(BIZ_NOTICE.ID))
-                .and(BIZ_NOTICE_RECIPIENT.READ_AT.isNotNull())
-        ).as("read_count");
-
-        // 接收人总数子查询
-        var recipientCountField = DSL.field(
-            DSL.select(DSL.count())
-                .from(BIZ_NOTICE_RECIPIENT)
-                .where(BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(BIZ_NOTICE.ID))
-        ).as("recipient_count");
-
         try (ExcelWriter excelWriter = FastExcel.write(out)
             .registerWriteHandler(new FormulaInjectionHandler())
             .build()) {
@@ -101,24 +77,7 @@ public class NoticeExportService {
                 }
                 int fetchSize = Math.min(BATCH_SIZE, remaining);
 
-                var records = dsl.select(
-                        BIZ_NOTICE.TITLE,
-                        BIZ_NOTICE.STATUS,
-                        BIZ_NOTICE.PINNED,
-                        BIZ_NOTICE.START_TIME,
-                        BIZ_NOTICE.END_TIME,
-                        MB_IAM_USER.NICKNAME.as("created_by_name"),
-                        BIZ_NOTICE.CREATED_AT,
-                        readCountField,
-                        recipientCountField
-                    )
-                    .from(BIZ_NOTICE)
-                    .leftJoin(MB_IAM_USER).on(BIZ_NOTICE.CREATED_BY.eq(MB_IAM_USER.ID))
-                    .where(conditions)
-                    .orderBy(BIZ_NOTICE.CREATED_AT.desc())
-                    .limit(fetchSize)
-                    .offset(offset)
-                    .fetch();
+                var records = noticeRepository.findForExport(query, fetchSize, offset);
 
                 if (records.isEmpty()) {
                     break;
@@ -126,27 +85,22 @@ public class NoticeExportService {
 
                 List<List<Object>> rows = new ArrayList<>(records.size());
                 for (var r : records) {
-                    String statusLabel = STATUS_LABEL.getOrDefault(
-                        r.get(BIZ_NOTICE.STATUS), "未知");
-                    String pinnedLabel = Boolean.TRUE.equals(r.get(BIZ_NOTICE.PINNED))
-                        ? "是" : "否";
+                    String statusLabel = STATUS_LABEL.getOrDefault(r.status(), "未知");
+                    String pinnedLabel = Boolean.TRUE.equals(r.pinned()) ? "是" : "否";
 
                     // 计算已读率
-                    int readCount = r.get("read_count", Integer.class);
-                    int recipientCount = r.get("recipient_count", Integer.class);
-                    String readRate = recipientCount == 0
+                    String readRate = r.recipientCount() == 0
                         ? "0%"
-                        : String.format("%.1f%%", (double) readCount / recipientCount * 100);
+                        : String.format("%.1f%%", (double) r.readCount() / r.recipientCount() * 100);
 
                     rows.add(List.of(
-                        r.get(BIZ_NOTICE.TITLE),
+                        r.title(),
                         statusLabel,
                         pinnedLabel,
-                        formatDateTime(r.get(BIZ_NOTICE.START_TIME)),
-                        formatDateTime(r.get(BIZ_NOTICE.END_TIME)),
-                        r.get("created_by_name", String.class) != null
-                            ? r.get("created_by_name", String.class) : "",
-                        formatDateTime(r.get(BIZ_NOTICE.CREATED_AT)),
+                        formatDateTime(r.startTime()),
+                        formatDateTime(r.endTime()),
+                        r.createdByName() != null ? r.createdByName() : "",
+                        formatDateTime(r.createdAt()),
                         readRate
                     ));
                 }
@@ -196,27 +150,5 @@ public class NoticeExportService {
      */
     private String formatDateTime(OffsetDateTime dt) {
         return dt == null ? "" : dt.format(DT_FORMAT);
-    }
-
-    /**
-     * 根据查询参数构建 jOOQ Condition 列表（复用列表查询的过滤逻辑）。
-     */
-    private List<Condition> buildConditions(NoticeQuery query) {
-        List<Condition> conditions = new ArrayList<>();
-
-        if (query.status() != null) {
-            conditions.add(BIZ_NOTICE.STATUS.eq(query.status()));
-        }
-        if (query.keyword() != null && !query.keyword().isBlank()) {
-            conditions.add(BIZ_NOTICE.TITLE.containsIgnoreCase(query.keyword()));
-        }
-        if (query.startTimeFrom() != null) {
-            conditions.add(BIZ_NOTICE.START_TIME.greaterOrEqual(query.startTimeFrom()));
-        }
-        if (query.startTimeTo() != null) {
-            conditions.add(BIZ_NOTICE.START_TIME.lessOrEqual(query.startTimeTo()));
-        }
-
-        return conditions;
     }
 }

@@ -1,7 +1,7 @@
 package com.metabuild.business.notice.domain;
 
+import com.metabuild.platform.notification.api.NotificationApi;
 import com.metabuild.platform.notification.api.dto.NotificationCreateCommand;
-import com.metabuild.platform.notification.domain.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -19,7 +19,7 @@ import org.springframework.transaction.event.TransactionalEventListener;
 @RequiredArgsConstructor
 public class NoticePublishedEventListener {
 
-    private final NotificationService notificationService;
+    private final NotificationApi notificationApi;
 
     /**
      * 监听公告发布事件，为每个接收人创建一条站内通知。
@@ -39,7 +39,7 @@ public class NoticePublishedEventListener {
                 "您收到一条新公告，请及时查看。",
                 "NOTICE"
             );
-            notificationService.create(command);
+            notificationApi.create(command);
             log.info("公告发布通知已创建: noticeId={}", event.noticeId());
         } catch (Exception e) {
             // 异步操作失败不影响发布结果，仅记录日志
