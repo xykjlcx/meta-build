@@ -48,105 +48,88 @@
         <!--
             jOOQ 代码生成 profile：mvn -Pcodegen generate-sources -pl mb-schema
 
-            流程：
-            1. gmaven-plus 启动 Testcontainers PostgreSQL 16 + 运行 Flyway 迁移
-            2. 把实际 JDBC URL/user/password 写入 Maven properties
-            3. jOOQ codegen 读取 Maven properties 连接到同一个数据库
+            三插件流水线（jOOQ 官方推荐模式）：
+            1. groovy-maven-plugin：启动 Testcontainers PG 16，暴露真实 JDBC URL 到 Maven property
+            2. flyway-maven-plugin：读 URL，执行迁移建表
+            3. jooq-codegen-maven：读 URL，连接同一个容器，反向工程生成 Java 类
+
+            为什么不用 jdbc:tc: URL？Maven 插件各自独立 ClassLoader，static Map 隔离，
+            无法跨插件共享容器实例。用真实 JDBC URL + Maven property 绕过此限制。
         -->
         <profile>
             <id>codegen</id>
+            <properties>
+                <db.username>test</db.username>
+                <db.password>test</db.password>
+            </properties>
             <build>
                 <plugins>
-                    <!-- Step 1: 启动 PG + Flyway 迁移，暴露 JDBC 连接信息给后续插件 -->
+                    <!-- Step 1: 启动 PG 容器，暴露真实 JDBC URL -->
                     <plugin>
-                        <groupId>org.codehaus.gmavenplus</groupId>
-                        <artifactId>gmavenplus-plugin</artifactId>
-                        <version>4.0.1</version>
+                        <groupId>org.codehaus.gmaven</groupId>
+                        <artifactId>groovy-maven-plugin</artifactId>
+                        <version>2.1.1</version>
                         <executions>
                             <execution>
-                                <id>start-pg-and-flyway</id>
+                                <id>start-pg</id>
                                 <phase>generate-sources</phase>
                                 <goals><goal>execute</goal></goals>
                                 <configuration>
-                                    <scripts>
-                                        <script><![CDATA[
-import org.testcontainers.containers.PostgreSQLContainer
-import org.flywaydb.core.Flyway
-
-// 启动 PostgreSQL 16
-def pg = new PostgreSQLContainer("postgres:16-alpine")
-    .withDatabaseName("metabuild")
-    .withUsername("test")
-    .withPassword("test")
-pg.start()
-
-log.info("Testcontainers PG 启动: ${pg.jdbcUrl}")
-
-// 运行 Flyway 迁移
-def flyway = Flyway.configure()
-    .dataSource(pg.jdbcUrl, pg.username, pg.password)
-    .locations("filesystem:${project.basedir}/src/main/resources/db/migration")
-    .load()
-def result = flyway.migrate()
-log.info("Flyway 迁移完成: ${result.migrationsExecuted} 个迁移")
-
-// 暴露连接信息给后续 jOOQ 插件
-project.properties.setProperty("tc.jdbc.url", pg.jdbcUrl)
-project.properties.setProperty("tc.jdbc.user", pg.username)
-project.properties.setProperty("tc.jdbc.password", pg.password)
-
-// 保存容器引用（JVM 退出时 Ryuk 会自动清理）
-project.setContextValue("tc.container.ref", pg)
-                                        ]]></script>
-                                    </scripts>
+                                    <source>
+                                        db = new org.testcontainers.containers.PostgreSQLContainer("postgres:16-alpine")
+                                            .withDatabaseName("metabuild")
+                                            .withUsername("${db.username}")
+                                            .withPassword("${db.password}")
+                                        db.start()
+                                        log.info("Testcontainers PG started: ${db.jdbcUrl}")
+                                        project.properties.setProperty('db.url', db.getJdbcUrl())
+                                    </source>
                                 </configuration>
                             </execution>
                         </executions>
                         <dependencies>
                             <dependency>
-                                <groupId>org.apache.groovy</groupId>
-                                <artifactId>groovy</artifactId>
-                                <version>4.0.24</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.testcontainers</groupId>
-                                <artifactId>testcontainers</artifactId>
-                                <version>${testcontainers.version}</version>
-                            </dependency>
-                            <dependency>
                                 <groupId>org.testcontainers</groupId>
                                 <artifactId>postgresql</artifactId>
                                 <version>${testcontainers.version}</version>
                             </dependency>
-                            <dependency>
-                                <groupId>org.postgresql</groupId>
-                                <artifactId>postgresql</artifactId>
-                                <version>${postgresql.version}</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>org.flywaydb</groupId>
-                                <artifactId>flyway-core</artifactId>
-                                <version>${flyway.version}</version>
-                            </dependency>
+                        </dependencies>
+                    </plugin>
+
+                    <!-- Step 2: Flyway 迁移（建表） -->
+                    <plugin>
+                        <groupId>org.flywaydb</groupId>
+                        <artifactId>flyway-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>flyway-migrate</id>
+                                <phase>generate-sources</phase>
+                                <goals><goal>migrate</goal></goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <url>${db.url}</url>
+                            <user>${db.username}</user>
+                            <password>${db.password}</password>
+                            <locations>
+                                <location>filesystem:${project.basedir}/src/main/resources/db/migration</location>
+                            </locations>
+                        </configuration>
+                        <dependencies>
                             <dependency>
                                 <groupId>org.flywaydb</groupId>
                                 <artifactId>flyway-database-postgresql</artifactId>
                                 <version>${flyway.version}</version>
                             </dependency>
                             <dependency>
-                                <groupId>com.fasterxml.jackson.core</groupId>
-                                <artifactId>jackson-databind</artifactId>
-                                <version>2.19.1</version>
-                            </dependency>
-                            <dependency>
-                                <groupId>junit</groupId>
-                                <artifactId>junit</artifactId>
-                                <version>4.13.2</version>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>${postgresql.version}</version>
                             </dependency>
                         </dependencies>
                     </plugin>
 
-                    <!-- Step 2: jOOQ 代码生成（连接 gmaven-plus 暴露的 PG 实例） -->
+                    <!-- Step 3: jOOQ 代码生成（连接同一个容器） -->
                     <plugin>
                         <groupId>org.jooq</groupId>
                         <artifactId>jooq-codegen-maven</artifactId>
@@ -159,9 +142,9 @@ project.setContextValue("tc.container.ref", pg)
                         </executions>
                         <configuration>
                             <jdbc>
-                                <url>${tc.jdbc.url}</url>
-                                <user>${tc.jdbc.user}</user>
-                                <password>${tc.jdbc.password}</password>
+                                <url>${db.url}</url>
+                                <user>${db.username}</user>
+                                <password>${db.password}</password>
                             </jdbc>
                             <generator>
                                 <database>
