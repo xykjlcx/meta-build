@@ -94,6 +94,37 @@ mb:
       max-size: 200
   observability: {}
 
+  # 文件存储
+  file:
+    storage-path: ${MB_FILE_STORAGE_PATH:/var/lib/meta-build/files}
+    max-size-mb: ${MB_FILE_MAX_SIZE:10}
+    allowed-types:
+      - image/jpeg
+      - image/png
+      - image/gif
+      - image/webp
+      - application/pdf
+      - application/zip
+      - application/json
+
+  # IAM 密码策略
+  iam:
+    password:
+      min-length: 8
+      max-length: 128
+      require-digit: true
+      require-letter: true
+      require-uppercase: false
+      require-special: false
+      history-count: 5
+      max-age-days: 0
+      captcha-threshold: 3
+      delay-threshold: 5
+      short-delay-seconds: 30
+      long-delay-seconds: 300
+      fail-count-ttl-minutes: 30
+      reset-token-ttl-minutes: 15
+
 # Actuator
 management:
   endpoints:
