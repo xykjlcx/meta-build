@@ -20,16 +20,18 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   args: {
     value: { keyword: '' },
+    defaultValue: { keyword: '' },
     onChange: () => {},
     resetLabel: '重置',
     applyLabel: '查询',
     children: null,
   },
   render: () => {
-    const [filter, setFilter] = useState({ keyword: '' });
+    const defaultValue = { keyword: '' };
+    const [filter, setFilter] = useState(defaultValue);
     return (
       <div className="space-y-4">
-        <NxFilter value={filter} onChange={setFilter} resetLabel="重置" applyLabel="查询">
+        <NxFilter value={filter} defaultValue={defaultValue} onChange={setFilter} resetLabel="重置" applyLabel="查询">
           <NxFilterField name="keyword" label="关键词">
             <Input placeholder="请输入关键词" />
           </NxFilterField>
@@ -45,14 +47,11 @@ export const WithMultipleFields: Story = {
     ...Default.args,
   },
   render: () => {
-    const [filter, setFilter] = useState({
-      name: '',
-      email: '',
-      phone: '',
-    });
+    const defaultValue = { name: '', email: '', phone: '' };
+    const [filter, setFilter] = useState(defaultValue);
     return (
       <div className="space-y-4">
-        <NxFilter value={filter} onChange={setFilter} resetLabel="重置" applyLabel="查询">
+        <NxFilter value={filter} defaultValue={defaultValue} onChange={setFilter} resetLabel="重置" applyLabel="查询">
           <NxFilterField name="name" label="姓名">
             <Input placeholder="请输入姓名" />
           </NxFilterField>
@@ -74,6 +73,7 @@ export const Reset: Story = {
     ...Default.args,
   },
   render: () => {
+    const defaultValue = { keyword: '', status: '' };
     const [filter, setFilter] = useState({
       keyword: '预设值',
       status: '启用',
@@ -81,7 +81,7 @@ export const Reset: Story = {
     return (
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">点击重置按钮清空所有筛选条件</p>
-        <NxFilter value={filter} onChange={setFilter} resetLabel="重置" applyLabel="查询">
+        <NxFilter value={filter} defaultValue={defaultValue} onChange={setFilter} resetLabel="重置" applyLabel="查询">
           <NxFilterField name="keyword" label="关键词">
             <Input placeholder="请输入关键词" />
           </NxFilterField>

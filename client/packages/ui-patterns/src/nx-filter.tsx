@@ -21,6 +21,8 @@ export type NxFilterValue = Record<string, unknown>;
 export interface NxFilterProps<TFilter extends NxFilterValue> {
   /** 受控值 */
   value: TFilter;
+  /** 重置时恢复到的默认值 */
+  defaultValue: TFilter;
   /** 同步到 URL 或状态 */
   onChange: (next: TFilter) => void;
   /** 重置按钮文案 — 必传，零默认文案 */
@@ -65,6 +67,7 @@ function useFilterContext() {
 
 export function NxFilter<TFilter extends NxFilterValue>({
   value,
+  defaultValue,
   onChange,
   resetLabel,
   applyLabel,
@@ -91,11 +94,9 @@ export function NxFilter<TFilter extends NxFilterValue>({
   );
 
   const handleReset = useCallback(() => {
-    // 将所有字段清空为 ''
-    const cleared = Object.fromEntries(Object.keys(value).map((key) => [key, ''])) as TFilter;
-    setDraft(cleared);
-    onChange(cleared);
-  }, [value, onChange]);
+    setDraft({ ...defaultValue });
+    onChange({ ...defaultValue });
+  }, [defaultValue, onChange]);
 
   return (
     <FilterContext.Provider value={{ draft, setField }}>

@@ -9,10 +9,11 @@ type Filter = { keyword: string; status: string };
 /** 渲染标准测试筛选栏 */
 function renderFilter(overrides: Partial<React.ComponentProps<typeof NxFilter<Filter>>> = {}) {
   const onChange = vi.fn();
-  const defaultValue: Filter = { keyword: '', status: '' };
+  const emptyFilter: Filter = { keyword: '', status: '' };
   const result = render(
     <NxFilter<Filter>
-      value={overrides.value ?? defaultValue}
+      value={overrides.value ?? emptyFilter}
+      defaultValue={overrides.defaultValue ?? emptyFilter}
       onChange={overrides.onChange ?? onChange}
       resetLabel="重置"
       applyLabel="查询"
