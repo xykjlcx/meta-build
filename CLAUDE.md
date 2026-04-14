@@ -2,7 +2,7 @@
 
 > **这是一份 AI 契约文档**。AI 和人类读这份文档都能在 3 分钟内理解 meta-build 的全貌，并找到任何细节的准确位置。
 >
-> **核心原则：索引而不是细节**。具体设计见 `docs/specs/`，决策原因见 `docs/adr/`，规划路线见 `meta-build规划_v1_最终对齐.md`。CLAUDE.md 不重复任何细节——**改架构修 specs，不修 CLAUDE.md**，避免文档-代码 drift。
+> **核心原则：索引而不是细节**。具体设计见 `docs/specs/`，决策原因见 `docs/adr/`，规划路线见 `docs/meta-build规划_v1_最终对齐.md`。CLAUDE.md 不重复任何细节——**改架构修 specs，不修 CLAUDE.md**，避免文档-代码 drift。
 
 ---
 
@@ -105,7 +105,7 @@ meta-build/
 │   │   └── 0012-全局时间策略clock-bean.md
 │   └── 日志/                        # 每日工作日志
 │
-├── meta-build规划_v1_最终对齐.md     # ground truth 基线（17 项决策）
+├── docs/meta-build规划_v1_最终对齐.md # ground truth 基线（17 项决策）
 └── CLAUDE.md                        # 本文档（AI 契约入口）
 ```
 
@@ -338,7 +338,7 @@ cd client && pnpm -C apps/web-admin tsc --noEmit
 
 | 文档 | 用途 | 状态 |
 |------|------|------|
-| [meta-build规划_v1_最终对齐.md](meta-build规划_v1_最终对齐.md) | v1 阶段的 17 项决策 ground truth 基线 | 定稿 |
+| [meta-build规划_v1_最终对齐.md](docs/meta-build规划_v1_最终对齐.md) | v1 阶段的 17 项决策 ground truth 基线 | 定稿 |
 | [docs/specs/backend/README.md](docs/specs/backend/README.md) | **后端设计入口**（9 子文件 + 反向索引；4000+ 行，已从单文件拆分） | **定稿** |
 | [docs/specs/frontend/README.md](docs/specs/frontend/README.md) | **前端设计入口**（12 子文件 + 反向索引 + appendix） | **定稿** |
 | [docs/adr/](docs/adr/) | 架构决策记录（12 份） | 定稿 |
