@@ -3,8 +3,8 @@ package com.metabuild.platform.notification.web;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.notification.api.dto.NotificationCreateRequest;
-import com.metabuild.platform.notification.api.dto.NotificationResponse;
+import com.metabuild.platform.notification.api.dto.NotificationCreateCommand;
+import com.metabuild.platform.notification.api.dto.NotificationView;
 import com.metabuild.platform.notification.domain.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,14 +23,14 @@ public class NotificationController {
 
     @GetMapping
     @RequirePermission("notification:notification:list")
-    public PageResult<NotificationResponse> list(PageQuery query) {
+    public PageResult<NotificationView> list(PageQuery query) {
         return notificationService.list(query);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("notification:notification:create")
-    public Long create(@Valid @RequestBody NotificationCreateRequest request) {
+    public Long create(@Valid @RequestBody NotificationCreateCommand request) {
         return notificationService.create(request);
     }
 

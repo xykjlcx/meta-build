@@ -3,9 +3,9 @@ package com.metabuild.platform.iam.api.dto;
 import java.time.OffsetDateTime;
 
 /**
- * 用户响应 DTO。
+ * 用户视图 DTO（只读，供响应使用）。
  */
-public record UserResponse(
+public record UserView(
     Long id,
     String username,
     String email,

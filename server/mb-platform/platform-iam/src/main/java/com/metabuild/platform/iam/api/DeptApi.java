@@ -1,6 +1,6 @@
 package com.metabuild.platform.iam.api;
 
-import com.metabuild.platform.iam.api.dto.DeptResponse;
+import com.metabuild.platform.iam.api.dto.DeptView;
 import java.util.List;
 
 /**
@@ -8,7 +8,7 @@ import java.util.List;
  */
 public interface DeptApi {
 
-    DeptResponse getById(Long id);
+    DeptView getById(Long id);
 
-    List<DeptResponse> tree();
+    List<DeptView> tree();
 }

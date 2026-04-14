@@ -1,18 +1,18 @@
 package com.metabuild.platform.iam.api.dto;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 
 /**
- * 角色响应 DTO。
+ * 部门视图 DTO（含子部门，用于树形展示）。
  */
-public record RoleResponse(
+public record DeptView(
     Long id,
+    Long parentId,
     String name,
-    String code,
-    String dataScope,
-    String remark,
+    Long leaderUserId,
     Short status,
     Integer sortOrder,
     OffsetDateTime createdAt,
-    OffsetDateTime updatedAt
+    List<DeptView> children
 ) {}

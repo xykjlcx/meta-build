@@ -3,9 +3,9 @@ package com.metabuild.platform.oplog.api.dto;
 import java.time.OffsetDateTime;
 
 /**
- * 操作日志查询响应 DTO。
+ * 操作日志视图 DTO（只读，供响应使用）。
  */
-public record OperationLogResponse(
+public record OperationLogView(
     Long id,
     Long userId,
     String username,

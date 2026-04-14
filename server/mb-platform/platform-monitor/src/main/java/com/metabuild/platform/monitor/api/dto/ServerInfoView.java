@@ -1,9 +1,9 @@
 package com.metabuild.platform.monitor.api.dto;
 
 /**
- * 服务器信息响应 DTO（JVM + 系统指标）。
+ * 服务器信息视图 DTO（JVM + 系统指标，只读，供响应使用）。
  */
-public record ServerInfoResponse(
+public record ServerInfoView(
     JvmMemory jvmMemory,
     CpuInfo cpu,
     ThreadInfo threads,

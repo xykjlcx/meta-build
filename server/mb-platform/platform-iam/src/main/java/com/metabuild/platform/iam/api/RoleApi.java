@@ -1,6 +1,6 @@
 package com.metabuild.platform.iam.api;
 
-import com.metabuild.platform.iam.api.dto.RoleResponse;
+import com.metabuild.platform.iam.api.dto.RoleView;
 import java.util.List;
 
 /**
@@ -8,7 +8,7 @@ import java.util.List;
  */
 public interface RoleApi {
 
-    RoleResponse getById(Long id);
+    RoleView getById(Long id);
 
-    List<RoleResponse> listByUserId(Long userId);
+    List<RoleView> listByUserId(Long userId);
 }

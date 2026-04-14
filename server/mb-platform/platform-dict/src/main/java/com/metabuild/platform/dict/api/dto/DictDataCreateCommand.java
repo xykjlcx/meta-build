@@ -5,9 +5,9 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 /**
- * 创建字典数据请求 DTO。
+ * 创建字典数据命令。
  */
-public record DictDataCreateRequest(
+public record DictDataCreateCommand(
     @NotNull Long dictTypeId,
     @NotBlank @Size(max = 128) String label,
     @NotBlank @Size(max = 128) String value,

@@ -8,10 +8,10 @@ import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.UserApi;
-import com.metabuild.platform.iam.api.dto.ChangePasswordRequest;
-import com.metabuild.platform.iam.api.dto.UserCreateRequest;
-import com.metabuild.platform.iam.api.dto.UserResponse;
-import com.metabuild.platform.iam.api.dto.UserUpdateRequest;
+import com.metabuild.platform.iam.api.dto.ChangePasswordCommand;
+import com.metabuild.platform.iam.api.dto.UserCreateCommand;
+import com.metabuild.platform.iam.api.dto.UserView;
+import com.metabuild.platform.iam.api.dto.UserUpdateCommand;
 import com.metabuild.platform.iam.domain.auth.PasswordPolicy;
 import com.metabuild.schema.tables.records.MbIamPasswordHistoryRecord;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
@@ -43,21 +43,21 @@ public class UserService implements UserApi {
     private final SnowflakeIdGenerator idGenerator;
 
     @Override
-    public UserResponse getById(Long id) {
+    public UserView getById(Long id) {
         return userRepository.findById(id)
             .map(this::toResponse)
             .orElseThrow(() -> new NotFoundException("iam.user.notFound", id));
     }
 
     @Override
-    public PageResult<UserResponse> list(PageQuery query) {
+    public PageResult<UserView> list(PageQuery query) {
         PageResult<MbIamUserRecord> page = userRepository.findPage(query);
-        List<UserResponse> content = page.content().stream().map(this::toResponse).toList();
+        List<UserView> content = page.content().stream().map(this::toResponse).toList();
         return new PageResult<>(content, page.totalElements(), page.totalPages(), page.page(), page.size());
     }
 
     @Transactional
-    public Long createUser(UserCreateRequest request) {
+    public Long createUser(UserCreateCommand request) {
         // 验证密码策略
         passwordPolicy.validate(request.password());
 
@@ -88,7 +88,7 @@ public class UserService implements UserApi {
     }
 
     @Transactional
-    public UserResponse updateUser(Long id, UserUpdateRequest request) {
+    public UserView updateUser(Long id, UserUpdateCommand request) {
         var record = userRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("iam.user.notFound", id));
 
@@ -120,7 +120,7 @@ public class UserService implements UserApi {
     }
 
     @Transactional
-    public void changePassword(Long userId, ChangePasswordRequest request) {
+    public void changePassword(Long userId, ChangePasswordCommand request) {
         var record = userRepository.findById(userId)
             .orElseThrow(() -> new NotFoundException("iam.user.notFound", userId));
 
@@ -186,8 +186,8 @@ public class UserService implements UserApi {
         passwordHistoryRepository.insert(histRecord);
     }
 
-    private UserResponse toResponse(MbIamUserRecord r) {
-        return new UserResponse(
+    private UserView toResponse(MbIamUserRecord r) {
+        return new UserView(
             r.getId(),
             r.getUsername(),
             r.getEmail(),

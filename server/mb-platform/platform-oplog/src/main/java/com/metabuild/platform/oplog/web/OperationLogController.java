@@ -3,7 +3,7 @@ package com.metabuild.platform.oplog.web;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.oplog.api.dto.OperationLogResponse;
+import com.metabuild.platform.oplog.api.dto.OperationLogView;
 import com.metabuild.platform.oplog.domain.OperationLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +22,7 @@ public class OperationLogController {
 
     @GetMapping
     @RequirePermission("oplog:log:list")
-    public PageResult<OperationLogResponse> list(PageQuery query) {
+    public PageResult<OperationLogView> list(PageQuery query) {
         return service.list(query);
     }
 }

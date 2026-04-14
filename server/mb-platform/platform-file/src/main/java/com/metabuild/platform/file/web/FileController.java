@@ -1,7 +1,7 @@
 package com.metabuild.platform.file.web;
 
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.file.api.dto.FileUploadResponse;
+import com.metabuild.platform.file.api.dto.FileUploadView;
 import com.metabuild.platform.file.domain.FileService;
 import com.metabuild.schema.tables.records.MbFileMetadataRecord;
 import jakarta.servlet.http.HttpServletResponse;
@@ -34,7 +34,7 @@ public class FileController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("file:file:upload")
-    public FileUploadResponse upload(@RequestParam("file") MultipartFile file) {
+    public FileUploadView upload(@RequestParam("file") MultipartFile file) {
         return fileService.upload(file);
     }
 

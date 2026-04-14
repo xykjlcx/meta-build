@@ -4,8 +4,8 @@ import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
-import com.metabuild.platform.notification.api.dto.NotificationCreateRequest;
-import com.metabuild.platform.notification.api.dto.NotificationResponse;
+import com.metabuild.platform.notification.api.dto.NotificationCreateCommand;
+import com.metabuild.platform.notification.api.dto.NotificationView;
 import com.metabuild.schema.tables.records.MbNotificationReadRecord;
 import com.metabuild.schema.tables.records.MbNotificationRecord;
 import lombok.RequiredArgsConstructor;
@@ -34,7 +34,7 @@ public class NotificationService {
     /**
      * 分页查询通知列表（携带当前用户已读状态）。
      */
-    public PageResult<NotificationResponse> list(PageQuery query) {
+    public PageResult<NotificationView> list(PageQuery query) {
         Long userId = currentUser.isAuthenticated() ? currentUser.userId() : null;
         Set<Long> readIds = userId != null ? readRepository.findReadIds(userId) : Set.of();
 
@@ -47,7 +47,7 @@ public class NotificationService {
      * 创建通知。
      */
     @Transactional
-    public Long create(NotificationCreateRequest req) {
+    public Long create(NotificationCreateCommand req) {
         MbNotificationRecord record = new MbNotificationRecord();
         record.setId(idGenerator.nextId());
         record.setTenantId(0L);
@@ -93,8 +93,8 @@ public class NotificationService {
         repository.deleteById(id);
     }
 
-    private NotificationResponse toResponse(MbNotificationRecord r, boolean read) {
-        return new NotificationResponse(
+    private NotificationView toResponse(MbNotificationRecord r, boolean read) {
+        return new NotificationView(
             r.getId(), r.getTitle(), r.getContent(), r.getType(),
             r.getStatus(), r.getSenderId(), read, r.getCreatedAt()
         );

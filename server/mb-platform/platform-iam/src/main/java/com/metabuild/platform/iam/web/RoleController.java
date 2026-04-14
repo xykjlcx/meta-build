@@ -3,9 +3,9 @@ package com.metabuild.platform.iam.web;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.iam.api.dto.RoleCreateRequest;
-import com.metabuild.platform.iam.api.dto.RoleResponse;
-import com.metabuild.platform.iam.api.dto.RoleUpdateRequest;
+import com.metabuild.platform.iam.api.dto.RoleCreateCommand;
+import com.metabuild.platform.iam.api.dto.RoleView;
+import com.metabuild.platform.iam.api.dto.RoleUpdateCommand;
 import com.metabuild.platform.iam.domain.menu.MenuService;
 import com.metabuild.platform.iam.domain.role.RoleService;
 import jakarta.validation.Valid;
@@ -28,27 +28,27 @@ public class RoleController {
 
     @GetMapping
     @RequirePermission("iam:role:list")
-    public PageResult<RoleResponse> list(PageQuery query) {
+    public PageResult<RoleView> list(PageQuery query) {
         return roleService.listPage(query);
     }
 
     @GetMapping("/{id}")
     @RequirePermission("iam:role:detail")
-    public RoleResponse getById(@PathVariable Long id) {
+    public RoleView getById(@PathVariable Long id) {
         return roleService.getById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("iam:role:create")
-    public RoleResponse create(@Valid @RequestBody RoleCreateRequest request) {
+    public RoleView create(@Valid @RequestBody RoleCreateCommand request) {
         Long id = roleService.createRole(request);
         return roleService.getById(id);
     }
 
     @PutMapping("/{id}")
     @RequirePermission("iam:role:update")
-    public RoleResponse update(@PathVariable Long id, @Valid @RequestBody RoleUpdateRequest request) {
+    public RoleView update(@PathVariable Long id, @Valid @RequestBody RoleUpdateCommand request) {
         return roleService.updateRole(id, request);
     }
 

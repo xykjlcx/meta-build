@@ -3,9 +3,9 @@ package com.metabuild.platform.iam.api.dto;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * 登录请求。
+ * 登录命令。
  */
-public record LoginRequest(
+public record LoginCommand(
     @NotBlank String username,
     @NotBlank String password,
     /** 验证码 token（当失败次数达到阈值时必填） */

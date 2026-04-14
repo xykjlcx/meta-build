@@ -3,8 +3,8 @@ package com.metabuild.platform.iam.api.dto;
 import jakarta.validation.constraints.NotBlank;
 
 /**
- * Token 刷新请求。
+ * Token 刷新命令。
  */
-public record RefreshRequest(
+public record RefreshCommand(
         @NotBlank String refreshToken
 ) {}

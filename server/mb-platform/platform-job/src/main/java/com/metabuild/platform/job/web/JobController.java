@@ -3,7 +3,7 @@ package com.metabuild.platform.job.web;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.job.api.dto.JobLogResponse;
+import com.metabuild.platform.job.api.dto.JobLogView;
 import com.metabuild.platform.job.domain.JobLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,7 +22,7 @@ public class JobController {
 
     @GetMapping("/logs")
     @RequirePermission("job:log:list")
-    public PageResult<JobLogResponse> listLogs(PageQuery query) {
+    public PageResult<JobLogView> listLogs(PageQuery query) {
         return jobLogService.list(query);
     }
 }

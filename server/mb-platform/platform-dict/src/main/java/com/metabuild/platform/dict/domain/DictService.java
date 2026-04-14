@@ -5,10 +5,10 @@ import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.infra.cache.CacheEvictSupport;
-import com.metabuild.platform.dict.api.dto.DictDataCreateRequest;
-import com.metabuild.platform.dict.api.dto.DictDataResponse;
-import com.metabuild.platform.dict.api.dto.DictTypeCreateRequest;
-import com.metabuild.platform.dict.api.dto.DictTypeResponse;
+import com.metabuild.platform.dict.api.dto.DictDataCreateCommand;
+import com.metabuild.platform.dict.api.dto.DictDataView;
+import com.metabuild.platform.dict.api.dto.DictTypeCreateCommand;
+import com.metabuild.platform.dict.api.dto.DictTypeView;
 import com.metabuild.schema.tables.records.MbDictDataRecord;
 import com.metabuild.schema.tables.records.MbDictTypeRecord;
 import lombok.RequiredArgsConstructor;
@@ -43,18 +43,18 @@ public class DictService {
 
     // ───────── DictType ─────────
 
-    public PageResult<DictTypeResponse> listTypes(PageQuery query) {
+    public PageResult<DictTypeView> listTypes(PageQuery query) {
         return typeRepository.findPage(query).map(this::toTypeResponse);
     }
 
-    public DictTypeResponse getTypeById(Long id) {
+    public DictTypeView getTypeById(Long id) {
         return typeRepository.findById(id)
             .map(this::toTypeResponse)
             .orElseThrow(() -> new NoSuchElementException("字典类型不存在: " + id));
     }
 
     @Transactional
-    public Long createType(DictTypeCreateRequest req) {
+    public Long createType(DictTypeCreateCommand req) {
         if (typeRepository.existsByCode(req.code())) {
             throw new IllegalArgumentException("字典编码已存在: " + req.code());
         }
@@ -87,14 +87,14 @@ public class DictService {
 
     // ───────── DictData ─────────
 
-    public List<DictDataResponse> listDataByTypeId(Long dictTypeId) {
+    public List<DictDataView> listDataByTypeId(Long dictTypeId) {
         return dataRepository.findByDictTypeId(dictTypeId).stream()
             .map(this::toDataResponse)
             .toList();
     }
 
     @Transactional
-    public Long createData(DictDataCreateRequest req) {
+    public Long createData(DictDataCreateCommand req) {
         MbDictDataRecord record = new MbDictDataRecord();
         record.setId(idGenerator.nextId());
         record.setDictTypeId(req.dictTypeId());
@@ -122,15 +122,15 @@ public class DictService {
 
     // ───────── Converters ─────────
 
-    private DictTypeResponse toTypeResponse(MbDictTypeRecord r) {
-        return new DictTypeResponse(
+    private DictTypeView toTypeResponse(MbDictTypeRecord r) {
+        return new DictTypeView(
             r.getId(), r.getName(), r.getCode(), r.getStatus(),
             r.getRemark(), r.getCreatedAt(), r.getUpdatedAt()
         );
     }
 
-    private DictDataResponse toDataResponse(MbDictDataRecord r) {
-        return new DictDataResponse(
+    private DictDataView toDataResponse(MbDictDataRecord r) {
+        return new DictDataView(
             r.getId(), r.getDictTypeId(), r.getLabel(), r.getValue(),
             r.getStatus(), r.getSortOrder(), r.getRemark(), r.getCreatedAt()
         );

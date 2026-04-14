@@ -3,9 +3,9 @@ package com.metabuild.platform.dict.api.dto;
 import java.time.OffsetDateTime;
 
 /**
- * 字典类型响应 DTO。
+ * 字典类型视图 DTO（只读，供响应使用）。
  */
-public record DictTypeResponse(
+public record DictTypeView(
     Long id,
     String name,
     String code,

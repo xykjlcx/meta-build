@@ -1,6 +1,6 @@
 package com.metabuild.platform.monitor.domain;
 
-import com.metabuild.platform.monitor.api.dto.ServerInfoResponse;
+import com.metabuild.platform.monitor.api.dto.ServerInfoView;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
@@ -24,8 +24,8 @@ public class MonitorService {
     /**
      * 读取服务器实时信息（JVM 内存 + CPU + 线程 + DB 连接池）。
      */
-    public ServerInfoResponse getServerInfo() {
-        return new ServerInfoResponse(
+    public ServerInfoView getServerInfo() {
+        return new ServerInfoView(
             buildJvmMemory(),
             buildCpuInfo(),
             buildThreadInfo(),
@@ -33,46 +33,46 @@ public class MonitorService {
         );
     }
 
-    private ServerInfoResponse.JvmMemory buildJvmMemory() {
+    private ServerInfoView.JvmMemory buildJvmMemory() {
         MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();
         long heapUsed = memoryMXBean.getHeapMemoryUsage().getUsed();
         long heapMax = memoryMXBean.getHeapMemoryUsage().getMax();
         long nonHeapUsed = memoryMXBean.getNonHeapMemoryUsage().getUsed();
 
-        return new ServerInfoResponse.JvmMemory(
+        return new ServerInfoView.JvmMemory(
             heapUsed / (1024 * 1024),
             heapMax / (1024 * 1024),
             nonHeapUsed / (1024 * 1024)
         );
     }
 
-    private ServerInfoResponse.CpuInfo buildCpuInfo() {
+    private ServerInfoView.CpuInfo buildCpuInfo() {
         OperatingSystemMXBean os = ManagementFactory.getOperatingSystemMXBean();
         double cpuUsage = -1.0;
         if (os instanceof com.sun.management.OperatingSystemMXBean sunOs) {
             cpuUsage = sunOs.getProcessCpuLoad();
         }
-        return new ServerInfoResponse.CpuInfo(
+        return new ServerInfoView.CpuInfo(
             os.getAvailableProcessors(),
             cpuUsage
         );
     }
 
-    private ServerInfoResponse.ThreadInfo buildThreadInfo() {
+    private ServerInfoView.ThreadInfo buildThreadInfo() {
         ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
-        return new ServerInfoResponse.ThreadInfo(
+        return new ServerInfoView.ThreadInfo(
             threadMXBean.getThreadCount(),
             threadMXBean.getDaemonThreadCount()
         );
     }
 
-    private ServerInfoResponse.DbInfo buildDbInfo() {
+    private ServerInfoView.DbInfo buildDbInfo() {
         // 从 Micrometer 读取 HikariCP 连接池指标（HikariCP 自动注册到 MeterRegistry）
         double active = getGaugeValue("hikaricp.connections.active", 0.0);
         double pending = getGaugeValue("hikaricp.connections.pending", 0.0);
         double max = getGaugeValue("hikaricp.connections.max", 0.0);
 
-        return new ServerInfoResponse.DbInfo(active, pending, max);
+        return new ServerInfoView.DbInfo(active, pending, max);
     }
 
     private double getGaugeValue(String metricName, double defaultValue) {

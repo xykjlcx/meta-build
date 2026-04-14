@@ -2,14 +2,14 @@ package com.metabuild.platform.iam.api;
 
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
-import com.metabuild.platform.iam.api.dto.UserResponse;
+import com.metabuild.platform.iam.api.dto.UserView;
 
 /**
  * 用户模块对外 API 接口（供跨模块调用）。
  */
 public interface UserApi {
 
-    UserResponse getById(Long id);
+    UserView getById(Long id);
 
-    PageResult<UserResponse> list(PageQuery query);
+    PageResult<UserView> list(PageQuery query);
 }

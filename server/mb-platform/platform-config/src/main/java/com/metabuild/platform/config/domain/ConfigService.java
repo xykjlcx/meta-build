@@ -5,8 +5,8 @@ import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.infra.cache.CacheEvictSupport;
-import com.metabuild.platform.config.api.dto.ConfigResponse;
-import com.metabuild.platform.config.api.dto.ConfigSetRequest;
+import com.metabuild.platform.config.api.dto.ConfigView;
+import com.metabuild.platform.config.api.dto.ConfigSetCommand;
 import com.metabuild.schema.tables.records.MbConfigRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -36,7 +36,7 @@ public class ConfigService {
     private final Clock clock;
     private final CacheEvictSupport cacheEvictSupport;
 
-    public PageResult<ConfigResponse> list(PageQuery query) {
+    public PageResult<ConfigView> list(PageQuery query) {
         return repository.findPage(query).map(this::toResponse);
     }
 
@@ -45,14 +45,14 @@ public class ConfigService {
      * 缓存未命中时查 DB 并自动写入缓存。
      */
     @Cacheable(cacheNames = "config", key = "#configKey")
-    public ConfigResponse getByKey(String configKey) {
+    public ConfigView getByKey(String configKey) {
         return repository.findByKey(configKey)
             .map(this::toResponse)
             .orElseThrow(() -> new NoSuchElementException("配置项不存在: " + configKey));
     }
 
     @Transactional
-    public void set(ConfigSetRequest req) {
+    public void set(ConfigSetCommand req) {
         MbConfigRecord record = new MbConfigRecord();
         // 检查是否已存在（复用原 id）
         repository.findByKey(req.configKey()).ifPresentOrElse(
@@ -88,8 +88,8 @@ public class ConfigService {
         cacheEvictSupport.evictAfterCommit(CACHE_PREFIX + configKey);
     }
 
-    private ConfigResponse toResponse(MbConfigRecord r) {
-        return new ConfigResponse(
+    private ConfigView toResponse(MbConfigRecord r) {
+        return new ConfigView(
             r.getId(), r.getConfigKey(), r.getConfigValue(),
             r.getConfigType(), r.getRemark(), r.getUpdatedAt()
         );

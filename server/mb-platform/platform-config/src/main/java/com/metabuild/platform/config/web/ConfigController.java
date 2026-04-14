@@ -3,8 +3,8 @@ package com.metabuild.platform.config.web;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.config.api.dto.ConfigResponse;
-import com.metabuild.platform.config.api.dto.ConfigSetRequest;
+import com.metabuild.platform.config.api.dto.ConfigView;
+import com.metabuild.platform.config.api.dto.ConfigSetCommand;
 import com.metabuild.platform.config.domain.ConfigService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,19 +23,19 @@ public class ConfigController {
 
     @GetMapping
     @RequirePermission("config:config:list")
-    public PageResult<ConfigResponse> list(PageQuery query) {
+    public PageResult<ConfigView> list(PageQuery query) {
         return configService.list(query);
     }
 
     @GetMapping("/{key}")
     @RequirePermission("config:config:detail")
-    public ConfigResponse getByKey(@PathVariable("key") String configKey) {
+    public ConfigView getByKey(@PathVariable("key") String configKey) {
         return configService.getByKey(configKey);
     }
 
     @PutMapping
     @RequirePermission("config:config:set")
-    public void set(@Valid @RequestBody ConfigSetRequest request) {
+    public void set(@Valid @RequestBody ConfigSetCommand request) {
         configService.set(request);
     }
 

@@ -4,8 +4,8 @@ import com.metabuild.common.exception.BusinessException;
 import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.MenuApi;
-import com.metabuild.platform.iam.api.dto.MenuCreateRequest;
-import com.metabuild.platform.iam.api.dto.MenuResponse;
+import com.metabuild.platform.iam.api.dto.MenuCreateCommand;
+import com.metabuild.platform.iam.api.dto.MenuView;
 import com.metabuild.schema.tables.records.MbIamMenuRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,26 +30,26 @@ public class MenuService implements MenuApi {
     private final CurrentUser currentUser;
 
     @Override
-    public MenuResponse getById(Long id) {
+    public MenuView getById(Long id) {
         return menuRepository.findById(id)
             .map(r -> toResponse(r, List.of()))
             .orElseThrow(() -> new NotFoundException("iam.menu.notFound", id));
     }
 
     @Override
-    public List<MenuResponse> tree() {
+    public List<MenuView> tree() {
         List<MbIamMenuRecord> all = menuRepository.findAll();
         return buildTree(all, 0L);
     }
 
     @Override
-    public List<MenuResponse> listByRoleId(Long roleId) {
+    public List<MenuView> listByRoleId(Long roleId) {
         List<MbIamMenuRecord> menus = menuRepository.findByRoleId(roleId);
         return buildTree(menus, 0L);
     }
 
     @Transactional
-    public Long createMenu(MenuCreateRequest request) {
+    public Long createMenu(MenuCreateCommand request) {
         var record = new MbIamMenuRecord();
         record.setParentId(request.parentId() != null ? request.parentId() : 0L);
         record.setName(request.name());
@@ -83,25 +83,25 @@ public class MenuService implements MenuApi {
     }
 
     /** 构建菜单树（递归，parentId=0 为根节点） */
-    private List<MenuResponse> buildTree(List<MbIamMenuRecord> all, Long parentId) {
+    private List<MenuView> buildTree(List<MbIamMenuRecord> all, Long parentId) {
         Map<Long, List<MbIamMenuRecord>> byParent = all.stream()
             .collect(Collectors.groupingBy(r -> r.getParentId() == null ? 0L : r.getParentId()));
 
         return buildChildren(byParent, parentId);
     }
 
-    private List<MenuResponse> buildChildren(Map<Long, List<MbIamMenuRecord>> byParent, Long parentId) {
+    private List<MenuView> buildChildren(Map<Long, List<MbIamMenuRecord>> byParent, Long parentId) {
         List<MbIamMenuRecord> children = byParent.getOrDefault(parentId, List.of());
-        List<MenuResponse> result = new ArrayList<>(children.size());
+        List<MenuView> result = new ArrayList<>(children.size());
         for (MbIamMenuRecord r : children) {
-            List<MenuResponse> subChildren = buildChildren(byParent, r.getId());
+            List<MenuView> subChildren = buildChildren(byParent, r.getId());
             result.add(toResponse(r, subChildren));
         }
         return result;
     }
 
-    private MenuResponse toResponse(MbIamMenuRecord r, List<MenuResponse> children) {
-        return new MenuResponse(
+    private MenuView toResponse(MbIamMenuRecord r, List<MenuView> children) {
+        return new MenuView(
             r.getId(),
             r.getParentId(),
             r.getName(),

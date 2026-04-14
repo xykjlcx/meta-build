@@ -3,9 +3,9 @@ package com.metabuild.platform.file.api.dto;
 import java.time.OffsetDateTime;
 
 /**
- * 文件上传响应 DTO。
+ * 文件上传视图 DTO（只读，供响应使用）。
  */
-public record FileUploadResponse(
+public record FileUploadView(
     Long id,
     String originalName,
     String filePath,

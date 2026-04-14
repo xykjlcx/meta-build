@@ -7,10 +7,10 @@ import com.metabuild.common.exception.ConflictException;
 import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.RoleApi;
-import com.metabuild.platform.iam.api.dto.AssignRolesRequest;
-import com.metabuild.platform.iam.api.dto.RoleCreateRequest;
-import com.metabuild.platform.iam.api.dto.RoleResponse;
-import com.metabuild.platform.iam.api.dto.RoleUpdateRequest;
+import com.metabuild.platform.iam.api.dto.AssignRolesCommand;
+import com.metabuild.platform.iam.api.dto.RoleCreateCommand;
+import com.metabuild.platform.iam.api.dto.RoleView;
+import com.metabuild.platform.iam.api.dto.RoleUpdateCommand;
 import com.metabuild.schema.tables.records.MbIamRoleRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,27 +32,27 @@ public class RoleService implements RoleApi {
     private final CurrentUser currentUser;
 
     @Override
-    public RoleResponse getById(Long id) {
+    public RoleView getById(Long id) {
         return roleRepository.findById(id)
             .map(this::toResponse)
             .orElseThrow(() -> new NotFoundException("iam.role.notFound", id));
     }
 
     @Override
-    public List<RoleResponse> listByUserId(Long userId) {
+    public List<RoleView> listByUserId(Long userId) {
         return roleRepository.findByUserId(userId).stream()
             .map(this::toResponse)
             .toList();
     }
 
-    public PageResult<RoleResponse> listPage(PageQuery query) {
+    public PageResult<RoleView> listPage(PageQuery query) {
         PageResult<MbIamRoleRecord> page = roleRepository.findPage(query);
-        List<RoleResponse> content = page.content().stream().map(this::toResponse).toList();
+        List<RoleView> content = page.content().stream().map(this::toResponse).toList();
         return new PageResult<>(content, page.totalElements(), page.totalPages(), page.page(), page.size());
     }
 
     @Transactional
-    public Long createRole(RoleCreateRequest request) {
+    public Long createRole(RoleCreateCommand request) {
         if (roleRepository.existsByCode(request.code())) {
             throw new ConflictException("iam.role.codeExists", request.code());
         }
@@ -75,7 +75,7 @@ public class RoleService implements RoleApi {
     }
 
     @Transactional
-    public RoleResponse updateRole(Long id, RoleUpdateRequest request) {
+    public RoleView updateRole(Long id, RoleUpdateCommand request) {
         var record = roleRepository.findById(id)
             .orElseThrow(() -> new NotFoundException("iam.role.notFound", id));
 
@@ -103,14 +103,14 @@ public class RoleService implements RoleApi {
     }
 
     @Transactional
-    public void assignRolesToUser(Long userId, AssignRolesRequest request) {
+    public void assignRolesToUser(Long userId, AssignRolesCommand request) {
         roleRepository.deleteUserRoles(userId);
         roleRepository.insertUserRoles(userId, request.roleIds());
         log.info("分配角色: userId={}, roleIds={}", userId, request.roleIds());
     }
 
-    private RoleResponse toResponse(MbIamRoleRecord r) {
-        return new RoleResponse(
+    private RoleView toResponse(MbIamRoleRecord r) {
+        return new RoleView(
             r.getId(),
             r.getName(),
             r.getCode(),

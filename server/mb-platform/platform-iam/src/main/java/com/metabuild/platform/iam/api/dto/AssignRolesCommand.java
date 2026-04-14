@@ -4,8 +4,8 @@ import jakarta.validation.constraints.NotNull;
 import java.util.List;
 
 /**
- * 分配角色请求。
+ * 分配角色命令。
  */
-public record AssignRolesRequest(
+public record AssignRolesCommand(
     @NotNull List<Long> roleIds
 ) {}

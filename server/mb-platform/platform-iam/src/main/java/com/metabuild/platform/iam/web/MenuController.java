@@ -1,8 +1,8 @@
 package com.metabuild.platform.iam.web;
 
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.iam.api.dto.MenuCreateRequest;
-import com.metabuild.platform.iam.api.dto.MenuResponse;
+import com.metabuild.platform.iam.api.dto.MenuCreateCommand;
+import com.metabuild.platform.iam.api.dto.MenuView;
 import com.metabuild.platform.iam.domain.menu.MenuService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,20 +23,20 @@ public class MenuController {
 
     @GetMapping
     @RequirePermission("iam:menu:list")
-    public List<MenuResponse> tree() {
+    public List<MenuView> tree() {
         return menuService.tree();
     }
 
     @GetMapping("/{id}")
     @RequirePermission("iam:menu:detail")
-    public MenuResponse getById(@PathVariable Long id) {
+    public MenuView getById(@PathVariable Long id) {
         return menuService.getById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("iam:menu:create")
-    public MenuResponse create(@Valid @RequestBody MenuCreateRequest request) {
+    public MenuView create(@Valid @RequestBody MenuCreateCommand request) {
         Long id = menuService.createMenu(request);
         return menuService.getById(id);
     }

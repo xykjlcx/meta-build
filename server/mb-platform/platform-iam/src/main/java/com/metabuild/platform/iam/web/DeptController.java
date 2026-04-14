@@ -1,8 +1,8 @@
 package com.metabuild.platform.iam.web;
 
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.iam.api.dto.DeptCreateRequest;
-import com.metabuild.platform.iam.api.dto.DeptResponse;
+import com.metabuild.platform.iam.api.dto.DeptCreateCommand;
+import com.metabuild.platform.iam.api.dto.DeptView;
 import com.metabuild.platform.iam.domain.dept.DeptService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,20 +23,20 @@ public class DeptController {
 
     @GetMapping
     @RequirePermission("iam:dept:list")
-    public List<DeptResponse> tree() {
+    public List<DeptView> tree() {
         return deptService.tree();
     }
 
     @GetMapping("/{id}")
     @RequirePermission("iam:dept:detail")
-    public DeptResponse getById(@PathVariable Long id) {
+    public DeptView getById(@PathVariable Long id) {
         return deptService.getById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("iam:dept:create")
-    public DeptResponse create(@Valid @RequestBody DeptCreateRequest request) {
+    public DeptView create(@Valid @RequestBody DeptCreateCommand request) {
         Long id = deptService.createDept(request);
         return deptService.getById(id);
     }

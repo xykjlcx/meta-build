@@ -4,9 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 /**
- * 创建菜单请求。
+ * 创建菜单命令。
  */
-public record MenuCreateRequest(
+public record MenuCreateCommand(
     Long parentId,
     @NotBlank @Size(max = 128) String name,
     @Size(max = 128) String permissionCode,

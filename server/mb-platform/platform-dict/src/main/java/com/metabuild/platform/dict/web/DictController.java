@@ -3,10 +3,10 @@ package com.metabuild.platform.dict.web;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.dict.api.dto.DictDataCreateRequest;
-import com.metabuild.platform.dict.api.dto.DictDataResponse;
-import com.metabuild.platform.dict.api.dto.DictTypeCreateRequest;
-import com.metabuild.platform.dict.api.dto.DictTypeResponse;
+import com.metabuild.platform.dict.api.dto.DictDataCreateCommand;
+import com.metabuild.platform.dict.api.dto.DictDataView;
+import com.metabuild.platform.dict.api.dto.DictTypeCreateCommand;
+import com.metabuild.platform.dict.api.dto.DictTypeView;
 import com.metabuild.platform.dict.domain.DictService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,20 +29,20 @@ public class DictController {
 
     @GetMapping("/types")
     @RequirePermission("dict:type:list")
-    public PageResult<DictTypeResponse> listTypes(PageQuery query) {
+    public PageResult<DictTypeView> listTypes(PageQuery query) {
         return dictService.listTypes(query);
     }
 
     @GetMapping("/types/{id}")
     @RequirePermission("dict:type:detail")
-    public DictTypeResponse getType(@PathVariable Long id) {
+    public DictTypeView getType(@PathVariable Long id) {
         return dictService.getTypeById(id);
     }
 
     @PostMapping("/types")
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("dict:type:create")
-    public DictTypeResponse createType(@Valid @RequestBody DictTypeCreateRequest request) {
+    public DictTypeView createType(@Valid @RequestBody DictTypeCreateCommand request) {
         Long id = dictService.createType(request);
         return dictService.getTypeById(id);
     }
@@ -58,14 +58,14 @@ public class DictController {
 
     @GetMapping("/types/{typeId}/data")
     @RequirePermission("dict:data:list")
-    public List<DictDataResponse> listData(@PathVariable Long typeId) {
+    public List<DictDataView> listData(@PathVariable Long typeId) {
         return dictService.listDataByTypeId(typeId);
     }
 
     @PostMapping("/data")
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("dict:data:create")
-    public DictDataResponse createData(@Valid @RequestBody DictDataCreateRequest request) {
+    public DictDataView createData(@Valid @RequestBody DictDataCreateCommand request) {
         Long id = dictService.createData(request);
         return dictService.listDataByTypeId(request.dictTypeId()).stream()
             .filter(d -> d.id().equals(id))
