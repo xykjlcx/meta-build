@@ -47,9 +47,9 @@ function Combobox({
   options,
   value,
   onValueChange,
-  placeholder = '请选择...',
-  searchPlaceholder = '搜索...',
-  emptyText = '无匹配结果',
+  placeholder,
+  searchPlaceholder,
+  emptyText,
   className,
   disabled,
 }: ComboboxProps) {
@@ -72,7 +72,7 @@ function Combobox({
             className,
           )}
         >
-          {selectedLabel ?? <span className="text-muted-foreground">{placeholder}</span>}
+          {selectedLabel ?? (placeholder ? <span className="text-muted-foreground">{placeholder}</span> : null)}
           <svg
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
@@ -98,7 +98,7 @@ function Combobox({
           <Command>
             <CommandInput placeholder={searchPlaceholder} />
             <CommandList>
-              <CommandEmpty>{emptyText}</CommandEmpty>
+              {emptyText && <CommandEmpty>{emptyText}</CommandEmpty>}
               <CommandGroup>
                 {options.map((option) => (
                   <CommandItem

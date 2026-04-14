@@ -1,6 +1,7 @@
-import type { ThemeId } from './theme-registry';
+import { themeRegistry, type ThemeId } from './theme-registry';
 
 const STORAGE_KEY = 'mb-theme';
+const validThemeIds = new Set<string>(themeRegistry.map((t) => t.id));
 
 export function applyTheme(themeId: ThemeId): void {
   document.documentElement.dataset.theme = themeId;
@@ -24,7 +25,7 @@ export function loadTheme(): ThemeId {
 }
 
 export function isValidTheme(value: string): value is ThemeId {
-  return value === 'default' || value === 'dark' || value === 'compact';
+  return validThemeIds.has(value);
 }
 
 export function initTheme(): void {

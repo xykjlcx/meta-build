@@ -81,7 +81,7 @@ function defaultFormatDate(date: Date): string {
 function DatePicker({
   value,
   onValueChange,
-  placeholder = '选择日期...',
+  placeholder,
   formatDate = defaultFormatDate,
   className,
   disabled,
@@ -99,7 +99,7 @@ function DatePicker({
             className,
           )}
         >
-          {value ? formatDate(value) : placeholder}
+          {value ? formatDate(value) : placeholder ?? ''}
           <svg
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"

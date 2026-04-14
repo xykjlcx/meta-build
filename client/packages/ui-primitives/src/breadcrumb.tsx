@@ -124,10 +124,12 @@ function BreadcrumbSeparator({ children, className, ref, ...props }: BreadcrumbS
 export interface BreadcrumbEllipsisProps extends React.ComponentPropsWithoutRef<'span'> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<HTMLSpanElement>;
+  /** 屏幕阅读器标签（不传则不渲染 sr-only 元素） */
+  srLabel?: string;
 }
 
 /** 面包屑省略号 */
-function BreadcrumbEllipsis({ className, ref, ...props }: BreadcrumbEllipsisProps) {
+function BreadcrumbEllipsis({ className, ref, srLabel, ...props }: BreadcrumbEllipsisProps) {
   return (
     <span
       ref={ref}
@@ -151,7 +153,7 @@ function BreadcrumbEllipsis({ className, ref, ...props }: BreadcrumbEllipsisProp
         <circle cx="19" cy="12" r="1" />
         <circle cx="5" cy="12" r="1" />
       </svg>
-      <span className="sr-only">More</span>
+      {srLabel && <span className="sr-only">{srLabel}</span>}
     </span>
   );
 }

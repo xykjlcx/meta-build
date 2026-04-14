@@ -63,19 +63,19 @@ describe('Combobox', () => {
   });
 
   it('应该应用主题样式', () => {
-    render(<Combobox options={options} />);
+    render(<Combobox options={options} placeholder="选择" />);
     const trigger = screen.getByRole('combobox');
     expect(trigger.className).toContain('border-input');
     expect(trigger.className).toContain('bg-background');
   });
 
   it('disabled 状态应该禁用', () => {
-    render(<Combobox options={options} disabled />);
+    render(<Combobox options={options} placeholder="选择" disabled />);
     expect(screen.getByRole('combobox')).toHaveProperty('disabled', true);
   });
 
   it('应该合并自定义 className', () => {
-    render(<Combobox options={options} className="custom-combo" />);
+    render(<Combobox options={options} placeholder="选择" className="custom-combo" />);
     expect(screen.getByRole('combobox').className).toContain('custom-combo');
   });
 });

@@ -43,14 +43,14 @@ describe('DatePicker', () => {
   });
 
   it('应该应用主题样式', () => {
-    render(<DatePicker />);
+    render(<DatePicker placeholder="选择日期" />);
     const trigger = screen.getByRole('button');
     expect(trigger.className).toContain('border-input');
     expect(trigger.className).toContain('bg-background');
   });
 
   it('disabled 状态应该禁用', () => {
-    render(<DatePicker disabled />);
+    render(<DatePicker placeholder="选择日期" disabled />);
     expect(screen.getByRole('button')).toHaveProperty('disabled', true);
   });
 
@@ -60,7 +60,7 @@ describe('DatePicker', () => {
   });
 
   it('应该合并自定义 className', () => {
-    render(<DatePicker className="custom-picker" />);
+    render(<DatePicker placeholder="选择日期" className="custom-picker" />);
     expect(screen.getByRole('button').className).toContain('custom-picker');
   });
 });
