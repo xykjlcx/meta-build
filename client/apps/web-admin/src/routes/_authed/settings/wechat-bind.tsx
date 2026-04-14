@@ -1,0 +1,149 @@
+import { customInstance } from '@mb/api-sdk/mutator/custom-instance';
+import { requireAuth } from '@mb/app-shell';
+import {
+  Badge,
+  Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@mb/ui-primitives';
+import { createFileRoute } from '@tanstack/react-router';
+import { useCallback, useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
+
+export const Route = createFileRoute('/_authed/settings/wechat-bind')({
+  beforeLoad: requireAuth(),
+  component: WechatBindPage,
+});
+
+interface WechatBinding {
+  platform: string;
+  nickname?: string;
+  boundAt?: string;
+}
+
+function WechatBindPage() {
+  const { t } = useTranslation('notice');
+  const [bindings, setBindings] = useState<WechatBinding[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  // 查询绑定状态
+  const fetchBindings = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await customInstance<{ data: WechatBinding[] }>('/api/v1/wechat/bindings', {
+        method: 'GET',
+      });
+      setBindings(result.data ?? []);
+    } catch {
+      // 静默处理
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // 公众号绑定 — 引导到微信 OAuth 授权页
+  const handleBindMP = useCallback(async () => {
+    try {
+      const result = await customInstance<{ data: { authUrl: string } }>(
+        '/api/v1/wechat/mp/auth-url',
+        { method: 'GET' },
+      );
+      // 跳转微信授权页
+      window.location.href = result.data.authUrl;
+    } catch {
+      toast.error(t('wechatError.authUrlFailed'));
+    }
+  }, [t]);
+
+  // 解绑
+  const handleUnbind = useCallback(
+    async (platform: string) => {
+      try {
+        await customInstance<void>(`/api/v1/wechat/unbind?platform=${platform}`, {
+          method: 'DELETE',
+        });
+        toast.success(t('wechat.unbind'));
+        fetchBindings();
+      } catch {
+        toast.error(t('wechatError.unbindFailed'));
+      }
+    },
+    [fetchBindings, t],
+  );
+
+  // 初始化加载 — 用 useEffect 而不是 useState 初始化
+  useEffect(() => {
+    fetchBindings();
+  }, [fetchBindings]);
+
+  const mpBinding = bindings.find((b) => b.platform === 'MP');
+  const miniBinding = bindings.find((b) => b.platform === 'MINI');
+
+  return (
+    <div className="space-y-6">
+      <h1 className="text-2xl font-bold">{t('settings.wechatBinding')}</h1>
+
+      <div className="grid gap-4 md:grid-cols-2">
+        {/* 公众号绑定 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('wechat.bindMP')}</CardTitle>
+            <CardDescription>{t('settings.mpDesc')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {mpBinding ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge variant="default">{t('wechat.bound')}</Badge>
+                  <span className="text-sm">{mpBinding.nickname}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => handleUnbind('MP')}>
+                  {t('wechat.unbind')}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <Badge variant="secondary">{t('wechat.unbound')}</Badge>
+                <Button size="sm" onClick={handleBindMP} disabled={loading}>
+                  {t('wechat.bindMP')}
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* 小程序绑定 — 仅在小程序 WebView 环境下显示 */}
+        <Card>
+          <CardHeader>
+            <CardTitle>{t('wechat.bindMini')}</CardTitle>
+            <CardDescription>{t('settings.miniDesc')}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {miniBinding ? (
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Badge variant="default">{t('wechat.bound')}</Badge>
+                  <span className="text-sm">{miniBinding.nickname}</span>
+                </div>
+                <Button variant="outline" size="sm" onClick={() => handleUnbind('MINI')}>
+                  {t('wechat.unbind')}
+                </Button>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between">
+                <Badge variant="secondary">{t('wechat.unbound')}</Badge>
+                <span className="text-sm text-muted-foreground">
+                  {t('settings.miniNotInWebview')}
+                </span>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+}

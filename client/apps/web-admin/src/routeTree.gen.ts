@@ -14,6 +14,10 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthLoginRouteImport } from './routes/auth/login'
 import { Route as AuthForgotPasswordRouteImport } from './routes/auth/forgot-password'
 import { Route as AuthedDashboardRouteImport } from './routes/_authed/dashboard'
+import { Route as AuthedSettingsIndexRouteImport } from './routes/_authed/settings/index'
+import { Route as AuthedNoticesIndexRouteImport } from './routes/_authed/notices/index'
+import { Route as AuthedSettingsWechatBindRouteImport } from './routes/_authed/settings/wechat-bind'
+import { Route as AuthedNoticesIdRouteImport } from './routes/_authed/notices/$id'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -39,18 +43,47 @@ const AuthedDashboardRoute = AuthedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedSettingsIndexRoute = AuthedSettingsIndexRouteImport.update({
+  id: '/settings/',
+  path: '/settings/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedNoticesIndexRoute = AuthedNoticesIndexRouteImport.update({
+  id: '/notices/',
+  path: '/notices/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedSettingsWechatBindRoute =
+  AuthedSettingsWechatBindRouteImport.update({
+    id: '/settings/wechat-bind',
+    path: '/settings/wechat-bind',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedNoticesIdRoute = AuthedNoticesIdRouteImport.update({
+  id: '/notices/$id',
+  path: '/notices/$id',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
+  '/notices/$id': typeof AuthedNoticesIdRoute
+  '/settings/wechat-bind': typeof AuthedSettingsWechatBindRoute
+  '/notices/': typeof AuthedNoticesIndexRoute
+  '/settings/': typeof AuthedSettingsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof AuthedDashboardRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
+  '/notices/$id': typeof AuthedNoticesIdRoute
+  '/settings/wechat-bind': typeof AuthedSettingsWechatBindRoute
+  '/notices': typeof AuthedNoticesIndexRoute
+  '/settings': typeof AuthedSettingsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -59,12 +92,32 @@ export interface FileRoutesById {
   '/_authed/dashboard': typeof AuthedDashboardRoute
   '/auth/forgot-password': typeof AuthForgotPasswordRoute
   '/auth/login': typeof AuthLoginRoute
+  '/_authed/notices/$id': typeof AuthedNoticesIdRoute
+  '/_authed/settings/wechat-bind': typeof AuthedSettingsWechatBindRoute
+  '/_authed/notices/': typeof AuthedNoticesIndexRoute
+  '/_authed/settings/': typeof AuthedSettingsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard' | '/auth/forgot-password' | '/auth/login'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/notices/$id'
+    | '/settings/wechat-bind'
+    | '/notices/'
+    | '/settings/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard' | '/auth/forgot-password' | '/auth/login'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/notices/$id'
+    | '/settings/wechat-bind'
+    | '/notices'
+    | '/settings'
   id:
     | '__root__'
     | '/'
@@ -72,6 +125,10 @@ export interface FileRouteTypes {
     | '/_authed/dashboard'
     | '/auth/forgot-password'
     | '/auth/login'
+    | '/_authed/notices/$id'
+    | '/_authed/settings/wechat-bind'
+    | '/_authed/notices/'
+    | '/_authed/settings/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -118,15 +175,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedDashboardRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/settings/': {
+      id: '/_authed/settings/'
+      path: '/settings'
+      fullPath: '/settings/'
+      preLoaderRoute: typeof AuthedSettingsIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/notices/': {
+      id: '/_authed/notices/'
+      path: '/notices'
+      fullPath: '/notices/'
+      preLoaderRoute: typeof AuthedNoticesIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/settings/wechat-bind': {
+      id: '/_authed/settings/wechat-bind'
+      path: '/settings/wechat-bind'
+      fullPath: '/settings/wechat-bind'
+      preLoaderRoute: typeof AuthedSettingsWechatBindRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/notices/$id': {
+      id: '/_authed/notices/$id'
+      path: '/notices/$id'
+      fullPath: '/notices/$id'
+      preLoaderRoute: typeof AuthedNoticesIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
 interface AuthedRouteChildren {
   AuthedDashboardRoute: typeof AuthedDashboardRoute
+  AuthedNoticesIdRoute: typeof AuthedNoticesIdRoute
+  AuthedSettingsWechatBindRoute: typeof AuthedSettingsWechatBindRoute
+  AuthedNoticesIndexRoute: typeof AuthedNoticesIndexRoute
+  AuthedSettingsIndexRoute: typeof AuthedSettingsIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedDashboardRoute: AuthedDashboardRoute,
+  AuthedNoticesIdRoute: AuthedNoticesIdRoute,
+  AuthedSettingsWechatBindRoute: AuthedSettingsWechatBindRoute,
+  AuthedNoticesIndexRoute: AuthedNoticesIndexRoute,
+  AuthedSettingsIndexRoute: AuthedSettingsIndexRoute,
 }
 
 const AuthedRouteWithChildren =

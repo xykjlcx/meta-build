@@ -77,6 +77,15 @@
     "download": "Download",
     "backToList": "Back to List"
   },
+  "settings": {
+    "title": "Settings",
+    "wechatBinding": "WeChat Binding",
+    "wechatBindingDesc": "Bind WeChat to receive notifications via MP/Mini Program",
+    "manageBinding": "Manage Binding",
+    "mpDesc": "Receive notifications via WeChat Official Account",
+    "miniDesc": "Receive subscribe messages via WeChat Mini Program",
+    "miniNotInWebview": "Please operate in WeChat Mini Program"
+  },
   "wechat": {
     "bindMP": "Bind WeChat MP",
     "bindMini": "Bind Mini Program",

@@ -77,6 +77,15 @@
     "download": "下载",
     "backToList": "返回列表"
   },
+  "settings": {
+    "title": "设置",
+    "wechatBinding": "微信绑定",
+    "wechatBindingDesc": "绑定微信后可接收公众号/小程序通知消息",
+    "manageBinding": "管理绑定",
+    "mpDesc": "通过微信公众号接收通知消息",
+    "miniDesc": "通过微信小程序接收订阅消息",
+    "miniNotInWebview": "请在微信小程序中操作"
+  },
   "wechat": {
     "bindMP": "绑定公众号",
     "bindMini": "绑定小程序",
