@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Index;
@@ -29,6 +30,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -136,6 +138,13 @@ public class MbJobLog extends TableImpl<MbJobLogRecord> {
     @Override
     public UniqueKey<MbJobLogRecord> getPrimaryKey() {
         return Keys.MB_JOB_LOG_PKEY;
+    }
+
+    @Override
+    public List<Check<MbJobLogRecord>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("chk_job_log_status"), "(((status)::text = ANY ((ARRAY['SUCCESS'::character varying, 'FAILURE'::character varying, 'RUNNING'::character varying])::text[])))", true)
+        );
     }
 
     @Override

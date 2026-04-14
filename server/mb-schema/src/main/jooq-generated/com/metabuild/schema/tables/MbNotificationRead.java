@@ -4,6 +4,7 @@
 package com.metabuild.schema.tables;
 
 
+import com.metabuild.schema.Indexes;
 import com.metabuild.schema.Keys;
 import com.metabuild.schema.Public;
 import com.metabuild.schema.tables.MbIamUser.MbIamUserPath;
@@ -18,6 +19,7 @@ import java.util.List;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
+import org.jooq.Index;
 import org.jooq.InverseForeignKey;
 import org.jooq.Name;
 import org.jooq.Path;
@@ -140,6 +142,11 @@ public class MbNotificationRead extends TableImpl<MbNotificationReadRecord> {
     @Override
     public Schema getSchema() {
         return aliased() ? null : Public.PUBLIC;
+    }
+
+    @Override
+    public List<Index> getIndexes() {
+        return Arrays.asList(Indexes.IDX_NOTIFICATION_READ_USER_ID);
     }
 
     @Override

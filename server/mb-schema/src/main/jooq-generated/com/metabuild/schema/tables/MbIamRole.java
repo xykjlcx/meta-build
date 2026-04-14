@@ -20,6 +20,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -39,6 +40,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -273,6 +275,14 @@ public class MbIamRole extends TableImpl<MbIamRoleRecord> {
      */
     public MbIamUserPath mbIamUser() {
         return mbIamUserRole().mbIamUser();
+    }
+
+    @Override
+    public List<Check<MbIamRoleRecord>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("chk_iam_role_data_scope"), "(((data_scope)::text = ANY ((ARRAY['ALL'::character varying, 'OWN_DEPT'::character varying, 'OWN_DEPT_AND_CHILD'::character varying, 'CUSTOM_DEPT'::character varying, 'SELF'::character varying])::text[])))", true),
+            Internal.createCheck(this, DSL.name("chk_iam_role_status"), "((status = ANY (ARRAY[0, 1])))", true)
+        );
     }
 
     @Override

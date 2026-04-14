@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -35,6 +36,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -230,6 +232,14 @@ public class MbNotification extends TableImpl<MbNotificationRecord> {
             _mbNotificationRead = new MbNotificationReadPath(this, null, Keys.MB_NOTIFICATION_READ__FK_NOTIFICATION_READ_NOTIFICATION.getInverseKey());
 
         return _mbNotificationRead;
+    }
+
+    @Override
+    public List<Check<MbNotificationRecord>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("chk_notification_status"), "((status = ANY (ARRAY[0, 1, 2])))", true),
+            Internal.createCheck(this, DSL.name("chk_notification_type"), "(((type)::text = ANY ((ARRAY['SYSTEM'::character varying, 'BUSINESS'::character varying, 'APPROVAL'::character varying])::text[])))", true)
+        );
     }
 
     @Override

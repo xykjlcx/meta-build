@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -36,6 +37,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -244,6 +246,13 @@ public class MbIamMenu extends TableImpl<MbIamMenuRecord> {
      */
     public MbIamRolePath mbIamRole() {
         return mbIamRoleMenu().mbIamRole();
+    }
+
+    @Override
+    public List<Check<MbIamMenuRecord>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("chk_iam_menu_menu_type"), "(((menu_type)::text = ANY ((ARRAY['DIRECTORY'::character varying, 'MENU'::character varying, 'BUTTON'::character varying])::text[])))", true)
+        );
     }
 
     @Override

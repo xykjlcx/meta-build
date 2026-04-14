@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import org.jooq.Check;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.ForeignKey;
@@ -34,6 +35,7 @@ import org.jooq.TableField;
 import org.jooq.TableOptions;
 import org.jooq.UniqueKey;
 import org.jooq.impl.DSL;
+import org.jooq.impl.Internal;
 import org.jooq.impl.SQLDataType;
 import org.jooq.impl.TableImpl;
 
@@ -237,6 +239,13 @@ public class MbIamRouteTree extends TableImpl<MbIamRouteTreeRecord> {
             _mbIamRouteTree = new MbIamRouteTreePath(this, Keys.MB_IAM_ROUTE_TREE__FK_IAM_ROUTE_TREE_PARENT, null);
 
         return _mbIamRouteTree;
+    }
+
+    @Override
+    public List<Check<MbIamRouteTreeRecord>> getChecks() {
+        return Arrays.asList(
+            Internal.createCheck(this, DSL.name("chk_iam_route_tree_route_type"), "(((route_type)::text = ANY ((ARRAY['LAYOUT'::character varying, 'PAGE'::character varying, 'MENU'::character varying, 'BUTTON'::character varying, 'EXTERNAL'::character varying])::text[])))", true)
+        );
     }
 
     @Override
