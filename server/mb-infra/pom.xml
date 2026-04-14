@@ -29,11 +29,16 @@
         <module>infra-captcha</module>
     </modules>
 
-    <!-- 所有 infra 子模块共享 mb-common 依赖 -->
+    <!-- 所有 infra 子模块共享 mb-common + Lombok 依赖 -->
     <dependencies>
         <dependency>
             <groupId>com.metabuild</groupId>
             <artifactId>mb-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
