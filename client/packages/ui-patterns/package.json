@@ -12,30 +12,33 @@
     "storybook:build": "storybook build"
   },
   "dependencies": {
-    "@mb/ui-tokens": "workspace:*",
-    "@mb/ui-primitives": "workspace:*",
-    "@tanstack/react-table": "^8.20.0",
-    "react-hook-form": "^7.54.0",
     "@hookform/resolvers": "^3.9.0",
-    "zod": "^3.24.0",
-    "date-fns": "^4.1.0",
+    "@mb/ui-primitives": "workspace:*",
+    "@mb/ui-tokens": "workspace:*",
+    "@tanstack/react-table": "^8.20.0",
     "clsx": "^2.1.1",
-    "tailwind-merge": "^3.5.0"
+    "date-fns": "^4.1.0",
+    "react-hook-form": "^7.54.0",
+    "tailwind-merge": "^3.5.0",
+    "zod": "^3.24.0"
   },
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
+    "@storybook/addon-a11y": "^8.4.0",
+    "@storybook/addon-essentials": "^8.4.0",
     "@storybook/react": "^8.4.0",
     "@storybook/react-vite": "^8.4.0",
-    "@storybook/addon-essentials": "^8.4.0",
-    "@storybook/addon-a11y": "^8.4.0",
-    "@testing-library/react": "^16.0.0",
+    "@storybook/test": "^8.4.0",
     "@testing-library/jest-dom": "^6.0.0",
+    "@testing-library/react": "^16.0.0",
     "@testing-library/user-event": "^14.0.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "jsdom": "^25.0.0",
-    "vitest": "^2.1.0",
-    "storybook": "^8.4.0"
+    "storybook": "^8.4.0",
+    "vitest": "^2.1.0"
   }
 }

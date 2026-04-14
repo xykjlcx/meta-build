@@ -173,6 +173,9 @@ importers:
       '@storybook/react-vite':
         specifier: ^8.4.0
         version: 8.6.18(@storybook/test@8.6.18(storybook@8.6.18))(react-dom@19.2.5(react@19.2.5))(react@19.2.5)(rollup@4.60.1)(storybook@8.6.18)(typescript@5.9.3)(vite@5.4.21(lightningcss@1.32.0))
+      '@storybook/test':
+        specifier: ^8.4.0
+        version: 8.6.18(storybook@8.6.18)
       '@testing-library/jest-dom':
         specifier: ^6.0.0
         version: 6.9.1
@@ -182,6 +185,12 @@ importers:
       '@testing-library/user-event':
         specifier: ^14.0.0
         version: 14.6.1(@testing-library/dom@10.4.0)
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.14
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.14)
       jsdom:
         specifier: ^25.0.0
         version: 25.0.1
