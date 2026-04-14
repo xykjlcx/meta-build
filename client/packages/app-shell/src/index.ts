@@ -18,6 +18,7 @@ export { ThemeProvider, useTheme } from './theme';
 // auth
 export {
   useCurrentUser,
+  toCurrentUser,
   useAuth,
   getAccessToken,
   requireAuth,

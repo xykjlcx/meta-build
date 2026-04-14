@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { authApi, type CurrentUserView } from '@mb/api-sdk';
 import { ANONYMOUS, type CurrentUser } from './types';
 
-function toCurrentUser(dto: CurrentUserView): CurrentUser {
+export function toCurrentUser(dto: CurrentUserView): CurrentUser {
   const permissions = new Set(dto.permissions) as ReadonlySet<string> as CurrentUser['permissions'];
   return {
     isAuthenticated: true,
