@@ -22,7 +22,7 @@ export function requireAuth(options: RequireAuthOptions = {}) {
   }) => {
     const user = context.currentUser;
     if (!user || !user.isAuthenticated) {
-      throw redirect({ to: '/auth/login', search: { redirect: location.pathname } });
+      throw redirect({ to: '/auth/login', search: { redirect: window.location.pathname } });
     }
     if (options.permission && !user.permissions.has(options.permission)) {
       throw new ForbiddenError(options.permission);

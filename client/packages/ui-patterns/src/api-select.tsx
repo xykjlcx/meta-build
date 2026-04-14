@@ -92,6 +92,10 @@ function ApiSelect<TValue = string>({
   // 用 ref 跟踪最新的请求，丢弃过期响应
   const fetchIdRef = useRef(0);
 
+  // 用 ref 存最新 fetcher，避免箭头函数引用变化导致无限循环
+  const fetcherRef = useRef(fetcher);
+  fetcherRef.current = fetcher;
+
   // debounced 关键词变化或弹窗打开时，调用 fetcher
   useEffect(() => {
     if (!open) return;
@@ -99,7 +103,7 @@ function ApiSelect<TValue = string>({
     const currentId = ++fetchIdRef.current;
     setLoading(true);
 
-    fetcher({ keyword: debouncedKeyword, page: 1, size })
+    fetcherRef.current({ keyword: debouncedKeyword, page: 1, size })
       .then((result) => {
         // 丢弃过期响应
         if (currentId !== fetchIdRef.current) return;
@@ -113,7 +117,7 @@ function ApiSelect<TValue = string>({
         if (currentId !== fetchIdRef.current) return;
         setLoading(false);
       });
-  }, [open, debouncedKeyword, fetcher, size]);
+  }, [open, debouncedKeyword, size]);
 
   // 弹窗关闭时重置搜索
   const handleOpenChange = useCallback((nextOpen: boolean) => {

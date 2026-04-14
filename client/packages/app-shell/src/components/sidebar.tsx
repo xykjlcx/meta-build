@@ -37,11 +37,13 @@ export function Sidebar() {
         </Button>
       </div>
 
-      {/* 菜单树 */}
+      {/* 菜单树（过滤 visible:false 的隐藏菜单） */}
       <nav className="flex-1 overflow-y-auto px-2 py-2">
-        {data?.tree.map((node) => (
-          <MenuTreeItem key={node.id} node={node} collapsed={collapsed} depth={0} />
-        ))}
+        {data?.tree
+          .filter((node) => node.visible !== false)
+          .map((node) => (
+            <MenuTreeItem key={node.id} node={node} collapsed={collapsed} depth={0} />
+          ))}
       </nav>
     </aside>
   );
@@ -93,12 +95,14 @@ function MenuTreeItem({
         {!collapsed && <span className="truncate">{node.name}</span>}
       </button>
 
-      {/* 子节点 */}
+      {/* 子节点（过滤隐藏菜单） */}
       {hasChildren && expanded && !collapsed && (
         <div>
-          {node.children.map((child) => (
-            <MenuTreeItem key={child.id} node={child} collapsed={collapsed} depth={depth + 1} />
-          ))}
+          {node.children
+            .filter((child) => child.visible !== false)
+            .map((child) => (
+              <MenuTreeItem key={child.id} node={child} collapsed={collapsed} depth={depth + 1} />
+            ))}
         </div>
       )}
     </div>

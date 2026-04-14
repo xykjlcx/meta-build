@@ -29,6 +29,9 @@ export interface NxTreeProps<TNode extends NxTreeNode> {
 /** 每层缩进像素 */
 const INDENT_PX = 24;
 
+/** 空 Set 常量，避免每次渲染创建新对象 */
+const EMPTY_SET: ReadonlySet<string> = new Set<string>();
+
 // ─── 展开箭头（纯 SVG，不依赖 lucide-react） ──────────────
 
 function ExpandIcon({ expanded }: { expanded: boolean }) {
@@ -114,7 +117,7 @@ function TreeNodeItem<TNode extends NxTreeNode>({
 function NxTree<TNode extends NxTreeNode>({
   data,
   renderNode,
-  expandedIds = new Set(),
+  expandedIds = EMPTY_SET as Set<string>,
   onExpandedChange,
   // v1.5 实现拖拽逻辑
   draggable: _draggable,

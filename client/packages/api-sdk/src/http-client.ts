@@ -61,6 +61,7 @@ export function createHttpClient(
       response = await interceptor(response);
     }
 
+    // 204 No Content — 调用方应声明 Promise<void>，此时 undefined as T 对 void 类型安全
     if (response.status === 204) return undefined as T;
     return response.json() as Promise<T>;
   }

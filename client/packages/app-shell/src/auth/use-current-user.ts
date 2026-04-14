@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { authApi, type CurrentUserView } from '@mb/api-sdk';
+import { authApi, ProblemDetailError, type CurrentUserView } from '@mb/api-sdk';
 import { ANONYMOUS, type CurrentUser } from './types';
 
 export function toCurrentUser(dto: CurrentUserView): CurrentUser {
@@ -23,12 +23,21 @@ export function toCurrentUser(dto: CurrentUserView): CurrentUser {
  * 未认证时返回 ANONYMOUS（不抛错）。
  */
 export function useCurrentUser(): CurrentUser {
-  const { data } = useQuery({
+  const { data, error } = useQuery({
     queryKey: ['auth', 'me'],
     queryFn: () => authApi.getCurrentUser(),
     staleTime: 5 * 60 * 1000,
-    retry: false,
+    retry: 1, // 允许重试一次（网络抖动）
     throwOnError: false,
   });
+
+  if (error) {
+    // 401 → 真的未登录；其他错误 → 网络问题，仍返回 ANONYMOUS 但 log 警告
+    if (error instanceof ProblemDetailError && error.status === 401) {
+      return ANONYMOUS;
+    }
+    console.warn('[useCurrentUser] 获取用户信息失败，非 401 错误:', error.message);
+  }
+
   return data ? toCurrentUser(data) : ANONYMOUS;
 }
