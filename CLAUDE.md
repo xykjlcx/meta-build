@@ -127,7 +127,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 
 | 维度 | 选型 |
 |------|------|
-| JVM / 框架 | JDK 21 + Spring Boot 3.5.13 |
+| JVM / 框架 | JDK 21 + Spring Boot 3.5.3 |
 | 数据访问 | jOOQ 3.19+ + PostgreSQL 16 + Flyway 10+ |
 | 认证 | **Sa-Token 1.39.x + `CurrentUser` 门面层 + `@RequirePermission` 自定义注解**（ADR-0005） |
 | 模块边界 | **Maven pom 隔离 + ArchUnit 双保险**（ADR-0003，已移除 Spring Modulith） |

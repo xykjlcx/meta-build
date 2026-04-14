@@ -494,8 +494,8 @@ public interface CurrentUser {
     /** 当前用户所属部门 ID */
     Long deptId();
 
-    /** 当前租户 ID（v1 总是返回 0） */
-    long tenantId();
+    /** 当前租户 ID（v1 总是返回 0L） */
+    Long tenantId();
 
     /** 权限点集合 */
     Set<String> permissions();
@@ -556,7 +556,7 @@ public class SaTokenCurrentUser implements CurrentUser {
     }
 
     @Override
-    public long tenantId() {
+    public Long tenantId() {
         Long tenantId = StpUtil.getSession().getLong("tenantId");
         return tenantId != null ? tenantId : 0L;
     }
@@ -2356,7 +2356,7 @@ public class AuthController {
 public record CurrentUserSnapshot(
     long userId,
     String username,
-    long tenantId,
+    Long tenantId,
     List<String> permissions,       // 权限点 code 列表（由角色→菜单→路由树 JOIN 推导）
     List<String> roles,             // 角色 code 列表
     String dataScopeType,           // 数据范围类型

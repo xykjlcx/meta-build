@@ -9,7 +9,7 @@
 架构守护 = **Maven 依赖隔离 + ArchUnit 规则双保险**（ADR-0003 移除 Spring Modulith）。
 
 - **Maven 层**（pom 级）：模块间依赖关系在 `pom.xml` 里显式声明，PR review 可见
-- **ArchUnit 层**（包级）：规则代码放 `infra-archunit` 模块，测试集中在 `mb-admin/src/test/java/com/metabuild/architecture/`
+- **ArchUnit 层**（包级）：规则代码放 `infra-archunit` 模块，测试集中在 `mb-admin/src/test/java/com/metabuild/admin/architecture/`
 
 **ArchUnit 规则分 3 类**：
 1. **借用官方 `GeneralCodingRules`**：零成本的通用规则（字段注入禁用 / System.out 禁用 / java.util.logging 禁用 / 通用异常禁用）
@@ -136,15 +136,15 @@ public class GeneralCodingRulesBundle {
 
 ## 5. 测试基类 ArchitectureTest [M1+M4]
 
-**位置**：`mb-admin/src/test/java/com/metabuild/architecture/ArchitectureTest.java`
+**位置**：`mb-admin/src/test/java/com/metabuild/admin/architecture/ArchitectureTest.java`
 
 `mb-admin` 的 `pom.xml` 依赖所有 `platform-*` 和 `business-*` 模块（启动聚合），ArchUnit 测试在这里能扫描到所有 class。
 
 **关键：排除 jOOQ 生成代码**（来自 `mb-schema` 的 `jooq-generated/`），避免 ArchUnit 误报生成代码中的命名规范问题。
 
 ```java
-// mb-admin/src/test/java/com/metabuild/architecture/ArchitectureTest.java
-package com.metabuild.architecture;
+// mb-admin/src/test/java/com/metabuild/admin/architecture/ArchitectureTest.java
+package com.metabuild.admin.architecture;
 
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.core.importer.Location;
@@ -274,8 +274,8 @@ public class ArchitectureTest {
 **排除 jOOQ 生成代码的 ImportOption**：
 
 ```java
-// mb-admin/src/test/java/com/metabuild/architecture/DoNotIncludeGeneratedJooq.java
-package com.metabuild.architecture;
+// mb-admin/src/test/java/com/metabuild/admin/architecture/DoNotIncludeGeneratedJooq.java
+package com.metabuild.admin.architecture;
 
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.core.importer.Location;
