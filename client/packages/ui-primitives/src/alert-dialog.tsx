@@ -1,161 +1,194 @@
-import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
-import type * as React from 'react';
-import { cn } from './lib/utils';
+import * as React from "react"
+import { AlertDialog as AlertDialogPrimitive } from "radix-ui"
 
-const AlertDialog = AlertDialogPrimitive.Root;
-const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
-const AlertDialogPortal = AlertDialogPrimitive.Portal;
+import { cn } from "./lib/utils"
+import { Button } from "./button"
 
-/** AlertDialogOverlay 组件属性 */
-export interface AlertDialogOverlayProps
-  extends React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Overlay> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<React.ElementRef<typeof AlertDialogPrimitive.Overlay>>;
+function AlertDialog({
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {
+  return <AlertDialogPrimitive.Root data-slot="alert-dialog" {...props} />
 }
 
-/** 警告对话框遮罩层 */
-function AlertDialogOverlay({ className, ref, ...props }: AlertDialogOverlayProps) {
+function AlertDialogTrigger({
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Trigger>) {
+  return (
+    <AlertDialogPrimitive.Trigger data-slot="alert-dialog-trigger" {...props} />
+  )
+}
+
+function AlertDialogPortal({
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) {
+  return (
+    <AlertDialogPrimitive.Portal data-slot="alert-dialog-portal" {...props} />
+  )
+}
+
+function AlertDialogOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Overlay>) {
   return (
     <AlertDialogPrimitive.Overlay
-      ref={ref}
+      data-slot="alert-dialog-overlay"
       className={cn(
-        'fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
-        className,
+        "fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
+        className
       )}
       {...props}
     />
-  );
+  )
 }
 
-/** AlertDialogContent 组件属性 */
-export interface AlertDialogContentProps
-  extends React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Content> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<React.ElementRef<typeof AlertDialogPrimitive.Content>>;
-}
-
-/** 警告对话框内容区域 */
-function AlertDialogContent({ className, ref, ...props }: AlertDialogContentProps) {
+function AlertDialogContent({
+  className,
+  size = "default",
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Content> & {
+  size?: "default" | "sm"
+}) {
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
       <AlertDialogPrimitive.Content
-        ref={ref}
+        data-slot="alert-dialog-content"
+        data-size={size}
         className={cn(
-          'fixed left-1/2 top-1/2 z-50 grid w-full max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg',
-          className,
+          "group/alert-dialog-content fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-4 rounded-lg border bg-background p-6 shadow-lg duration-200 data-[size=sm]:max-w-xs data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[size=default]:sm:max-w-lg",
+          className
         )}
         {...props}
       />
     </AlertDialogPortal>
-  );
+  )
 }
 
-/** 警告对话框头部 */
-function AlertDialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={cn('flex flex-col space-y-2 text-center sm:text-left', className)} {...props} />
-  );
-}
-
-/** 警告对话框底部 */
-function AlertDialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+function AlertDialogHeader({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
     <div
-      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
+      data-slot="alert-dialog-header"
+      className={cn(
+        "grid grid-rows-[auto_1fr] place-items-center gap-1.5 text-center has-data-[slot=alert-dialog-media]:grid-rows-[auto_auto_1fr] has-data-[slot=alert-dialog-media]:gap-x-6 sm:group-data-[size=default]/alert-dialog-content:place-items-start sm:group-data-[size=default]/alert-dialog-content:text-left sm:group-data-[size=default]/alert-dialog-content:has-data-[slot=alert-dialog-media]:grid-rows-[auto_1fr]",
+        className
+      )}
       {...props}
     />
-  );
+  )
 }
 
-/** AlertDialogTitle 组件属性 */
-export interface AlertDialogTitleProps
-  extends React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Title> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<React.ElementRef<typeof AlertDialogPrimitive.Title>>;
+function AlertDialogFooter({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="alert-dialog-footer"
+      className={cn(
+        "flex flex-col-reverse gap-2 group-data-[size=sm]/alert-dialog-content:grid group-data-[size=sm]/alert-dialog-content:grid-cols-2 sm:flex-row sm:justify-end",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-/** 警告对话框标题 */
-function AlertDialogTitle({ className, ref, ...props }: AlertDialogTitleProps) {
+function AlertDialogTitle({
+  className,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Title>) {
   return (
     <AlertDialogPrimitive.Title
-      ref={ref}
-      className={cn('text-lg font-semibold', className)}
+      data-slot="alert-dialog-title"
+      className={cn(
+        "text-lg font-semibold sm:group-data-[size=default]/alert-dialog-content:group-has-data-[slot=alert-dialog-media]/alert-dialog-content:col-start-2",
+        className
+      )}
       {...props}
     />
-  );
+  )
 }
 
-/** AlertDialogDescription 组件属性 */
-export interface AlertDialogDescriptionProps
-  extends React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<React.ElementRef<typeof AlertDialogPrimitive.Description>>;
-}
-
-/** 警告对话框描述 */
-function AlertDialogDescription({ className, ref, ...props }: AlertDialogDescriptionProps) {
+function AlertDialogDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Description>) {
   return (
     <AlertDialogPrimitive.Description
-      ref={ref}
-      className={cn('text-sm text-muted-foreground', className)}
+      data-slot="alert-dialog-description"
+      className={cn("text-sm text-muted-foreground", className)}
       {...props}
     />
-  );
+  )
 }
 
-/** AlertDialogAction 组件属性 */
-export interface AlertDialogActionProps
-  extends React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Action> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<React.ElementRef<typeof AlertDialogPrimitive.Action>>;
-}
-
-/** 警告对话框确认按钮 */
-function AlertDialogAction({ className, ref, ...props }: AlertDialogActionProps) {
+function AlertDialogMedia({
+  className,
+  ...props
+}: React.ComponentProps<"div">) {
   return (
-    <AlertDialogPrimitive.Action
-      ref={ref}
+    <div
+      data-slot="alert-dialog-media"
       className={cn(
-        'inline-flex h-10 items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
-        className,
+        "mb-2 inline-flex size-16 items-center justify-center rounded-md bg-muted sm:group-data-[size=default]/alert-dialog-content:row-span-2 *:[svg:not([class*='size-'])]:size-8",
+        className
       )}
       {...props}
     />
-  );
+  )
 }
 
-/** AlertDialogCancel 组件属性 */
-export interface AlertDialogCancelProps
-  extends React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Cancel> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<React.ElementRef<typeof AlertDialogPrimitive.Cancel>>;
-}
-
-/** 警告对话框取消按钮 */
-function AlertDialogCancel({ className, ref, ...props }: AlertDialogCancelProps) {
+function AlertDialogAction({
+  className,
+  variant = "default",
+  size = "default",
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Action> &
+  Pick<React.ComponentProps<typeof Button>, "variant" | "size">) {
   return (
-    <AlertDialogPrimitive.Cancel
-      ref={ref}
-      className={cn(
-        'mt-2 inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-semibold ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 sm:mt-0',
-        className,
-      )}
-      {...props}
-    />
-  );
+    <Button variant={variant} size={size} asChild>
+      <AlertDialogPrimitive.Action
+        data-slot="alert-dialog-action"
+        className={cn(className)}
+        {...props}
+      />
+    </Button>
+  )
+}
+
+function AlertDialogCancel({
+  className,
+  variant = "outline",
+  size = "default",
+  ...props
+}: React.ComponentProps<typeof AlertDialogPrimitive.Cancel> &
+  Pick<React.ComponentProps<typeof Button>, "variant" | "size">) {
+  return (
+    <Button variant={variant} size={size} asChild>
+      <AlertDialogPrimitive.Cancel
+        data-slot="alert-dialog-cancel"
+        className={cn(className)}
+        {...props}
+      />
+    </Button>
+  )
 }
 
 export {
   AlertDialog,
-  AlertDialogTrigger,
-  AlertDialogPortal,
-  AlertDialogOverlay,
-  AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogFooter,
-  AlertDialogTitle,
-  AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
-};
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogMedia,
+  AlertDialogOverlay,
+  AlertDialogPortal,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+}

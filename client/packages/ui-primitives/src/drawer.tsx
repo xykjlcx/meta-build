@@ -1,33 +1,48 @@
-import * as DialogPrimitive from '@radix-ui/react-dialog';
-import { type VariantProps, cva } from 'class-variance-authority';
-import { X } from 'lucide-react';
-import type * as React from 'react';
-import { cn } from './lib/utils';
+import * as React from 'react'
+import { type VariantProps, cva } from 'class-variance-authority'
+import { XIcon } from 'lucide-react'
+import { Dialog as DialogPrimitive } from 'radix-ui'
 
-const Drawer = DialogPrimitive.Root;
-const DrawerTrigger = DialogPrimitive.Trigger;
-const DrawerPortal = DialogPrimitive.Portal;
-const DrawerClose = DialogPrimitive.Close;
+import { cn } from './lib/utils'
 
-/** DrawerOverlay 组件属性 */
-export interface DrawerOverlayProps
-  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<React.ElementRef<typeof DialogPrimitive.Overlay>>;
+function Drawer({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Root>) {
+  return <DialogPrimitive.Root data-slot="drawer" {...props} />
 }
 
-/** 抽屉遮罩层 */
-function DrawerOverlay({ className, ref, ...props }: DrawerOverlayProps) {
+function DrawerTrigger({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
+  return <DialogPrimitive.Trigger data-slot="drawer-trigger" {...props} />
+}
+
+function DrawerPortal({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Portal>) {
+  return <DialogPrimitive.Portal data-slot="drawer-portal" {...props} />
+}
+
+function DrawerClose({
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Close>) {
+  return <DialogPrimitive.Close data-slot="drawer-close" {...props} />
+}
+
+function DrawerOverlay({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
   return (
     <DialogPrimitive.Overlay
-      ref={ref}
+      data-slot="drawer-overlay"
       className={cn(
-        'fixed inset-0 z-50 bg-background/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+        'fixed inset-0 z-50 bg-black/50 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0',
         className,
       )}
       {...props}
     />
-  );
+  )
 }
 
 /** 抽屉内容区域的 CVA 变体定义 */
@@ -48,96 +63,81 @@ const drawerContentVariants = cva(
       side: 'right',
     },
   },
-);
+)
 
-/** DrawerContent 组件属性 */
-export interface DrawerContentProps
-  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>,
-    VariantProps<typeof drawerContentVariants> {
-  /** 关闭按钮的 ARIA 标签（L2 不假设默认语言，使用方通过 t() 传入） */
-  closeLabel: string;
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<React.ElementRef<typeof DialogPrimitive.Content>>;
-}
-
-/** 抽屉内容区域 */
 function DrawerContent({
   side = 'right',
   className,
   children,
   closeLabel,
-  ref,
   ...props
-}: DrawerContentProps) {
+}: React.ComponentProps<typeof DialogPrimitive.Content> &
+  VariantProps<typeof drawerContentVariants> & {
+    /** 关闭按钮的 ARIA 标签（L2 不假设默认语言，使用方通过 t() 传入） */
+    closeLabel: string
+  }) {
   return (
     <DrawerPortal>
       <DrawerOverlay />
       <DialogPrimitive.Content
-        ref={ref}
+        data-slot="drawer-content"
         className={cn(drawerContentVariants({ side }), className)}
         {...props}
       >
         {children}
         <DialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-          <X className="h-4 w-4" />
+          <XIcon className="h-4 w-4" />
           <span className="sr-only">{closeLabel}</span>
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DrawerPortal>
-  );
+  )
 }
 
-/** 抽屉头部 */
-function DrawerHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div className={cn('flex flex-col space-y-2 text-center sm:text-left', className)} {...props} />
-  );
-}
-
-/** 抽屉底部 */
-function DrawerFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
   return (
     <div
+      data-slot="drawer-header"
+      className={cn('flex flex-col space-y-2 text-center sm:text-left', className)}
+      {...props}
+    />
+  )
+}
+
+function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
+  return (
+    <div
+      data-slot="drawer-footer"
       className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
       {...props}
     />
-  );
+  )
 }
 
-/** DrawerTitle 组件属性 */
-export interface DrawerTitleProps
-  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<React.ElementRef<typeof DialogPrimitive.Title>>;
-}
-
-/** 抽屉标题 */
-function DrawerTitle({ className, ref, ...props }: DrawerTitleProps) {
+function DrawerTitle({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
-      ref={ref}
+      data-slot="drawer-title"
       className={cn('text-lg font-semibold leading-none tracking-tight', className)}
       {...props}
     />
-  );
+  )
 }
 
-/** DrawerDescription 组件属性 */
-export interface DrawerDescriptionProps
-  extends React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<React.ElementRef<typeof DialogPrimitive.Description>>;
-}
-
-/** 抽屉描述 */
-function DrawerDescription({ className, ref, ...props }: DrawerDescriptionProps) {
+function DrawerDescription({
+  className,
+  ...props
+}: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
     <DialogPrimitive.Description
-      ref={ref}
+      data-slot="drawer-description"
       className={cn('text-sm text-muted-foreground', className)}
       {...props}
     />
-  );
+  )
 }
 
 export {
@@ -152,4 +152,4 @@ export {
   DrawerTitle,
   DrawerDescription,
   drawerContentVariants,
-};
+}

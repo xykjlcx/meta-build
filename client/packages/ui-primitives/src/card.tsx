@@ -1,82 +1,92 @@
-import type * as React from 'react';
-import { cn } from './lib/utils';
+import * as React from "react"
 
-/** Card 组件属性 */
-export interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<HTMLDivElement>;
-}
+import { cn } from "./lib/utils"
 
-/** 卡片根容器 */
-function Card({ className, ref, ...props }: CardProps) {
+function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      ref={ref}
-      className={cn('rounded-lg border bg-card text-card-foreground shadow-sm', className)}
+      data-slot="card"
+      className={cn(
+        "flex flex-col gap-6 rounded-xl border bg-card py-6 text-card-foreground shadow-sm",
+        className
+      )}
       {...props}
     />
-  );
+  )
 }
 
-/** CardHeader 组件属性 */
-export interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<HTMLDivElement>;
-}
-
-/** 卡片头部 */
-function CardHeader({ className, ref, ...props }: CardHeaderProps) {
-  return <div ref={ref} className={cn('flex flex-col space-y-1.5 p-6', className)} {...props} />;
-}
-
-/** CardTitle 组件属性 */
-export interface CardTitleProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<HTMLDivElement>;
-}
-
-/** 卡片标题 */
-function CardTitle({ className, ref, ...props }: CardTitleProps) {
+function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div
-      ref={ref}
-      className={cn('text-2xl font-semibold leading-none tracking-tight', className)}
+      data-slot="card-header"
+      className={cn(
+        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
+        className
+      )}
       {...props}
     />
-  );
+  )
 }
 
-/** CardDescription 组件属性 */
-export interface CardDescriptionProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<HTMLDivElement>;
+function CardTitle({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-title"
+      className={cn("leading-none font-semibold", className)}
+      {...props}
+    />
+  )
 }
 
-/** 卡片描述文本 */
-function CardDescription({ className, ref, ...props }: CardDescriptionProps) {
-  return <div ref={ref} className={cn('text-sm text-muted-foreground', className)} {...props} />;
+function CardDescription({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-description"
+      className={cn("text-sm text-muted-foreground", className)}
+      {...props}
+    />
+  )
 }
 
-/** CardContent 组件属性 */
-export interface CardContentProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<HTMLDivElement>;
+function CardAction({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-action"
+      className={cn(
+        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-/** 卡片内容区域 */
-function CardContent({ className, ref, ...props }: CardContentProps) {
-  return <div ref={ref} className={cn('p-6 pt-0', className)} {...props} />;
+function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-content"
+      className={cn("px-6", className)}
+      {...props}
+    />
+  )
 }
 
-/** CardFooter 组件属性 */
-export interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
-  /** DOM ref 转发（React 19 原生 ref-as-prop） */
-  ref?: React.Ref<HTMLDivElement>;
+function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <div
+      data-slot="card-footer"
+      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
+      {...props}
+    />
+  )
 }
 
-/** 卡片底部 */
-function CardFooter({ className, ref, ...props }: CardFooterProps) {
-  return <div ref={ref} className={cn('flex items-center p-6 pt-0', className)} {...props} />;
+export {
+  Card,
+  CardHeader,
+  CardFooter,
+  CardTitle,
+  CardAction,
+  CardDescription,
+  CardContent,
 }
-
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent };
