@@ -1,5 +1,7 @@
 package com.metabuild.platform.iam.api.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.Set;
 
 /**
@@ -12,5 +14,5 @@ public record CurrentUserView(
     Long deptId,
     Set<String> permissions,
     Set<String> roles,
-    boolean isAdmin
+    @JsonProperty("isAdmin") boolean isAdmin
 ) {}

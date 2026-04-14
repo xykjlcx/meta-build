@@ -117,9 +117,11 @@ public class MenuService implements MenuApi {
     }
 
     private MenuView toResponse(MbIamMenuRecord r, List<MenuView> children) {
+        // 根节点 parentId=0（DDL DEFAULT 0）转为 null，前端期望 null 表示"无父节点"
+        Long parentId = r.getParentId() != null && r.getParentId() == 0L ? null : r.getParentId();
         return new MenuView(
             r.getId(),
-            r.getParentId(),
+            parentId,
             r.getName(),
             r.getPermissionCode(),
             r.getMenuType(),
