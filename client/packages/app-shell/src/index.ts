@@ -49,3 +49,6 @@ export { GlobalErrorBoundary, GlobalErrorPage, GlobalNotFoundPage } from './erro
 
 // feedback
 export { ToastContainer, DialogContainer } from './feedback';
+
+// sse
+export { useSseConnection, useSseSubscription, sseEventBus } from './sse';
