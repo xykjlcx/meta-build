@@ -1,5 +1,6 @@
 package com.metabuild.infra.exception;
 
+import cn.dev33.satoken.exception.DisableServiceException;
 import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.exception.NotRoleException;
@@ -120,6 +121,24 @@ public class GlobalExceptionHandler {
         pd.setProperty("code", "errors.auth.forbidden");
         pd.setProperty("traceId", MDC.get("traceId"));
         log.warn("权限拒绝 [errors.auth.forbidden]: permission={}", ex.getPermission());
+        return pd;
+    }
+
+    /**
+     * 处理 Sa-Token 账号封禁异常（DisableServiceException）→ 403 Forbidden。
+     */
+    @ExceptionHandler(DisableServiceException.class)
+    public ProblemDetail handleDisableService(DisableServiceException ex) {
+        var locale = LocaleContextHolder.getLocale();
+        String message = messageSource.getMessage("errors.auth.accountDisabled", null, "账号已被封禁", locale);
+
+        var pd = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
+        pd.setTitle("Forbidden");
+        pd.setDetail(message);
+        pd.setProperty("code", "errors.auth.accountDisabled");
+        pd.setProperty("disableTime", ex.getDisableTime());
+        pd.setProperty("traceId", MDC.get("traceId"));
+        log.warn("账号封禁 [errors.auth.accountDisabled]: service={}, level={}", ex.getService(), ex.getLevel());
         return pd;
     }
 

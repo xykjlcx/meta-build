@@ -19,8 +19,10 @@ public record MbCorsProperties(
 ) {
     public MbCorsProperties {
         // 默认值兜底
-        if (allowedOrigins == null || allowedOrigins.isEmpty()) {
-            allowedOrigins = List.of("*");
+        // allowedOrigins 默认为空列表（不允许任何跨域），必须在配置文件中显式指定
+        // 避免通配符 "*" 成为安全默认值（反面教材：opt-in 安全模式）
+        if (allowedOrigins == null) {
+            allowedOrigins = List.of();
         }
         if (allowedMethods == null || allowedMethods.isEmpty()) {
             allowedMethods = List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS");

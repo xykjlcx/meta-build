@@ -18,6 +18,9 @@ import java.util.Set;
 /**
  * AuthFacade 的 Sa-Token 实现。
  * 业务层通过此门面执行登录/登出，零感知 Sa-Token API。
+ *
+ * <p>双 token 模式：access token 由 Sa-Token JWT 生成（短期，1800s），
+ * refresh token 由 {@link RefreshTokenService} 管理（长期，Redis 存储，one-time use rotation）。
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -25,6 +28,7 @@ import java.util.Set;
 public class SaTokenAuthFacade implements AuthFacade {
 
     private final MbAuthProperties authProperties;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public LoginResult doLogin(Long userId, SessionData sessionData) {
@@ -76,31 +80,41 @@ public class SaTokenAuthFacade implements AuthFacade {
                         : Set.of()
         );
 
+        // 生成独立 refresh token（Redis 存储，7 天有效）
+        String newRefreshToken = refreshTokenService.createRefreshToken(userId);
+
         log.info("用户登录成功: userId={}", userId);
         return new LoginResult(
                 tokenInfo.tokenValue,
-                tokenInfo.tokenValue, // Sa-Token 单 token 模式，refresh token 与 access token 相同
+                newRefreshToken,
                 authProperties.tokenTimeout(),
                 userInfo
         );
     }
 
+    /**
+     * 仅验证并轮换 refresh token，返回 userId 供上层重建 SessionData。
+     * 完整刷新流程由 platform-iam AuthService 编排（需要重建权限/角色等 session 数据）。
+     */
     @Override
     public LoginResult refresh(String refreshToken) {
-        // Sa-Token 单 token 模式：验证 token 有效性，续期并返回原 token
-        Object loginId = StpUtil.getLoginIdByToken(refreshToken);
-        if (loginId == null) {
-            throw new com.metabuild.common.exception.ForbiddenException("errors.auth.invalidToken");
-        }
-        // 续期（重置 token 超时时间）
-        StpUtil.renewTimeout(refreshToken, authProperties.tokenTimeout());
-        log.info("Token 续期成功: loginId={}", loginId);
-        return new LoginResult(
-                refreshToken,
-                refreshToken,
-                authProperties.tokenTimeout(),
-                null // 上层按需重建 userInfo
-        );
+        // 验证并轮换（one-time use），返回 userId
+        Long userId = refreshTokenService.validateAndRotate(refreshToken);
+        // access token 由调用方（AuthService）重新调用 doLogin 生成
+        // 此处仅返回 userId 的空壳，供内部使用，正常情况下 AuthController 不直接调用此方法
+        log.info("Refresh token 验证通过: userId={}", userId);
+        return new LoginResult(null, null, 0L, null);
+    }
+
+    /**
+     * 内部接口：验证 refresh token 并返回 userId，供 platform-iam 编排完整刷新流程。
+     *
+     * @param refreshToken 客户端传入的 refresh token
+     * @return 对应的 userId
+     * @throws com.metabuild.common.exception.UnauthorizedException token 无效
+     */
+    public Long validateRefreshTokenAndGetUserId(String refreshToken) {
+        return refreshTokenService.validateAndRotate(refreshToken);
     }
 
     @Override

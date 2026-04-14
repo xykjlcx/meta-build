@@ -1,8 +1,10 @@
 package com.metabuild.platform.iam.domain.auth;
 
 import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.SystemException;
 import com.metabuild.common.exception.UnauthorizedException;
 import com.metabuild.common.security.AuthFacade;
+import com.metabuild.infra.security.SaTokenAuthFacade;
 import com.metabuild.common.security.DataScope;
 import com.metabuild.common.security.DataScopeType;
 import com.metabuild.common.security.LoginResult;
@@ -140,6 +142,58 @@ public class AuthService implements AuthApi {
     @Override
     public void logout() {
         authFacade.logout();
+    }
+
+    /**
+     * 刷新 access token。
+     *
+     * <p>流程：验证 refresh token → 获取 userId → 重新构建 SessionData → 重新登录（生成新 access token + 新 refresh token）。
+     * Refresh token one-time use rotation，旧 token 在验证时立即删除。
+     *
+     * @param refreshToken 客户端持有的 refresh token
+     * @return 包含新 access token 和新 refresh token 的 LoginResult
+     */
+    @Transactional
+    public LoginResult refresh(String refreshToken) {
+        // 1. 验证 refresh token 并获取 userId（同时轮换，旧 token 失效）
+        if (!(authFacade instanceof SaTokenAuthFacade saTokenAuthFacade)) {
+            throw new SystemException("errors.system.internal");
+        }
+        Long userId = saTokenAuthFacade.validateRefreshTokenAndGetUserId(refreshToken);
+
+        // 2. 查询用户，确保仍然有效
+        MbIamUserRecord user = userRepository.findById(userId)
+                .orElseThrow(() -> new UnauthorizedException("errors.auth.refreshTokenInvalid"));
+
+        if (user.getStatus() == null || user.getStatus() == 0) {
+            throw new BusinessException("iam.auth.userDisabled", 403);
+        }
+
+        // 3. 重建 SessionData（与登录流程保持一致）
+        List<MbIamRoleRecord> roles = roleRepository.findByUserId(userId);
+        Set<String> permissions = permissionService.getPermissions(userId);
+        Set<String> roleCodes = permissionService.getRoles(userId);
+        boolean isAdmin = roleCodes.contains("SUPER_ADMIN");
+        DataScopeType scopeType = resolveScopeType(roles);
+        Set<Long> scopeDeptIds = resolveScopeDeptIds(scopeType, user.getDeptId(), roles);
+        DataScope dataScope = new DataScope(scopeType, scopeDeptIds);
+
+        SessionData sessionData = new SessionData(
+                userId,
+                user.getUsername(),
+                user.getDeptId(),
+                user.getTenantId(),
+                dataScope,
+                Boolean.TRUE.equals(user.getMustChangePassword()),
+                permissions,
+                roleCodes,
+                isAdmin
+        );
+
+        // 4. 重新登录（生成新 access token + 新 refresh token）
+        LoginResult result = authFacade.doLogin(userId, sessionData);
+        log.info("Token 刷新成功: userId={}", userId);
+        return result;
     }
 
     /** 获取失败次数 */

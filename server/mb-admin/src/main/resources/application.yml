@@ -46,12 +46,13 @@ spring:
 sa-token:
   token-name: Authorization
   token-prefix: Bearer
-  timeout: 7200
+  timeout: 1800
   active-timeout: -1
   is-concurrent: true
   token-style: uuid
   is-log: false
-  jwt-secret-key: ${MB_SA_TOKEN_JWT_SECRET:metabuild-dev-jwt-secret-key-2026}
+  # 生产环境必须通过环境变量 MB_SA_TOKEN_JWT_SECRET 注入，无默认值，启动时 fail-fast
+  jwt-secret-key: ${MB_SA_TOKEN_JWT_SECRET}
 
 # Meta-Build 自定义配置
 mb:
@@ -64,7 +65,7 @@ mb:
     default-locale: zh_CN
     supported-locales: zh_CN,en_US
   auth:
-    token-timeout: 7200
+    token-timeout: 1800
     refresh-timeout: 604800
     token-name: Authorization
   cors:

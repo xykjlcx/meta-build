@@ -12,6 +12,7 @@ mb:
 
 sa-token:
   is-log: false
+  jwt-secret-key: test-jwt-secret-key-for-testing
 
 springdoc:
   api-docs:
