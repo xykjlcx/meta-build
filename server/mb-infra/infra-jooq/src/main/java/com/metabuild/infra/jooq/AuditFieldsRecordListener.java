@@ -8,7 +8,7 @@ import org.jooq.impl.DefaultRecordListener;
 import org.springframework.beans.factory.ObjectProvider;
 
 import java.time.Clock;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 
 /**
  * 审计字段自动填充监听器：
@@ -33,7 +33,7 @@ public class AuditFieldsRecordListener extends DefaultRecordListener {
 
     @Override
     public void insertStart(RecordContext ctx) {
-        LocalDateTime now = now();
+        OffsetDateTime now = now();
         Long userId = currentUserId();
 
         setFieldIfExists(ctx, "created_by", userId);
@@ -44,7 +44,7 @@ public class AuditFieldsRecordListener extends DefaultRecordListener {
 
     @Override
     public void updateStart(RecordContext ctx) {
-        LocalDateTime now = now();
+        OffsetDateTime now = now();
         Long userId = currentUserId();
 
         setFieldIfExists(ctx, "updated_by", userId);
@@ -87,17 +87,18 @@ public class AuditFieldsRecordListener extends DefaultRecordListener {
     }
 
     /**
-     * 获取当前时间，Clock Bean 不存在时降级为系统时间。
+     * 获取当前时间（含时区），Clock Bean 不存在时降级为系统时间。
+     * DDL 使用 TIMESTAMPTZ，jOOQ 映射为 OffsetDateTime。
      */
-    private LocalDateTime now() {
+    private OffsetDateTime now() {
         try {
             Clock clock = clockProvider.getIfAvailable();
             if (clock != null) {
-                return LocalDateTime.now(clock);
+                return OffsetDateTime.now(clock);
             }
         } catch (Exception e) {
             log.debug("审计字段：获取 Clock Bean 失败，使用系统时间", e);
         }
-        return LocalDateTime.now();
+        return OffsetDateTime.now();
     }
 }

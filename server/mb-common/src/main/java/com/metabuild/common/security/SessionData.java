@@ -6,6 +6,7 @@ package com.metabuild.common.security;
 public record SessionData(
     Long userId,
     String username,
+    Long deptId,
     Long tenantId,
     DataScope dataScope,
     boolean mustChangePassword

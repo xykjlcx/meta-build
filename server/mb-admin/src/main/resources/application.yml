@@ -45,11 +45,13 @@ spring:
 # Sa-Token
 sa-token:
   token-name: Authorization
+  token-prefix: Bearer
   timeout: 7200
   active-timeout: -1
   is-concurrent: true
   token-style: uuid
   is-log: false
+  jwt-secret-key: ${MB_SA_TOKEN_JWT_SECRET:metabuild-dev-jwt-secret-key-2026}
 
 # Meta-Build 自定义配置
 mb:
@@ -90,8 +92,7 @@ mb:
     pagination:
       default-size: 20
       max-size: 200
-  observability:
-    slow-query-threshold-ms: 200
+  observability: {}
 
 # Actuator
 management:

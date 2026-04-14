@@ -1,6 +1,7 @@
 package com.metabuild.infra.observability;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 /**
  * 可观测性配置项。
@@ -13,6 +14,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * }</pre>
  */
 @ConfigurationProperties(prefix = "mb.observability")
+@Validated
 public record MbObservabilityProperties(
         long slowQueryThresholdMs
 ) {

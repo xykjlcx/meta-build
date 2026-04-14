@@ -33,6 +33,7 @@ public class SaTokenAuthFacade implements AuthFacade {
         // 写入 session extras
         var session = StpUtil.getSession();
         session.set(SaTokenCurrentUser.KEY_USERNAME, sessionData.username());
+        session.set(SaTokenCurrentUser.KEY_DEPT_ID, sessionData.deptId());
         session.set(SaTokenCurrentUser.KEY_TENANT_ID, sessionData.tenantId());
 
         if (sessionData.dataScope() != null) {
@@ -55,7 +56,7 @@ public class SaTokenAuthFacade implements AuthFacade {
         CurrentUserInfo userInfo = new CurrentUserInfo(
                 userId,
                 sessionData.username(),
-                null, // deptId 由上层按需注入
+                sessionData.deptId(),
                 sessionData.tenantId(),
                 Set.of(),
                 sessionData.dataScope() != null ? sessionData.dataScope().type() : DataScopeType.SELF,

@@ -1,6 +1,6 @@
 package com.metabuild.infra.security;
 
-import cn.dev33.satoken.jwt.StpLogicJwtForStateless;
+import cn.dev33.satoken.jwt.StpLogicJwtForSimple;
 import cn.dev33.satoken.stp.StpLogic;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Sa-Token JWT 模式配置。
- * 使用无状态 JWT 模式（Stateless），token 中嵌入用户 ID，无需 Redis 存储 token 本身。
- * 但 Session 数据（权限等）仍由 Redis 支撑（sa-token-redis-jackson）。
+ * 使用 Simple JWT 模式：token 采用 JWT 格式（含签名），同时在 Redis 中保留 Session。
+ * StpUtil.getSession() 可用，踢人下线等有状态操作正常工作。
  *
- * <p>注意：如需切换到有状态 JWT（Simple 模式），替换为 {@code StpLogicJwtForSimple}。
+ * <p>application.yml 中需配置 sa-token.jwt-secret-key。
  */
 @Slf4j
 @Configuration
@@ -20,12 +20,11 @@ import org.springframework.context.annotation.Configuration;
 public class SaTokenJwtConfig {
 
     /**
-     * 启用 Sa-Token JWT 无状态模式。
-     * application.yml 中需配置 sa-token.jwt-secret-key。
+     * 启用 Sa-Token JWT Simple 模式（JWT 格式 token + Redis Session 管理）。
      */
     @Bean
     public StpLogic getStpLogicJwt() {
-        log.info("启用 Sa-Token JWT 无状态模式");
-        return new StpLogicJwtForStateless();
+        log.info("启用 Sa-Token JWT Simple 模式（JWT + Redis Session）");
+        return new StpLogicJwtForSimple();
     }
 }

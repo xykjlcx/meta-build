@@ -8,22 +8,25 @@ import org.springframework.validation.annotation.Validated;
  * <p>
  * 配置前缀：mb.rate-limit
  * 支持全局 QPS、按 IP QPS、按用户 QPS 三个维度的独立限流阈值。
+ *
+ * <p>使用 {@code Boolean}（包装类型）而非 {@code boolean}，
+ * 以便在 compact constructor 中将 null（未配置）默认为 true。
  */
 @ConfigurationProperties(prefix = "mb.rate-limit")
 @Validated
 public record MbRateLimitProperties(
-        boolean enabled,
+        Boolean enabled,
         int globalQps,
         int perIpQps,
         int perUserQps,
         int burstCapacity
 ) {
     public MbRateLimitProperties {
+        if (enabled == null) enabled = true;
         if (globalQps <= 0) globalQps = 1000;
         if (perIpQps <= 0) perIpQps = 100;
         if (perUserQps <= 0) perUserQps = 200;
         if (burstCapacity <= 0) burstCapacity = 50;
-        // enabled 默认 true（boolean 原始类型，false 是 JVM 默认值，这里通过构造器外部设置）
     }
 
     /**
