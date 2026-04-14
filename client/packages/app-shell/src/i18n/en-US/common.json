@@ -1,0 +1,8 @@
+{
+  "action": { "confirm": "OK", "cancel": "Cancel", "save": "Save", "delete": "Delete", "edit": "Edit", "create": "Create", "search": "Search", "reset": "Reset", "retry": "Retry", "back": "Back", "close": "Close", "export": "Export", "import": "Import" },
+  "status": { "loading": "Loading...", "saving": "Saving...", "success": "Success", "failed": "Failed" },
+  "empty": { "data": "No data", "search": "No results found" },
+  "error": { "network": "Network error, please try again later", "server": "Server error", "forbidden": "Access denied", "notFound": "Page not found", "unknown": "Unknown error" },
+  "pagination": { "total": "{{total}} items", "page": "Page {{page}} / {{pages}}" },
+  "table": { "selectedCount": "{{count}} selected", "clearSelection": "Clear selection" }
+}

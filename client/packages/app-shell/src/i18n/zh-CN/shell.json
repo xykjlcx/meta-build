@@ -1,0 +1,7 @@
+{
+  "sidebar": { "collapse": "收起侧边栏", "expand": "展开侧边栏" },
+  "header": { "profile": "个人信息", "logout": "退出登录" },
+  "theme": { "switch": "切换主题", "default": "默认", "dark": "暗色", "compact": "紧凑" },
+  "language": { "switch": "切换语言" },
+  "auth": { "username": "用户名", "password": "密码", "login": "登录", "forgotPassword": "忘记密码" }
+}

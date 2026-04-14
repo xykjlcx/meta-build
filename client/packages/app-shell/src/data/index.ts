@@ -1,1 +1,1 @@
-// Phase 3 实现
+export { createQueryClient } from './query-client';
