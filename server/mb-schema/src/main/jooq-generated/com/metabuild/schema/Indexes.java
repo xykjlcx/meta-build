@@ -25,6 +25,7 @@ import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
 import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
 
 import org.jooq.Index;
@@ -69,6 +70,9 @@ public class Indexes {
     public static final Index IDX_NOTICE_TENANT_CREATED = Internal.createIndex(DSL.name("idx_notice_tenant_created"), BizNotice.BIZ_NOTICE, new OrderField[] { BizNotice.BIZ_NOTICE.TENANT_ID, BizNotice.BIZ_NOTICE.CREATED_AT.desc() }, false);
     public static final Index IDX_NOTICE_TENANT_DEPT = Internal.createIndex(DSL.name("idx_notice_tenant_dept"), BizNotice.BIZ_NOTICE, new OrderField[] { BizNotice.BIZ_NOTICE.TENANT_ID, BizNotice.BIZ_NOTICE.OWNER_DEPT_ID }, false);
     public static final Index IDX_NOTICE_TENANT_STATUS = Internal.createIndex(DSL.name("idx_notice_tenant_status"), BizNotice.BIZ_NOTICE, new OrderField[] { BizNotice.BIZ_NOTICE.TENANT_ID, BizNotice.BIZ_NOTICE.STATUS }, false);
+    public static final Index IDX_NOTIF_LOG_MODULE_REF = Internal.createIndex(DSL.name("idx_notif_log_module_ref"), MbNotificationLog.MB_NOTIFICATION_LOG, new OrderField[] { MbNotificationLog.MB_NOTIFICATION_LOG.MODULE, MbNotificationLog.MB_NOTIFICATION_LOG.REFERENCE_ID }, false);
+    public static final Index IDX_NOTIF_LOG_RECIPIENT = Internal.createIndex(DSL.name("idx_notif_log_recipient"), MbNotificationLog.MB_NOTIFICATION_LOG, new OrderField[] { MbNotificationLog.MB_NOTIFICATION_LOG.TENANT_ID, MbNotificationLog.MB_NOTIFICATION_LOG.RECIPIENT_ID, MbNotificationLog.MB_NOTIFICATION_LOG.CREATED_AT.desc() }, false);
+    public static final Index IDX_NOTIF_LOG_STATUS = Internal.createIndex(DSL.name("idx_notif_log_status"), MbNotificationLog.MB_NOTIFICATION_LOG, new OrderField[] { MbNotificationLog.MB_NOTIFICATION_LOG.TENANT_ID, MbNotificationLog.MB_NOTIFICATION_LOG.STATUS }, false);
     public static final Index IDX_NOTIFICATION_READ_NOTIFICATION_ID = Internal.createIndex(DSL.name("idx_notification_read_notification_id"), MbNotificationRead.MB_NOTIFICATION_READ, new OrderField[] { MbNotificationRead.MB_NOTIFICATION_READ.NOTIFICATION_ID }, false);
     public static final Index IDX_NOTIFICATION_READ_USER_ID = Internal.createIndex(DSL.name("idx_notification_read_user_id"), MbNotificationRead.MB_NOTIFICATION_READ, new OrderField[] { MbNotificationRead.MB_NOTIFICATION_READ.USER_ID, MbNotificationRead.MB_NOTIFICATION_READ.READ_AT.desc() }, false);
     public static final Index IDX_NOTIFICATION_STATUS = Internal.createIndex(DSL.name("idx_notification_status"), MbNotification.MB_NOTIFICATION, new OrderField[] { MbNotification.MB_NOTIFICATION.TENANT_ID, MbNotification.MB_NOTIFICATION.STATUS }, false);

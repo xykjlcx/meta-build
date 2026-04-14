@@ -25,6 +25,7 @@ import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
 import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
 
 
@@ -138,6 +139,11 @@ public class Tables {
      * 通知公告表
      */
     public static final MbNotification MB_NOTIFICATION = MbNotification.MB_NOTIFICATION;
+
+    /**
+     * 通知发送记录
+     */
+    public static final MbNotificationLog MB_NOTIFICATION_LOG = MbNotificationLog.MB_NOTIFICATION_LOG;
 
     /**
      * 通知已读记录（追加表）
