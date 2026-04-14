@@ -1,7 +1,21 @@
-# Testcontainers 会通过 @DynamicPropertySource 注入数据源配置
+# Test profile — Testcontainers 动态注入 datasource 和 redis
+# spring.datasource.* 和 spring.data.redis.* 由 @DynamicPropertySource 覆盖
 spring:
   flyway:
     clean-disabled: false
+
+mb:
+  rate-limit:
+    enabled: false
+  captcha:
+    enabled: false
+
+sa-token:
+  is-log: false
+
+springdoc:
+  api-docs:
+    enabled: false
 
 logging:
   level:

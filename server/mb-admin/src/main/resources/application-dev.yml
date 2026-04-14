@@ -3,6 +3,22 @@ spring:
     url: jdbc:postgresql://localhost:15432/metabuild
     username: metabuild
     password: metabuild
+  data:
+    redis:
+      host: localhost
+      port: 16379
+
+# Dev 放宽限流和验证码
+mb:
+  rate-limit:
+    enabled: false
+  captcha:
+    enabled: false
+
+# springdoc dev 全开
+springdoc:
+  swagger-ui:
+    enabled: true
 
 logging:
   level:

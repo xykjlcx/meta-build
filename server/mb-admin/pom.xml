@@ -15,7 +15,7 @@
     <description>Spring Boot 启动入口 + 集成测试 + ArchUnit 测试</description>
 
     <dependencies>
-        <!-- 内部模块 -->
+        <!-- 内部模块 — mb-* 核心层 -->
         <dependency>
             <groupId>com.metabuild</groupId>
             <artifactId>mb-common</artifactId>
@@ -24,6 +24,8 @@
             <groupId>com.metabuild</groupId>
             <artifactId>mb-schema</artifactId>
         </dependency>
+
+        <!-- 内部模块 — infra 基础设施层（全部） -->
         <dependency>
             <groupId>com.metabuild</groupId>
             <artifactId>infra-jooq</artifactId>
@@ -35,6 +37,30 @@
         <dependency>
             <groupId>com.metabuild</groupId>
             <artifactId>infra-observability</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-i18n</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-exception</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-cache</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-rate-limit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-captcha</artifactId>
         </dependency>
 
         <!-- Spring Boot Starters -->
@@ -53,6 +79,16 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!-- OpenAPI -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
         </dependency>
 
         <!-- Database -->

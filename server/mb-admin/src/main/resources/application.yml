@@ -28,13 +28,70 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
-# jOOQ 自定义配置
+  # Redis
+  data:
+    redis:
+      host: ${MB_REDIS_HOST:localhost}
+      port: ${MB_REDIS_PORT:16379}
+      password: ${MB_REDIS_PASSWORD:}
+      database: 0
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 4
+          min-idle: 1
+
+# Sa-Token
+sa-token:
+  token-name: Authorization
+  timeout: 7200
+  active-timeout: -1
+  is-concurrent: true
+  token-style: uuid
+  is-log: false
+
+# Meta-Build 自定义配置
 mb:
   jooq:
     slow-query-threshold-ms: ${MB_JOOQ_SLOW_QUERY_THRESHOLD_MS:500}
   id:
     worker: ${MB_ID_WORKER:1}
     datacenter: ${MB_ID_DATACENTER:1}
+  i18n:
+    default-locale: zh_CN
+    supported-locales: zh_CN,en_US
+  auth:
+    token-timeout: 7200
+    refresh-timeout: 604800
+    token-name: Authorization
+  cors:
+    allowed-origins: http://localhost:5173,http://localhost:3000
+    allowed-methods: GET,POST,PUT,DELETE,PATCH
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age-seconds: 3600
+  cache:
+    default-ttl-seconds: 3600
+    jitter-percent: 10
+  rate-limit:
+    enabled: true
+    global-qps: 1000
+    per-ip-qps: 100
+    per-user-qps: 200
+    burst-capacity: 50
+  captcha:
+    enabled: true
+    expire-seconds: 300
+    tolerance-px: 5
+    width: 300
+    height: 150
+  api:
+    pagination:
+      default-size: 20
+      max-size: 200
+  observability:
+    slow-query-threshold-ms: 200
 
 # Actuator
 management:
@@ -42,7 +99,7 @@ management:
     web:
       base-path: /actuator
       exposure:
-        include: health,info,metrics,loggers
+        include: health,info,metrics,loggers,prometheus
   endpoint:
     health:
       show-details: when-authorized
@@ -51,6 +108,19 @@ management:
   info:
     env:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+# springdoc
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  default-produces-media-type: application/json
 
 # Server
 server:
