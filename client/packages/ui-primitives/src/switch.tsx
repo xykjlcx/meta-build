@@ -1,10 +1,9 @@
-import * as React from 'react';
 import * as SwitchPrimitive from '@radix-ui/react-switch';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 /** Switch 组件属性 */
-export interface SwitchProps
-  extends React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> {
+export interface SwitchProps extends React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<HTMLButtonElement>;
 }

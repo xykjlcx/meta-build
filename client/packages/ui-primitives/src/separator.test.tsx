@@ -31,7 +31,7 @@ describe('Separator', () => {
   });
 
   it('应该转发 ref', () => {
-    const ref = { current: null as HTMLElement | null };
+    const ref = { current: null as HTMLDivElement | null };
     render(<Separator ref={ref} />);
     expect(ref.current).toBeInstanceOf(HTMLElement);
   });

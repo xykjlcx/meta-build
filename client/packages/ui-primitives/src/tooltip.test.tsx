@@ -5,6 +5,14 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tool
 // Radix Tooltip 在 defaultOpen 时会同时渲染视觉 div 和一个 sr-only span（role=tooltip）
 // 导致 getByText 匹配到多个元素，需要用 getAllByText 取第一个（视觉元素）
 
+/** 取第一个匹配元素（视觉 div，带 className），确保非空 */
+function firstMatch(text: string) {
+  const els = screen.getAllByText(text);
+  const first = els[0];
+  expect(first).toBeDefined();
+  return first as HTMLElement;
+}
+
 describe('Tooltip', () => {
   it('应该渲染触发元素', () => {
     render(
@@ -27,8 +35,7 @@ describe('Tooltip', () => {
         </Tooltip>
       </TooltipProvider>,
     );
-    // 取第一个匹配元素（视觉 div，带 className）
-    const content = screen.getAllByText('提示内容')[0];
+    const content = firstMatch('提示内容');
     expect(content.className).toContain('bg-popover');
     expect(content.className).toContain('text-popover-foreground');
   });
@@ -42,7 +49,7 @@ describe('Tooltip', () => {
         </Tooltip>
       </TooltipProvider>,
     );
-    const content = screen.getAllByText('内容')[0];
+    const content = firstMatch('内容');
     expect(content.className).toContain('custom-tooltip');
   });
 
@@ -67,7 +74,7 @@ describe('Tooltip', () => {
         </Tooltip>
       </TooltipProvider>,
     );
-    const content = screen.getAllByText('动画提示')[0];
+    const content = firstMatch('动画提示');
     expect(content.className).toContain('animate-in');
   });
 });

@@ -1,12 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from './select';
+import { describe, expect, it } from 'vitest';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 
 describe('Select', () => {
   it('应该渲染选择器触发按钮', () => {

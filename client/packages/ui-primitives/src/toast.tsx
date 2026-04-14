@@ -1,7 +1,7 @@
-import * as React from 'react';
 import * as ToastPrimitive from '@radix-ui/react-toast';
+import { type VariantProps, cva } from 'class-variance-authority';
 import { X } from 'lucide-react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 import { useToast } from './use-toast';
 
@@ -119,11 +119,7 @@ export interface ToastTitleProps
 /** Toast 标题 */
 function ToastTitle({ className, ref, ...props }: ToastTitleProps) {
   return (
-    <ToastPrimitive.Title
-      ref={ref}
-      className={cn('text-sm font-semibold', className)}
-      {...props}
-    />
+    <ToastPrimitive.Title ref={ref} className={cn('text-sm font-semibold', className)} {...props} />
   );
 }
 
@@ -135,11 +131,7 @@ export interface ToastDescriptionProps
 }
 
 /** Toast 描述文本 */
-function ToastDescription({
-  className,
-  ref,
-  ...props
-}: ToastDescriptionProps) {
+function ToastDescription({ className, ref, ...props }: ToastDescriptionProps) {
   return (
     <ToastPrimitive.Description
       ref={ref}
@@ -159,13 +151,9 @@ function Toaster() {
         <Toast key={id} {...props}>
           <div className="grid gap-1">
             {title && <ToastTitle>{title}</ToastTitle>}
-            {description && (
-              <ToastDescription>{description}</ToastDescription>
-            )}
+            {description && <ToastDescription>{description}</ToastDescription>}
           </div>
-          {action && (
-            <ToastAction altText={action.altText}>{action.action}</ToastAction>
-          )}
+          {action && <ToastAction altText={action.altText}>{action.action}</ToastAction>}
           <ToastClose />
         </Toast>
       ))}
@@ -186,4 +174,4 @@ export {
   toastVariants,
 };
 
-export type { ToastActionProps as ToastActionElement };
+// 注意：ToastActionElement 由 use-toast.ts 导出（toast 数据结构），不在此重复导出

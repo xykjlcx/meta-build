@@ -27,18 +27,12 @@ export const Default: Story = {
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuLink
-            href="/about"
-            className={navigationMenuTriggerStyle()}
-          >
+          <NavigationMenuLink href="/about" className={navigationMenuTriggerStyle()}>
             关于
           </NavigationMenuLink>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <NavigationMenuLink
-            href="/contact"
-            className={navigationMenuTriggerStyle()}
-          >
+          <NavigationMenuLink href="/contact" className={navigationMenuTriggerStyle()}>
             联系我们
           </NavigationMenuLink>
         </NavigationMenuItem>

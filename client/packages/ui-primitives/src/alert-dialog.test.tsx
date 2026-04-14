@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -123,8 +123,6 @@ describe('AlertDialog', () => {
       </AlertDialog>,
     );
     await user.click(screen.getByText('触发'));
-    expect(screen.getByRole('alertdialog').className).toContain(
-      'custom-content',
-    );
+    expect(screen.getByRole('alertdialog').className).toContain('custom-content');
   });
 });

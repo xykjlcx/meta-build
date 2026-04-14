@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { Combobox } from './combobox';
 import {
   Command,
   CommandEmpty,
@@ -7,8 +8,7 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-  Combobox,
-} from './combobox';
+} from './command';
 
 describe('Command', () => {
   it('应该渲染命令面板', () => {

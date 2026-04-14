@@ -1,5 +1,5 @@
-import * as React from 'react';
 import { Slot } from '@radix-ui/react-slot';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 /** Breadcrumb 组件属性 */
@@ -14,8 +14,7 @@ function Breadcrumb({ ref, ...props }: BreadcrumbProps) {
 }
 
 /** BreadcrumbList 组件属性 */
-export interface BreadcrumbListProps
-  extends React.ComponentPropsWithoutRef<'ol'> {
+export interface BreadcrumbListProps extends React.ComponentPropsWithoutRef<'ol'> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<HTMLOListElement>;
 }
@@ -35,26 +34,18 @@ function BreadcrumbList({ className, ref, ...props }: BreadcrumbListProps) {
 }
 
 /** BreadcrumbItem 组件属性 */
-export interface BreadcrumbItemProps
-  extends React.ComponentPropsWithoutRef<'li'> {
+export interface BreadcrumbItemProps extends React.ComponentPropsWithoutRef<'li'> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<HTMLLIElement>;
 }
 
 /** 面包屑项 */
 function BreadcrumbItem({ className, ref, ...props }: BreadcrumbItemProps) {
-  return (
-    <li
-      ref={ref}
-      className={cn('inline-flex items-center gap-1.5', className)}
-      {...props}
-    />
-  );
+  return <li ref={ref} className={cn('inline-flex items-center gap-1.5', className)} {...props} />;
 }
 
 /** BreadcrumbLink 组件属性 */
-export interface BreadcrumbLinkProps
-  extends React.ComponentPropsWithoutRef<'a'> {
+export interface BreadcrumbLinkProps extends React.ComponentPropsWithoutRef<'a'> {
   /** 是否将链接渲染为子元素（多态模式） */
   asChild?: boolean;
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
@@ -62,12 +53,7 @@ export interface BreadcrumbLinkProps
 }
 
 /** 面包屑链接 */
-function BreadcrumbLink({
-  asChild,
-  className,
-  ref,
-  ...props
-}: BreadcrumbLinkProps) {
+function BreadcrumbLink({ asChild, className, ref, ...props }: BreadcrumbLinkProps) {
   const Comp = asChild ? Slot : 'a';
   return (
     <Comp
@@ -79,8 +65,7 @@ function BreadcrumbLink({
 }
 
 /** BreadcrumbPage 组件属性 */
-export interface BreadcrumbPageProps
-  extends React.ComponentPropsWithoutRef<'span'> {
+export interface BreadcrumbPageProps extends React.ComponentPropsWithoutRef<'span'> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<HTMLSpanElement>;
 }
@@ -93,6 +78,7 @@ function BreadcrumbPage({ className, ref, ...props }: BreadcrumbPageProps) {
       role="link"
       aria-disabled="true"
       aria-current="page"
+      tabIndex={0}
       className={cn('font-normal text-foreground', className)}
       {...props}
     />
@@ -100,19 +86,13 @@ function BreadcrumbPage({ className, ref, ...props }: BreadcrumbPageProps) {
 }
 
 /** BreadcrumbSeparator 组件属性 */
-export interface BreadcrumbSeparatorProps
-  extends React.ComponentPropsWithoutRef<'li'> {
+export interface BreadcrumbSeparatorProps extends React.ComponentPropsWithoutRef<'li'> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<HTMLLIElement>;
 }
 
 /** 面包屑分隔符 */
-function BreadcrumbSeparator({
-  children,
-  className,
-  ref,
-  ...props
-}: BreadcrumbSeparatorProps) {
+function BreadcrumbSeparator({ children, className, ref, ...props }: BreadcrumbSeparatorProps) {
   return (
     <li
       ref={ref}
@@ -123,6 +103,7 @@ function BreadcrumbSeparator({
     >
       {children ?? (
         <svg
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
@@ -140,18 +121,13 @@ function BreadcrumbSeparator({
 }
 
 /** BreadcrumbEllipsis 组件属性 */
-export interface BreadcrumbEllipsisProps
-  extends React.ComponentPropsWithoutRef<'span'> {
+export interface BreadcrumbEllipsisProps extends React.ComponentPropsWithoutRef<'span'> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<HTMLSpanElement>;
 }
 
 /** 面包屑省略号 */
-function BreadcrumbEllipsis({
-  className,
-  ref,
-  ...props
-}: BreadcrumbEllipsisProps) {
+function BreadcrumbEllipsis({ className, ref, ...props }: BreadcrumbEllipsisProps) {
   return (
     <span
       ref={ref}
@@ -161,6 +137,7 @@ function BreadcrumbEllipsis({
       {...props}
     >
       <svg
+        aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="none"

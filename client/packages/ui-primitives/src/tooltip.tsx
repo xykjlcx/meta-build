@@ -1,5 +1,5 @@
-import * as React from 'react';
 import * as TooltipPrimitive from '@radix-ui/react-tooltip';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 const TooltipProvider = TooltipPrimitive.Provider;
@@ -14,12 +14,7 @@ export interface TooltipContentProps
 }
 
 /** 提示框内容区域 */
-function TooltipContent({
-  className,
-  sideOffset = 4,
-  ref,
-  ...props
-}: TooltipContentProps) {
+function TooltipContent({ className, sideOffset = 4, ref, ...props }: TooltipContentProps) {
   return (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content

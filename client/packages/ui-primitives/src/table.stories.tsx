@@ -44,9 +44,7 @@ export const Default: Story = {
             <TableCell className="font-medium">{inv.id}</TableCell>
             <TableCell>{inv.status}</TableCell>
             <TableCell>{inv.method}</TableCell>
-            <TableCell className="text-right">
-              ¥{inv.amount.toFixed(2)}
-            </TableCell>
+            <TableCell className="text-right">¥{inv.amount.toFixed(2)}</TableCell>
           </TableRow>
         ))}
       </TableBody>

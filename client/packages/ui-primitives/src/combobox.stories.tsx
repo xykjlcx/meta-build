@@ -37,6 +37,12 @@ export const WithValue: Story = {
 };
 
 export const Controlled: Story = {
+  args: {
+    options: frameworks,
+    placeholder: '选择框架...',
+    searchPlaceholder: '搜索框架...',
+    emptyText: '未找到框架',
+  },
   render: () => {
     const [value, setValue] = useState('');
     return (

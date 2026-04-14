@@ -73,11 +73,9 @@ describe('RadioGroup', () => {
         <RadioGroupItem value="b" aria-label="未选" />
       </RadioGroup>,
     );
-    expect(
-      screen.getByRole('radio', { name: '选中' }).getAttribute('data-state'),
-    ).toBe('checked');
-    expect(
-      screen.getByRole('radio', { name: '未选' }).getAttribute('data-state'),
-    ).toBe('unchecked');
+    expect(screen.getByRole('radio', { name: '选中' }).getAttribute('data-state')).toBe('checked');
+    expect(screen.getByRole('radio', { name: '未选' }).getAttribute('data-state')).toBe(
+      'unchecked',
+    );
   });
 });

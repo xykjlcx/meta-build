@@ -35,9 +35,7 @@ describe('Breadcrumb', () => {
         </BreadcrumbList>
       </Breadcrumb>,
     );
-    expect(
-      screen.getByRole('navigation').getAttribute('aria-label'),
-    ).toBe('breadcrumb');
+    expect(screen.getByRole('navigation').getAttribute('aria-label')).toBe('breadcrumb');
   });
 
   it('应该渲染分隔符', () => {

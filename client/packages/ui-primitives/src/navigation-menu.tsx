@@ -1,6 +1,6 @@
-import * as React from 'react';
 import * as NavigationMenuPrimitive from '@radix-ui/react-navigation-menu';
 import { cva } from 'class-variance-authority';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 /** NavigationMenu 组件属性 */
@@ -11,19 +11,11 @@ export interface NavigationMenuProps
 }
 
 /** 导航菜单根元素 */
-function NavigationMenu({
-  className,
-  children,
-  ref,
-  ...props
-}: NavigationMenuProps) {
+function NavigationMenu({ className, children, ref, ...props }: NavigationMenuProps) {
   return (
     <NavigationMenuPrimitive.Root
       ref={ref}
-      className={cn(
-        'relative z-10 flex max-w-max flex-1 items-center justify-center',
-        className,
-      )}
+      className={cn('relative z-10 flex max-w-max flex-1 items-center justify-center', className)}
       {...props}
     >
       {children}
@@ -40,18 +32,11 @@ export interface NavigationMenuListProps
 }
 
 /** 导航菜单列表 */
-function NavigationMenuList({
-  className,
-  ref,
-  ...props
-}: NavigationMenuListProps) {
+function NavigationMenuList({ className, ref, ...props }: NavigationMenuListProps) {
   return (
     <NavigationMenuPrimitive.List
       ref={ref}
-      className={cn(
-        'group flex flex-1 list-none items-center justify-center space-x-1',
-        className,
-      )}
+      className={cn('group flex flex-1 list-none items-center justify-center space-x-1', className)}
       {...props}
     />
   );
@@ -71,12 +56,7 @@ export interface NavigationMenuTriggerProps
 }
 
 /** 导航菜单触发按钮 */
-function NavigationMenuTrigger({
-  className,
-  children,
-  ref,
-  ...props
-}: NavigationMenuTriggerProps) {
+function NavigationMenuTrigger({ className, children, ref, ...props }: NavigationMenuTriggerProps) {
   return (
     <NavigationMenuPrimitive.Trigger
       ref={ref}
@@ -109,11 +89,7 @@ export interface NavigationMenuContentProps
 }
 
 /** 导航菜单内容面板 */
-function NavigationMenuContent({
-  className,
-  ref,
-  ...props
-}: NavigationMenuContentProps) {
+function NavigationMenuContent({ className, ref, ...props }: NavigationMenuContentProps) {
   return (
     <NavigationMenuPrimitive.Content
       ref={ref}
@@ -136,11 +112,7 @@ export interface NavigationMenuViewportProps
 }
 
 /** 导航菜单视口 */
-function NavigationMenuViewport({
-  className,
-  ref,
-  ...props
-}: NavigationMenuViewportProps) {
+function NavigationMenuViewport({ className, ref, ...props }: NavigationMenuViewportProps) {
   return (
     <div className={cn('absolute left-0 top-full flex justify-center')}>
       <NavigationMenuPrimitive.Viewport
@@ -163,11 +135,7 @@ export interface NavigationMenuIndicatorProps
 }
 
 /** 导航菜单指示器 */
-function NavigationMenuIndicator({
-  className,
-  ref,
-  ...props
-}: NavigationMenuIndicatorProps) {
+function NavigationMenuIndicator({ className, ref, ...props }: NavigationMenuIndicatorProps) {
   return (
     <NavigationMenuPrimitive.Indicator
       ref={ref}

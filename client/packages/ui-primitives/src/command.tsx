@@ -1,11 +1,10 @@
-import * as React from 'react';
 import { Command as CommandPrimitive } from 'cmdk';
-import { cn } from './lib/utils';
+import type * as React from 'react';
 import { Dialog, DialogContent, type DialogContentProps } from './dialog';
+import { cn } from './lib/utils';
 
 /** Command 组件属性 */
-export interface CommandProps
-  extends React.ComponentPropsWithoutRef<typeof CommandPrimitive> {
+export interface CommandProps extends React.ComponentPropsWithoutRef<typeof CommandPrimitive> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<React.ElementRef<typeof CommandPrimitive>>;
 }
@@ -35,20 +34,10 @@ export interface CommandDialogProps extends DialogContentProps {
 }
 
 /** 命令面板对话框（Command 包装在 Dialog 中） */
-function CommandDialog({
-  children,
-  open,
-  onOpenChange,
-  closeLabel,
-  ...props
-}: CommandDialogProps) {
+function CommandDialog({ children, open, onOpenChange, closeLabel, ...props }: CommandDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent
-        className="overflow-hidden p-0 shadow-lg"
-        closeLabel={closeLabel}
-        {...props}
-      >
+      <DialogContent className="overflow-hidden p-0 shadow-lg" closeLabel={closeLabel} {...props}>
         <Command className="[&_[cmdk-group-heading]]:px-2 [&_[cmdk-group-heading]]:font-medium [&_[cmdk-group-heading]]:text-muted-foreground [&_[cmdk-group]:not([hidden])_~[cmdk-group]]:pt-0 [&_[cmdk-input-wrapper]_svg]:h-5 [&_[cmdk-input-wrapper]_svg]:w-5 [&_[cmdk-input]]:h-12 [&_[cmdk-item]]:px-2 [&_[cmdk-item]]:py-3 [&_[cmdk-item]_svg]:h-5 [&_[cmdk-item]_svg]:w-5">
           {children}
         </Command>
@@ -69,6 +58,7 @@ function CommandInput({ className, ref, ...props }: CommandInputProps) {
   return (
     <div className="flex items-center border-b px-3" cmdk-input-wrapper="">
       <svg
+        aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="none"
@@ -120,13 +110,7 @@ export interface CommandEmptyProps
 
 /** 命令面板空状态 */
 function CommandEmpty({ ref, ...props }: CommandEmptyProps) {
-  return (
-    <CommandPrimitive.Empty
-      ref={ref}
-      className="py-6 text-center text-sm"
-      {...props}
-    />
-  );
+  return <CommandPrimitive.Empty ref={ref} className="py-6 text-center text-sm" {...props} />;
 }
 
 /** CommandGroup 组件属性 */
@@ -190,16 +174,10 @@ function CommandItem({ className, ref, ...props }: CommandItemProps) {
 }
 
 /** 命令面板快捷键提示 */
-function CommandShortcut({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLSpanElement>) {
+function CommandShortcut({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
   return (
     <span
-      className={cn(
-        'ml-auto text-xs tracking-widest text-muted-foreground',
-        className,
-      )}
+      className={cn('ml-auto text-xs tracking-widest text-muted-foreground', className)}
       {...props}
     />
   );

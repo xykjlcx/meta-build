@@ -1,12 +1,11 @@
-import * as React from 'react';
 import * as TabsPrimitive from '@radix-ui/react-tabs';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 const Tabs = TabsPrimitive.Root;
 
 /** TabsList 组件属性 */
-export interface TabsListProps
-  extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> {
+export interface TabsListProps extends React.ComponentPropsWithoutRef<typeof TabsPrimitive.List> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<React.ElementRef<typeof TabsPrimitive.List>>;
 }

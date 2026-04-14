@@ -14,10 +14,7 @@ type Story = StoryObj<typeof meta>;
 export const WithImage: Story = {
   render: () => (
     <Avatar>
-      <AvatarImage
-        src="https://github.com/shadcn.png"
-        alt="头像"
-      />
+      <AvatarImage src="https://github.com/shadcn.png" alt="头像" />
       <AvatarFallback>CN</AvatarFallback>
     </Avatar>
   ),

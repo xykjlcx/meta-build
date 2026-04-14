@@ -34,7 +34,10 @@ export const Right: Story = {
         </DrawerHeader>
         <div className="p-4">设置内容区域</div>
         <DrawerFooter>
-          <button type="button" className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">
+          <button
+            type="button"
+            className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
+          >
             保存
           </button>
         </DrawerFooter>

@@ -1,10 +1,9 @@
-import * as React from 'react';
 import * as AvatarPrimitive from '@radix-ui/react-avatar';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 /** Avatar 组件属性 */
-export interface AvatarProps
-  extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> {
+export interface AvatarProps extends React.ComponentPropsWithoutRef<typeof AvatarPrimitive.Root> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<React.ElementRef<typeof AvatarPrimitive.Root>>;
 }
@@ -14,10 +13,7 @@ function Avatar({ className, ref, ...props }: AvatarProps) {
   return (
     <AvatarPrimitive.Root
       ref={ref}
-      className={cn(
-        'relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full',
-        className,
-      )}
+      className={cn('relative flex h-10 w-10 shrink-0 overflow-hidden rounded-full', className)}
       {...props}
     />
   );

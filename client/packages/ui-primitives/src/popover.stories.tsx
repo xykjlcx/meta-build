@@ -23,9 +23,7 @@ export const Default: Story = {
         <div className="grid gap-4">
           <div className="space-y-2">
             <h4 className="font-medium leading-none">尺寸设置</h4>
-            <p className="text-sm text-muted-foreground">
-              调整组件的宽度和高度。
-            </p>
+            <p className="text-sm text-muted-foreground">调整组件的宽度和高度。</p>
           </div>
         </div>
       </PopoverContent>

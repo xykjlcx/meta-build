@@ -25,7 +25,10 @@ export const Default: Story = {
   render: () => (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <button type="button" className="rounded-md border border-destructive px-4 py-2 text-sm text-destructive">
+        <button
+          type="button"
+          className="rounded-md border border-destructive px-4 py-2 text-sm text-destructive"
+        >
           删除账户
         </button>
       </AlertDialogTrigger>

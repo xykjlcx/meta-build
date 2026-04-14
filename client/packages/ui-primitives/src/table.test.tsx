@@ -81,9 +81,7 @@ describe('Table', () => {
       </Table>,
     );
     expect(screen.getByText('内容').className).toContain('custom-cell');
-    expect(screen.getByText('内容').closest('tr')?.className).toContain(
-      'custom-row',
-    );
+    expect(screen.getByText('内容').closest('tr')?.className).toContain('custom-row');
   });
 
   it('应该转发 ref', () => {

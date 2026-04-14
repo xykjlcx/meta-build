@@ -41,17 +41,9 @@ export const DatePickerDefault: StoryObj<typeof datePickerMeta> = {
 };
 
 export const DatePickerWithValue: StoryObj<typeof datePickerMeta> = {
-  render: () => (
-    <DatePicker
-      value={new Date()}
-      placeholder="选择日期..."
-      className="w-[240px]"
-    />
-  ),
+  render: () => <DatePicker value={new Date()} placeholder="选择日期..." className="w-[240px]" />,
 };
 
 export const DatePickerDisabled: StoryObj<typeof datePickerMeta> = {
-  render: () => (
-    <DatePicker disabled placeholder="不可选择" className="w-[240px]" />
-  ),
+  render: () => <DatePicker disabled placeholder="不可选择" className="w-[240px]" />,
 };

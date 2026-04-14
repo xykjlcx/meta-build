@@ -1,5 +1,5 @@
-import * as React from 'react';
 import * as RadioGroupPrimitive from '@radix-ui/react-radio-group';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 /** RadioGroup 组件属性 */
@@ -11,13 +11,7 @@ export interface RadioGroupProps
 
 /** 单选按钮组容器 */
 function RadioGroup({ className, ref, ...props }: RadioGroupProps) {
-  return (
-    <RadioGroupPrimitive.Root
-      className={cn('grid gap-2', className)}
-      ref={ref}
-      {...props}
-    />
-  );
+  return <RadioGroupPrimitive.Root className={cn('grid gap-2', className)} ref={ref} {...props} />;
 }
 
 /** RadioGroupItem 组件属性 */
@@ -40,6 +34,7 @@ function RadioGroupItem({ className, ref, ...props }: RadioGroupItemProps) {
     >
       <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
         <svg
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="currentColor"

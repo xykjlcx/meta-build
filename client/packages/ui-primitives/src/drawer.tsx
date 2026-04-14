@@ -1,7 +1,7 @@
-import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { type VariantProps, cva } from 'class-variance-authority';
 import { X } from 'lucide-react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 const Drawer = DialogPrimitive.Root;
@@ -88,32 +88,17 @@ function DrawerContent({
 }
 
 /** 抽屉头部 */
-function DrawerHeader({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function DrawerHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      className={cn(
-        'flex flex-col space-y-2 text-center sm:text-left',
-        className,
-      )}
-      {...props}
-    />
+    <div className={cn('flex flex-col space-y-2 text-center sm:text-left', className)} {...props} />
   );
 }
 
 /** 抽屉底部 */
-function DrawerFooter({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function DrawerFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2',
-        className,
-      )}
+      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
       {...props}
     />
   );
@@ -131,10 +116,7 @@ function DrawerTitle({ className, ref, ...props }: DrawerTitleProps) {
   return (
     <DialogPrimitive.Title
       ref={ref}
-      className={cn(
-        'text-lg font-semibold leading-none tracking-tight',
-        className,
-      )}
+      className={cn('text-lg font-semibold leading-none tracking-tight', className)}
       {...props}
     />
   );
@@ -148,11 +130,7 @@ export interface DrawerDescriptionProps
 }
 
 /** 抽屉描述 */
-function DrawerDescription({
-  className,
-  ref,
-  ...props
-}: DrawerDescriptionProps) {
+function DrawerDescription({ className, ref, ...props }: DrawerDescriptionProps) {
   return (
     <DialogPrimitive.Description
       ref={ref}

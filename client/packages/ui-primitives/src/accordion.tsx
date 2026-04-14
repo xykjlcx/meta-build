@@ -1,5 +1,5 @@
-import * as React from 'react';
 import * as AccordionPrimitive from '@radix-ui/react-accordion';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 const Accordion = AccordionPrimitive.Root;
@@ -13,13 +13,7 @@ export interface AccordionItemProps
 
 /** 手风琴项 */
 function AccordionItem({ className, ref, ...props }: AccordionItemProps) {
-  return (
-    <AccordionPrimitive.Item
-      ref={ref}
-      className={cn('border-b', className)}
-      {...props}
-    />
-  );
+  return <AccordionPrimitive.Item ref={ref} className={cn('border-b', className)} {...props} />;
 }
 
 /** AccordionTrigger 组件属性 */
@@ -30,12 +24,7 @@ export interface AccordionTriggerProps
 }
 
 /** 手风琴触发按钮 */
-function AccordionTrigger({
-  className,
-  children,
-  ref,
-  ...props
-}: AccordionTriggerProps) {
+function AccordionTrigger({ className, children, ref, ...props }: AccordionTriggerProps) {
   return (
     <AccordionPrimitive.Header className="flex">
       <AccordionPrimitive.Trigger
@@ -48,6 +37,7 @@ function AccordionTrigger({
       >
         {children}
         <svg
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
@@ -72,12 +62,7 @@ export interface AccordionContentProps
 }
 
 /** 手风琴内容区域 */
-function AccordionContent({
-  className,
-  children,
-  ref,
-  ...props
-}: AccordionContentProps) {
+function AccordionContent({ className, children, ref, ...props }: AccordionContentProps) {
   return (
     <AccordionPrimitive.Content
       ref={ref}

@@ -1,6 +1,6 @@
-import * as React from 'react';
 import * as LabelPrimitive from '@radix-ui/react-label';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { type VariantProps, cva } from 'class-variance-authority';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 const labelVariants = cva(
@@ -17,13 +17,7 @@ export interface LabelProps
 
 /** 表单标签组件 */
 function Label({ className, ref, ...props }: LabelProps) {
-  return (
-    <LabelPrimitive.Root
-      ref={ref}
-      className={cn(labelVariants(), className)}
-      {...props}
-    />
-  );
+  return <LabelPrimitive.Root ref={ref} className={cn(labelVariants(), className)} {...props} />;
 }
 
 export { Label };

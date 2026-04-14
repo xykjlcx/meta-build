@@ -1,6 +1,6 @@
-import * as React from 'react';
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 const Dialog = DialogPrimitive.Root;
@@ -39,13 +39,7 @@ export interface DialogContentProps
 }
 
 /** 对话框内容区域 */
-function DialogContent({
-  className,
-  children,
-  closeLabel,
-  ref,
-  ...props
-}: DialogContentProps) {
+function DialogContent({ className, children, closeLabel, ref, ...props }: DialogContentProps) {
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -68,32 +62,20 @@ function DialogContent({
 }
 
 /** 对话框头部 */
-function DialogHeader({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function DialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        'flex flex-col space-y-1.5 text-center sm:text-left',
-        className,
-      )}
+      className={cn('flex flex-col space-y-1.5 text-center sm:text-left', className)}
       {...props}
     />
   );
 }
 
 /** 对话框底部 */
-function DialogFooter({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function DialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2',
-        className,
-      )}
+      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
       {...props}
     />
   );
@@ -111,10 +93,7 @@ function DialogTitle({ className, ref, ...props }: DialogTitleProps) {
   return (
     <DialogPrimitive.Title
       ref={ref}
-      className={cn(
-        'text-lg font-semibold leading-none tracking-tight',
-        className,
-      )}
+      className={cn('text-lg font-semibold leading-none tracking-tight', className)}
       {...props}
     />
   );
@@ -128,11 +107,7 @@ export interface DialogDescriptionProps
 }
 
 /** 对话框描述 */
-function DialogDescription({
-  className,
-  ref,
-  ...props
-}: DialogDescriptionProps) {
+function DialogDescription({ className, ref, ...props }: DialogDescriptionProps) {
   return (
     <DialogPrimitive.Description
       ref={ref}

@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { Calendar, DatePicker } from './date-picker';
 
 describe('Calendar', () => {
@@ -34,7 +34,9 @@ describe('DatePicker', () => {
     render(
       <DatePicker
         value={date}
-        formatDate={(d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`}
+        formatDate={(d) =>
+          `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+        }
       />,
     );
     expect(screen.getByText('2026-01-15')).toBeDefined();
@@ -54,9 +56,7 @@ describe('DatePicker', () => {
 
   it('未选日期时应该显示 placeholder 样式', () => {
     render(<DatePicker placeholder="请选择" />);
-    expect(screen.getByRole('button').className).toContain(
-      'text-muted-foreground',
-    );
+    expect(screen.getByRole('button').className).toContain('text-muted-foreground');
   });
 
   it('应该合并自定义 className', () => {

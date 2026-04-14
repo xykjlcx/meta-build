@@ -30,13 +30,14 @@ export const Default: Story = {
       <DialogContent closeLabel="关闭">
         <DialogHeader>
           <DialogTitle>编辑个人信息</DialogTitle>
-          <DialogDescription>
-            修改您的个人信息，完成后点击保存。
-          </DialogDescription>
+          <DialogDescription>修改您的个人信息，完成后点击保存。</DialogDescription>
         </DialogHeader>
         <div className="py-4">对话框内容区域</div>
         <DialogFooter>
-          <button type="button" className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground">
+          <button
+            type="button"
+            className="rounded-md bg-primary px-4 py-2 text-sm text-primary-foreground"
+          >
             保存
           </button>
         </DialogFooter>

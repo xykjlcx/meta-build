@@ -1,10 +1,9 @@
-import * as React from 'react';
 import * as SliderPrimitive from '@radix-ui/react-slider';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 /** Slider 组件属性 */
-export interface SliderProps
-  extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
+export interface SliderProps extends React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<HTMLSpanElement>;
 }
@@ -14,10 +13,7 @@ function Slider({ className, ref, ...props }: SliderProps) {
   return (
     <SliderPrimitive.Root
       ref={ref}
-      className={cn(
-        'relative flex w-full touch-none select-none items-center',
-        className,
-      )}
+      className={cn('relative flex w-full touch-none select-none items-center', className)}
       {...props}
     >
       <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">

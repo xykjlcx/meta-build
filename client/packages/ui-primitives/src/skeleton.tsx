@@ -1,4 +1,4 @@
-import * as React from 'react';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 /** Skeleton 组件属性 */
@@ -10,11 +10,7 @@ export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
 /** 骨架屏占位组件 */
 function Skeleton({ className, ref, ...props }: SkeletonProps) {
   return (
-    <div
-      ref={ref}
-      className={cn('animate-pulse rounded-md bg-muted', className)}
-      {...props}
-    />
+    <div ref={ref} className={cn('animate-pulse rounded-md bg-muted', className)} {...props} />
   );
 }
 

@@ -1,9 +1,8 @@
-import * as React from 'react';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 /** Input 组件属性 */
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
+export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<HTMLInputElement>;
 }

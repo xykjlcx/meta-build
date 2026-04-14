@@ -23,21 +23,13 @@ describe('Slider', () => {
 
   it('应该响应 onValueChange', () => {
     const onValueChange = vi.fn();
-    render(
-      <Slider
-        aria-label="音量"
-        defaultValue={[50]}
-        onValueChange={onValueChange}
-      />,
-    );
+    render(<Slider aria-label="音量" defaultValue={[50]} onValueChange={onValueChange} />);
     // Radix Slider 没有直接 click-to-change，但我们验证 handler 被设置
     expect(screen.getByRole('slider')).toBeDefined();
   });
 
   it('应该支持自定义范围', () => {
-    render(
-      <Slider aria-label="进度" defaultValue={[25]} max={100} min={0} step={5} />,
-    );
+    render(<Slider aria-label="进度" defaultValue={[25]} max={100} min={0} step={5} />);
     const slider = screen.getByRole('slider');
     expect(slider.getAttribute('aria-valuemin')).toBe('0');
     expect(slider.getAttribute('aria-valuemax')).toBe('100');
@@ -49,9 +41,7 @@ describe('Slider', () => {
   });
 
   it('应该合并自定义 className', () => {
-    render(
-      <Slider className="custom" data-testid="slider" defaultValue={[50]} />,
-    );
+    render(<Slider className="custom" data-testid="slider" defaultValue={[50]} />);
     expect(screen.getByTestId('slider').className).toContain('custom');
   });
 });

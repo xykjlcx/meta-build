@@ -1,5 +1,5 @@
-import * as React from 'react';
 import * as SelectPrimitive from '@radix-ui/react-select';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 const Select = SelectPrimitive.Root;
@@ -27,6 +27,7 @@ function SelectTrigger({ className, children, ref, ...props }: SelectTriggerProp
       {children}
       <SelectPrimitive.Icon asChild>
         <svg
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"
@@ -51,21 +52,15 @@ export interface SelectScrollUpButtonProps
 }
 
 /** 选择器向上滚动按钮 */
-function SelectScrollUpButton({
-  className,
-  ref,
-  ...props
-}: SelectScrollUpButtonProps) {
+function SelectScrollUpButton({ className, ref, ...props }: SelectScrollUpButtonProps) {
   return (
     <SelectPrimitive.ScrollUpButton
       ref={ref}
-      className={cn(
-        'flex cursor-default items-center justify-center py-1',
-        className,
-      )}
+      className={cn('flex cursor-default items-center justify-center py-1', className)}
       {...props}
     >
       <svg
+        aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="none"
@@ -89,21 +84,15 @@ export interface SelectScrollDownButtonProps
 }
 
 /** 选择器向下滚动按钮 */
-function SelectScrollDownButton({
-  className,
-  ref,
-  ...props
-}: SelectScrollDownButtonProps) {
+function SelectScrollDownButton({ className, ref, ...props }: SelectScrollDownButtonProps) {
   return (
     <SelectPrimitive.ScrollDownButton
       ref={ref}
-      className={cn(
-        'flex cursor-default items-center justify-center py-1',
-        className,
-      )}
+      className={cn('flex cursor-default items-center justify-center py-1', className)}
       {...props}
     >
       <svg
+        aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="none"
@@ -202,6 +191,7 @@ function SelectItem({ className, children, ref, ...props }: SelectItemProps) {
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         <SelectPrimitive.ItemIndicator>
           <svg
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"

@@ -1,5 +1,5 @@
-import * as React from 'react';
 import * as DropdownMenuPrimitive from '@radix-ui/react-dropdown-menu';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
@@ -38,6 +38,7 @@ function DropdownMenuSubTrigger({
     >
       {children}
       <svg
+        aria-hidden="true"
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 24 24"
         fill="none"
@@ -61,11 +62,7 @@ export interface DropdownMenuSubContentProps
 }
 
 /** 子菜单内容 */
-function DropdownMenuSubContent({
-  className,
-  ref,
-  ...props
-}: DropdownMenuSubContentProps) {
+function DropdownMenuSubContent({ className, ref, ...props }: DropdownMenuSubContentProps) {
   return (
     <DropdownMenuPrimitive.SubContent
       ref={ref}
@@ -117,12 +114,7 @@ export interface DropdownMenuItemProps
 }
 
 /** 下拉菜单项 */
-function DropdownMenuItem({
-  className,
-  inset,
-  ref,
-  ...props
-}: DropdownMenuItemProps) {
+function DropdownMenuItem({ className, inset, ref, ...props }: DropdownMenuItemProps) {
   return (
     <DropdownMenuPrimitive.Item
       ref={ref}
@@ -164,6 +156,7 @@ function DropdownMenuCheckboxItem({
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <svg
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"
@@ -190,12 +183,7 @@ export interface DropdownMenuRadioItemProps
 }
 
 /** 下拉菜单单选项 */
-function DropdownMenuRadioItem({
-  className,
-  children,
-  ref,
-  ...props
-}: DropdownMenuRadioItemProps) {
+function DropdownMenuRadioItem({ className, children, ref, ...props }: DropdownMenuRadioItemProps) {
   return (
     <DropdownMenuPrimitive.RadioItem
       ref={ref}
@@ -208,6 +196,7 @@ function DropdownMenuRadioItem({
       <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
         <DropdownMenuPrimitive.ItemIndicator>
           <svg
+            aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="none"
@@ -236,20 +225,11 @@ export interface DropdownMenuLabelProps
 }
 
 /** 下拉菜单标签 */
-function DropdownMenuLabel({
-  className,
-  inset,
-  ref,
-  ...props
-}: DropdownMenuLabelProps) {
+function DropdownMenuLabel({ className, inset, ref, ...props }: DropdownMenuLabelProps) {
   return (
     <DropdownMenuPrimitive.Label
       ref={ref}
-      className={cn(
-        'px-2 py-1.5 text-sm font-semibold',
-        inset && 'pl-8',
-        className,
-      )}
+      className={cn('px-2 py-1.5 text-sm font-semibold', inset && 'pl-8', className)}
       {...props}
     />
   );
@@ -263,11 +243,7 @@ export interface DropdownMenuSeparatorProps
 }
 
 /** 下拉菜单分隔线 */
-function DropdownMenuSeparator({
-  className,
-  ref,
-  ...props
-}: DropdownMenuSeparatorProps) {
+function DropdownMenuSeparator({ className, ref, ...props }: DropdownMenuSeparatorProps) {
   return (
     <DropdownMenuPrimitive.Separator
       ref={ref}
@@ -278,15 +254,9 @@ function DropdownMenuSeparator({
 }
 
 /** 下拉菜单快捷键提示 */
-function DropdownMenuShortcut({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLSpanElement>) {
+function DropdownMenuShortcut({ className, ...props }: React.HTMLAttributes<HTMLSpanElement>) {
   return (
-    <span
-      className={cn('ml-auto text-xs tracking-widest opacity-60', className)}
-      {...props}
-    />
+    <span className={cn('ml-auto text-xs tracking-widest opacity-60', className)} {...props} />
   );
 }
 

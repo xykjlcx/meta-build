@@ -1,5 +1,5 @@
-import * as React from 'react';
 import * as AlertDialogPrimitive from '@radix-ui/react-alert-dialog';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 const AlertDialog = AlertDialogPrimitive.Root;
@@ -14,11 +14,7 @@ export interface AlertDialogOverlayProps
 }
 
 /** 警告对话框遮罩层 */
-function AlertDialogOverlay({
-  className,
-  ref,
-  ...props
-}: AlertDialogOverlayProps) {
+function AlertDialogOverlay({ className, ref, ...props }: AlertDialogOverlayProps) {
   return (
     <AlertDialogPrimitive.Overlay
       ref={ref}
@@ -39,11 +35,7 @@ export interface AlertDialogContentProps
 }
 
 /** 警告对话框内容区域 */
-function AlertDialogContent({
-  className,
-  ref,
-  ...props
-}: AlertDialogContentProps) {
+function AlertDialogContent({ className, ref, ...props }: AlertDialogContentProps) {
   return (
     <AlertDialogPortal>
       <AlertDialogOverlay />
@@ -60,32 +52,17 @@ function AlertDialogContent({
 }
 
 /** 警告对话框头部 */
-function AlertDialogHeader({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function AlertDialogHeader({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      className={cn(
-        'flex flex-col space-y-2 text-center sm:text-left',
-        className,
-      )}
-      {...props}
-    />
+    <div className={cn('flex flex-col space-y-2 text-center sm:text-left', className)} {...props} />
   );
 }
 
 /** 警告对话框底部 */
-function AlertDialogFooter({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function AlertDialogFooter({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        'flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2',
-        className,
-      )}
+      className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
       {...props}
     />
   );
@@ -99,11 +76,7 @@ export interface AlertDialogTitleProps
 }
 
 /** 警告对话框标题 */
-function AlertDialogTitle({
-  className,
-  ref,
-  ...props
-}: AlertDialogTitleProps) {
+function AlertDialogTitle({ className, ref, ...props }: AlertDialogTitleProps) {
   return (
     <AlertDialogPrimitive.Title
       ref={ref}
@@ -115,19 +88,13 @@ function AlertDialogTitle({
 
 /** AlertDialogDescription 组件属性 */
 export interface AlertDialogDescriptionProps
-  extends React.ComponentPropsWithoutRef<
-    typeof AlertDialogPrimitive.Description
-  > {
+  extends React.ComponentPropsWithoutRef<typeof AlertDialogPrimitive.Description> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<React.ElementRef<typeof AlertDialogPrimitive.Description>>;
 }
 
 /** 警告对话框描述 */
-function AlertDialogDescription({
-  className,
-  ref,
-  ...props
-}: AlertDialogDescriptionProps) {
+function AlertDialogDescription({ className, ref, ...props }: AlertDialogDescriptionProps) {
   return (
     <AlertDialogPrimitive.Description
       ref={ref}
@@ -145,11 +112,7 @@ export interface AlertDialogActionProps
 }
 
 /** 警告对话框确认按钮 */
-function AlertDialogAction({
-  className,
-  ref,
-  ...props
-}: AlertDialogActionProps) {
+function AlertDialogAction({ className, ref, ...props }: AlertDialogActionProps) {
   return (
     <AlertDialogPrimitive.Action
       ref={ref}
@@ -170,11 +133,7 @@ export interface AlertDialogCancelProps
 }
 
 /** 警告对话框取消按钮 */
-function AlertDialogCancel({
-  className,
-  ref,
-  ...props
-}: AlertDialogCancelProps) {
+function AlertDialogCancel({ className, ref, ...props }: AlertDialogCancelProps) {
   return (
     <AlertDialogPrimitive.Cancel
       ref={ref}

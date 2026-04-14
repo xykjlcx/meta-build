@@ -24,9 +24,7 @@ describe('Checkbox', () => {
 
   it('应该响应 onCheckedChange', async () => {
     const onCheckedChange = vi.fn();
-    render(
-      <Checkbox aria-label="勾选" onCheckedChange={onCheckedChange} />,
-    );
+    render(<Checkbox aria-label="勾选" onCheckedChange={onCheckedChange} />);
     await userEvent.click(screen.getByRole('checkbox'));
     expect(onCheckedChange).toHaveBeenCalledWith(true);
   });
@@ -38,9 +36,7 @@ describe('Checkbox', () => {
 
   it('应该支持受控 checked 状态', () => {
     render(<Checkbox checked aria-label="已选" />);
-    expect(
-      screen.getByRole('checkbox').getAttribute('data-state'),
-    ).toBe('checked');
+    expect(screen.getByRole('checkbox').getAttribute('data-state')).toBe('checked');
   });
 
   it('应该合并自定义 className', () => {

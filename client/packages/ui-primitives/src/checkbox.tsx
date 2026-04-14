@@ -1,5 +1,5 @@
-import * as React from 'react';
 import * as CheckboxPrimitive from '@radix-ui/react-checkbox';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 /** Checkbox 组件属性 */
@@ -20,10 +20,9 @@ function Checkbox({ className, ref, ...props }: CheckboxProps) {
       )}
       {...props}
     >
-      <CheckboxPrimitive.Indicator
-        className={cn('flex items-center justify-center text-current')}
-      >
+      <CheckboxPrimitive.Indicator className={cn('flex items-center justify-center text-current')}>
         <svg
+          aria-hidden="true"
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
           fill="none"

@@ -1,22 +1,31 @@
-import { render, screen, act } from '@testing-library/react';
-import { describe, expect, it, beforeEach } from 'vitest';
-import { Toaster, Toast, ToastTitle, ToastDescription, ToastClose, ToastAction, ToastViewport, ToastProvider } from './toast';
-import { toast, useToast } from './use-toast';
+import { act, render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vitest';
+import {
+  Toast,
+  ToastAction,
+  ToastClose,
+  ToastDescription,
+  ToastProvider,
+  ToastTitle,
+  ToastViewport,
+  Toaster,
+} from './toast';
+import { toast } from './use-toast';
 
 describe('Toast 组件', () => {
   it('ToastProvider + ToastViewport 应该渲染', () => {
-    const { container } = render(
+    const { container: c } = render(
       <ToastProvider>
         <ToastViewport />
       </ToastProvider>,
     );
     // Viewport 是一个 ol 元素
-    const viewport = container.querySelector('ol');
+    const viewport = c.querySelector('ol');
     expect(viewport).not.toBeNull();
   });
 
   it('Toast 应该包含 default 变体样式', () => {
-    const { container } = render(
+    render(
       <ToastProvider>
         <Toast open>
           <ToastTitle>标题</ToastTitle>
@@ -97,12 +106,12 @@ describe('Toast 组件', () => {
 
 describe('useToast hook', () => {
   it('toast() 应返回带 id 和 dismiss 的对象', () => {
-    let result: ReturnType<typeof toast>;
+    let result: ReturnType<typeof toast> | undefined;
     act(() => {
       result = toast({ title: '测试' });
     });
-    expect(result!.id).toBeDefined();
-    expect(typeof result!.dismiss).toBe('function');
+    expect(result?.id).toBeDefined();
+    expect(typeof result?.dismiss).toBe('function');
   });
 });
 

@@ -1,9 +1,8 @@
-import * as React from 'react';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 /** Textarea 组件属性 */
-export interface TextareaProps
-  extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   /** DOM ref 转发（React 19 原生 ref-as-prop） */
   ref?: React.Ref<HTMLTextAreaElement>;
 }

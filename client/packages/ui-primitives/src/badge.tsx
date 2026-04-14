@@ -1,5 +1,5 @@
-import * as React from 'react';
-import { cva, type VariantProps } from 'class-variance-authority';
+import { type VariantProps, cva } from 'class-variance-authority';
+import type * as React from 'react';
 import { cn } from './lib/utils';
 
 const badgeVariants = cva(
@@ -7,15 +7,13 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
+        default: 'border-transparent bg-primary text-primary-foreground hover:bg-primary/80',
         secondary:
           'border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80',
         destructive:
           'border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80',
         outline: 'text-foreground',
-        success:
-          'border-transparent bg-success text-success-foreground hover:bg-success/80',
+        success: 'border-transparent bg-success text-success-foreground hover:bg-success/80',
       },
     },
     defaultVariants: {
@@ -34,13 +32,7 @@ export interface BadgeProps
 
 /** 徽章组件，支持 5 种风格变体 */
 function Badge({ className, variant, ref, ...props }: BadgeProps) {
-  return (
-    <div
-      ref={ref}
-      className={cn(badgeVariants({ variant }), className)}
-      {...props}
-    />
-  );
+  return <div ref={ref} className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
 
 export { Badge, badgeVariants };

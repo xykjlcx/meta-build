@@ -1,13 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from './card';
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from './card';
 
 describe('Card', () => {
   it('应该渲染完整卡片结构', () => {
@@ -67,9 +60,7 @@ describe('Card', () => {
         </CardHeader>
       </Card>,
     );
-    expect(screen.getByText('描述文本').className).toContain(
-      'text-muted-foreground',
-    );
+    expect(screen.getByText('描述文本').className).toContain('text-muted-foreground');
   });
 
   it('CardFooter 应该包含 flex 样式', () => {

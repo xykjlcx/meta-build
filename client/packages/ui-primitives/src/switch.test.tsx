@@ -23,9 +23,7 @@ describe('Switch', () => {
 
   it('应该响应 onCheckedChange', async () => {
     const onCheckedChange = vi.fn();
-    render(
-      <Switch aria-label="切换" onCheckedChange={onCheckedChange} />,
-    );
+    render(<Switch aria-label="切换" onCheckedChange={onCheckedChange} />);
     await userEvent.click(screen.getByRole('switch'));
     expect(onCheckedChange).toHaveBeenCalledWith(true);
   });
@@ -37,15 +35,11 @@ describe('Switch', () => {
 
   it('应该支持受控 checked 状态', () => {
     render(<Switch checked aria-label="已开启" />);
-    expect(
-      screen.getByRole('switch').getAttribute('data-state'),
-    ).toBe('checked');
+    expect(screen.getByRole('switch').getAttribute('data-state')).toBe('checked');
   });
 
   it('未选中时应显示 unchecked 状态', () => {
     render(<Switch checked={false} aria-label="已关闭" />);
-    expect(
-      screen.getByRole('switch').getAttribute('data-state'),
-    ).toBe('unchecked');
+    expect(screen.getByRole('switch').getAttribute('data-state')).toBe('unchecked');
   });
 });

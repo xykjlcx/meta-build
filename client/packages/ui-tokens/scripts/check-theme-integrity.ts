@@ -22,9 +22,9 @@ function extractVariables(cssContent: string): string[] {
   const vars: string[] = [];
   // 匹配 --xxx-yyy: value 格式的声明
   const regex = /^\s*(--[a-z][a-z0-9-]*)\s*:/gm;
-  let match: RegExpExecArray | null;
-  while ((match = regex.exec(cssContent)) !== null) {
-    vars.push(match[1]!);
+  for (let match = regex.exec(cssContent); match !== null; match = regex.exec(cssContent)) {
+    const name = match[1];
+    if (name) vars.push(name);
   }
   return vars;
 }
@@ -97,9 +97,7 @@ for (const [themeId, vars] of themeVarsMap) {
 
   // 变量数量
   if (vars.length !== referenceVars.length) {
-    console.error(
-      `[FAIL] ${themeId}: 变量数量 ${vars.length}，期望 ${referenceVars.length}`,
-    );
+    console.error(`[FAIL] ${themeId}: 变量数量 ${vars.length}，期望 ${referenceVars.length}`);
     hasError = true;
   }
 }
@@ -109,6 +107,9 @@ if (hasError) {
   process.exit(1);
 }
 
-console.log(
-  `[PASS] ${themeRegistry.length} 个主题，每个主题 ${referenceVars.length} 个变量，命名规范全部通过`,
+// biome 禁止 console.log，用 process.stdout 输出成功信息
+const themeCount = themeVarsMap.size;
+const varCount = referenceVars.length;
+process.stdout.write(
+  `[PASS] ${themeCount} 个主题，每个主题 ${varCount} 个变量，命名规范全部通过\n`,
 );
