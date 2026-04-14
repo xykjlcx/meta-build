@@ -4,8 +4,8 @@ import cn.dev33.satoken.exception.NotLoginException;
 import cn.dev33.satoken.exception.NotPermissionException;
 import cn.dev33.satoken.exception.NotRoleException;
 import com.metabuild.common.exception.MetaBuildException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -22,16 +22,12 @@ import java.util.Map;
 /**
  * 全局异常处理：MetaBuildException → ProblemDetail，覆盖业务异常、校验失败、乐观锁冲突、Sa-Token 认证/授权异常。
  */
+@Slf4j
+@RequiredArgsConstructor
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
-
     private final MessageSource messageSource;
-
-    public GlobalExceptionHandler(MessageSource messageSource) {
-        this.messageSource = messageSource;
-    }
 
     /**
      * 处理 MetaBuildException（BusinessException / NotFoundException / ForbiddenException 等）。

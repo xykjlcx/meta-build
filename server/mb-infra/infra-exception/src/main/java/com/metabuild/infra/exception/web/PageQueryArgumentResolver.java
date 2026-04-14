@@ -1,6 +1,7 @@
 package com.metabuild.infra.exception.web;
 
 import com.metabuild.common.dto.PageQuery;
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.MethodParameter;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
@@ -15,13 +16,10 @@ import java.util.List;
  * <p>
  * 示例请求：GET /api/users?page=2&size=10&sort=createdAt,desc&sort=name,asc
  */
+@RequiredArgsConstructor
 public class PageQueryArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final MbPaginationProperties props;
-
-    public PageQueryArgumentResolver(MbPaginationProperties props) {
-        this.props = props;
-    }
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
