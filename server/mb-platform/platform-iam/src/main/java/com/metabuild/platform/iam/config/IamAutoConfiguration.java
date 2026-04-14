@@ -1,7 +1,10 @@
 package com.metabuild.platform.iam.config;
 
+import com.metabuild.common.security.AuthFacade;
+import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.domain.auth.MustChangePasswordInterceptor;
 import com.metabuild.platform.iam.domain.auth.PasswordPolicy;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -16,7 +19,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @AutoConfiguration
 @EnableConfigurationProperties(MbIamPasswordProperties.class)
 @ComponentScan(basePackages = "com.metabuild.platform.iam")
+@RequiredArgsConstructor
 public class IamAutoConfiguration implements WebMvcConfigurer {
+
+    private final CurrentUser currentUser;
+    private final AuthFacade authFacade;
 
     @Bean
     public PasswordPolicy passwordPolicy(MbIamPasswordProperties props) {
@@ -25,7 +32,7 @@ public class IamAutoConfiguration implements WebMvcConfigurer {
 
     @Bean
     public MustChangePasswordInterceptor mustChangePasswordInterceptor() {
-        return new MustChangePasswordInterceptor();
+        return new MustChangePasswordInterceptor(currentUser, authFacade);
     }
 
     @Override

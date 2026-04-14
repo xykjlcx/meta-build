@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -50,6 +51,12 @@ public class SaTokenAuthFacade implements AuthFacade {
         // 权限和角色由 platform-iam 通过 SaPermissionImpl 回调提供，此处不重复写入
         // isAdmin 由 platform-iam 在登录时按需写入（可扩展）
         session.set(SaTokenCurrentUser.KEY_IS_ADMIN, false);
+
+        // 写入强制修改密码标志（SessionData 携带，统一在此处写入）
+        // 键名与 MustChangePasswordInterceptor.SESSION_KEY_MUST_CHANGE_PASSWORD 保持一致
+        if (sessionData.mustChangePassword()) {
+            session.set("mustChangePassword", true);
+        }
 
         // 构建返回值
         SaTokenInfo tokenInfo = StpUtil.getTokenInfo();
@@ -103,5 +110,34 @@ public class SaTokenAuthFacade implements AuthFacade {
     public void kickoutAll(Long userId) {
         StpUtil.kickout(userId);
         log.info("踢出用户所有会话: userId={}", userId);
+    }
+
+    @Override
+    public boolean isAuthenticated() {
+        return StpUtil.isLogin();
+    }
+
+    @Override
+    public Object getSessionFlag(String key) {
+        if (!StpUtil.isLogin()) {
+            return null;
+        }
+        return StpUtil.getSession().get(key);
+    }
+
+    @Override
+    public void setSessionFlag(String key, Object value) {
+        StpUtil.getSession().set(key, value);
+    }
+
+    @Override
+    public long onlineUserCount() {
+        List<String> sessionIds = StpUtil.searchSessionId("", 0, -1, false);
+        return sessionIds != null ? sessionIds.size() : 0L;
+    }
+
+    @Override
+    public boolean isUserOnline(Long userId) {
+        return StpUtil.isLogin(userId);
     }
 }

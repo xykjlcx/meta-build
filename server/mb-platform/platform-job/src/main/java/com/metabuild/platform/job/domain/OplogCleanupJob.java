@@ -3,13 +3,10 @@ package com.metabuild.platform.job.domain;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock;
-import org.jooq.DSLContext;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
-
-import static com.metabuild.schema.tables.MbOperationLog.MB_OPERATION_LOG;
 
 /**
  * 操作日志定时清理任务。
@@ -25,7 +22,7 @@ public class OplogCleanupJob {
     private static final String JOB_NAME = "oplog-cleanup";
 
     private final JobLogService jobLogService;
-    private final DSLContext dsl;
+    private final OplogCleanupRepository oplogCleanupRepository;
 
     @Scheduled(cron = "0 0 2 * * ?")
     @SchedulerLock(name = JOB_NAME, lockAtLeastFor = "PT5M", lockAtMostFor = "PT30M")
@@ -35,9 +32,7 @@ public class OplogCleanupJob {
 
         try {
             OffsetDateTime cutoff = startTime.minusDays(RETAIN_DAYS);
-            int deleted = dsl.deleteFrom(MB_OPERATION_LOG)
-                .where(MB_OPERATION_LOG.CREATED_AT.lt(cutoff))
-                .execute();
+            int deleted = oplogCleanupRepository.deleteOlderThan(cutoff);
 
             OffsetDateTime endTime = OffsetDateTime.now();
             log.info("[{}] 清理完成，共删除 {} 条记录", JOB_NAME, deleted);

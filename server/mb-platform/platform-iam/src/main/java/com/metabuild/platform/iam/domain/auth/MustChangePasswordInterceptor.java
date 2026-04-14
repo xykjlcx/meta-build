@@ -1,9 +1,11 @@
 package com.metabuild.platform.iam.domain.auth;
 
-import cn.dev33.satoken.stp.StpUtil;
 import com.metabuild.common.exception.ForbiddenException;
+import com.metabuild.common.security.AuthFacade;
+import com.metabuild.common.security.CurrentUser;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -12,6 +14,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * 用户 mustChangePassword=true 时，只允许访问密码修改接口，其他接口返回 403。
  */
 @Slf4j
+@RequiredArgsConstructor
 public class MustChangePasswordInterceptor implements HandlerInterceptor {
 
     /** Session 中存储"强制修改密码"标志的键名 */
@@ -27,10 +30,13 @@ public class MustChangePasswordInterceptor implements HandlerInterceptor {
         "/actuator",
     };
 
+    private final CurrentUser currentUser;
+    private final AuthFacade authFacade;
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
         // 未登录放行（由 Sa-Token 自身拦截）
-        if (!StpUtil.isLogin()) {
+        if (!currentUser.isAuthenticated()) {
             return true;
         }
 
@@ -44,7 +50,7 @@ public class MustChangePasswordInterceptor implements HandlerInterceptor {
         }
 
         // 检查是否需要强制修改密码
-        Object mustChange = StpUtil.getSession().get(SESSION_KEY_MUST_CHANGE_PASSWORD);
+        Object mustChange = authFacade.getSessionFlag(SESSION_KEY_MUST_CHANGE_PASSWORD);
         if (Boolean.TRUE.equals(mustChange)) {
             log.warn("用户需要修改密码，拒绝访问: path={}", path);
             throw new ForbiddenException("iam.auth.mustChangePassword");

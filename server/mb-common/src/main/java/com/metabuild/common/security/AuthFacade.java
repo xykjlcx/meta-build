@@ -9,4 +9,24 @@ public interface AuthFacade {
     LoginResult refresh(String refreshToken);
     void logout();
     void kickoutAll(Long userId);
+
+    /** 踢出指定用户（与 kickoutAll 等效，语义更明确）。 */
+    default void kickout(Long userId) {
+        kickoutAll(userId);
+    }
+
+    /** 检查当前请求是否已登录。 */
+    boolean isAuthenticated();
+
+    /** 获取当前 session 中的标志值。 */
+    Object getSessionFlag(String key);
+
+    /** 向当前 session 写入标志值。 */
+    void setSessionFlag(String key, Object value);
+
+    /** 获取在线用户数量。 */
+    long onlineUserCount();
+
+    /** 检查指定用户是否在线。 */
+    boolean isUserOnline(Long userId);
 }

@@ -15,12 +15,5 @@
     <description>零 Spring 依赖的公共工具层</description>
 
     <!-- 注意：此模块不能有任何 Spring / jOOQ / JJWT 依赖 -->
-    <dependencies>
-        <dependency>
-            <groupId>org.jetbrains</groupId>
-            <artifactId>annotations</artifactId>
-            <version>26.0.1</version>
-            <scope>provided</scope>
-        </dependency>
-    </dependencies>
+
 </project>

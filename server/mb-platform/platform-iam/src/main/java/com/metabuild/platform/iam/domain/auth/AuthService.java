@@ -1,6 +1,5 @@
 package com.metabuild.platform.iam.domain.auth;
 
-import cn.dev33.satoken.stp.StpUtil;
 import com.metabuild.common.exception.BusinessException;
 import com.metabuild.common.exception.UnauthorizedException;
 import com.metabuild.common.security.AuthFacade;
@@ -112,18 +111,13 @@ public class AuthService implements AuthApi {
             Boolean.TRUE.equals(user.getMustChangePassword())
         );
 
-        // 7. 执行登录
+        // 7. 执行登录（mustChangePassword 标志由 AuthFacade 实现负责写入 session）
         LoginResult result = authFacade.doLogin(user.getId(), sessionData);
 
-        // 8. 写入 mustChangePassword 标志到 session（供 MustChangePasswordInterceptor 读取）
-        if (sessionData.mustChangePassword()) {
-            StpUtil.getSession().set(MustChangePasswordInterceptor.SESSION_KEY_MUST_CHANGE_PASSWORD, true);
-        }
-
-        // 9. 清除失败计数
+        // 8. 清除失败计数
         redisTemplate.delete(failKey);
 
-        // 10. 记录登录日志
+        // 9. 记录登录日志
         loginLogService.recordSuccess(user.getId(), username);
 
         log.info("用户登录成功: userId={}, username={}", user.getId(), username);
