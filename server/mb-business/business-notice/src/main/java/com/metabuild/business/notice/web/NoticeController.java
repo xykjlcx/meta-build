@@ -69,7 +69,7 @@ public class NoticeController {
     @Operation(summary = "更新公告")
     @PutMapping("/{id}")
     @RequirePermission("notice:notice:update")
-    @OperationLog(module = "notice", operation = "更新公告")
+    @OperationLog(module = "notice", operation = "编辑公告")
     public NoticeDetailView update(
         @Parameter(description = "公告 ID") @PathVariable Long id,
         @Valid @RequestBody NoticeUpdateCommand cmd

@@ -22,6 +22,8 @@ import org.jsoup.safety.Safelist;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 /**
  * 公告领域服务。
  */
@@ -32,6 +34,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class NoticeService {
 
     private final NoticeRepository noticeRepository;
+    private final NoticeAttachmentRepository noticeAttachmentRepository;
     private final CurrentUser currentUser;
     private final SnowflakeIdGenerator idGenerator;
 
@@ -74,7 +77,11 @@ public class NoticeService {
 
         noticeRepository.insert(record);
 
-        // TODO: Task 8 实现附件关联处理（cmd.attachmentFileIds()）
+        // 批量插入附件关联（按 fileIds 顺序设 sortOrder）
+        List<Long> fileIds = cmd.attachmentFileIds();
+        if (fileIds != null && !fileIds.isEmpty()) {
+            noticeAttachmentRepository.batchInsert(noticeId, fileIds, userId, 0L);
+        }
 
         log.info("创建公告: noticeId={}, title={}", noticeId, cmd.title());
         return detail(noticeId);
@@ -108,7 +115,12 @@ public class NoticeService {
             throw new ConflictException("common.concurrentModification");
         }
 
-        // TODO: Task 8 实现附件关联处理（先删后建）
+        // 附件关联：全量替换（先删后插）
+        noticeAttachmentRepository.deleteByNoticeId(id);
+        List<Long> fileIds = cmd.attachmentFileIds();
+        if (fileIds != null && !fileIds.isEmpty()) {
+            noticeAttachmentRepository.batchInsert(id, fileIds, currentUser.userIdOrSystem(), 0L);
+        }
 
         log.info("更新公告: noticeId={}", id);
         return detail(id);
