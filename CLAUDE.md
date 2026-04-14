@@ -80,7 +80,7 @@ meta-build/
 │   ├── mb-common/                   # 零 Spring 工具（异常基类、Snowflake ID、PageResult）
 │   ├── mb-schema/                   # ★ 数据库契约层（Flyway SQL + jOOQ 生成代码，ADR-0004）
 │   ├── mb-infra/                    # 基础设施（11 个子模块：security/cache/jooq/exception/captcha/...）
-│   ├── mb-platform/                 # 平台业务（8 个子模块：iam/oplog/file/notification/...）
+│   ├── mb-platform/                 # 平台业务（8 个子模块：iam/log/file/notification/...）
 │   ├── mb-business/                 # ★ 使用者扩展位 + M5 canonical reference（ADR-0004）
 │   └── mb-admin/                    # Spring Boot 启动入口 + 集成测试 + ArchUnit 测试
 │
@@ -88,7 +88,7 @@ meta-build/
 │   ├── specs/                       # 架构设计规范
 │   │   ├── backend/                 # 后端完整设计（9 子文件 + README + appendix，~4200 行总量）
 │   │   └── frontend/                # 前端完整设计（12 子文件 + README + appendix）
-│   ├── adr/                         # 架构决策记录（12 份）
+│   ├── adr/                         # 架构决策记录（13 份）
 │   ├── handoff/                     # Milestone 交接文档（m2-complete / m2-shadcn-upgrade / m3-complete）
 │   └── 日志/                        # 每日工作日志
 │
@@ -136,7 +136,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | 表格/表单 | TanStack Table v8 + React Hook Form + Zod（封装在 L3 `@mb/ui-patterns`） |
 | i18n | react-i18next + i18next（zh-CN 默认 + en-US，全量加载） |
 | HTTP 客户端 | `@mb/api-sdk`（原生 fetch + 4 拦截器，M5 切 OpenAPI 生成） |
-| 测试 | Vitest（267 tests）+ Storybook 8 + Playwright（M5 补用例） |
+| 测试 | Vitest（271 tests）+ Storybook 8 + Playwright（M5 补用例） |
 | 代码质量 | Biome + Stylelint + dependency-cruiser（7 条规则） |
 
 ---
@@ -157,6 +157,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | [0010](docs/adr/0010-审计日志改操作日志.md) | **v1 用操作日志替代审计日志**（platform-audit → platform-oplog，@Audit → @OperationLog） | 已采纳 |
 | [0011](docs/adr/0011-version字段按需添加.md) | **version 字段按需添加**（不再强制所有表） | 已采纳 |
 | [0012](docs/adr/0012-全局时间策略clock-bean.md) | **全局时间策略**（Clock Bean + 文档引导） | 已采纳 |
+| [0013](docs/adr/0013-oplog改名platform-log加注解下沉.md) | **platform-oplog → platform-log + @OperationLog 下沉 mb-common** | 已采纳 |
 
 **新增 ADR 的时机**：任何翻转既有决策、引入新架构概念、或修订规划文档的行为，都应该先写 ADR 再改代码/specs。
 
@@ -294,10 +295,10 @@ cd client && pnpm dev                                     # dev server（localho
 cd client && pnpm build                                   # 生产构建
 
 # === 前端测试 ===
-cd client && pnpm test                                    # 全量测试（267 tests）
+cd client && pnpm test                                    # 全量测试（271 tests）
 cd client && pnpm -F @mb/ui-primitives test               # L2 测试（197 tests）
 cd client && pnpm -F @mb/ui-patterns test                 # L3 测试（55 tests）
-cd client && pnpm -F @mb/api-sdk test                     # api-sdk 测试（15 tests）
+cd client && pnpm -F @mb/api-sdk test                     # api-sdk 测试（19 tests）
 
 # === 前端质量检查（12 项，CI 等效）===
 cd client && pnpm build                                   # 生产构建
@@ -348,8 +349,8 @@ docker compose up -d                                      # PG(15432) + Redis(16
 | [meta-build规划_v1_最终对齐.md](docs/meta-build规划_v1_最终对齐.md) | v1 阶段的 17 项决策 ground truth 基线 | 定稿 |
 | [docs/specs/backend/README.md](docs/specs/backend/README.md) | **后端设计入口**（9 子文件 + 反向索引；4000+ 行，已从单文件拆分） | **定稿** |
 | [docs/specs/frontend/README.md](docs/specs/frontend/README.md) | **前端设计入口**（12 子文件 + 反向索引 + appendix） | **定稿** |
-| [docs/adr/](docs/adr/) | 架构决策记录（12 份） | 定稿 |
-| [docs/handoff/](docs/handoff/) | **Milestone 交接文档**（m2-complete / m2-shadcn-upgrade-supplement / m3-complete） | 持续更新 |
+| [docs/adr/](docs/adr/) | 架构决策记录（13 份） | 定稿 |
+| [docs/handoff/](docs/handoff/) | **Milestone 交接文档**（m2-complete / m2-shadcn-upgrade-supplement / m3-complete / m4-review-fixes） | 持续更新 |
 | [docs/日志/](docs/日志/) | 每日工作日志 | 持续更新 |
 | [.claude/rules/](.claude/rules/) | **项目规则库**（pitfall + playbook，自动加载，持续积累） | 持续更新 |
 
