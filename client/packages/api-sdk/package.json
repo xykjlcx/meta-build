@@ -18,5 +18,8 @@
   },
   "devDependencies": {
     "vitest": "^2.1.0"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.62.0"
   }
 }
