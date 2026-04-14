@@ -70,6 +70,6 @@ describe('DropdownMenu', () => {
       </DropdownMenu>,
     );
     await user.click(screen.getByText('打开菜单'));
-    expect(screen.getByText('标签').className).toContain('font-semibold');
+    expect(screen.getByText('标签').className).toContain('font-medium');
   });
 });

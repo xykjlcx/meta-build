@@ -15,7 +15,7 @@ describe('Input', () => {
     render(<Input data-testid="input" />);
     const input = screen.getByTestId('input');
     expect(input.className).toContain('border-input');
-    expect(input.className).toContain('bg-background');
+    expect(input.className).toContain('bg-transparent');
   });
 
   it('应该转发 ref', () => {

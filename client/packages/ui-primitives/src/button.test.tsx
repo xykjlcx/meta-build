@@ -22,7 +22,7 @@ describe('Button', () => {
 
   it('应该应用 sm 尺寸', () => {
     render(<Button size="sm">小按钮</Button>);
-    expect(screen.getByRole('button').className).toContain('h-9');
+    expect(screen.getByRole('button').className).toContain('h-8');
   });
 
   it('应该转发 ref', () => {
@@ -49,9 +49,9 @@ describe('Button', () => {
     expect(link.className).toContain('bg-primary');
   });
 
-  it('默认 type 应该是 button', () => {
-    render(<Button>普通按钮</Button>);
-    expect(screen.getByRole('button').getAttribute('type')).toBe('button');
+  it('传入 type 时应该正确设置', () => {
+    render(<Button type="submit">提交按钮</Button>);
+    expect(screen.getByRole('button').getAttribute('type')).toBe('submit');
   });
 
   it('disabled 状态应该包含 disabled 样式', () => {

@@ -17,7 +17,7 @@ describe('Skeleton', () => {
   it('应该包含 muted 背景色', () => {
     const { container } = render(<Skeleton />);
     const el = container.firstChild as HTMLElement;
-    expect(el.className).toContain('bg-muted');
+    expect(el.className).toContain('bg-accent');
   });
 
   it('应该包含圆角样式', () => {

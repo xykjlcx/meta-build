@@ -38,7 +38,7 @@ describe('Breadcrumb', () => {
     expect(screen.getByRole('navigation').getAttribute('aria-label')).toBe('面包屑导航');
   });
 
-  it('不传 aria-label 时不应有默认值', () => {
+  it('不传 aria-label 时应有默认值 breadcrumb', () => {
     render(
       <Breadcrumb>
         <BreadcrumbList>
@@ -48,7 +48,7 @@ describe('Breadcrumb', () => {
         </BreadcrumbList>
       </Breadcrumb>,
     );
-    expect(screen.getByRole('navigation').getAttribute('aria-label')).toBeNull();
+    expect(screen.getByRole('navigation').getAttribute('aria-label')).toBe('breadcrumb');
   });
 
   it('应该渲染分隔符', () => {

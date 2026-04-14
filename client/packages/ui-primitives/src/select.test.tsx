@@ -30,7 +30,7 @@ describe('Select', () => {
     );
     const trigger = screen.getByRole('combobox');
     expect(trigger.className).toContain('border-input');
-    expect(trigger.className).toContain('bg-background');
+    expect(trigger.className).toContain('bg-transparent');
   });
 
   it('应该转发 trigger ref', () => {

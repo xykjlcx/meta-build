@@ -1,6 +1,21 @@
 // vitest 全局测试设置
 // 为 jsdom 环境补充缺失的 API
 
+// Sonner 需要 matchMedia
+if (!window.matchMedia) {
+  window.matchMedia = (query: string) =>
+    ({
+      matches: false,
+      media: query,
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    }) as MediaQueryList;
+}
+
 // Radix UI Slider 和 cmdk 需要 ResizeObserver
 class ResizeObserverMock {
   observe() {}

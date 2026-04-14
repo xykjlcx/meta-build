@@ -15,7 +15,7 @@ describe('Textarea', () => {
     render(<Textarea data-testid="textarea" />);
     const el = screen.getByTestId('textarea');
     expect(el.className).toContain('border-input');
-    expect(el.className).toContain('bg-background');
+    expect(el.className).toContain('bg-transparent');
   });
 
   it('应该转发 ref', () => {

@@ -53,7 +53,7 @@ describe('Table', () => {
     );
     const th = screen.getByText('列头');
     expect(th.className).toContain('font-medium');
-    expect(th.className).toContain('text-muted-foreground');
+    expect(th.className).toContain('text-foreground');
   });
 
   it('TableRow 应该包含 hover 样式', () => {
@@ -123,6 +123,6 @@ describe('Table', () => {
       </Table>,
     );
     const wrapper = container.firstChild as HTMLElement;
-    expect(wrapper.className).toContain('overflow-auto');
+    expect(wrapper.className).toContain('overflow-x-auto');
   });
 });

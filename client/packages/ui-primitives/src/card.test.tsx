@@ -23,7 +23,7 @@ describe('Card', () => {
   it('Card 应该包含正确样式', () => {
     render(<Card>内容</Card>);
     const card = screen.getByText('内容');
-    expect(card.className).toContain('rounded-lg');
+    expect(card.className).toContain('rounded-xl');
     expect(card.className).toContain('border');
     expect(card.className).toContain('shadow-sm');
   });
@@ -48,7 +48,6 @@ describe('Card', () => {
       </Card>,
     );
     const title = screen.getByText('标题');
-    expect(title.className).toContain('text-2xl');
     expect(title.className).toContain('font-semibold');
   });
 

@@ -30,7 +30,7 @@ describe('RadioGroup', () => {
         <RadioGroupItem value="a" aria-label="选项 A" />
       </RadioGroup>,
     );
-    expect(screen.getByRole('radio').className).toContain('border-primary');
+    expect(screen.getByRole('radio').className).toContain('border-input');
   });
 
   it('应该转发 ref', () => {

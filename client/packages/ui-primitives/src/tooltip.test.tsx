@@ -36,8 +36,8 @@ describe('Tooltip', () => {
       </TooltipProvider>,
     );
     const content = firstMatch('提示内容');
-    expect(content.className).toContain('bg-popover');
-    expect(content.className).toContain('text-popover-foreground');
+    expect(content.className).toContain('bg-foreground');
+    expect(content.className).toContain('text-background');
   });
 
   it('应该合并自定义 className', () => {
