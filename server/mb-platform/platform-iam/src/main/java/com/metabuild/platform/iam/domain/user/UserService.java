@@ -5,6 +5,7 @@ import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.exception.BusinessException;
 import com.metabuild.common.exception.ConflictException;
 import com.metabuild.common.exception.NotFoundException;
+import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.UserApi;
 import com.metabuild.platform.iam.api.dto.ChangePasswordRequest;
@@ -39,6 +40,7 @@ public class UserService implements UserApi {
     private final PasswordPolicy passwordPolicy;
     private final CurrentUser currentUser;
     private final Clock clock;
+    private final SnowflakeIdGenerator idGenerator;
 
     @Override
     public UserResponse getById(Long id) {
@@ -65,6 +67,7 @@ public class UserService implements UserApi {
         }
 
         var record = new MbIamUserRecord();
+        record.setId(idGenerator.nextId());
         record.setUsername(request.username());
         record.setPasswordHash(passwordEncoder.encode(request.password()));
         record.setEmail(request.email());
@@ -176,6 +179,7 @@ public class UserService implements UserApi {
     /** 保存密码历史 */
     private void savePasswordHistory(Long userId, String passwordHash) {
         var histRecord = new MbIamPasswordHistoryRecord();
+        histRecord.setId(idGenerator.nextId());
         histRecord.setUserId(userId);
         histRecord.setPasswordHash(passwordHash);
         histRecord.setCreatedAt(OffsetDateTime.now(clock));
