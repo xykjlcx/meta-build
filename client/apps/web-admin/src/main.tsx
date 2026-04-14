@@ -48,7 +48,9 @@ configureApiSdk({
     }
   },
   onUnauthenticated: () => {
-    window.location.href = '/auth/login';
+    // replace 不在 history 中留下当前页面，避免用户后退到 401 页面
+    const currentPath = window.location.pathname + window.location.search;
+    window.location.replace(`/auth/login?redirect=${encodeURIComponent(currentPath)}`);
   },
   onForbidden: (err) => {
     console.error('[403]', err.message);
