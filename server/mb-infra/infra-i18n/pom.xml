@@ -11,4 +11,16 @@
     <artifactId>infra-i18n</artifactId>
     <name>infra-i18n</name>
     <description>MessageSource + LocaleResolver（M4 实现）</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 </project>
