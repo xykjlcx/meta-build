@@ -83,6 +83,9 @@ mb:
     per-ip-qps: 100
     per-user-qps: 200
     burst-capacity: 50
+  sse:
+    max-connections: ${MB_SSE_MAX_CONNECTIONS:5000}
+    emitter-timeout-ms: ${MB_SSE_EMITTER_TIMEOUT_MS:1800000}
   captcha:
     enabled: true
     expire-seconds: 300
