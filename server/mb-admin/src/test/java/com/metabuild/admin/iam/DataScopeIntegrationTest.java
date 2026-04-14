@@ -56,6 +56,10 @@ class DataScopeIntegrationTest extends BaseIntegrationTest {
 
     @BeforeEach
     void setupTestUsers() {
+        // 先创建测试用部门（FK 约束要求 dept_id 必须存在）
+        insertTestDeptViaJdbc(DEPT_A, "测试部门A");
+        insertTestDeptViaJdbc(DEPT_B, "测试部门B");
+
         // 通过 JdbcTemplate 直接写入，绕过 jOOQ RecordListener（AuditFieldsRecordListener 会覆盖 created_by）
         // 用户 A：属于 DEPT_A，由 USER_SELF_ID 创建
         insertTestUserViaJdbc(9901L, "ds_user_a", DEPT_A, USER_SELF_ID);
@@ -150,6 +154,23 @@ class DataScopeIntegrationTest extends BaseIntegrationTest {
     }
 
     // ─────────── 辅助方法 ───────────
+
+    /**
+     * 通过 JdbcTemplate 直接 INSERT 部门，满足 FK 约束。
+     */
+    private void insertTestDeptViaJdbc(Long id, String name) {
+        jdbcTemplate.update("""
+            INSERT INTO mb_iam_dept
+              (id, tenant_id, parent_id, name, sort_order, status, owner_dept_id,
+               created_by, created_at, updated_by, updated_at, version)
+            VALUES
+              (?, 0, NULL, ?, 0, 1, 0,
+               0, NOW(), 0, NOW(), 0)
+            ON CONFLICT (id) DO NOTHING
+            """,
+            id, name
+        );
+    }
 
     /**
      * 通过 JdbcTemplate 直接 INSERT，绕过 jOOQ AuditFieldsRecordListener。

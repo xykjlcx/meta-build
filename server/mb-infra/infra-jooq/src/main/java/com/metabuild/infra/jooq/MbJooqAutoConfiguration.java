@@ -1,6 +1,7 @@
 package com.metabuild.infra.jooq;
 
 import com.metabuild.common.security.CurrentUser;
+import org.jooq.ExecuteListenerProvider;
 import org.jooq.impl.DefaultConfiguration;
 import org.jooq.impl.DefaultExecuteListenerProvider;
 import org.jooq.impl.DefaultRecordListenerProvider;
@@ -29,15 +30,12 @@ public class MbJooqAutoConfiguration {
     }
 
     /**
-     * 将 SlowQueryListener 注册到 jOOQ Configuration。
-     *
-     * <p>Spring Boot 的 JooqAutoConfiguration 自动收集 ExecuteListenerProvider 类型的 Bean，
-     * 但因为 MbJooqAutoConfiguration 在 JooqAutoConfiguration 之后加载，需通过
-     * DefaultConfigurationCustomizer 确保注册。
+     * 将 SlowQueryListener 注册为独立的 ExecuteListenerProvider Bean。
+     * Spring Boot 的 JooqAutoConfiguration 会自动收集所有 ExecuteListenerProvider Bean。
      */
     @Bean
-    public DefaultConfigurationCustomizer slowQueryListenerCustomizer(SlowQueryListener listener) {
-        return config -> config.set(new DefaultExecuteListenerProvider(listener));
+    public ExecuteListenerProvider slowQueryListenerProvider(SlowQueryListener listener) {
+        return new DefaultExecuteListenerProvider(listener);
     }
 
     // ---- 数据权限 ----
@@ -65,11 +63,11 @@ public class MbJooqAutoConfiguration {
     }
 
     /**
-     * 将 DataScopeExecuteListener 注册到 jOOQ Configuration。
+     * 将 DataScopeExecuteListener 注册为独立的 ExecuteListenerProvider Bean。
      */
     @Bean
-    public DefaultConfigurationCustomizer dataScopeExecuteListenerCustomizer(DataScopeVisitListener listener) {
-        return config -> config.set(new DefaultExecuteListenerProvider(listener));
+    public ExecuteListenerProvider dataScopeListenerProvider(DataScopeVisitListener listener) {
+        return new DefaultExecuteListenerProvider(listener);
     }
 
     /**
