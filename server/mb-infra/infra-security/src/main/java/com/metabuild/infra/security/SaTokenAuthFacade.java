@@ -48,9 +48,13 @@ public class SaTokenAuthFacade implements AuthFacade {
             session.set(SaTokenCurrentUser.KEY_DATA_SCOPE_DEPT_IDS, Set.of());
         }
 
-        // 权限和角色由 platform-iam 通过 SaPermissionImpl 回调提供，此处不重复写入
-        // isAdmin 由 platform-iam 在登录时按需写入（可扩展）
-        session.set(SaTokenCurrentUser.KEY_IS_ADMIN, false);
+        // 写入权限码和角色码（SessionData 由 platform-iam 在登录时填充）
+        session.set(SaTokenCurrentUser.KEY_PERMISSIONS,
+                sessionData.permissions() != null ? new HashSet<>(sessionData.permissions()) : Set.of());
+        session.set(SaTokenCurrentUser.KEY_ROLES,
+                sessionData.roles() != null ? new HashSet<>(sessionData.roles()) : Set.of());
+        // isAdmin 由登录服务按角色判断后写入
+        session.set(SaTokenCurrentUser.KEY_IS_ADMIN, sessionData.admin());
 
         // 写入强制修改密码标志（SessionData 携带，统一在此处写入）
         // 键名与 MustChangePasswordInterceptor.SESSION_KEY_MUST_CHANGE_PASSWORD 保持一致

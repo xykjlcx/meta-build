@@ -4,11 +4,11 @@ import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
+import com.metabuild.infra.cache.CacheEvictSupport;
 import com.metabuild.platform.config.api.dto.ConfigResponse;
 import com.metabuild.platform.config.api.dto.ConfigSetRequest;
 import com.metabuild.schema.tables.records.MbConfigRecord;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,10 +27,14 @@ import java.util.NoSuchElementException;
 @Transactional(readOnly = true)
 public class ConfigService {
 
+    /** Spring Cache Redis key 前缀，格式：{cacheName}::{key} */
+    private static final String CACHE_PREFIX = "config::";
+
     private final ConfigRepository repository;
     private final SnowflakeIdGenerator idGenerator;
     private final CurrentUser currentUser;
     private final Clock clock;
+    private final CacheEvictSupport cacheEvictSupport;
 
     public PageResult<ConfigResponse> list(PageQuery query) {
         return repository.findPage(query).map(this::toResponse);
@@ -48,7 +52,6 @@ public class ConfigService {
     }
 
     @Transactional
-    @CacheEvict(cacheNames = "config", key = "#req.configKey()")
     public void set(ConfigSetRequest req) {
         MbConfigRecord record = new MbConfigRecord();
         // 检查是否已存在（复用原 id）
@@ -74,12 +77,15 @@ public class ConfigService {
         record.setUpdatedAt(OffsetDateTime.now(clock));
 
         repository.upsert(record);
+        // 事务提交后再失效缓存，防止提交前缓存被其他请求重新填入旧数据
+        cacheEvictSupport.evictAfterCommit(CACHE_PREFIX + req.configKey());
     }
 
     @Transactional
-    @CacheEvict(cacheNames = "config", key = "#configKey")
     public void deleteByKey(String configKey) {
         repository.deleteByKey(configKey);
+        // 事务提交后再失效缓存
+        cacheEvictSupport.evictAfterCommit(CACHE_PREFIX + configKey);
     }
 
     private ConfigResponse toResponse(MbConfigRecord r) {

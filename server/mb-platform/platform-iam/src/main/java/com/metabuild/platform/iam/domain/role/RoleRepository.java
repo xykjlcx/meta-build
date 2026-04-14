@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.metabuild.schema.tables.MbIamRole.MB_IAM_ROLE;
+import static com.metabuild.schema.tables.MbIamRoleDataScopeDept.MB_IAM_ROLE_DATA_SCOPE_DEPT;
 import static com.metabuild.schema.tables.MbIamUserRole.MB_IAM_USER_ROLE;
 
 /**
@@ -102,6 +103,15 @@ public class RoleRepository {
         dsl.deleteFrom(MB_IAM_USER_ROLE)
             .where(MB_IAM_USER_ROLE.USER_ID.eq(userId))
             .execute();
+    }
+
+    /** 查询指定角色列表对应的自定义数据权限部门 ID */
+    public List<Long> findDataScopeDeptIds(List<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) return List.of();
+        return dsl.selectDistinct(MB_IAM_ROLE_DATA_SCOPE_DEPT.DEPT_ID)
+            .from(MB_IAM_ROLE_DATA_SCOPE_DEPT)
+            .where(MB_IAM_ROLE_DATA_SCOPE_DEPT.ROLE_ID.in(roleIds))
+            .fetchInto(Long.class);
     }
 
     /** 批量插入用户的角色关联 */

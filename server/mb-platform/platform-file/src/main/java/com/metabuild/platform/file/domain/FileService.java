@@ -22,6 +22,7 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.HexFormat;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -67,13 +68,16 @@ public class FileService {
         // 3. 计算 SHA-256
         String sha256 = computeSha256(file);
 
-        // 4. 查重：相同 sha256 已存在则直接返回（文件去重）
-        return fileRepository.findBySha256(sha256)
+        // 4. 查重：相同 sha256 + 相同租户才复用，跨租户不复用
+        Long tenantId = currentUser.isAuthenticated() ? currentUser.tenantId() : 0L;
+        if (tenantId == null) tenantId = 0L;
+        final Long resolvedTenantId = tenantId;
+        return fileRepository.findBySha256AndTenant(sha256, resolvedTenantId)
             .map(existing -> toResponse(existing))
-            .orElseGet(() -> doUpload(file, sha256, contentType));
+            .orElseGet(() -> doUpload(file, sha256, contentType, resolvedTenantId));
     }
 
-    private FileUploadResponse doUpload(MultipartFile file, String sha256, String contentType) {
+    private FileUploadResponse doUpload(MultipartFile file, String sha256, String contentType, Long tenantId) {
         // 5. 存储文件
         String storedPath = fileStorage.store(file, sha256);
 
@@ -89,7 +93,7 @@ public class FileService {
         // 7. 保存元数据
         MbFileMetadataRecord record = new MbFileMetadataRecord();
         record.setId(idGenerator.nextId());
-        record.setTenantId(0L);
+        record.setTenantId(tenantId);
         record.setOriginalName(originalName);
         record.setStoredName(sha256);
         record.setFilePath(storedPath);
@@ -111,22 +115,32 @@ public class FileService {
     }
 
     public InputStream download(Long fileId) {
-        MbFileMetadataRecord record = fileRepository.findById(fileId)
-            .orElseThrow(() -> new NoSuchElementException("文件不存在: " + fileId));
+        MbFileMetadataRecord record = findByIdWithTenantCheck(fileId);
         return fileStorage.read(record.getFilePath());
     }
 
     public MbFileMetadataRecord getMetadata(Long fileId) {
-        return fileRepository.findById(fileId)
-            .orElseThrow(() -> new NoSuchElementException("文件不存在: " + fileId));
+        return findByIdWithTenantCheck(fileId);
     }
 
     @Transactional
     public void delete(Long fileId) {
-        MbFileMetadataRecord record = fileRepository.findById(fileId)
-            .orElseThrow(() -> new NoSuchElementException("文件不存在: " + fileId));
+        MbFileMetadataRecord record = findByIdWithTenantCheck(fileId);
+        // 仅上传者或管理员可删除
+        if (!currentUser.isAdmin()
+                && !Objects.equals(record.getUploaderId(), currentUser.userId())) {
+            throw new SecurityException("无权删除该文件");
+        }
         fileStorage.delete(record.getFilePath());
         fileRepository.deleteById(fileId);
+    }
+
+    /** 按 ID 查询并校验租户归属，防止跨租户越权访问。 */
+    private MbFileMetadataRecord findByIdWithTenantCheck(Long fileId) {
+        Long tenantId = currentUser.isAuthenticated() ? currentUser.tenantId() : 0L;
+        if (tenantId == null) tenantId = 0L;
+        return fileRepository.findByIdAndTenant(fileId, tenantId)
+            .orElseThrow(() -> new NoSuchElementException("文件不存在: " + fileId));
     }
 
     private String computeSha256(MultipartFile file) {

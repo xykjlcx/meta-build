@@ -24,9 +24,19 @@ public class FileRepository {
             .fetchOptional();
     }
 
-    public Optional<MbFileMetadataRecord> findBySha256(String sha256) {
+    /** 按 SHA-256 查重，仅在同一租户内去重（跨租户不复用） */
+    public Optional<MbFileMetadataRecord> findBySha256AndTenant(String sha256, Long tenantId) {
         return dsl.selectFrom(MB_FILE_METADATA)
             .where(MB_FILE_METADATA.SHA256.eq(sha256))
+            .and(MB_FILE_METADATA.TENANT_ID.eq(tenantId))
+            .fetchOptional();
+    }
+
+    /** 按 ID 查询，同时校验租户归属（防止跨租户访问） */
+    public Optional<MbFileMetadataRecord> findByIdAndTenant(Long id, Long tenantId) {
+        return dsl.selectFrom(MB_FILE_METADATA)
+            .where(MB_FILE_METADATA.ID.eq(id))
+            .and(MB_FILE_METADATA.TENANT_ID.eq(tenantId))
             .fetchOptional();
     }
 

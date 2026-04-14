@@ -10,6 +10,7 @@ import com.metabuild.common.security.SessionData;
 import com.metabuild.infra.captcha.CaptchaService;
 import com.metabuild.platform.iam.api.AuthApi;
 import com.metabuild.platform.iam.api.dto.LoginRequest;
+import com.metabuild.platform.iam.domain.dept.DeptRepository;
 import com.metabuild.platform.iam.domain.permission.PermissionService;
 import com.metabuild.platform.iam.domain.role.RoleRepository;
 import com.metabuild.platform.iam.domain.session.LoginLogService;
@@ -25,6 +26,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -40,6 +43,7 @@ public class AuthService implements AuthApi {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final DeptRepository deptRepository;
     private final PermissionService permissionService;
     private final PasswordPolicy passwordPolicy;
     private final AuthFacade authFacade;
@@ -98,9 +102,15 @@ public class AuthService implements AuthApi {
         Set<String> permissions = permissionService.getPermissions(user.getId());
         Set<String> roleCodes = permissionService.getRoles(user.getId());
 
+        // 是否超管：包含 SUPER_ADMIN 角色即视为管理员
+        boolean isAdmin = roleCodes.contains("SUPER_ADMIN");
+
         // 数据权限：取角色中最宽松的数据权限范围（简化策略）
         DataScopeType scopeType = resolveScopeType(roles);
-        DataScope dataScope = new DataScope(scopeType, Set.of());
+
+        // 根据数据权限类型填充对应的部门 ID 集合
+        Set<Long> scopeDeptIds = resolveScopeDeptIds(scopeType, user.getDeptId(), roles);
+        DataScope dataScope = new DataScope(scopeType, scopeDeptIds);
 
         SessionData sessionData = new SessionData(
             user.getId(),
@@ -108,7 +118,10 @@ public class AuthService implements AuthApi {
             user.getDeptId(),
             user.getTenantId(),
             dataScope,
-            Boolean.TRUE.equals(user.getMustChangePassword())
+            Boolean.TRUE.equals(user.getMustChangePassword()),
+            permissions,
+            roleCodes,
+            isAdmin
         );
 
         // 7. 执行登录（mustChangePassword 标志由 AuthFacade 实现负责写入 session）
@@ -157,5 +170,48 @@ public class AuthService implements AuthApi {
             }
         }
         return broadest;
+    }
+
+    /**
+     * 根据数据权限类型填充需要的部门 ID 集合。
+     * <ul>
+     *   <li>ALL / SELF：空集合（ALL 无需过滤，SELF 按 created_by 过滤）</li>
+     *   <li>OWN_DEPT：仅用户自己的部门</li>
+     *   <li>OWN_DEPT_AND_CHILD：用户部门 + 所有子孙部门（迭代查询）</li>
+     *   <li>CUSTOM_DEPT：从 mb_iam_role_data_scope_dept 读取配置的部门</li>
+     * </ul>
+     */
+    private Set<Long> resolveScopeDeptIds(DataScopeType scopeType, Long userDeptId,
+                                          List<MbIamRoleRecord> roles) {
+        return switch (scopeType) {
+            case ALL, SELF -> Set.of();
+            case OWN_DEPT -> userDeptId != null ? Set.of(userDeptId) : Set.of();
+            case OWN_DEPT_AND_CHILD -> {
+                if (userDeptId == null) yield Set.of();
+                Set<Long> deptIds = new HashSet<>();
+                collectDeptIdsRecursively(userDeptId, deptIds);
+                yield deptIds;
+            }
+            case CUSTOM_DEPT -> {
+                // 聚合用户所有角色对应的自定义部门 ID
+                List<Long> roleIds = roles.stream().map(MbIamRoleRecord::getId).toList();
+                if (roleIds.isEmpty()) yield Set.of();
+                yield new HashSet<>(roleRepository.findDataScopeDeptIds(roleIds));
+            }
+        };
+    }
+
+    /** 迭代收集指定部门及其所有子孙部门 ID。 */
+    private void collectDeptIdsRecursively(Long deptId, Set<Long> result) {
+        result.add(deptId);
+        List<Long> childIds = deptRepository.findByParentId(deptId)
+            .stream()
+            .map(d -> d.getId())
+            .toList();
+        for (Long childId : childIds) {
+            if (!result.contains(childId)) {
+                collectDeptIdsRecursively(childId, result);
+            }
+        }
     }
 }
