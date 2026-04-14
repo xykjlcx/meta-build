@@ -158,6 +158,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | [0011](docs/adr/0011-version字段按需添加.md) | **version 字段按需添加**（不再强制所有表） | 已采纳 |
 | [0012](docs/adr/0012-全局时间策略clock-bean.md) | **全局时间策略**（Clock Bean + 文档引导） | 已采纳 |
 | [0013](docs/adr/0013-oplog改名platform-log加注解下沉.md) | **platform-oplog → platform-log + @OperationLog 下沉 mb-common** | 已采纳 |
+| [0014](docs/adr/0014-sse-替代-websocket-实时推送.md) | **SSE 替代 WebSocket 作为 v1 实时推送方案** | 已采纳 |
 
 **新增 ADR 的时机**：任何翻转既有决策、引入新架构概念、或修订规划文档的行为，都应该先写 ADR 再改代码/specs。
 

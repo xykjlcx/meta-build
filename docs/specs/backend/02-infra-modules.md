@@ -19,7 +19,7 @@
 | 5 | `infra-i18n` | MessageSource + Accept-Language LocaleResolver | nxboot I18nHelper（改造） | M4 |
 | 6 | `infra-async` | AsyncConfig + 线程池 + 上下文传递 | nxboot AsyncConfig（增强） | M1 |
 | 7 | `infra-rate-limit` | Bucket4j + RateLimitInterceptor（v1 内存版） | nxboot RateLimitInterceptor | M4 |
-| 8 | `infra-websocket` | WebSocket 基础设施 | （v1 留空占位） | v1.5 |
+| 8 | `infra-websocket` | WebSocket 基础设施 | （v1 留空占位，v1 实时推送改用 SSE，见 [ADR-0014](../../adr/0014-sse-替代-websocket-实时推送.md)） | v1.5 |
 | 9 | `infra-observability` | Actuator + Micrometer + Logback JSON + TraceIdFilter | 新增 | M1 启动 + M4 补全 |
 | 10 | `infra-archunit` | ArchUnit 规则库（规则代码，不含测试；测试在 mb-admin） | 新增 | M1 启动 + M4 补全 |
 | 11 | `infra-captcha` | 滑块验证码生成与验证（登录保护等场景） | 新增 | M4 |
