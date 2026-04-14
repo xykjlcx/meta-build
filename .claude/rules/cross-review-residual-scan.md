@@ -15,6 +15,7 @@ scope: [流程, 全栈]
 
 ## How to apply
 - 批量替换完成后，立即 grep 所有旧名称，结果必须为零（或全部是合法保留并逐一确认）
+- **扫描范围必须包含文档**：`docs/specs/`、`docs/handoff/`、`CLAUDE.md`、设计文档。代码归零不等于文档归零——2026-04-14 platform-oplog→platform-log 重命名，代码和测试全绿，但 docs/specs/ 下 6 个文件 20 处残留直到实施后第二轮审查才发现。文档残留会导致 AI 按旧名称生成代码
 - 多 agent 并行修改完成后，dispatch 一个 code-reviewer agent 做残留扫描
 - 残留扫描的范围不限于本次修改的文件，要扫全项目（交叉引用可能在任何文件）
 - 发现残留 → 修复 → 再扫一轮确认

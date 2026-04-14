@@ -50,7 +50,8 @@ scope: [后端/前端/全栈/构建/部署/流程]
 |------|----------|------|
 | [ADR 必须先于代码/文档变更](adr-before-code.md) | 翻转决策, 新架构概念, 改 specs | 0412 ADR-0009~0012 补写教训 |
 | [verify 块纪律](verify-block-discipline.md) | specs, verify, 新增约束 | 0413 verify-docs.sh 覆盖缺口 |
-| [交叉审查 + 残留扫描](cross-review-residual-scan.md) | 批量替换, 重命名, 多 agent 并行 | 0411 命名重构 + 0412 并行修改残留 |
+| [交叉审查 + 残留扫描](cross-review-residual-scan.md) | 批量替换, 重命名, 多 agent 并行 | 0411 命名重构 + 0412 并行修改残留 + **0414 强化：文档残留扫描** |
+| [计划代码片段必须 grep 验证](plan-code-snippets-must-verify.md) | 计划, plan, 方法签名, 实施 | 0414 M4 修复计划 3 处方法名不匹配 |
 
 ### 全栈
 | 规则 | triggers | 来源 |
