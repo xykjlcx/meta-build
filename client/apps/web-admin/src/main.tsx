@@ -1,4 +1,5 @@
 import { configureApiSdk } from '@mb/api-sdk';
+import type { LoginView } from '@mb/api-sdk';
 import {
   DialogContainer,
   GlobalErrorBoundary,
@@ -27,6 +28,25 @@ configureApiSdk({
   basePath: '',
   getToken: () => getAccessToken(),
   getLanguage: () => i18n.language,
+  tryRefreshToken: async () => {
+    const refreshToken = localStorage.getItem('mb_refresh_token');
+    if (!refreshToken) return null;
+    try {
+      // 直接用 fetch 发 refresh 请求，绕过 http-client 的 401 retry 逻辑，避免死锁
+      const resp = await fetch('/api/v1/auth/refresh', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+      if (!resp.ok) return null;
+      const result: LoginView = await resp.json();
+      localStorage.setItem('mb_access_token', result.accessToken);
+      localStorage.setItem('mb_refresh_token', result.refreshToken);
+      return result.accessToken;
+    } catch {
+      return null;
+    }
+  },
   onUnauthenticated: () => {
     window.location.href = '/auth/login';
   },

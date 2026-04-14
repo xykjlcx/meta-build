@@ -10,20 +10,24 @@ export interface ApiSdkConfig extends ErrorHandlerOptions {
   basePath: string;
   getToken: () => string | null;
   getLanguage: () => string;
+  /** 尝试刷新 token，成功返回新 access token，失败返回 null */
+  tryRefreshToken?: () => Promise<string | null>;
 }
 
 let client: HttpClient | null = null;
 
 export function configureApiSdk(config: ApiSdkConfig): void {
-  client = createHttpClient(
-    config.basePath,
-    [
+  client = createHttpClient({
+    basePath: config.basePath,
+    requestInterceptors: [
       createAuthInterceptor(config.getToken),
       createLanguageInterceptor(config.getLanguage),
       createRequestIdInterceptor(),
     ],
-    [createErrorInterceptor(config)],
-  );
+    responseInterceptors: [createErrorInterceptor(config)],
+    tryRefreshToken: config.tryRefreshToken,
+    onUnauthenticated: config.onUnauthenticated,
+  });
 }
 
 export function getClient(): HttpClient {

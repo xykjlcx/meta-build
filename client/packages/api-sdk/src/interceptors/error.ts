@@ -32,7 +32,8 @@ export function createErrorInterceptor(options: ErrorHandlerOptions): ResponseIn
     const err = new ProblemDetailError(payload);
 
     if (err.status === 401) {
-      options.onUnauthenticated();
+      // 不在 interceptor 层调 onUnauthenticated —— 由 http-client retry 逻辑决定：
+      // refresh 成功 → 重试原请求；refresh 失败或未配置 → http-client 调 onUnauthenticated
       throw err;
     }
     if (err.status === 403) {

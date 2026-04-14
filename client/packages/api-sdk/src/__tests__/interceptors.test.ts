@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProblemDetailError, isProblemDetail } from '../errors';
+import { createHttpClient } from '../http-client';
 import { createAuthInterceptor } from '../interceptors/auth';
 import { createErrorInterceptor } from '../interceptors/error';
 import { createLanguageInterceptor } from '../interceptors/language';
@@ -93,12 +94,13 @@ describe('createErrorInterceptor', () => {
     expect(onServerError).not.toHaveBeenCalled();
   });
 
-  it('401 调用 onUnauthenticated 并 throw ProblemDetailError', async () => {
+  it('401 throw ProblemDetailError（不直接调 onUnauthenticated，由 http-client 层决定 refresh 还是跳登录）', async () => {
     const interceptor = createErrorInterceptor({ onUnauthenticated, onForbidden, onServerError });
     const response = makeResponse(401, { type: 'about:blank', status: 401, title: 'Unauthorized' });
 
     await expect(interceptor(response)).rejects.toThrow(ProblemDetailError);
-    expect(onUnauthenticated).toHaveBeenCalledOnce();
+    // 401 的 onUnauthenticated 已移到 http-client 层，interceptor 不再直接调用
+    expect(onUnauthenticated).not.toHaveBeenCalled();
     expect(onForbidden).not.toHaveBeenCalled();
     expect(onServerError).not.toHaveBeenCalled();
   });
@@ -236,5 +238,157 @@ describe('isProblemDetail', () => {
     expect(isProblemDetail('string')).toBe(false);
     expect(isProblemDetail(null)).toBe(false);
     expect(isProblemDetail(undefined)).toBe(false);
+  });
+});
+
+// ── HttpClient 401 refresh + retry ──
+
+describe('createHttpClient — 401 refresh token', () => {
+  const onUnauthenticated = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.restoreAllMocks();
+  });
+
+  it('401 → refresh 成功 → 用新 token 重试原请求', async () => {
+    let callCount = 0;
+    // 第一次返回 401，第二次返回 200
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async (_url, init) => {
+      callCount++;
+      if (callCount === 1) {
+        return new Response(
+          JSON.stringify({ type: 'about:blank', status: 401, title: 'Unauthorized' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+      // 重试时应带新 token
+      const headers = new Headers((init as RequestInit)?.headers);
+      expect(headers.get('Authorization')).toBe('Bearer new-access-token');
+      return new Response(JSON.stringify({ data: 'ok' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    const tryRefreshToken = vi.fn().mockResolvedValue('new-access-token');
+    const errorInterceptor = createErrorInterceptor({
+      onUnauthenticated,
+      onForbidden: vi.fn(),
+      onServerError: vi.fn(),
+    });
+
+    const client = createHttpClient({
+      basePath: '',
+      requestInterceptors: [],
+      responseInterceptors: [errorInterceptor],
+      tryRefreshToken,
+      onUnauthenticated,
+    });
+
+    const result = await client.request<{ data: string }>('/api/test');
+    expect(result).toEqual({ data: 'ok' });
+    expect(tryRefreshToken).toHaveBeenCalledOnce();
+    expect(onUnauthenticated).not.toHaveBeenCalled();
+    expect(callCount).toBe(2);
+  });
+
+  it('401 → refresh 失败（返回 null）→ 调 onUnauthenticated + throw', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({ type: 'about:blank', status: 401, title: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } },
+      ),
+    );
+
+    const tryRefreshToken = vi.fn().mockResolvedValue(null);
+    const errorInterceptor = createErrorInterceptor({
+      onUnauthenticated,
+      onForbidden: vi.fn(),
+      onServerError: vi.fn(),
+    });
+
+    const client = createHttpClient({
+      basePath: '',
+      requestInterceptors: [],
+      responseInterceptors: [errorInterceptor],
+      tryRefreshToken,
+      onUnauthenticated,
+    });
+
+    await expect(client.request('/api/test')).rejects.toThrow(ProblemDetailError);
+    expect(tryRefreshToken).toHaveBeenCalledOnce();
+    expect(onUnauthenticated).toHaveBeenCalledOnce();
+  });
+
+  it('401 但未配置 tryRefreshToken → 直接调 onUnauthenticated + throw', async () => {
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
+      new Response(
+        JSON.stringify({ type: 'about:blank', status: 401, title: 'Unauthorized' }),
+        { status: 401, headers: { 'Content-Type': 'application/json' } },
+      ),
+    );
+
+    const errorInterceptor = createErrorInterceptor({
+      onUnauthenticated,
+      onForbidden: vi.fn(),
+      onServerError: vi.fn(),
+    });
+
+    const client = createHttpClient({
+      basePath: '',
+      requestInterceptors: [],
+      responseInterceptors: [errorInterceptor],
+      onUnauthenticated,
+    });
+
+    await expect(client.request('/api/test')).rejects.toThrow(ProblemDetailError);
+    expect(onUnauthenticated).toHaveBeenCalledOnce();
+  });
+
+  it('并发 401 → 共享同一个 refresh 请求（不重复刷新）', async () => {
+    let callCount = 0;
+    vi.spyOn(globalThis, 'fetch').mockImplementation(async () => {
+      callCount++;
+      if (callCount <= 2) {
+        // 前两次并发请求都返回 401
+        return new Response(
+          JSON.stringify({ type: 'about:blank', status: 401, title: 'Unauthorized' }),
+          { status: 401, headers: { 'Content-Type': 'application/json' } },
+        );
+      }
+      // 重试都成功
+      return new Response(JSON.stringify({ data: 'ok' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    });
+
+    const tryRefreshToken = vi.fn().mockResolvedValue('new-token');
+    const errorInterceptor = createErrorInterceptor({
+      onUnauthenticated,
+      onForbidden: vi.fn(),
+      onServerError: vi.fn(),
+    });
+
+    const client = createHttpClient({
+      basePath: '',
+      requestInterceptors: [],
+      responseInterceptors: [errorInterceptor],
+      tryRefreshToken,
+      onUnauthenticated,
+    });
+
+    // 并发两个请求
+    const [r1, r2] = await Promise.all([
+      client.request<{ data: string }>('/api/a'),
+      client.request<{ data: string }>('/api/b'),
+    ]);
+
+    expect(r1).toEqual({ data: 'ok' });
+    expect(r2).toEqual({ data: 'ok' });
+    // tryRefreshToken 只调用一次
+    expect(tryRefreshToken).toHaveBeenCalledOnce();
+    expect(onUnauthenticated).not.toHaveBeenCalled();
   });
 });
