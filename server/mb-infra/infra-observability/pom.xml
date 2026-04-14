@@ -27,5 +27,16 @@
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
         </dependency>
+        <!-- DatabaseReadinessIndicator 使用 DSLContext 做健康检查 -->
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- MeterRegistry (Micrometer core) -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+        </dependency>
     </dependencies>
 </project>
