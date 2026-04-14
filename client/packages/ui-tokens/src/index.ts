@@ -61,3 +61,6 @@ export const TOKEN_NAMES = {
 } as const;
 
 export const TOTAL_TOKENS = 46;
+
+export { themeRegistry, type ThemeId, type ThemeMeta } from './theme-registry';
+export { applyTheme, loadTheme, initTheme, isValidTheme } from './apply-theme';
