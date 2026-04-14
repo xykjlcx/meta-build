@@ -43,6 +43,21 @@ ls client/packages/api-sdk/src/generated/models/
 # 确认存在：noticeView.ts, noticeDetailView.ts, noticeCreateCommand.ts 等
 ```
 
+- [ ] 更新 `client/packages/api-sdk/package.json` 的 `exports` map，新增子路径导出：
+
+```json
+{
+  "exports": {
+    ".": "./src/index.ts",
+    "./mutator/*": "./src/mutator/*",
+    "./generated/*": "./src/generated/*"
+  }
+}
+```
+
+> 这样手写代码中可以用 `import { customInstance } from '@mb/api-sdk/mutator/custom-instance'` 干净路径，
+> 不需要走 `../../mutator/custom-instance` 这种相对路径。
+
 - [ ] 确认 hooks 名称映射（从现有生成代码确认）：
 
 | 后端端点 | orval 生成的 hook | 类型 |
@@ -184,9 +199,38 @@ cd client && pnpm lint
     "forceLogout": "您已被管理员下线：{{reason}}"
   },
   "pagination": {
-    "info": "共 {total} 条，第 {page}/{pages} 页",
+    "info": "共 {{total}} 条，第 {{page}}/{{pages}} 页",
     "prev": "上一页",
     "next": "下一页"
+  },
+  "upload": {
+    "unsupportedFormat": "不支持的文件格式",
+    "fileTooLarge": "文件大小不能超过 {{max}}MB",
+    "uploading": "上传中...",
+    "uploadFailed": "上传失败",
+    "downloadFailed": "下载失败"
+  },
+  "wechatError": {
+    "authUrlFailed": "获取授权链接失败",
+    "unbindFailed": "解绑失败"
+  },
+  "log": {
+    "channel": "渠道",
+    "recipient": "接收人",
+    "status": "状态",
+    "errorMessage": "错误信息",
+    "sentAt": "发送时间",
+    "channelType": {
+      "IN_APP": "站内信",
+      "EMAIL": "邮件",
+      "WECHAT_MP": "微信公众号",
+      "WECHAT_MINI": "微信小程序"
+    },
+    "statusLabel": {
+      "0": "待发送",
+      "1": "成功",
+      "2": "失败"
+    }
   }
 }
 ```
@@ -293,9 +337,38 @@ cd client && pnpm lint
     "forceLogout": "You have been logged out by admin: {{reason}}"
   },
   "pagination": {
-    "info": "Total {total}, Page {page}/{pages}",
+    "info": "Total {{total}}, Page {{page}}/{{pages}}",
     "prev": "Previous",
     "next": "Next"
+  },
+  "upload": {
+    "unsupportedFormat": "Unsupported file format",
+    "fileTooLarge": "File size cannot exceed {{max}}MB",
+    "uploading": "Uploading...",
+    "uploadFailed": "Upload failed",
+    "downloadFailed": "Download failed"
+  },
+  "wechatError": {
+    "authUrlFailed": "Failed to get authorization link",
+    "unbindFailed": "Unbind failed"
+  },
+  "log": {
+    "channel": "Channel",
+    "recipient": "Recipient",
+    "status": "Status",
+    "errorMessage": "Error Message",
+    "sentAt": "Sent At",
+    "channelType": {
+      "IN_APP": "In-App",
+      "EMAIL": "Email",
+      "WECHAT_MP": "WeChat MP",
+      "WECHAT_MINI": "WeChat Mini"
+    },
+    "statusLabel": {
+      "0": "Pending",
+      "1": "Success",
+      "2": "Failed"
+    }
   }
 }
 ```
@@ -586,7 +659,6 @@ export function BatchConfirmDialog({
 
 ```tsx
 import { useCurrentUser } from '@mb/app-shell';
-import { triggerDownload } from '@mb/api-sdk';
 import { Button, cn } from '@mb/ui-primitives';
 import { NxBar, NxFilter, NxFilterField, NxTable } from '@mb/ui-patterns';
 import type { NxTablePagination } from '@mb/ui-patterns';
@@ -633,8 +705,6 @@ import {
   useBatchDelete,
   getList4QueryKey,
   getUnreadCountQueryKey,
-  _export,
-  getExportUrl,
 } from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
 import type { NoticeView } from '@mb/api-sdk/generated/models';
 import { NOTICE_STATUS, PAGE_SIZE, type NoticeStatusValue } from '../constants';
@@ -825,29 +895,16 @@ export function NoticeListPage() {
   }, [batchConfirm, batchPublishMutation, batchDeleteMutation, invalidateNotices]);
 
   // ─── 导出 ──────────────────────────────────────────
-  const handleExport = useCallback(async () => {
-    try {
-      // 导出使用 blob 模式，直接构造 URL 下载
-      const url = getExportUrl({
-        status: filter.status ? Number(filter.status) : undefined,
-        keyword: filter.keyword || undefined,
-        startTimeFrom: filter.startTimeFrom || undefined,
-        startTimeTo: filter.startTimeTo || undefined,
-      });
-      const response = await _export(
-        {
-          status: filter.status ? Number(filter.status) : undefined,
-          keyword: filter.keyword || undefined,
-        },
-        { responseType: 'blob' } as RequestInit,
-      );
-      // 后端返回的是文件流，通过 a 标签下载
-      const blob = response as unknown as Blob;
-      triggerDownload(blob, `notices_${new Date().toISOString().slice(0, 10)}.xlsx`);
-    } catch {
-      toast.error(t('error.exportRateLimit'));
-    }
-  }, [filter, t]);
+  const handleExport = useCallback(() => {
+    // fetch 不支持 responseType: 'blob'，直接用 window.open 触发浏览器下载
+    const params = new URLSearchParams();
+    if (filter.status) params.set('status', filter.status);
+    if (filter.keyword) params.set('keyword', filter.keyword);
+    if (filter.startTimeFrom) params.set('startTimeFrom', filter.startTimeFrom);
+    if (filter.startTimeTo) params.set('startTimeTo', filter.startTimeTo);
+    const qs = params.toString();
+    window.open(`/api/v1/notices/export${qs ? `?${qs}` : ''}`, '_blank');
+  }, [filter]);
 
   // ─── 新增/编辑 ─────────────────────────────────────
   const handleCreate = useCallback(() => {
@@ -1078,16 +1135,17 @@ export function NoticeListPage() {
         emptyText={t('list.empty')}
         pagination={currentPagination}
         onPaginationChange={setPagination}
-        paginationInfoTemplate={t('pagination.info')}
+        paginationInfoTemplate={t('pagination.info', { total: currentPagination.totalElements, page: currentPagination.page, pages: currentPagination.totalPages })}
         rowSelection={rowSelection}
         onRowSelectionChange={setRowSelection}
         onRowClick={(row) => navigate({ to: '/notices/$id', params: { id: String(row.id) } })}
       />
 
       {/* 批量操作栏 */}
+      {/* L3 组件的模板 props 接收已插值的字符串，i18n 层负责所有插值 */}
       <NxBar
         selectedCount={selectedIds.length}
-        selectedTemplate={t('batch.selected')}
+        selectedTemplate={t('batch.selected', { count: selectedIds.length })}
         onClear={() => setRowSelection({})}
         clearLabel={t('batch.clear')}
         fixed
@@ -1266,7 +1324,7 @@ import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { customInstance } from '@mb/api-sdk/generated/endpoints/公告管理/../../mutator/custom-instance';
+import { customInstance } from '@mb/api-sdk/mutator/custom-instance';
 import {
   ATTACHMENT_ALLOWED_EXTENSIONS,
   ATTACHMENT_MAX_COUNT,
@@ -1318,13 +1376,13 @@ export function FileUploadField({ name, control }: FileUploadFieldProps) {
         // 格式校验
         const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
         if (!ATTACHMENT_ALLOWED_EXTENSIONS.includes(ext as typeof ATTACHMENT_ALLOWED_EXTENSIONS[number])) {
-          toast.error(`${file.name}: 不支持的文件格式`);
+          toast.error(`${file.name}: ${t('upload.unsupportedFormat')}`);
           continue;
         }
 
         // 大小校验
         if (file.size > ATTACHMENT_MAX_SIZE_MB * 1024 * 1024) {
-          toast.error(`${file.name}: 文件大小不能超过 ${ATTACHMENT_MAX_SIZE_MB}MB`);
+          toast.error(`${file.name}: ${t('upload.fileTooLarge', { max: ATTACHMENT_MAX_SIZE_MB })}`);
           continue;
         }
 
@@ -1340,7 +1398,7 @@ export function FileUploadField({ name, control }: FileUploadFieldProps) {
           newFiles.push({ fileId: uploaded.fileId, fileName: uploaded.fileName ?? file.name });
           newFileIds.push(uploaded.fileId);
         } catch {
-          toast.error(`${file.name}: 上传失败`);
+          toast.error(`${file.name}: ${t('upload.uploadFailed')}`);
         }
       }
 
@@ -1377,7 +1435,7 @@ export function FileUploadField({ name, control }: FileUploadFieldProps) {
           onClick={() => inputRef.current?.click()}
         >
           <Upload className="mr-1 size-4" />
-          {uploading ? '上传中...' : t('form.attachments')}
+          {uploading ? t('upload.uploading') : t('form.attachments')}
         </Button>
         <span className="text-sm text-muted-foreground">
           {currentFileIds.length}/{ATTACHMENT_MAX_COUNT}
@@ -1890,23 +1948,10 @@ interface NotificationLogTabProps {
   noticeId: number;
 }
 
-const CHANNEL_LABELS: Record<string, string> = {
-  IN_APP: '站内信',
-  EMAIL: '邮件',
-  WECHAT_MP: '微信公众号',
-  WECHAT_MINI: '微信小程序',
-};
-
 const STATUS_VARIANT: Record<number, 'secondary' | 'default' | 'destructive'> = {
   0: 'secondary',
   1: 'default',
   2: 'destructive',
-};
-
-const STATUS_LABEL: Record<number, string> = {
-  0: 'Pending',
-  1: 'Success',
-  2: 'Failed',
 };
 
 export function NotificationLogTab({ noticeId: _noticeId }: NotificationLogTabProps) {
@@ -1920,40 +1965,40 @@ export function NotificationLogTab({ noticeId: _noticeId }: NotificationLogTabPr
     () => [
       {
         accessorKey: 'channelType',
-        header: '渠道',
-        cell: ({ getValue }) => CHANNEL_LABELS[getValue<string>()] ?? getValue<string>(),
+        header: t('log.channel'),
+        cell: ({ getValue }) => t(`log.channelType.${getValue<string>()}`),
       },
       {
         accessorKey: 'recipientName',
-        header: '接收人',
+        header: t('log.recipient'),
       },
       {
         accessorKey: 'status',
-        header: '状态',
+        header: t('log.status'),
         cell: ({ getValue }) => {
           const s = getValue<number>();
           return (
             <Badge variant={STATUS_VARIANT[s] ?? 'secondary'}>
-              {STATUS_LABEL[s] ?? String(s)}
+              {t(`log.statusLabel.${s}`)}
             </Badge>
           );
         },
       },
       {
         accessorKey: 'errorMessage',
-        header: '错误信息',
+        header: t('log.errorMessage'),
         cell: ({ getValue }) => getValue<string>() || '-',
       },
       {
         accessorKey: 'sentAt',
-        header: '发送时间',
+        header: t('log.sentAt'),
         cell: ({ getValue }) => {
           const val = getValue<string>();
           return val ? new Date(val).toLocaleString() : '-';
         },
       },
     ],
-    [],
+    [t],
   );
 
   return (
@@ -2128,7 +2173,7 @@ export function NoticeDetailPage() {
       const blob = await response.blob();
       triggerDownload(blob, fileName);
     } catch {
-      toast.error('下载失败');
+      toast.error(t('upload.downloadFailed'));
     }
   }, []);
 
@@ -2352,7 +2397,8 @@ cd client && pnpm lint
 
 **Files:**
 - `client/packages/app-shell/src/components/notification-badge.tsx` (Create)
-- `client/packages/app-shell/src/components/header.tsx` (Modify)
+- `client/packages/app-shell/src/components/header.tsx` (Modify, 接受 `notificationSlot` 插槽)
+- `client/packages/app-shell/src/layouts/sidebar-layout.tsx` (Modify, 透传 `notificationSlot`)
 - `client/packages/app-shell/src/index.ts` (Modify, 导出 NotificationBadge)
 
 **Steps:**
@@ -2363,30 +2409,28 @@ cd client && pnpm lint
 import { Badge, Button } from '@mb/ui-primitives';
 import { Bell } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
-import { customInstance } from '@mb/api-sdk/generated/endpoints/公告管理/../../mutator/custom-instance';
-
 /**
- * 未读公告计数 Badge。
+ * 未读公告计数 Badge — 通用组件。
  *
- * 直接调用 API 而非使用 orval 生成的 hook，
- * 避免 L4 依赖 L5 的生成代码路径。
- * 查询 key 与 orval 生成的 getUnreadCountQueryKey 保持一致。
+ * L4 组件不依赖任何业务 API，查询函数由 L5 注入。
  */
-export function NotificationBadge({ onClick }: { onClick?: () => void }) {
+export interface NotificationBadgeProps {
+  /** 查询函数，返回未读数量 */
+  queryFn: () => Promise<number>;
+  /** TanStack Query 的 queryKey */
+  queryKey: string[];
+  onClick?: () => void;
+}
+
+export function NotificationBadge({ queryFn, queryKey, onClick }: NotificationBadgeProps) {
   const { data } = useQuery({
-    queryKey: ['/api/v1/notices/unread-count'],
-    queryFn: async () => {
-      const result = await customInstance<{ data: { count?: number } }>(
-        '/api/v1/notices/unread-count',
-        { method: 'GET' },
-      );
-      return result.data;
-    },
+    queryKey,
+    queryFn,
     staleTime: 60_000, // 1 分钟缓存
     retry: 1,
   });
 
-  const count = data?.count ?? 0;
+  const count = data ?? 0;
 
   return (
     <Button variant="ghost" size="sm" onClick={onClick} className="relative">
@@ -2404,24 +2448,24 @@ export function NotificationBadge({ onClick }: { onClick?: () => void }) {
 }
 ```
 
-- [ ] 修改 `client/packages/app-shell/src/components/header.tsx`，在右侧工具栏 Separator 之前插入 NotificationBadge：
-
-在 `header.tsx` 中导入 NotificationBadge 并添加到工具栏：
+- [ ] 修改 `client/packages/app-shell/src/components/header.tsx`，Header 接受可选的 `notificationSlot`，由 L5 注入 NotificationBadge：
 
 ```tsx
 import { Avatar, AvatarFallback, Button, Separator } from '@mb/ui-primitives';
 import { LogOut, User } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useAuth, useCurrentUser } from '../auth';
 import { LanguageSwitcher } from './language-switcher';
-import { NotificationBadge } from './notification-badge';
 import { ThemeSwitcher } from './theme-switcher';
 
 /**
  * 顶部 Header 栏（用于 SidebarLayout）。
- * 右侧工具栏：语言切换 + 主题切换 + 未读通知 + 用户头像 + 退出。
+ * 右侧工具栏：语言切换 + 主题切换 + [可选通知插槽] + 用户头像 + 退出。
+ *
+ * notificationSlot 由 L5 注入，L4 不依赖任何业务 API。
  */
-export function Header() {
+export function Header({ notificationSlot }: { notificationSlot?: ReactNode }) {
   const { t } = useTranslation('shell');
   const user = useCurrentUser();
   const { logout, isLoggingOut } = useAuth();
@@ -2435,7 +2479,7 @@ export function Header() {
       <div className="flex items-center gap-1">
         <LanguageSwitcher />
         <ThemeSwitcher />
-        <NotificationBadge />
+        {notificationSlot}
         <Separator orientation="vertical" className="mx-1 h-5" />
         <div className="flex items-center gap-2">
           <Avatar size="sm">
@@ -2463,6 +2507,19 @@ export function Header() {
 }
 ```
 
+- [ ] 修改 `client/packages/app-shell/src/layouts/sidebar-layout.tsx`，`SidebarLayout` 接受可选 `notificationSlot` prop 并传递给 `Header`：
+
+```tsx
+// SidebarLayout props 新增
+interface SidebarLayoutProps {
+  children: ReactNode;
+  notificationSlot?: ReactNode;
+}
+
+// 在 render 中传递给 Header
+<Header notificationSlot={notificationSlot} />
+```
+
 **Verify:**
 
 ```bash
@@ -2470,7 +2527,7 @@ cd client && pnpm check:types
 cd client && pnpm lint
 ```
 
-**Commit:** `feat(notice): 未读计数 Badge 集成到 Header`
+**Commit:** `feat(notice): 未读计数 Badge 集成到 Header（通用 queryFn 注入）`
 
 ---
 
@@ -2753,8 +2810,10 @@ export function SseHandlers() {
 
 ```tsx
 import { authApi } from '@mb/api-sdk';
-import { SidebarLayout, toCurrentUser, useSseConnection } from '@mb/app-shell';
-import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
+import { customInstance } from '@mb/api-sdk/mutator/custom-instance';
+import { NotificationBadge, SidebarLayout, toCurrentUser, useSseConnection } from '@mb/app-shell';
+import { Outlet, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
+import { useCallback } from 'react';
 import { SseHandlers } from '../features/notice/components/sse-handlers';
 
 export const Route = createFileRoute('/_authed')({
@@ -2779,9 +2838,27 @@ export const Route = createFileRoute('/_authed')({
 function AuthedLayout() {
   // SSE 连接管理（登录后自动建连）
   useSseConnection();
+  const navigate = useNavigate();
+
+  // L5 注入未读计数查询函数给 L4 的 NotificationBadge
+  const unreadQueryFn = useCallback(async () => {
+    const result = await customInstance<{ data: { count?: number } }>(
+      '/api/v1/notices/unread-count',
+      { method: 'GET' },
+    );
+    return result.data?.count ?? 0;
+  }, []);
 
   return (
-    <SidebarLayout>
+    <SidebarLayout
+      notificationSlot={
+        <NotificationBadge
+          queryFn={unreadQueryFn}
+          queryKey={['/api/v1/notices/unread-count']}
+          onClick={() => navigate({ to: '/notices' })}
+        />
+      }
+    >
       <SseHandlers />
       <Outlet />
     </SidebarLayout>
@@ -2868,10 +2945,10 @@ import {
   CardTitle,
 } from '@mb/ui-primitives';
 import { createFileRoute } from '@tanstack/react-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { customInstance } from '@mb/api-sdk/generated/endpoints/公告管理/../../mutator/custom-instance';
+import { customInstance } from '@mb/api-sdk/mutator/custom-instance';
 
 export const Route = createFileRoute('/_authed/settings/wechat-bind')({
   beforeLoad: requireAuth(),
@@ -2916,7 +2993,7 @@ function WechatBindPage() {
       // 跳转微信授权页
       window.location.href = result.data.authUrl;
     } catch {
-      toast.error('获取授权链接失败');
+      toast.error(t('wechatError.authUrlFailed'));
     }
   }, []);
 
@@ -2931,16 +3008,16 @@ function WechatBindPage() {
         toast.success(t('wechat.unbind'));
         fetchBindings();
       } catch {
-        toast.error('解绑失败');
+        toast.error(t('wechatError.unbindFailed'));
       }
     },
     [fetchBindings, t],
   );
 
   // 初始化加载
-  useState(() => {
+  useEffect(() => {
     fetchBindings();
-  });
+  }, []);
 
   const mpBinding = bindings.find((b) => b.platform === 'MP');
   const miniBinding = bindings.find((b) => b.platform === 'MINI');
@@ -3486,3 +3563,28 @@ cd client/apps/web-admin && npx playwright test --reporter=list
 - 所有 API 调用通过 `@mb/api-sdk`（orval 生成或 customInstance）
 - i18n 全量覆盖，静态文案走 i18next
 - 代码英文，注释中文
+
+---
+
+## Review 记录
+
+**Review 日期**: 2026-04-15
+**Review 方式**: 计划审查（plan-review-before-execution）
+
+### Critical（已修复）
+
+| ID | 问题 | 修复方式 |
+|----|------|---------|
+| C1 | NxBar/NxTable 模板插值约定不统一：i18n 用 `{{count}}` 双括号，但 pagination.info 用 `{total}` 单括号 | i18n JSON 统一改为双括号 `{{count}}`/`{{total}}`/`{{page}}`/`{{pages}}`；调用处改为 `t('key', {params})` 先插值再传给 L3 组件；加注释说明约定 |
+| C2 | 微信绑定页 `useState(() => { fetchBindings() })` 是 bug，useState 的 initializer 不应发起副作用 | 改为 `useEffect(() => { fetchBindings() }, [])`，import 补充 `useEffect` |
+| C3 | `customInstance` 导入路径脆弱：`@mb/api-sdk/generated/endpoints/公告管理/../../mutator/custom-instance` | 所有手写代码改为 `@mb/api-sdk/mutator/custom-instance`；Task 1 新增步骤更新 `api-sdk/package.json` exports map |
+
+### Important（已修复）
+
+| ID | 问题 | 修复方式 |
+|----|------|---------|
+| I1 | NotificationBadge 放 L4 但直接调用业务 API，违反依赖方向 | 改为通用组件 `NotificationBadgeProps { queryFn, queryKey }`，L5 的 `_authed.tsx` 注入具体查询；Header 改为接收 `notificationSlot` 插槽 |
+| I2 | api-sdk package.json exports 不完整 | 与 C3 合并修复，Task 1 新增 exports map 步骤 |
+| I3 | 多处硬编码中文未走 i18n | file-upload-field.tsx / wechat-bind.tsx / detail page 的硬编码中文改为 i18n key；zh-CN 和 en-US 补充 `upload.*` 和 `wechatError.*` key |
+| I4 | Excel 导出用 `_export()` + `responseType: 'blob'` 行不通（fetch 不支持 responseType） | 改为 `window.open(exportUrl, '_blank')`，移除 `_export`/`getExportUrl`/`triggerDownload` 的无效导入 |
+| I6 | notification-log-tab 列头硬编码中文 | 列头改为 `t('log.channel')` 等；zh-CN 和 en-US 补充 `log.*` key（含 channelType 和 statusLabel 子对象） |

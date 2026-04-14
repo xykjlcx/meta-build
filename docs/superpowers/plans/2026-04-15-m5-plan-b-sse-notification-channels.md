@@ -5,9 +5,11 @@
 **Goal:** 搭建 SSE 实时推送基础设施（infra-sse），升级 platform-notification 为多渠道通知系统（站内信+邮件+微信公众号+微信小程序），串联 Notice 发布→通知分发全链路。
 
 **Architecture:**
-- Phase 3: `infra-sse` 模块提供业务无关的 SSE 连接管理、心跳、单播/广播、踢人下线能力，位于 infra 层
+- Phase 3: `infra-sse` 模块提供业务无关的 SSE 连接管理、心跳、单播/广播能力，位于 infra 层；踢人下线的 Redis 兜底拦截器 `ForceLogoutCheckInterceptor` 位于 `infra-security`（因 ArchUnit 规则只允许 infra-security 和 infra-exception 使用 StpUtil）
 - Phase 4: `platform-notification` 升级为渠道抽象 + 多渠道分发，新增 `NotificationChannel` 接口 + `NotificationDispatcher` + 4 个 channel 实现 + 发送记录表
 - 最后串联 Notice publish → AFTER_COMMIT → NotificationDispatcher，替换 Plan A 中的简单 NotificationApi.create() 调用
+
+> **注意**：specs 中提到的短信和 Webhook 渠道推迟到后续 milestone，本 Plan 仅实现 4 个渠道（IN_APP/EMAIL/WECHAT_MP/WECHAT_MINI）。
 
 **Tech Stack:** Spring Boot 3.5 + SseEmitter + StringRedisTemplate + JavaMailSender + Thymeleaf + weixin-java-mp/miniapp 4.6.7
 
@@ -67,17 +69,16 @@
             <artifactId>jackson-databind</artifactId>
         </dependency>
 
-        <!-- 限流注解（@RateLimit 用于 SSE connect 端点限流） -->
+        <!-- Bucket4j（SSE 建连限流：5 次/分钟/用户） -->
         <dependency>
-            <groupId>com.metabuild</groupId>
-            <artifactId>infra-rate-limit</artifactId>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j-core</artifactId>
         </dependency>
 
-        <!-- Sa-Token（ForceLogoutCheckInterceptor 使用 StpUtil 检查登录态） -->
+        <!-- mb-common（CurrentUser 接口） -->
         <dependency>
-            <groupId>cn.dev33</groupId>
-            <artifactId>sa-token-spring-boot3-starter</artifactId>
-            <scope>provided</scope>
+            <groupId>com.metabuild</groupId>
+            <artifactId>mb-common</artifactId>
         </dependency>
 
         <!-- OpenAPI 注解（springdoc） -->
@@ -144,21 +145,20 @@ public record SseProperties(
 package com.metabuild.infra.sse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.metabuild.common.security.CurrentUser;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
  * SSE 模块自动配置入口。
  *
  * <p>注册 SSE 连接管理、消息发送、心跳调度全部组件。
- * 启用 @EnableScheduling 以支持心跳定时任务。
+ * 注意：@EnableScheduling 由 platform-job 已声明，此处不重复声明。
  */
 @AutoConfiguration
 @EnableConfigurationProperties(SseProperties.class)
-@EnableScheduling
 public class SseAutoConfiguration {
 
     @Bean
@@ -182,8 +182,9 @@ public class SseAutoConfiguration {
     @Bean
     public SseConnectionController sseConnectionController(
             SseSessionRegistry registry,
-            SseProperties properties) {
-        return new SseConnectionController(registry, properties);
+            SseProperties properties,
+            com.metabuild.common.security.CurrentUser currentUser) {
+        return new SseConnectionController(registry, properties, currentUser);
     }
 }
 ```
@@ -508,7 +509,9 @@ cd server && mvn compile -pl mb-infra/infra-sse -am
 package com.metabuild.infra.sse;
 
 import com.metabuild.common.security.CurrentUser;
-import com.metabuild.infra.ratelimit.RateLimit;
+import io.github.bucket4j.Bandwidth;
+import io.github.bucket4j.Bucket;
+import io.github.bucket4j.Refill;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -522,13 +525,16 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.time.Duration;
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * SSE 连接端点。
  *
  * <p>GET /api/v1/sse/connect — 建立 SSE 长连接。
  * 已登录用户才能建连（走全局 SaInterceptor 认证）。
  *
- * <p>每用户每分钟 5 次建连限制（防止异常客户端频繁重连）。
+ * <p>每用户每分钟 5 次建连限制（防止异常客户端频繁重连），使用 Bucket4j 手写限流。
  * 全局连接数上限由 SseProperties.maxConnections 控制。
  */
 @RestController
@@ -539,14 +545,27 @@ public class SseConnectionController {
 
     private static final Logger log = LoggerFactory.getLogger(SseConnectionController.class);
 
+    /** 每用户限流桶：5 次/分钟 */
+    private static final ConcurrentHashMap<Long, Bucket> RATE_LIMIT_BUCKETS = new ConcurrentHashMap<>();
+
     private final SseSessionRegistry registry;
     private final SseProperties properties;
+    private final CurrentUser currentUser;
 
     @GetMapping(value = "/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "建立 SSE 连接", description = "已登录用户建立 SSE 长连接，接收实时消息")
-    @RateLimit(qps = 5)
-    public SseEmitter connect(CurrentUser currentUser) {
+    public SseEmitter connect() {
         Long userId = currentUser.userId();
+
+        // 每用户每分钟 5 次建连限流（Bucket4j）
+        Bucket bucket = RATE_LIMIT_BUCKETS.computeIfAbsent(userId, id ->
+                Bucket.builder()
+                        .addLimit(Bandwidth.classic(5, Refill.greedy(5, Duration.ofMinutes(1))))
+                        .build());
+        if (!bucket.tryConsume(1)) {
+            log.warn("SSE 建连限流：用户 {} 每分钟建连次数超过 5 次", userId);
+            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS, "建连过于频繁，请稍后重试");
+        }
 
         // 全局连接数限制
         if (registry.size() >= properties.maxConnections()) {
@@ -577,7 +596,7 @@ public class SseConnectionController {
 }
 ```
 
-> **注意**：`@RateLimit` 注解来自 `infra-rate-limit` 模块，签名为 `@RateLimit(qps, key)`。`qps=5` 表示每秒最多 5 次请求。`SseConnectionController` 通过 `SseAutoConfiguration` 注册为 Bean（不使用 `@ComponentScan`），限流拦截器由 `RateLimitAutoConfiguration` 全局注册。如果需要"每分钟 5 次"的时间窗口语义而非"每秒 5 次"，则改为在 Controller 方法内手动创建 Bucket4j Bucket 做自定义限流检查（`Bandwidth.classic(5, Refill.greedy(5, Duration.ofMinutes(1)))`）。
+> **注意**：限流采用 Bucket4j 手写实现（5 次/分钟/用户），而非 `@RateLimit` 注解（该注解是 QPS 语义，即每秒 N 次）。使用 `ConcurrentHashMap<Long, Bucket>` 的静态 Map 存储每用户的限流桶。`CurrentUser` 通过构造器注入（`SseAutoConfiguration` 中传入），不是方法参数（Spring MVC 没有 `CurrentUser` 的 ArgumentResolver）。
 
 **Verify:**
 
@@ -593,8 +612,8 @@ cd server && mvn compile -pl mb-infra/infra-sse -am
 
 **Files:**
 - `server/mb-infra/infra-sse/src/main/java/com/metabuild/infra/sse/SseHeartbeatScheduler.java`（新建）
-- `server/mb-infra/infra-sse/src/main/java/com/metabuild/infra/sse/ForceLogoutCheckInterceptor.java`（新建）
-- `server/mb-infra/infra-sse/src/main/java/com/metabuild/infra/sse/SseAutoConfiguration.java`（修改，注册拦截器）
+- `server/mb-infra/infra-security/src/main/java/com/metabuild/infra/security/ForceLogoutCheckInterceptor.java`（新建）
+- `server/mb-infra/infra-security/src/main/java/com/metabuild/infra/security/SecurityAutoConfiguration.java`（修改，注册拦截器）
 
 **Steps:**
 
@@ -645,10 +664,10 @@ public class SseHeartbeatScheduler {
 }
 ```
 
-- [ ] 创建 `server/mb-infra/infra-sse/src/main/java/com/metabuild/infra/sse/ForceLogoutCheckInterceptor.java`：
+- [ ] 创建 `server/mb-infra/infra-security/src/main/java/com/metabuild/infra/security/ForceLogoutCheckInterceptor.java`：
 
 ```java
-package com.metabuild.infra.sse;
+package com.metabuild.infra.security;
 
 import cn.dev33.satoken.stp.StpUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -661,15 +680,18 @@ import org.springframework.web.servlet.HandlerInterceptor;
 /**
  * force-logout Redis 兜底拦截器。
  *
- * <p>每次 HTTP 请求检查 Redis SET mb:kicked:{userId}，
+ * <p>每次 HTTP 请求检查 Redis key mb:kicked:{userId}，
  * 如果存在则清除登录态 + 删除 Redis 标记 + 返回 401。
  *
  * <p>设计意图：即使 SSE 推送的 force-logout 消息未送达（网络断开等），
  * 用户下次发起任何 HTTP 请求时也会被拦截。
  *
- * <p><strong>注意</strong>：此拦截器依赖 Sa-Token 的 StpUtil，
- * 因此仅限 infra-sse 模块内部使用（由 SseAutoConfiguration 注册），
- * 不暴露给 business 层。
+ * <p>注意：此拦截器使用 StpUtil（Sa-Token），位于 infra-security 模块——
+ * 符合 ArchUnit 规则 {@code ONLY_INFRA_SECURITY_DEPENDS_ON_SA_TOKEN}，
+ * 只有 infra-security 和 infra-exception 可以依赖 Sa-Token。
+ *
+ * <p>注意：spec 原设计用 Redis SET（opsForSet），此处改用 String + TTL，
+ * 更简洁且满足需求（只需判断 key 是否存在）。
  */
 public class ForceLogoutCheckInterceptor implements HandlerInterceptor {
 
@@ -712,36 +734,30 @@ public class ForceLogoutCheckInterceptor implements HandlerInterceptor {
 }
 ```
 
-- [ ] 修改 `server/mb-infra/infra-sse/src/main/java/com/metabuild/infra/sse/SseAutoConfiguration.java`，新增拦截器注册和 WebMvcConfigurer 实现：
+- [ ] 修改 `server/mb-infra/infra-sse/src/main/java/com/metabuild/infra/sse/SseAutoConfiguration.java`，新增心跳调度器注册（注意：不再包含 ForceLogoutCheckInterceptor，该拦截器已移到 infra-security）：
 
 ```java
 package com.metabuild.infra.sse;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.metabuild.common.security.CurrentUser;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
  * SSE 模块自动配置入口。
  *
- * <p>注册 SSE 连接管理、消息发送、心跳调度、force-logout 兜底拦截器全部组件。
- * 启用 @EnableScheduling 以支持心跳定时任务。
+ * <p>注册 SSE 连接管理、消息发送、心跳调度全部组件。
+ * 注意：@EnableScheduling 由 platform-job 声明，不在此处重复声明。
+ *
+ * <p>force-logout 兜底拦截器（ForceLogoutCheckInterceptor）位于 infra-security 模块，
+ * 因 ArchUnit 规则只允许 infra-security 和 infra-exception 使用 StpUtil。
  */
 @AutoConfiguration
 @EnableConfigurationProperties(SseProperties.class)
-@EnableScheduling
-public class SseAutoConfiguration implements WebMvcConfigurer {
-
-    private final StringRedisTemplate redisTemplate;
-
-    public SseAutoConfiguration(StringRedisTemplate redisTemplate) {
-        this.redisTemplate = redisTemplate;
-    }
+public class SseAutoConfiguration {
 
     @Bean
     public SseSessionRegistry sseSessionRegistry() {
@@ -764,8 +780,52 @@ public class SseAutoConfiguration implements WebMvcConfigurer {
     @Bean
     public SseConnectionController sseConnectionController(
             SseSessionRegistry registry,
-            SseProperties properties) {
-        return new SseConnectionController(registry, properties);
+            SseProperties properties,
+            CurrentUser currentUser) {
+        return new SseConnectionController(registry, properties, currentUser);
+    }
+}
+```
+
+- [ ] 修改 `server/mb-infra/infra-security/src/main/java/com/metabuild/infra/security/SecurityAutoConfiguration.java`，注册 `ForceLogoutCheckInterceptor` 并通过 `@Import` 声明：
+
+```java
+package com.metabuild.infra.security;
+
+import cn.dev33.satoken.interceptor.SaInterceptor;
+import cn.dev33.satoken.stp.StpUtil;
+import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+/**
+ * infra-security 自动配置入口。
+ * 注册认证/授权/CORS/密码编码器/force-logout 兜底全部组件。
+ */
+@AutoConfiguration
+@EnableConfigurationProperties({MbAuthProperties.class, MbCorsProperties.class})
+@EnableAspectJAutoProxy
+@Import({
+        SaTokenJwtConfig.class,
+        CorsConfig.class,
+        PasswordEncoderConfig.class,
+        SaTokenCurrentUser.class,
+        SaPermissionImpl.class,
+        RequirePermissionAspect.class,
+        SaTokenAuthFacade.class,
+        RefreshTokenService.class
+})
+public class SecurityAutoConfiguration implements WebMvcConfigurer {
+
+    private final StringRedisTemplate redisTemplate;
+
+    public SecurityAutoConfiguration(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
     }
 
     @Bean
@@ -774,11 +834,25 @@ public class SseAutoConfiguration implements WebMvcConfigurer {
     }
 
     /**
-     * 注册 force-logout 兜底拦截器。
-     * 在 /api/** 路径上检查 Redis 踢人标记。
+     * 全局认证拦截器 + force-logout 兜底拦截器。
+     * opt-out 模式（默认拦截），而非 opt-in（默认放行）。
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        // 1. 全局认证拦截器
+        registry.addInterceptor(new SaInterceptor(handle -> StpUtil.checkLogin()))
+                .addPathPatterns("/api/**")
+                .excludePathPatterns(
+                        "/api/v1/auth/login",
+                        "/api/v1/auth/refresh",
+                        "/api/v1/public/**",
+                        "/api-docs",
+                        "/api-docs/**",
+                        "/swagger-ui/**",
+                        "/swagger-ui.html"
+                );
+
+        // 2. force-logout Redis 兜底拦截器（在认证拦截器之后执行）
         registry.addInterceptor(forceLogoutCheckInterceptor())
                 .addPathPatterns("/api/**")
                 .excludePathPatterns(
@@ -790,9 +864,9 @@ public class SseAutoConfiguration implements WebMvcConfigurer {
 }
 ```
 
-> **注意**：`ForceLogoutCheckInterceptor` 内部使用 `StpUtil`（Sa-Token），这是合理的——它位于 infra 层（infra-sse），与 infra-security 同层。Sa-Token 依赖已在 Task 1 的 pom.xml 中以 `provided` scope 声明，运行时由 mb-admin 的类路径传递。
+> **注意**：`ForceLogoutCheckInterceptor` 位于 `infra-security` 模块（`com.metabuild.infra.security` 包），符合 ArchUnit 规则 `ONLY_INFRA_SECURITY_DEPENDS_ON_SA_TOKEN`。infra-security 已有 `spring-boot-starter-data-redis` 依赖，无需新增。infra-sse 不再直接依赖 Sa-Token，通过 `SseMessageSender.forceLogout()` 写 Redis 标记，由 infra-security 的拦截器读取。
 
-- [ ] 在 `server/mb-infra/infra-security/src/main/java/com/metabuild/infra/security/SecurityAutoConfiguration.java` 中，将 SSE 端点 `/api/v1/sse/connect` 添加到 SaInterceptor 的排除列表——**不需要排除**，SSE 连接需要认证。确认 `/api/v1/sse/connect` 不在排除列表中（已登录才能建连）。
+- [ ] 确认 SSE 端点 `/api/v1/sse/connect` 不在 SaInterceptor 的排除列表中（已登录才能建连）。
 
 **Verify:**
 
@@ -1100,7 +1174,6 @@ import com.metabuild.platform.notification.api.NotificationMessage;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -1121,8 +1194,9 @@ public class NotificationDispatcher {
 
     private final List<NotificationChannel> channels;
     private final NotificationLogRepository logRepository;
-    @Qualifier("mbAsyncExecutor")
-    private final Executor taskExecutor;
+    // 字段名 mbAsyncExecutor 与 Bean 名一致，Spring by-name 自动匹配
+    // 不使用 @Qualifier（Lombok @RequiredArgsConstructor 不会把 @Qualifier 传到构造器参数上）
+    private final Executor mbAsyncExecutor;
 
     /**
      * 分发通知到所有支持的渠道。
@@ -1154,7 +1228,7 @@ public class NotificationDispatcher {
                         log.error("通知发送失败: channel={}, module={}, ref={}, error={}",
                                 ch.channelType(), message.module(), message.referenceId(), e.getMessage());
                     }
-                }, taskExecutor))
+                }, mbAsyncExecutor))
                 .toList();
 
         CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new)).join();
@@ -1489,6 +1563,7 @@ cd server && mvn compile -pl mb-platform/platform-notification -am
 
 **Files:**
 - `server/mb-platform/platform-notification/pom.xml`（修改，新增 mail + thymeleaf 依赖）
+- `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/config/ThymeleafEmailConfig.java`（新建）
 - `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/domain/EmailChannel.java`（新建）
 - `server/mb-platform/platform-notification/src/main/resources/templates/notice_published.html`（新建）
 - `server/pom.xml`（确认 spring-boot-starter-mail 和 thymeleaf 版本管理）
@@ -1504,14 +1579,54 @@ cd server && mvn compile -pl mb-platform/platform-notification -am
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-mail</artifactId>
 </dependency>
-<!-- Thymeleaf 邮件模板 -->
+<!-- Thymeleaf 邮件模板（不用 starter，避免全局启用视图解析器） -->
 <dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+    <groupId>org.thymeleaf</groupId>
+    <artifactId>thymeleaf</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.thymeleaf</groupId>
+    <artifactId>thymeleaf-spring6</artifactId>
 </dependency>
 ```
 
-> 注意：`spring-boot-starter-mail` 和 `spring-boot-starter-thymeleaf` 由 Spring Boot BOM 管理版本，无需在 root pom 的 dependencyManagement 中声明。
+> 注意：`spring-boot-starter-mail` 由 Spring Boot BOM 管理版本，无需在 root pom 的 dependencyManagement 中声明。Thymeleaf 不使用 `spring-boot-starter-thymeleaf`（会全局启用视图解析器，影响 REST API），而是直接引入 `thymeleaf` + `thymeleaf-spring6`，手动配置 `SpringTemplateEngine` bean 专用于邮件模板渲染。
+
+- [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/config/ThymeleafEmailConfig.java`（手动配置 Thymeleaf，不使用 starter 的自动配置）：
+
+```java
+package com.metabuild.platform.notification.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.thymeleaf.spring6.SpringTemplateEngine;
+import org.thymeleaf.templatemode.TemplateMode;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
+
+/**
+ * Thymeleaf 邮件模板引擎配置。
+ *
+ * <p>不使用 spring-boot-starter-thymeleaf（会全局启用视图解析器），
+ * 手动创建 SpringTemplateEngine，专用于邮件 HTML 模板渲染。
+ */
+@Configuration
+public class ThymeleafEmailConfig {
+
+    @Bean
+    public SpringTemplateEngine emailTemplateEngine() {
+        ClassLoaderTemplateResolver resolver = new ClassLoaderTemplateResolver();
+        resolver.setPrefix("templates/");
+        resolver.setSuffix(".html");
+        resolver.setTemplateMode(TemplateMode.HTML);
+        resolver.setCharacterEncoding("UTF-8");
+        resolver.setCacheable(true);
+
+        SpringTemplateEngine engine = new SpringTemplateEngine();
+        engine.setTemplateResolver(resolver);
+        return engine;
+    }
+}
+```
 
 - [ ] 创建 `server/mb-platform/platform-notification/src/main/resources/templates/notice_published.html`：
 
@@ -1561,8 +1676,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
-import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 
 import java.util.List;
 
@@ -1581,7 +1696,7 @@ public class EmailChannel implements NotificationChannel {
     private static final Logger log = LoggerFactory.getLogger(EmailChannel.class);
 
     private final JavaMailSender mailSender;
-    private final TemplateEngine templateEngine;
+    private final SpringTemplateEngine emailTemplateEngine;
     private final DSLContext dsl;
 
     @Value("${spring.mail.host:}")
@@ -1609,7 +1724,7 @@ public class EmailChannel implements NotificationChannel {
         ctx.setVariable("title", title);
         ctx.setVariable("summary", summary);
         ctx.setVariable("viewUrl", viewUrl);
-        String htmlContent = templateEngine.process("notice_published", ctx);
+        String htmlContent = emailTemplateEngine.process("notice_published", ctx);
 
         // 查询接收人邮箱
         List<EmailRecipient> recipients = dsl.select(MB_IAM_USER.ID, MB_IAM_USER.EMAIL)
@@ -2622,8 +2737,40 @@ cd server && mvn compile -pl mb-business/business-notice -am
 
 **Files:**
 - `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/web/NotificationLogController.java`（新建）
+- `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/domain/NotificationLogService.java`（新建）
 
 **Steps:**
+
+- [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/domain/NotificationLogService.java`（Controller 不能直接持有 Repository，ArchUnit 规则 `CONTROLLER_NO_DIRECT_REPOSITORY` 禁止 `..web..` 包的类依赖 `*Repository`）：
+
+```java
+package com.metabuild.platform.notification.domain;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+/**
+ * 通知发送记录查询 Service。
+ *
+ * <p>Controller 不能直接持有 Repository（ArchUnit 规则），
+ * 通过此 Service 中转。
+ */
+@Service
+@RequiredArgsConstructor
+public class NotificationLogService {
+
+    private final NotificationLogRepository logRepository;
+
+    /**
+     * 按模块 + 关联 ID 查询发送记录。
+     */
+    public List<NotificationLogView> findByModuleAndRef(String module, String referenceId) {
+        return logRepository.findByModuleAndRef(module, referenceId);
+    }
+}
+```
 
 - [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/web/NotificationLogController.java`：
 
@@ -2631,7 +2778,7 @@ cd server && mvn compile -pl mb-business/business-notice -am
 package com.metabuild.platform.notification.web;
 
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.notification.domain.NotificationLogRepository;
+import com.metabuild.platform.notification.domain.NotificationLogService;
 import com.metabuild.platform.notification.domain.NotificationLogView;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -2645,6 +2792,7 @@ import java.util.List;
  * 通知发送记录查询 API。
  *
  * <p>查询某条公告（或其他业务模块）的各渠道发送状态。
+ * 通过 NotificationLogService 访问数据（ArchUnit 规则禁止 Controller 直接持有 Repository）。
  */
 @RestController
 @RequestMapping("/api/v1/notification-logs")
@@ -2652,7 +2800,7 @@ import java.util.List;
 @Tag(name = "通知发送记录", description = "通知分发日志查询")
 public class NotificationLogController {
 
-    private final NotificationLogRepository logRepository;
+    private final NotificationLogService logService;
 
     @GetMapping
     @RequirePermission("notice:notice:detail")
@@ -2660,7 +2808,7 @@ public class NotificationLogController {
     public List<NotificationLogView> findByModuleAndRef(
             @Parameter(description = "来源模块", example = "notice") @RequestParam String module,
             @Parameter(description = "关联业务 ID", example = "123456") @RequestParam String referenceId) {
-        return logRepository.findByModuleAndRef(module, referenceId);
+        return logService.findByModuleAndRef(module, referenceId);
     }
 }
 ```
@@ -2974,3 +3122,37 @@ Phase 4 (通知渠道):
 | **Plan A** | OpenAPI 管线 + Notice 后端 CRUD | 无 | 已完成 |
 | **Plan B**（本文档） | SSE 基础设施 + 通知渠道系统 | 依赖 Plan A | 执行中 |
 | **Plan C** | Notice 前端 + SSE 前端 + E2E | 依赖 Plan A + B | 待写 |
+
+---
+
+## Review 记录
+
+**Review 日期**: 2026-04-15
+
+### Critical（已修复）
+
+| 编号 | 问题 | 修复方式 |
+|------|------|---------|
+| C1 | `ForceLogoutCheckInterceptor` 放在 `infra-sse` 包，ArchUnit 规则只允许 `infra-security` 和 `infra-exception` 使用 StpUtil | 移到 `infra-security` 模块（`com.metabuild.infra.security` 包），`SseAutoConfiguration` 不再注册拦截器，改由 `SecurityAutoConfiguration` 注册；infra-sse pom 删除 sa-token 依赖 |
+| C2 | `NotificationLogController` 直接持有 `NotificationLogRepository`，违反 ArchUnit 规则 `CONTROLLER_NO_DIRECT_REPOSITORY` | 新增 `NotificationLogService` 中转，Controller 注入 Service 而非 Repository |
+| C3 | `SseConnectionController.connect(CurrentUser currentUser)` 方法参数注入，Spring MVC 无 ArgumentResolver | 改为构造器注入 `private final CurrentUser currentUser` 字段，`SseAutoConfiguration` 传入 CurrentUser Bean |
+| C4 | `@Qualifier("mbAsyncExecutor") + @RequiredArgsConstructor` 不兼容，Lombok 不传 @Qualifier 到构造器 | 字段名从 `taskExecutor` 改为 `mbAsyncExecutor`，删除 `@Qualifier`，Spring by-name 匹配 |
+
+### Important（已修复）
+
+| 编号 | 问题 | 修复方式 |
+|------|------|---------|
+| I1 | Redis 数据类型 spec 用 SET，plan 用 String | 保留 plan 的 String + TTL 方式（更简洁），在 ForceLogoutCheckInterceptor 注释中说明 |
+| I2 | `@RateLimit(qps=5)` 是 5 次/秒，spec 要求 5 次/分钟 | 删除 `@RateLimit`，改为 Bucket4j 手写限流（ConcurrentHashMap<Long, Bucket>），infra-sse pom 新增 bucket4j-core 依赖 |
+| I4 | `spring-boot-starter-thymeleaf` 会全局启用视图解析器 | 改为 `thymeleaf` + `thymeleaf-spring6`，新增 `ThymeleafEmailConfig` 手动创建 `SpringTemplateEngine` bean |
+| I5 | `@EnableScheduling` 冗余（platform-job 已声明） | 删除 SseAutoConfiguration 的 `@EnableScheduling`，加注释说明 |
+| I7 | 短信+Webhook 渠道未标注 deferred | 在 Architecture 描述部分加说明：本 Plan 仅实现 4 个渠道 |
+
+### 影响范围
+
+- Task 1: pom.xml 依赖变更（删 sa-token/infra-rate-limit，加 bucket4j/mb-common）、SseAutoConfiguration 删 @EnableScheduling + 加 CurrentUser 参数
+- Task 4: SseConnectionController 重写（CurrentUser 构造器注入 + Bucket4j 限流）
+- Task 5: ForceLogoutCheckInterceptor 移到 infra-security、SseAutoConfiguration 重写、SecurityAutoConfiguration 新增拦截器注册
+- Task 7: NotificationDispatcher 字段名 taskExecutor → mbAsyncExecutor
+- Task 10: Thymeleaf 依赖从 starter 改为手动配置、新增 ThymeleafEmailConfig
+- Task 15: 新增 NotificationLogService、Controller 改用 Service
