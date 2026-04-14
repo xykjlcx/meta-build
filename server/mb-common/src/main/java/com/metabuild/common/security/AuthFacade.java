@@ -6,7 +6,14 @@ package com.metabuild.common.security;
  */
 public interface AuthFacade {
     LoginResult doLogin(Long userId, SessionData sessionData);
-    LoginResult refresh(String refreshToken);
+
+    /**
+     * 验证 refresh token 有效性并轮转（旧 token 失效），返回关联的 userId。
+     * 由 AuthService.refresh() 调用，将 refresh token 验证逻辑封装在门面内部，
+     * 避免业务层 instanceof 判断具体实现。
+     */
+    Long validateAndRotateRefreshToken(String refreshToken);
+
     void logout();
     void kickoutAll(Long userId);
 

@@ -9,6 +9,8 @@ import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
+
+import java.time.Clock;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -26,8 +28,8 @@ public class IamAutoConfiguration implements WebMvcConfigurer {
     private final AuthFacade authFacade;
 
     @Bean
-    public PasswordPolicy passwordPolicy(MbIamPasswordProperties props) {
-        return new PasswordPolicy(props);
+    public PasswordPolicy passwordPolicy(MbIamPasswordProperties props, Clock clock) {
+        return new PasswordPolicy(props, clock);
     }
 
     @Bean

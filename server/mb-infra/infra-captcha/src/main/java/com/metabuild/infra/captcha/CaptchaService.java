@@ -11,7 +11,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Base64;
-import java.util.Random;
+import java.security.SecureRandom;
 import java.util.UUID;
 
 /**
@@ -29,7 +29,7 @@ public class CaptchaService {
     private static final String CAPTCHA_KEY_PREFIX = "mb:captcha:";
     private static final String CHARS = "0123456789";
     private static final int CODE_LENGTH = 4;
-    private static final Random RANDOM = new Random();
+    private static final SecureRandom RANDOM = new SecureRandom();
 
     private final StringRedisTemplate redisTemplate;
     private final MbCaptchaProperties props;

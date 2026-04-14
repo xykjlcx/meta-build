@@ -6,6 +6,7 @@ import com.metabuild.common.security.CurrentUser;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.iam.api.dto.AssignRolesCommand;
 import com.metabuild.platform.iam.api.dto.ChangePasswordCommand;
+import com.metabuild.platform.iam.api.dto.ResetPasswordCommand;
 import com.metabuild.platform.iam.api.dto.UserCreateCommand;
 import com.metabuild.platform.iam.api.dto.UserView;
 import com.metabuild.platform.iam.api.dto.UserUpdateCommand;
@@ -70,8 +71,8 @@ public class UserController {
     /** 管理员重置用户密码 */
     @PostMapping("/{id}/reset-password")
     @RequirePermission("iam:user:resetPassword")
-    public void resetPassword(@PathVariable Long id, @RequestBody String newPassword) {
-        userService.resetPassword(id, newPassword);
+    public void resetPassword(@PathVariable Long id, @Valid @RequestBody ResetPasswordCommand request) {
+        userService.resetPassword(id, request.newPassword());
     }
 
     /** 为用户分配角色 */

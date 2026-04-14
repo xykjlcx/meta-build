@@ -1,10 +1,8 @@
 package com.metabuild.platform.iam.domain.auth;
 
 import com.metabuild.common.exception.BusinessException;
-import com.metabuild.common.exception.SystemException;
 import com.metabuild.common.exception.UnauthorizedException;
 import com.metabuild.common.security.AuthFacade;
-import com.metabuild.infra.security.SaTokenAuthFacade;
 import com.metabuild.common.security.DataScope;
 import com.metabuild.common.security.DataScopeType;
 import com.metabuild.common.security.LoginResult;
@@ -155,10 +153,7 @@ public class AuthService implements AuthApi {
     @Transactional
     public LoginResult refresh(String refreshToken) {
         // 1. 验证 refresh token 并获取 userId（同时轮换，旧 token 失效）
-        if (!(authFacade instanceof SaTokenAuthFacade saTokenAuthFacade)) {
-            throw new SystemException("errors.system.internal");
-        }
-        Long userId = saTokenAuthFacade.validateRefreshTokenAndGetUserId(refreshToken);
+        Long userId = authFacade.validateAndRotateRefreshToken(refreshToken);
 
         // 2. 查询用户，确保仍然有效
         MbIamUserRecord user = userRepository.findById(userId)

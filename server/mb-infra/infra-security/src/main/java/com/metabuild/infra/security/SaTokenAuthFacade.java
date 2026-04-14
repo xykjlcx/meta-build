@@ -92,28 +92,8 @@ public class SaTokenAuthFacade implements AuthFacade {
         );
     }
 
-    /**
-     * 仅验证并轮换 refresh token，返回 userId 供上层重建 SessionData。
-     * 完整刷新流程由 platform-iam AuthService 编排（需要重建权限/角色等 session 数据）。
-     */
     @Override
-    public LoginResult refresh(String refreshToken) {
-        // 验证并轮换（one-time use），返回 userId
-        Long userId = refreshTokenService.validateAndRotate(refreshToken);
-        // access token 由调用方（AuthService）重新调用 doLogin 生成
-        // 此处仅返回 userId 的空壳，供内部使用，正常情况下 AuthController 不直接调用此方法
-        log.info("Refresh token 验证通过: userId={}", userId);
-        return new LoginResult(null, null, 0L, null);
-    }
-
-    /**
-     * 内部接口：验证 refresh token 并返回 userId，供 platform-iam 编排完整刷新流程。
-     *
-     * @param refreshToken 客户端传入的 refresh token
-     * @return 对应的 userId
-     * @throws com.metabuild.common.exception.UnauthorizedException token 无效
-     */
-    public Long validateRefreshTokenAndGetUserId(String refreshToken) {
+    public Long validateAndRotateRefreshToken(String refreshToken) {
         return refreshTokenService.validateAndRotate(refreshToken);
     }
 

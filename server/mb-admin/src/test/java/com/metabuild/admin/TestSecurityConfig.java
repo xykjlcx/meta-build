@@ -39,8 +39,8 @@ public class TestSecurityConfig {
             }
 
             @Override
-            public LoginResult refresh(String refreshToken) {
-                return new LoginResult("test-access-token-refreshed", "test-refresh-token", 3600L, null);
+            public Long validateAndRotateRefreshToken(String refreshToken) {
+                return 1L; // 测试环境返回固定 userId
             }
 
             @Override

@@ -4,6 +4,7 @@ import com.metabuild.common.exception.BusinessException;
 import com.metabuild.platform.iam.config.MbIamPasswordProperties;
 import lombok.RequiredArgsConstructor;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
 
 /**
@@ -13,6 +14,7 @@ import java.time.OffsetDateTime;
 public class PasswordPolicy {
 
     private final MbIamPasswordProperties props;
+    private final Clock clock;
 
     /**
      * 验证密码是否满足策略要求。
@@ -50,7 +52,7 @@ public class PasswordPolicy {
      */
     public boolean isExpired(OffsetDateTime passwordUpdatedAt) {
         if (props.maxAgeDays() == 0) return false;
-        return passwordUpdatedAt.plusDays(props.maxAgeDays()).isBefore(OffsetDateTime.now());
+        return passwordUpdatedAt.plusDays(props.maxAgeDays()).isBefore(OffsetDateTime.now(clock));
     }
 
     /** 获取密码历史数量（用于防重用校验） */
