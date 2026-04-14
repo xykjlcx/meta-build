@@ -1,4 +1,4 @@
-# M1 → M2 交接文档
+# M1 完成交接文档
 
 > 新 session 开始前读这份文档，5 分钟内获得完整上下文。
 
@@ -40,7 +40,26 @@ apps/web-admin     → Vite + React 19 + Tailwind v4，Mock 登录页
 - CI：.github/workflows/server.yml + client.yml
 - Branch protection：暂未开启（GitHub 免费版私有仓库不支持）
 
-## M2 要做的事
+---
+
+## 下一阶段：M2 + M4 可并行
+
+### 里程碑全景
+
+| Milestone | 内容 | 依赖 | 方向 |
+|-----------|------|------|------|
+| **M2** | 前端 L1 完整 + Theme 系统 + L2 原子组件 | M1 ✅ | **纯前端** |
+| M3 | 前端 L3 业务组件 + L4 App Shell + 路由 + i18n | M2 | 前端 |
+| **M4** | 后端底座 + 8 平台模块 + 契约驱动 | M1 ✅ | **纯后端** |
+| M5 | Canonical Reference（notice/order/approval） | M3 + M4 | 前后端联调 |
+| M6 | 验证层完整版 + 主题样本库 | M5 | 全栈 |
+| M7 | 开源准备 | M6 | 文档/运维 |
+
+**M2 和 M4 零依赖，可以完全并行开发。** M5 是第一个需要前后端联调的里程碑。
+
+---
+
+## M2：前端 L1 完整 + Theme 系统 + L2 组件
 
 ### 目标
 主题系统可切换 + L2 原子组件开始落地
@@ -58,43 +77,82 @@ apps/web-admin     → Vite + React 19 + Tailwind v4，Mock 登录页
 
 3. **主题完整性校验脚本**
    - ~50 行 TS，扫描所有 themes/*.css，确保每个主题定义了全部 46 token
-   - CI 硬失败
-   - 加到 `pnpm check:theme` 脚本
+   - CI 硬失败，加到 `pnpm check:theme`
 
-4. **L2 原子组件**（shadcn/Radix 风格）
-   - ~30 个组件：Button, Input, Dialog, Select, Tabs, Tooltip, Popover, DropdownMenu, Badge, Card, Avatar...
-   - 使用 CVA + clsx + tailwind-merge
-   - 每个组件引用 CSS 变量（var(--color-primary)），不硬编码颜色
+4. **L2 原子组件**（shadcn/Radix 风格，~30 个）
+   - Button, Input, Dialog, Select, Tabs, Tooltip, Popover, DropdownMenu, Badge, Card, Avatar...
+   - CVA + clsx + tailwind-merge
+   - 引用 CSS 变量，不硬编码颜色
 
 5. **Storybook 搭建**
-   - 每个 L2 组件每个 variant 一个 story
-   - Storybook 能切换主题预览
+   - 每个 L2 组件每个 variant 一个 story，能切换主题预览
 
-6. **Vitest 搭建**
-   - L2 组件基础单元测试
+6. **Vitest 搭建** — L2 组件单元测试
 
-7. **质量门禁升级**
-   - 启用 theme-integrity-check（CI 硬失败）
-   - L2 组件必须有 Storybook story（MUST #1）
+7. **质量门禁升级** — theme-integrity-check + Storybook story 必须存在
 
-### 关键 spec 文件
-
-- `docs/specs/frontend/02-ui-tokens-theme.md` — L1 主题系统完整设计
+### 关键 spec
+- `docs/specs/frontend/02-ui-tokens-theme.md` — 主题系统完整设计
 - `docs/specs/frontend/03-ui-primitives.md` — L2 组件列表和规范
 - `docs/specs/frontend/10-quality-gates.md §6.2` — M2 阶段启用的工具和规则
 
-## 已知的待处理问题（M4 阶段）
+---
 
-Codex 对抗性审查发现，M4 写业务代码时会暴露：
+## M4：后端底座 + 8 平台模块 + 契约驱动
 
-| 问题 | 涉及文件 |
-|------|---------|
-| ArchUnit 模块边界规则误判同模块内依赖 | infra-archunit/ModuleBoundaryRule.java |
-| 异步线程丢失 MDC traceId + 认证上下文 | infra-async/AsyncConfig.java |
-| JooqHelper 缺少审计字段自动填充 | infra-jooq/JooqHelper.java |
-| BaseIntegrationTest 缺少 rollback 隔离 | mb-admin/BaseIntegrationTest.java |
+### 目标
+8 个平台模块全部实现 + OpenAPI 契约驱动前后端对接
 
-这些在 M4 计划时统一处理，M2 不需要管。
+### 具体任务
+
+1. **infra 剩余 7 模块实现**
+   - infra-security：Sa-Token 封装 + SaTokenCurrentUser + @RequirePermission + CORS
+   - infra-cache：Redis + CacheEvictSupport
+   - infra-exception：GlobalExceptionHandler + ProblemDetail
+   - infra-i18n：MessageSource + LocaleResolver
+   - infra-rate-limit：Bucket4j
+   - infra-captcha：滑块验证
+   - infra-websocket：预留（v1 可选）
+
+2. **8 个 platform 模块**
+   - platform-iam：用户/角色/菜单/部门 CRUD + 数据权限
+   - platform-oplog：操作日志（@OperationLog 注解 + AOP）
+   - platform-file：文件上传/下载（本地 + OSS 切换）
+   - platform-notification：站内通知
+   - platform-dict：数据字典
+   - platform-config：系统配置
+   - platform-job：定时任务
+   - platform-monitor：系统监控
+
+3. **Flyway 全量迁移** — 8 模块的表结构
+4. **jOOQ 代码重新生成** — 覆盖所有新表
+5. **契约驱动** — springdoc → OpenAPI 3.1 → @mb/api-sdk
+6. **ArchUnit 规则完善** — M1 的 3 条 + M4 新增规则
+
+### 关键 spec
+- `docs/specs/backend/README.md` — 后端设计入口（按 M4 实施者阅读路径）
+- `docs/specs/backend/03-platform-modules.md` — 8 模块设计 + 12 步新增模块清单
+- `docs/specs/backend/05-security.md` — 认证/授权/数据权限完整设计
+- `docs/specs/backend/06-api-and-contract.md` — API 契约 + OpenAPI 生成
+
+### M1 遗留的 M4 待修复项（Codex 审查发现）
+
+| 问题 | 涉及文件 | 说明 |
+|------|---------|------|
+| ArchUnit 模块边界规则误判同模块内依赖 | infra-archunit/ModuleBoundaryRule.java | 需加模块名比对 |
+| 异步线程丢失 MDC traceId + 认证上下文 | infra-async/AsyncConfig.java | 需加 TaskDecorator |
+| JooqHelper 缺少审计字段自动填充 | infra-jooq/JooqHelper.java | 需注入 CurrentUser + Clock |
+| BaseIntegrationTest 缺少 rollback 隔离 | mb-admin/BaseIntegrationTest.java | 需加 @Transactional 或 reset |
+
+---
+
+## 并行开发策略建议
+
+- 如果一个 session 做：先 M2 后 M4（前端体量小，先收尾）
+- 如果多 session 并行：一个 session 做 M2，另一个做 M4，各自开 feature 分支
+- M5 是汇合点——需要 M2 的组件 + M4 的 API 都就绪
+
+---
 
 ## 关键技术决策备忘
 
