@@ -11,4 +11,26 @@
     <artifactId>infra-exception</artifactId>
     <name>infra-exception</name>
     <description>GlobalExceptionHandler + ProblemDetail（M4 实现）</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- jOOQ DataChangedException（乐观锁异常处理） -->
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+        </dependency>
+        <!-- Sa-Token 异常类（provided scope，运行时由 infra-security 提供） -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot3-starter</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
 </project>

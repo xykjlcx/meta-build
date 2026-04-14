@@ -15,5 +15,29 @@
     <name>mb-platform</name>
     <description>平台业务层（8 个子模块，M4 实现）</description>
 
-    <!-- M4 时添加子模块：platform-iam, platform-oplog, platform-file, ... -->
+    <modules>
+        <module>platform-iam</module>
+        <module>platform-oplog</module>
+        <module>platform-dict</module>
+        <module>platform-config</module>
+        <module>platform-file</module>
+        <module>platform-notification</module>
+        <module>platform-job</module>
+        <module>platform-monitor</module>
+    </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>mb-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>mb-schema</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-jooq</artifactId>
+        </dependency>
+    </dependencies>
 </project>

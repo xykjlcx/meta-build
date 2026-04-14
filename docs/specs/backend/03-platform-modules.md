@@ -118,7 +118,7 @@ CREATE UNIQUE INDEX uk_mb_file_tenant_sha256
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OperationLog {
-    /** 操作标识，如 "iam.user.create" */
+    /** 操作标识（操作日志 action 用点分隔，权限码用冒号分隔），如 "iam.user.create" */
     String action();
 
     /** 模块名（空则自动推断 Controller 类名前缀） */
@@ -142,14 +142,14 @@ public class UserController {
     private final UserApi api;
 
     @PostMapping
-    @RequirePermission("iam.user.create")
+    @RequirePermission("iam:user:create")
     @OperationLog(action = "iam.user.create", module = "iam")
     public UserView create(@RequestBody @Valid UserCreateCommand cmd) {
         return api.create(cmd);
     }
 
     @PutMapping("/{id}")
-    @RequirePermission("iam.user.update")
+    @RequirePermission("iam:user:update")
     @OperationLog(action = "iam.user.update", module = "iam")
     public UserView update(@PathVariable Long id, @RequestBody @Valid UserUpdateCommand cmd) {
         return api.update(id, cmd);
@@ -424,10 +424,10 @@ public interface MenuApi {
 | 方法 | 端点 | 说明 |
 |------|------|------|
 | `GET /api/v1/menus/current-user` | 当前用户菜单 + 权限 | 返回 `CurrentUserMenuResult`（扁平节点列表 + permissions 数组） |
-| `GET /api/v1/menus` | 管理端完整菜单树 | `@RequirePermission("iam.menu.list")` |
-| `POST /api/v1/menus` | 创建菜单节点 | `@RequirePermission("iam.menu.create")` |
-| `PATCH /api/v1/menus/{id}/route-ref` | 重新绑定路由引用 | `@RequirePermission("iam.menu.update")` |
-| `GET /api/v1/route-tree-nodes` | 路由树节点列表 | `@RequirePermission("iam.menu.list")` |
+| `GET /api/v1/menus` | 管理端完整菜单树 | `@RequirePermission("iam:menu:list")` |
+| `POST /api/v1/menus` | 创建菜单节点 | `@RequirePermission("iam:menu:create")` |
+| `PATCH /api/v1/menus/{id}/route-ref` | 重新绑定路由引用 | `@RequirePermission("iam:menu:update")` |
+| `GET /api/v1/route-tree-nodes` | 路由树节点列表 | `@RequirePermission("iam:menu:list")` |
 
 `GET /api/v1/menus/current-user` 返回体 DTO 结构：
 
@@ -496,14 +496,14 @@ public class <Name>Controller {
 
     @GetMapping("/{id}")
     @Operation(summary = "查询详情")
-    @RequirePermission("<layer>.<name>.view")
+    @RequirePermission("<layer>:<name>:view")
     public <Name>View getById(@PathVariable Long id) {
         return api.findById(id);
     }
 
     @PostMapping
     @Operation(summary = "创建")
-    @RequirePermission("<layer>.<name>.create")
+    @RequirePermission("<layer>:<name>:create")
     public <Name>View create(@RequestBody @Valid <Name>CreateCommand cmd) {
         return api.create(cmd);
     }
@@ -670,7 +670,7 @@ cd server && mvn -Pcodegen generate-sources -pl mb-schema
 ```
 生成的 `com.metabuild.schema.tables.BizOrderMain` 和 `BizOrderMainRecord` 进入 `mb-schema/src/main/jooq-generated/`，**commit 到 git**。
 
-**步骤 3.5（插入在步骤 3 之后）：明确一个业务实体的完整类清单**
+**步骤 3.5：明确一个业务实体的完整类清单**（此步骤概念上属于步骤 3 的补充，在开始写任何 Java 文件之前确认清单）
 
 每个业务实体对应以下文件（详见 [01-module-structure.md §4](01-module-structure.md)）：
 
@@ -696,7 +696,7 @@ cd server && mvn -Pcodegen generate-sources -pl mb-schema
 - Controller 不 `import cn.dev33.satoken.*`（ArchUnit 强制，通过 `CurrentUser` / `AuthFacade` 门面）
 - Repository 是**普通类**——方案 E 不再需要继承任何基类。数据权限由 `DataScopeVisitListener` 在 jOOQ 层单点拦截，**前提是在 `DataScopeConfig` 里把新表注册到 `DataScopeRegistry`**（见步骤 10.1）
 - Repository 禁止使用 jOOQ 的 `@PlainSQL` API（`fetch(String)` 等），由 ArchUnit 规则 `NO_RAW_SQL_FETCH` 强制
-- Controller 每个方法标注 `@RequirePermission("business.order.<action>")`（**权限只能在 Controller 层，不在 Service 层**，详见 [05-security.md §2.5](05-security.md)）
+- Controller 每个方法标注 `@RequirePermission("business:order:<action>")`（**权限只能在 Controller 层，不在 Service 层**，详见 [05-security.md §2.5](05-security.md)）
 
 **步骤 10.1（新加业务表时的必补步骤）**：在 `mb-admin/src/main/java/com/metabuild/admin/config/DataScopeConfig.java` 里添加：
 
@@ -709,8 +709,11 @@ registry.register("biz_order_main", "owner_dept_id");
 **步骤 10.2**：确认业务表 DDL 包含 `owner_dept_id BIGINT NOT NULL` 字段 + 索引 `idx_xxx_tenant_dept (tenant_id, owner_dept_id)`。RecordListener 会在 INSERT 时自动从 `CurrentUser.deptId()` 填充。
 
 **步骤 11：写集成测试**
+
+集成测试必须放在 `mb-admin/src/test/java/` 下，原因：`@SpringBootTest` 需要完整应用上下文（含所有 platform-* 模块），而 `business-order` 自身没有 Spring Boot starter，无法独立启动。
+
 ```java
-// business-order/src/test/java/com/metabuild/business/order/OrderServiceIntegrationTest.java
+// mb-admin/src/test/java/com/metabuild/admin/order/OrderServiceIntegrationTest.java
 @SpringBootTest
 @Import(TestSecurityConfig.class)
 class OrderServiceIntegrationTest extends BaseIntegrationTest {
@@ -725,7 +728,7 @@ class OrderServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void user_with_permission_can_create_order() {
-        currentUser.asUser(100L, "alice", "business.order.create");
+        currentUser.asUser(100L, "alice", "business:order:create");
         OrderView view = orderApi.create(new OrderCreateCommand(...));
         assertThat(view.id()).isNotNull();
     }
@@ -750,7 +753,7 @@ cd server && mvn -pl mb-admin verify
 - `mb-admin` 里的 `ArchitectureTest`（确认 Sa-Token 隔离、jOOQ 隔离、跨模块规则等全部通过）
 - `mb-admin` 里的 `BaseIntegrationTest` 继承者（包括 `business-order` 的集成测试）
 
-**额外步骤（如需权限控制）**：在 `iam` 模块里通过 SQL 初始化或管理界面登记 `business.order.create / view / update / delete / submit / cancel` 权限点，绑定到相应角色。
+**额外步骤（如需权限控制）**：在 `iam` 模块里通过 SQL 初始化或管理界面登记 `business:order:create / view / update / delete / submit / cancel` 权限点，绑定到相应角色。
 
 <!-- verify: test -f server/mb-business/business-order/pom.xml && ls server/mb-schema/src/main/resources/db/migration/V[0-9]*__business_order_main.sql >/dev/null && cd server && mvn -pl business-order verify -->
 

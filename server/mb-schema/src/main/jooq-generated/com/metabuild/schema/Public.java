@@ -4,7 +4,24 @@
 package com.metabuild.schema;
 
 
+import com.metabuild.schema.tables.MbConfig;
+import com.metabuild.schema.tables.MbDictData;
+import com.metabuild.schema.tables.MbDictType;
+import com.metabuild.schema.tables.MbFileMetadata;
+import com.metabuild.schema.tables.MbIamDept;
+import com.metabuild.schema.tables.MbIamLoginLog;
+import com.metabuild.schema.tables.MbIamMenu;
+import com.metabuild.schema.tables.MbIamPasswordHistory;
+import com.metabuild.schema.tables.MbIamRole;
+import com.metabuild.schema.tables.MbIamRoleDataScopeDept;
+import com.metabuild.schema.tables.MbIamRoleMenu;
+import com.metabuild.schema.tables.MbIamRouteTree;
 import com.metabuild.schema.tables.MbIamUser;
+import com.metabuild.schema.tables.MbIamUserRole;
+import com.metabuild.schema.tables.MbJobLog;
+import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.MbOperationLog;
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,9 +45,94 @@ public class Public extends SchemaImpl {
     public static final Public PUBLIC = new Public();
 
     /**
+     * 系统配置表
+     */
+    public final MbConfig MB_CONFIG = MbConfig.MB_CONFIG;
+
+    /**
+     * 字典数据表
+     */
+    public final MbDictData MB_DICT_DATA = MbDictData.MB_DICT_DATA;
+
+    /**
+     * 字典类型表
+     */
+    public final MbDictType MB_DICT_TYPE = MbDictType.MB_DICT_TYPE;
+
+    /**
+     * 文件元数据表
+     */
+    public final MbFileMetadata MB_FILE_METADATA = MbFileMetadata.MB_FILE_METADATA;
+
+    /**
+     * 部门表
+     */
+    public final MbIamDept MB_IAM_DEPT = MbIamDept.MB_IAM_DEPT;
+
+    /**
+     * 登录日志
+     */
+    public final MbIamLoginLog MB_IAM_LOGIN_LOG = MbIamLoginLog.MB_IAM_LOGIN_LOG;
+
+    /**
+     * 菜单表
+     */
+    public final MbIamMenu MB_IAM_MENU = MbIamMenu.MB_IAM_MENU;
+
+    /**
+     * 密码历史表（防重用）
+     */
+    public final MbIamPasswordHistory MB_IAM_PASSWORD_HISTORY = MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY;
+
+    /**
+     * 角色表
+     */
+    public final MbIamRole MB_IAM_ROLE = MbIamRole.MB_IAM_ROLE;
+
+    /**
+     * 角色-数据权限自定义部门关联表（CUSTOM_DEPT 时使用）
+     */
+    public final MbIamRoleDataScopeDept MB_IAM_ROLE_DATA_SCOPE_DEPT = MbIamRoleDataScopeDept.MB_IAM_ROLE_DATA_SCOPE_DEPT;
+
+    /**
+     * 角色-菜单关联表
+     */
+    public final MbIamRoleMenu MB_IAM_ROLE_MENU = MbIamRoleMenu.MB_IAM_ROLE_MENU;
+
+    /**
+     * 路由树
+     */
+    public final MbIamRouteTree MB_IAM_ROUTE_TREE = MbIamRouteTree.MB_IAM_ROUTE_TREE;
+
+    /**
      * 用户表
      */
     public final MbIamUser MB_IAM_USER = MbIamUser.MB_IAM_USER;
+
+    /**
+     * 用户-角色关联表
+     */
+    public final MbIamUserRole MB_IAM_USER_ROLE = MbIamUserRole.MB_IAM_USER_ROLE;
+
+    /**
+     * 定时任务日志（追加表）
+     */
+    public final MbJobLog MB_JOB_LOG = MbJobLog.MB_JOB_LOG;
+
+    /**
+     * 通知公告表
+     */
+    public final MbNotification MB_NOTIFICATION = MbNotification.MB_NOTIFICATION;
+
+    /**
+     * 通知已读记录（追加表）
+     */
+    public final MbNotificationRead MB_NOTIFICATION_READ = MbNotificationRead.MB_NOTIFICATION_READ;
+
+    /**
+     * 操作日志（追加表，不注册 DataScope）
+     */
+    public final MbOperationLog MB_OPERATION_LOG = MbOperationLog.MB_OPERATION_LOG;
 
     /**
      * No further instances allowed
@@ -48,7 +150,24 @@ public class Public extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.asList(
-            MbIamUser.MB_IAM_USER
+            MbConfig.MB_CONFIG,
+            MbDictData.MB_DICT_DATA,
+            MbDictType.MB_DICT_TYPE,
+            MbFileMetadata.MB_FILE_METADATA,
+            MbIamDept.MB_IAM_DEPT,
+            MbIamLoginLog.MB_IAM_LOGIN_LOG,
+            MbIamMenu.MB_IAM_MENU,
+            MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY,
+            MbIamRole.MB_IAM_ROLE,
+            MbIamRoleDataScopeDept.MB_IAM_ROLE_DATA_SCOPE_DEPT,
+            MbIamRoleMenu.MB_IAM_ROLE_MENU,
+            MbIamRouteTree.MB_IAM_ROUTE_TREE,
+            MbIamUser.MB_IAM_USER,
+            MbIamUserRole.MB_IAM_USER_ROLE,
+            MbJobLog.MB_JOB_LOG,
+            MbNotification.MB_NOTIFICATION,
+            MbNotificationRead.MB_NOTIFICATION_READ,
+            MbOperationLog.MB_OPERATION_LOG
         );
     }
 }

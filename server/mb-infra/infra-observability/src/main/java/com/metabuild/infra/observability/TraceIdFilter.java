@@ -12,6 +12,9 @@ import java.util.UUID;
 
 /**
  * 请求链路追踪：从 X-Trace-Id header 读取或自动生成 16 字符 traceId，写入 MDC + 响应头。
+ *
+ * <p>userId 注入由 {@link UserIdMdcInterceptor}（HandlerInterceptor）负责，
+ * 在 Spring MVC 安全过滤器之后、Controller 执行之前注入，时序正确。
  */
 public class TraceIdFilter extends OncePerRequestFilter {
 

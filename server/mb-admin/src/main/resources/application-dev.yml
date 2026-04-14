@@ -3,6 +3,26 @@ spring:
     url: jdbc:postgresql://localhost:15432/metabuild
     username: metabuild
     password: metabuild
+  data:
+    redis:
+      host: localhost
+      port: 16379
+
+# Dev 环境 JWT Secret（本地开发安全默认值，不可用于生产）
+sa-token:
+  jwt-secret-key: metabuild-dev-jwt-secret-key-2026
+
+# Dev 放宽限流和验证码
+mb:
+  rate-limit:
+    enabled: false
+  captcha:
+    enabled: false
+
+# springdoc dev 全开
+springdoc:
+  swagger-ui:
+    enabled: true
 
 logging:
   level:

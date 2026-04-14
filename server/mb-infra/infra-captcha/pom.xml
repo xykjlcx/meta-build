@@ -11,4 +11,23 @@
     <artifactId>infra-captcha</artifactId>
     <name>infra-captcha</name>
     <description>滑块验证码（M4 实现）</description>
+
+    <dependencies>
+        <!-- Spring MVC（CaptchaController） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- Redis（验证码 token 存储） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+        <!-- 配置属性元数据（IDE 提示） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 </project>

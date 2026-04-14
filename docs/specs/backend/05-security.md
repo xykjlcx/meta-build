@@ -179,19 +179,19 @@ public ProblemDetail handleDisabled(DisableServiceException ex, HttpServletReque
 
 ### 2.1 权限点命名规范
 
-格式: **点分隔字符串，不限段数**（camelCase，和错误码命名一致），语义清晰即可。推荐三段式 `<module>.<resource>.<action>`，二段式 `<module>.<action>` 也合法。
+格式: **冒号分隔字符串，三段式** `<module>:<resource>:<action>`（小驼峰 action，语义清晰即可）。与错误码格式有意区分——错误码用点分隔，权限码用冒号分隔，避免混淆。
 
 AppPermission 生成链路（§13）保证前后端一致——后端 `@RequirePermission` 标什么字符串，前端联合类型就生成什么。
 
 例:
-- `iam.user.list`
-- `iam.user.create`
-- `iam.user.update`
-- `iam.user.delete`
-- `iam.role.assignPermission`
-- `audit.log.export`
-- `file.upload`
-- `business.order.create`（业务模块用 `business` 前缀）
+- `iam:user:list`
+- `iam:user:create`
+- `iam:user:update`
+- `iam:user:delete`
+- `iam:role:assignPermission`
+- `audit:log:export`
+- `file:upload`
+- `business:order:create`（业务模块用 `business` 前缀）
 
 ### 2.2 @RequirePermission 注解定义
 
@@ -248,19 +248,19 @@ public class UserController {
     private final UserApi userApi;
 
     @GetMapping
-    @RequirePermission("iam.user.list")
+    @RequirePermission("iam:user:list")
     public PageResult<UserView> list(UserQuery query) {
         return userApi.page(query);
     }
 
     @PostMapping
-    @RequirePermission("iam.user.create")
+    @RequirePermission("iam:user:create")
     public UserView create(@RequestBody @Valid UserCreateCommand cmd) {
         return userApi.create(cmd);
     }
 
     @PutMapping("/{id}")
-    @RequirePermission("iam.user.update")
+    @RequirePermission("iam:user:update")
     public UserView update(@PathVariable Long id, @RequestBody @Valid UserUpdateCommand cmd) {
         return userApi.update(id, cmd);
     }
@@ -284,7 +284,7 @@ public class UserController {
 @RestController
 public class UserController {
     @PostMapping("/users")
-    @RequirePermission("iam.user.create")
+    @RequirePermission("iam:user:create")
     public UserView create(@RequestBody @Valid UserCreateCommand cmd) {
         return userService.create(cmd);
     }
@@ -299,7 +299,7 @@ public class UserService {
 // ❌ 错误：@RequirePermission 在 Service 层（禁止！）
 @Service
 public class UserService {
-    // @RequirePermission("iam.user.create")  ← 禁止！
+    // @RequirePermission("iam:user:create")  ← 禁止！
     public UserView create(UserCreateCommand cmd) { ... }
 }
 ```
@@ -309,7 +309,7 @@ public class UserService {
 ```java
 // Service 层的动态权限检查（不是注解）
 public UserView updateEmail(Long userId, UserUpdateEmailCommand cmd) {
-    if (!currentUser.userId().equals(userId) && !currentUser.hasPermission("iam.user.update")) {
+    if (!currentUser.userId().equals(userId) && !currentUser.hasPermission("iam:user:update")) {
         throw new BusinessException("iam.user.cannotUpdate");
     }
     // ...
@@ -1854,7 +1854,7 @@ private void checkPasswordHistory(Long userId, String newPlainPassword) {
 
 #### 8.6.2 管理员重置密码
 
-**注意**：`@RequirePermission("iam.user.resetPassword")` 应该放在对应的 Controller 方法上，不在 Service 方法上（N3 §2.5）。
+**注意**：`@RequirePermission("iam:user:resetPassword")` 应该放在对应的 Controller 方法上，不在 Service 方法上（N3 §2.5）。
 
 Controller 层（权限声明）：
 
@@ -1868,7 +1868,7 @@ public class PasswordController {
     private final PasswordService passwordService;
 
     @PostMapping("/admin-reset")
-    @RequirePermission("iam.user.resetPassword")       // ← 权限在 Controller 层
+    @RequirePermission("iam:user:resetPassword")       // ← 权限在 Controller 层
     @OperationLog(action = "iam.auth.resetPasswordByAdmin")
     public String resetPasswordByAdmin(@RequestBody @Valid ResetPasswordByAdminCommand cmd) {
         return passwordService.resetPasswordByAdmin(cmd);

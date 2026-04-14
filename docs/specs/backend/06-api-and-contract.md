@@ -333,7 +333,7 @@ public class UserController {
                 schema = @Schema(implementation = ProblemDetail.class)))
     })
     @GetMapping
-    @RequirePermission("iam.user.list")
+    @RequirePermission("iam:user:list")
     public PageResult<UserView> list(
             @Parameter(description = "查询参数") @Valid UserQuery query,
             @Parameter(description = "页码（从 1 开始）") @RequestParam(defaultValue = "1") int page,
@@ -551,12 +551,12 @@ List<SortField<?>> orderBy = SortParser.builder()
 
 ```
 1. 后端标注
-   Controller 方法 @RequirePermission("iam.user.create")
+   Controller 方法 @RequirePermission("iam:user:create")
          │
          │ springdoc 扫描（OperationCustomizer）
          ▼
 2. OpenAPI extension
-   operation["x-permission"] = "iam.user.create"
+   operation["x-permission"] = "iam:user:create"
          │
          │ mvn springdoc:generate
          ▼
@@ -571,7 +571,7 @@ List<SortField<?>> orderBy = SortParser.builder()
          │ import AppPermission
          ▼
 5. 前端编译期校验
-   requireAuth({ permission: 'iam.user.create' })  // 拼错 → tsc 报错
+   requireAuth({ permission: 'iam:user:create' })  // 拼错 → tsc 报错
 ```
 
 ### 13.2 OperationCustomizer 代码骨架
@@ -600,19 +600,19 @@ public class PermissionOperationCustomizer implements OperationCustomizer {
 // 自动生成，不手动编辑
 
 export type AppPermission =
-  | 'iam.user.list'
-  | 'iam.user.create'
-  | 'iam.user.update'
-  | 'iam.user.delete'
-  | 'iam.role.list'
-  | 'iam.role.assignPermission'
-  | 'iam.menu.list'
+  | 'iam:user:list'
+  | 'iam:user:create'
+  | 'iam:user:update'
+  | 'iam:user:delete'
+  | 'iam:role:list'
+  | 'iam:role:assignPermission'
+  | 'iam:menu:list'
   // ... 所有 @RequirePermission 扫描到的 code
   ;
 
 export const ALL_APP_PERMISSIONS: readonly AppPermission[] = [
-  'iam.user.list',
-  'iam.user.create',
+  'iam:user:list',
+  'iam:user:create',
   // ...
 ] as const;
 ```

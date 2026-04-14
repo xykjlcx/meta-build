@@ -4,7 +4,20 @@
 package com.metabuild.schema;
 
 
+import com.metabuild.schema.tables.MbConfig;
+import com.metabuild.schema.tables.MbDictData;
+import com.metabuild.schema.tables.MbDictType;
+import com.metabuild.schema.tables.MbFileMetadata;
+import com.metabuild.schema.tables.MbIamDept;
+import com.metabuild.schema.tables.MbIamLoginLog;
+import com.metabuild.schema.tables.MbIamMenu;
+import com.metabuild.schema.tables.MbIamPasswordHistory;
+import com.metabuild.schema.tables.MbIamRole;
+import com.metabuild.schema.tables.MbIamRouteTree;
 import com.metabuild.schema.tables.MbIamUser;
+import com.metabuild.schema.tables.MbJobLog;
+import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbOperationLog;
 
 import org.jooq.Index;
 import org.jooq.OrderField;
@@ -22,7 +35,25 @@ public class Indexes {
     // INDEX definitions
     // -------------------------------------------------------------------------
 
+    public static final Index IDX_FILE_SHA256 = Internal.createIndex(DSL.name("idx_file_sha256"), MbFileMetadata.MB_FILE_METADATA, new OrderField[] { MbFileMetadata.MB_FILE_METADATA.SHA256 }, false);
+    public static final Index IDX_FILE_UPLOADER = Internal.createIndex(DSL.name("idx_file_uploader"), MbFileMetadata.MB_FILE_METADATA, new OrderField[] { MbFileMetadata.MB_FILE_METADATA.TENANT_ID, MbFileMetadata.MB_FILE_METADATA.UPLOADER_ID }, false);
+    public static final Index IDX_IAM_DEPT_PARENT = Internal.createIndex(DSL.name("idx_iam_dept_parent"), MbIamDept.MB_IAM_DEPT, new OrderField[] { MbIamDept.MB_IAM_DEPT.TENANT_ID, MbIamDept.MB_IAM_DEPT.PARENT_ID }, false);
+    public static final Index IDX_IAM_MENU_PARENT = Internal.createIndex(DSL.name("idx_iam_menu_parent"), MbIamMenu.MB_IAM_MENU, new OrderField[] { MbIamMenu.MB_IAM_MENU.TENANT_ID, MbIamMenu.MB_IAM_MENU.PARENT_ID }, false);
     public static final Index IDX_IAM_USER_DEPT = Internal.createIndex(DSL.name("idx_iam_user_dept"), MbIamUser.MB_IAM_USER, new OrderField[] { MbIamUser.MB_IAM_USER.TENANT_ID, MbIamUser.MB_IAM_USER.DEPT_ID }, false);
     public static final Index IDX_IAM_USER_STATUS = Internal.createIndex(DSL.name("idx_iam_user_status"), MbIamUser.MB_IAM_USER, new OrderField[] { MbIamUser.MB_IAM_USER.TENANT_ID, MbIamUser.MB_IAM_USER.STATUS }, false);
+    public static final Index IDX_JOB_LOG_NAME = Internal.createIndex(DSL.name("idx_job_log_name"), MbJobLog.MB_JOB_LOG, new OrderField[] { MbJobLog.MB_JOB_LOG.JOB_NAME, MbJobLog.MB_JOB_LOG.CREATED_AT.desc() }, false);
+    public static final Index IDX_LOGIN_LOG_TIME = Internal.createIndex(DSL.name("idx_login_log_time"), MbIamLoginLog.MB_IAM_LOGIN_LOG, new OrderField[] { MbIamLoginLog.MB_IAM_LOGIN_LOG.CREATED_AT.desc() }, false);
+    public static final Index IDX_LOGIN_LOG_USER = Internal.createIndex(DSL.name("idx_login_log_user"), MbIamLoginLog.MB_IAM_LOGIN_LOG, new OrderField[] { MbIamLoginLog.MB_IAM_LOGIN_LOG.USER_ID, MbIamLoginLog.MB_IAM_LOGIN_LOG.CREATED_AT.desc() }, false);
+    public static final Index IDX_NOTIFICATION_STATUS = Internal.createIndex(DSL.name("idx_notification_status"), MbNotification.MB_NOTIFICATION, new OrderField[] { MbNotification.MB_NOTIFICATION.TENANT_ID, MbNotification.MB_NOTIFICATION.STATUS }, false);
+    public static final Index IDX_NOTIFICATION_TIME = Internal.createIndex(DSL.name("idx_notification_time"), MbNotification.MB_NOTIFICATION, new OrderField[] { MbNotification.MB_NOTIFICATION.TENANT_ID, MbNotification.MB_NOTIFICATION.CREATED_AT.desc() }, false);
+    public static final Index IDX_OPLOG_MODULE = Internal.createIndex(DSL.name("idx_oplog_module"), MbOperationLog.MB_OPERATION_LOG, new OrderField[] { MbOperationLog.MB_OPERATION_LOG.TENANT_ID, MbOperationLog.MB_OPERATION_LOG.MODULE }, false);
+    public static final Index IDX_OPLOG_TIME = Internal.createIndex(DSL.name("idx_oplog_time"), MbOperationLog.MB_OPERATION_LOG, new OrderField[] { MbOperationLog.MB_OPERATION_LOG.TENANT_ID, MbOperationLog.MB_OPERATION_LOG.CREATED_AT.desc() }, false);
+    public static final Index IDX_OPLOG_USER = Internal.createIndex(DSL.name("idx_oplog_user"), MbOperationLog.MB_OPERATION_LOG, new OrderField[] { MbOperationLog.MB_OPERATION_LOG.TENANT_ID, MbOperationLog.MB_OPERATION_LOG.USER_ID, MbOperationLog.MB_OPERATION_LOG.CREATED_AT.desc() }, false);
+    public static final Index IDX_PASSWORD_HISTORY_USER = Internal.createIndex(DSL.name("idx_password_history_user"), MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY, new OrderField[] { MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY.USER_ID, MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY.CREATED_AT.desc() }, false);
+    public static final Index IDX_ROUTE_TREE_PARENT = Internal.createIndex(DSL.name("idx_route_tree_parent"), MbIamRouteTree.MB_IAM_ROUTE_TREE, new OrderField[] { MbIamRouteTree.MB_IAM_ROUTE_TREE.TENANT_ID, MbIamRouteTree.MB_IAM_ROUTE_TREE.PARENT_ID }, false);
+    public static final Index UK_CONFIG_TENANT_KEY = Internal.createIndex(DSL.name("uk_config_tenant_key"), MbConfig.MB_CONFIG, new OrderField[] { MbConfig.MB_CONFIG.TENANT_ID, MbConfig.MB_CONFIG.CONFIG_KEY }, true);
+    public static final Index UK_DICT_DATA_TYPE_VALUE = Internal.createIndex(DSL.name("uk_dict_data_type_value"), MbDictData.MB_DICT_DATA, new OrderField[] { MbDictData.MB_DICT_DATA.TENANT_ID, MbDictData.MB_DICT_DATA.DICT_TYPE_ID, MbDictData.MB_DICT_DATA.VALUE }, true);
+    public static final Index UK_DICT_TYPE_TENANT_CODE = Internal.createIndex(DSL.name("uk_dict_type_tenant_code"), MbDictType.MB_DICT_TYPE, new OrderField[] { MbDictType.MB_DICT_TYPE.TENANT_ID, MbDictType.MB_DICT_TYPE.CODE }, true);
+    public static final Index UK_IAM_ROLE_TENANT_CODE = Internal.createIndex(DSL.name("uk_iam_role_tenant_code"), MbIamRole.MB_IAM_ROLE, new OrderField[] { MbIamRole.MB_IAM_ROLE.TENANT_ID, MbIamRole.MB_IAM_ROLE.CODE }, true);
     public static final Index UK_IAM_USER_TENANT_USERNAME = Internal.createIndex(DSL.name("uk_iam_user_tenant_username"), MbIamUser.MB_IAM_USER, new OrderField[] { MbIamUser.MB_IAM_USER.TENANT_ID, MbIamUser.MB_IAM_USER.USERNAME }, true);
 }

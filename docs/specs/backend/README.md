@@ -112,12 +112,12 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | 1 | 跨 `mb-platform` 模块直接 import 对方的 `domain` / `web` 包 | Maven pom 白名单 + ArchUnit `CROSS_PLATFORM_ONLY_VIA_API` | [01-module-structure.md §3 跨模块访问的反模式修复](./01-module-structure.md#3-跨模块访问的反模式修复-m1m4) |
 | 2 | Service / Controller 持有 `DSLContext` 字段（允许 `import com.metabuild.schema.tables.records.*` Record 数据类型）| ArchUnit `DSLCONTEXT_ONLY_IN_REPOSITORY`（N3 精化了原 `DOMAIN_MUST_NOT_USE_JOOQ`）| [04-data-persistence.md §7 jOOQ 不入 Service 层](./04-data-persistence.md#7-jooq-不入-service-层-m1m4) + [08-archunit-rules.md §6 N3 精化规则](./08-archunit-rules.md) |
 | 3 | 业务层（`platform` / `business`）`import cn.dev33.satoken.*` | ArchUnit `BUSINESS_MUST_NOT_DEPEND_ON_SA_TOKEN` | [05-security.md §6 CurrentUser 门面层](./05-security.md#6-currentuser-门面层设计adr-0005) |
-| 4 | `@CacheEvict(allEntries = true)` | ArchUnit `NO_EVICT_ALL_ENTRIES` | [04-data-persistence.md §11 缓存 key 级失效](./04-data-persistence.md#11-缓存-key-级失效禁用-allentriestrue-m4) |
+| 4 | `@CacheEvict(allEntries = true)` | 代码审查（ArchUnit 注解属性检查需自定义 ConditionEvent，暂用 code review 守护） | [04-data-persistence.md §11 缓存 key 级失效](./04-data-persistence.md#11-缓存-key-级失效禁用-allentriestrue-m4) |
 | 5 | Controller 用 Spring `@PreAuthorize`（必须用自定义 `@RequirePermission`），或把 `@RequirePermission` 放 Service 层（**必须**放 Controller 层）| 代码约定 + 示例强制 | [05-security.md §2.5 @RequirePermission 位置规范](./05-security.md#25-requirepermission-位置规范n3-修订) |
 | 6 | `api` 包使用 `LocalDateTime`（必须用 `Instant`） | ArchUnit `NO_LOCALDATETIME_IN_API` | [04-data-persistence.md §12 时区规范](./04-data-persistence.md#12-时区规范-m1) |
 | 7 | `@Autowired` 字段注入 | ArchUnit `GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION` | [08-archunit-rules.md §4 编码规范规则](./08-archunit-rules.md#4-controller--依赖注入--编码规范规则-m4) |
 | 8 | Controller / Repository 使用 `@Transactional`（只允许 Service 层） | ArchUnit `TRANSACTIONAL_ONLY_IN_SERVICE` | [04-data-persistence.md §8 事务边界规范](./04-data-persistence.md#8-事务边界规范-m4) |
-| 9 | 响应用 `R<T>{code, msg, data}` 包装（必须用 `ProblemDetail` + `PageResult` + 直接返回） | 代码 review + ArchUnit | [06-api-and-contract.md §3 响应格式混合方案](./06-api-and-contract.md#3-响应格式混合方案-m4) |
+| 9 | 响应用 `R<T>{code, msg, data}` 包装（必须用 `ProblemDetail` + `PageResult` + 直接返回） | 代码审查（ArchUnit 无法检测泛型返回类型结构） | [06-api-and-contract.md §3 响应格式混合方案](./06-api-and-contract.md#3-响应格式混合方案-m4) |
 | 10 | `mb-common` 依赖 Spring / jOOQ / JJWT / Sa-Token | Maven 依赖检查 | [01-module-structure.md §1.5 单向依赖硬约束](./01-module-structure.md#15-单向依赖硬约束) |
 | 11 | `mb-schema` 依赖任何 `mb-*` 模块（只能依赖 `org.jooq` runtime） | Maven 依赖检查 | [01-module-structure.md §1.5 单向依赖硬约束](./01-module-structure.md#15-单向依赖硬约束) |
 | 12 | 业务异常抛 checked Exception（必须继承 `RuntimeException`） | 代码约定 | [04-data-persistence.md §8 事务边界规范（回滚规则）](./04-data-persistence.md#8-事务边界规范-m4) |
@@ -148,7 +148,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | 13 | Service / Repository / Controller **必须**用 Lombok `@RequiredArgsConstructor` + `final` 字段构造器注入（C2）| [08-archunit-rules.md §7.2](./08-archunit-rules.md) |
 | 14 | 实体 → DTO 映射**必须**手写 `from()` 静态方法，v1 **禁用** MapStruct / ModelMapper（C2）| [08-archunit-rules.md §7.3](./08-archunit-rules.md) |
 | 15 | Service 对 `org.jooq` 的依赖**仅限** `Record` / `Result` / `exception` 白名单（`SERVICE_JOOQ_WHITELIST`）；`DSLContext` / `DSL` / `Field` / `Condition` / 各类 Step 一律禁止（C8）| [08-archunit-rules.md §6 N3 精化规则](./08-archunit-rules.md) |
-| 16 | 含 `owner_dept_id` 字段的表**必须**在 `DataScopeConfig` 注册到 `DataScopeRegistry`（ArchUnit 自动检测：扫描 jOOQ schema 中有 OWNER_DEPT_ID 字段的表 vs Registry 注册列表，差集非空则测试失败） | [05-security.md §7.7](./05-security.md) |
+| 16 | 含 `owner_dept_id` 字段的表**必须**在 `DataScopeConfig` 注册到 `DataScopeRegistry`（漏注册 = 超权风险） | 代码审查 + DataScopeConfig 登记纪律（ArchUnit 跨 jOOQ schema 和 Spring Bean 的差集检测暂不实现） | [05-security.md §7.7](./05-security.md) |
 
 ---
 

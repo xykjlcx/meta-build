@@ -28,13 +28,103 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
-# jOOQ 自定义配置
+  # Redis
+  data:
+    redis:
+      host: ${MB_REDIS_HOST:localhost}
+      port: ${MB_REDIS_PORT:16379}
+      password: ${MB_REDIS_PASSWORD:}
+      database: 0
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 4
+          min-idle: 1
+
+# Sa-Token
+sa-token:
+  token-name: Authorization
+  token-prefix: Bearer
+  timeout: 1800
+  active-timeout: -1
+  is-concurrent: true
+  token-style: uuid
+  is-log: false
+  # 生产环境必须通过环境变量 MB_SA_TOKEN_JWT_SECRET 注入，无默认值，启动时 fail-fast
+  jwt-secret-key: ${MB_SA_TOKEN_JWT_SECRET}
+
+# Meta-Build 自定义配置
 mb:
   jooq:
     slow-query-threshold-ms: ${MB_JOOQ_SLOW_QUERY_THRESHOLD_MS:500}
   id:
     worker: ${MB_ID_WORKER:1}
     datacenter: ${MB_ID_DATACENTER:1}
+  i18n:
+    default-locale: zh_CN
+    supported-locales: zh_CN,en_US
+  auth:
+    token-timeout: 1800
+    refresh-timeout: 604800
+    token-name: Authorization
+  cors:
+    allowed-origins: http://localhost:5173,http://localhost:3000
+    allowed-methods: GET,POST,PUT,DELETE,PATCH
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age-seconds: 3600
+  cache:
+    default-ttl-seconds: 3600
+    jitter-percent: 10
+  rate-limit:
+    enabled: true
+    global-qps: 1000
+    per-ip-qps: 100
+    per-user-qps: 200
+    burst-capacity: 50
+  captcha:
+    enabled: true
+    expire-seconds: 300
+    tolerance-px: 5
+    width: 300
+    height: 150
+  api:
+    pagination:
+      default-size: 20
+      max-size: 200
+  observability: {}
+
+  # 文件存储
+  file:
+    storage-path: ${MB_FILE_STORAGE_PATH:/var/lib/meta-build/files}
+    max-size-mb: ${MB_FILE_MAX_SIZE:10}
+    allowed-types:
+      - image/jpeg
+      - image/png
+      - image/gif
+      - image/webp
+      - application/pdf
+      - application/zip
+      - application/json
+
+  # IAM 密码策略
+  iam:
+    password:
+      min-length: 8
+      max-length: 128
+      require-digit: true
+      require-letter: true
+      require-uppercase: false
+      require-special: false
+      history-count: 5
+      max-age-days: 0
+      captcha-threshold: 3
+      delay-threshold: 5
+      short-delay-seconds: 30
+      long-delay-seconds: 300
+      fail-count-ttl-minutes: 30
+      reset-token-ttl-minutes: 15
 
 # Actuator
 management:
@@ -42,7 +132,7 @@ management:
     web:
       base-path: /actuator
       exposure:
-        include: health,info,metrics,loggers
+        include: health,info,metrics,loggers,prometheus
   endpoint:
     health:
       show-details: when-authorized
@@ -51,6 +141,19 @@ management:
   info:
     env:
       enabled: true
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+# springdoc
+springdoc:
+  api-docs:
+    path: /api-docs
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+  default-produces-media-type: application/json
 
 # Server
 server:
