@@ -32,7 +32,7 @@
         <java.version>21</java.version>
 
         <!-- 第三方版本（Spring Boot BOM 未管理的） -->
-        <lombok.version>1.18.34</lombok.version>
+        <lombok.version>1.18.44</lombok.version>
         <sa-token.version>1.39.0</sa-token.version>
         <springdoc.version>2.6.0</springdoc.version>
         <bucket4j.version>8.14.0</bucket4j.version>
@@ -188,6 +188,23 @@
     </dependencyManagement>
 
     <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
         <plugins>
             <!-- CI-friendly ${revision} 需要 flatten 才能正确 install 到本地仓库 -->
             <plugin>
