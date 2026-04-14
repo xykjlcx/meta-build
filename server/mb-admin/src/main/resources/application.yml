@@ -68,6 +68,10 @@ sa-token:
 mb:
   app:
     base-url: ${MB_APP_BASE_URL:http://localhost:5173}
+  email:
+    host: ${MB_MAIL_HOST:}
+    from: ${MB_MAIL_USERNAME:}
+    base-url: ${MB_APP_BASE_URL:http://localhost:5173}
   wechat:
     mp:
       app-id: ${MB_WECHAT_MP_APP_ID:}
