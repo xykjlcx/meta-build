@@ -4,8 +4,42 @@
 package com.metabuild.schema;
 
 
+import com.metabuild.schema.tables.MbConfig;
+import com.metabuild.schema.tables.MbDictData;
+import com.metabuild.schema.tables.MbDictType;
+import com.metabuild.schema.tables.MbFileMetadata;
+import com.metabuild.schema.tables.MbIamDept;
+import com.metabuild.schema.tables.MbIamLoginLog;
+import com.metabuild.schema.tables.MbIamMenu;
+import com.metabuild.schema.tables.MbIamPasswordHistory;
+import com.metabuild.schema.tables.MbIamRole;
+import com.metabuild.schema.tables.MbIamRoleDataScopeDept;
+import com.metabuild.schema.tables.MbIamRoleMenu;
+import com.metabuild.schema.tables.MbIamRouteTree;
 import com.metabuild.schema.tables.MbIamUser;
+import com.metabuild.schema.tables.MbIamUserRole;
+import com.metabuild.schema.tables.MbJobLog;
+import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.MbOperationLog;
+import com.metabuild.schema.tables.records.MbConfigRecord;
+import com.metabuild.schema.tables.records.MbDictDataRecord;
+import com.metabuild.schema.tables.records.MbDictTypeRecord;
+import com.metabuild.schema.tables.records.MbFileMetadataRecord;
+import com.metabuild.schema.tables.records.MbIamDeptRecord;
+import com.metabuild.schema.tables.records.MbIamLoginLogRecord;
+import com.metabuild.schema.tables.records.MbIamMenuRecord;
+import com.metabuild.schema.tables.records.MbIamPasswordHistoryRecord;
+import com.metabuild.schema.tables.records.MbIamRoleDataScopeDeptRecord;
+import com.metabuild.schema.tables.records.MbIamRoleMenuRecord;
+import com.metabuild.schema.tables.records.MbIamRoleRecord;
+import com.metabuild.schema.tables.records.MbIamRouteTreeRecord;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
+import com.metabuild.schema.tables.records.MbIamUserRoleRecord;
+import com.metabuild.schema.tables.records.MbJobLogRecord;
+import com.metabuild.schema.tables.records.MbNotificationReadRecord;
+import com.metabuild.schema.tables.records.MbNotificationRecord;
+import com.metabuild.schema.tables.records.MbOperationLogRecord;
 
 import org.jooq.TableField;
 import org.jooq.UniqueKey;
@@ -24,5 +58,22 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<MbConfigRecord> MB_CONFIG_PKEY = Internal.createUniqueKey(MbConfig.MB_CONFIG, DSL.name("mb_config_pkey"), new TableField[] { MbConfig.MB_CONFIG.ID }, true);
+    public static final UniqueKey<MbDictDataRecord> MB_DICT_DATA_PKEY = Internal.createUniqueKey(MbDictData.MB_DICT_DATA, DSL.name("mb_dict_data_pkey"), new TableField[] { MbDictData.MB_DICT_DATA.ID }, true);
+    public static final UniqueKey<MbDictTypeRecord> MB_DICT_TYPE_PKEY = Internal.createUniqueKey(MbDictType.MB_DICT_TYPE, DSL.name("mb_dict_type_pkey"), new TableField[] { MbDictType.MB_DICT_TYPE.ID }, true);
+    public static final UniqueKey<MbFileMetadataRecord> MB_FILE_METADATA_PKEY = Internal.createUniqueKey(MbFileMetadata.MB_FILE_METADATA, DSL.name("mb_file_metadata_pkey"), new TableField[] { MbFileMetadata.MB_FILE_METADATA.ID }, true);
+    public static final UniqueKey<MbIamDeptRecord> MB_IAM_DEPT_PKEY = Internal.createUniqueKey(MbIamDept.MB_IAM_DEPT, DSL.name("mb_iam_dept_pkey"), new TableField[] { MbIamDept.MB_IAM_DEPT.ID }, true);
+    public static final UniqueKey<MbIamLoginLogRecord> MB_IAM_LOGIN_LOG_PKEY = Internal.createUniqueKey(MbIamLoginLog.MB_IAM_LOGIN_LOG, DSL.name("mb_iam_login_log_pkey"), new TableField[] { MbIamLoginLog.MB_IAM_LOGIN_LOG.ID }, true);
+    public static final UniqueKey<MbIamMenuRecord> MB_IAM_MENU_PKEY = Internal.createUniqueKey(MbIamMenu.MB_IAM_MENU, DSL.name("mb_iam_menu_pkey"), new TableField[] { MbIamMenu.MB_IAM_MENU.ID }, true);
+    public static final UniqueKey<MbIamPasswordHistoryRecord> MB_IAM_PASSWORD_HISTORY_PKEY = Internal.createUniqueKey(MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY, DSL.name("mb_iam_password_history_pkey"), new TableField[] { MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY.ID }, true);
+    public static final UniqueKey<MbIamRoleRecord> MB_IAM_ROLE_PKEY = Internal.createUniqueKey(MbIamRole.MB_IAM_ROLE, DSL.name("mb_iam_role_pkey"), new TableField[] { MbIamRole.MB_IAM_ROLE.ID }, true);
+    public static final UniqueKey<MbIamRoleDataScopeDeptRecord> MB_IAM_ROLE_DATA_SCOPE_DEPT_PKEY = Internal.createUniqueKey(MbIamRoleDataScopeDept.MB_IAM_ROLE_DATA_SCOPE_DEPT, DSL.name("mb_iam_role_data_scope_dept_pkey"), new TableField[] { MbIamRoleDataScopeDept.MB_IAM_ROLE_DATA_SCOPE_DEPT.ROLE_ID, MbIamRoleDataScopeDept.MB_IAM_ROLE_DATA_SCOPE_DEPT.DEPT_ID }, true);
+    public static final UniqueKey<MbIamRoleMenuRecord> MB_IAM_ROLE_MENU_PKEY = Internal.createUniqueKey(MbIamRoleMenu.MB_IAM_ROLE_MENU, DSL.name("mb_iam_role_menu_pkey"), new TableField[] { MbIamRoleMenu.MB_IAM_ROLE_MENU.ROLE_ID, MbIamRoleMenu.MB_IAM_ROLE_MENU.MENU_ID }, true);
+    public static final UniqueKey<MbIamRouteTreeRecord> MB_IAM_ROUTE_TREE_PKEY = Internal.createUniqueKey(MbIamRouteTree.MB_IAM_ROUTE_TREE, DSL.name("mb_iam_route_tree_pkey"), new TableField[] { MbIamRouteTree.MB_IAM_ROUTE_TREE.ID }, true);
     public static final UniqueKey<MbIamUserRecord> MB_IAM_USER_PKEY = Internal.createUniqueKey(MbIamUser.MB_IAM_USER, DSL.name("mb_iam_user_pkey"), new TableField[] { MbIamUser.MB_IAM_USER.ID }, true);
+    public static final UniqueKey<MbIamUserRoleRecord> MB_IAM_USER_ROLE_PKEY = Internal.createUniqueKey(MbIamUserRole.MB_IAM_USER_ROLE, DSL.name("mb_iam_user_role_pkey"), new TableField[] { MbIamUserRole.MB_IAM_USER_ROLE.USER_ID, MbIamUserRole.MB_IAM_USER_ROLE.ROLE_ID }, true);
+    public static final UniqueKey<MbJobLogRecord> MB_JOB_LOG_PKEY = Internal.createUniqueKey(MbJobLog.MB_JOB_LOG, DSL.name("mb_job_log_pkey"), new TableField[] { MbJobLog.MB_JOB_LOG.ID }, true);
+    public static final UniqueKey<MbNotificationRecord> MB_NOTIFICATION_PKEY = Internal.createUniqueKey(MbNotification.MB_NOTIFICATION, DSL.name("mb_notification_pkey"), new TableField[] { MbNotification.MB_NOTIFICATION.ID }, true);
+    public static final UniqueKey<MbNotificationReadRecord> MB_NOTIFICATION_READ_PKEY = Internal.createUniqueKey(MbNotificationRead.MB_NOTIFICATION_READ, DSL.name("mb_notification_read_pkey"), new TableField[] { MbNotificationRead.MB_NOTIFICATION_READ.NOTIFICATION_ID, MbNotificationRead.MB_NOTIFICATION_READ.USER_ID }, true);
+    public static final UniqueKey<MbOperationLogRecord> MB_OPERATION_LOG_PKEY = Internal.createUniqueKey(MbOperationLog.MB_OPERATION_LOG, DSL.name("mb_operation_log_pkey"), new TableField[] { MbOperationLog.MB_OPERATION_LOG.ID }, true);
 }

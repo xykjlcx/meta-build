@@ -232,6 +232,48 @@ public class MbIamUserRecord extends UpdatableRecordImpl<MbIamUserRecord> {
         return (OffsetDateTime) get(14);
     }
 
+    /**
+     * Setter for <code>public.mb_iam_user.version</code>.
+     */
+    public void setVersion(Integer value) {
+        set(15, value);
+    }
+
+    /**
+     * Getter for <code>public.mb_iam_user.version</code>.
+     */
+    public Integer getVersion() {
+        return (Integer) get(15);
+    }
+
+    /**
+     * Setter for <code>public.mb_iam_user.password_updated_at</code>.
+     */
+    public void setPasswordUpdatedAt(OffsetDateTime value) {
+        set(16, value);
+    }
+
+    /**
+     * Getter for <code>public.mb_iam_user.password_updated_at</code>.
+     */
+    public OffsetDateTime getPasswordUpdatedAt() {
+        return (OffsetDateTime) get(16);
+    }
+
+    /**
+     * Setter for <code>public.mb_iam_user.must_change_password</code>.
+     */
+    public void setMustChangePassword(Boolean value) {
+        set(17, value);
+    }
+
+    /**
+     * Getter for <code>public.mb_iam_user.must_change_password</code>.
+     */
+    public Boolean getMustChangePassword() {
+        return (Boolean) get(17);
+    }
+
     // -------------------------------------------------------------------------
     // Primary key information
     // -------------------------------------------------------------------------
@@ -255,7 +297,7 @@ public class MbIamUserRecord extends UpdatableRecordImpl<MbIamUserRecord> {
     /**
      * Create a detached, initialised MbIamUserRecord
      */
-    public MbIamUserRecord(Long id, Long tenantId, String username, String passwordHash, String email, String phone, String nickname, String avatar, Long deptId, Short status, Long ownerDeptId, Long createdBy, OffsetDateTime createdAt, Long updatedBy, OffsetDateTime updatedAt) {
+    public MbIamUserRecord(Long id, Long tenantId, String username, String passwordHash, String email, String phone, String nickname, String avatar, Long deptId, Short status, Long ownerDeptId, Long createdBy, OffsetDateTime createdAt, Long updatedBy, OffsetDateTime updatedAt, Integer version, OffsetDateTime passwordUpdatedAt, Boolean mustChangePassword) {
         super(MbIamUser.MB_IAM_USER);
 
         setId(id);
@@ -273,6 +315,9 @@ public class MbIamUserRecord extends UpdatableRecordImpl<MbIamUserRecord> {
         setCreatedAt(createdAt);
         setUpdatedBy(updatedBy);
         setUpdatedAt(updatedAt);
+        setVersion(version);
+        setPasswordUpdatedAt(passwordUpdatedAt);
+        setMustChangePassword(mustChangePassword);
         resetChangedOnNotNull();
     }
 }

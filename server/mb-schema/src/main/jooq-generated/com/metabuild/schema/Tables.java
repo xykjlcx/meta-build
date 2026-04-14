@@ -4,7 +4,24 @@
 package com.metabuild.schema;
 
 
+import com.metabuild.schema.tables.MbConfig;
+import com.metabuild.schema.tables.MbDictData;
+import com.metabuild.schema.tables.MbDictType;
+import com.metabuild.schema.tables.MbFileMetadata;
+import com.metabuild.schema.tables.MbIamDept;
+import com.metabuild.schema.tables.MbIamLoginLog;
+import com.metabuild.schema.tables.MbIamMenu;
+import com.metabuild.schema.tables.MbIamPasswordHistory;
+import com.metabuild.schema.tables.MbIamRole;
+import com.metabuild.schema.tables.MbIamRoleDataScopeDept;
+import com.metabuild.schema.tables.MbIamRoleMenu;
+import com.metabuild.schema.tables.MbIamRouteTree;
 import com.metabuild.schema.tables.MbIamUser;
+import com.metabuild.schema.tables.MbIamUserRole;
+import com.metabuild.schema.tables.MbJobLog;
+import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.MbOperationLog;
 
 
 /**
@@ -14,7 +31,92 @@ import com.metabuild.schema.tables.MbIamUser;
 public class Tables {
 
     /**
+     * 系统配置表
+     */
+    public static final MbConfig MB_CONFIG = MbConfig.MB_CONFIG;
+
+    /**
+     * 字典数据表
+     */
+    public static final MbDictData MB_DICT_DATA = MbDictData.MB_DICT_DATA;
+
+    /**
+     * 字典类型表
+     */
+    public static final MbDictType MB_DICT_TYPE = MbDictType.MB_DICT_TYPE;
+
+    /**
+     * 文件元数据表
+     */
+    public static final MbFileMetadata MB_FILE_METADATA = MbFileMetadata.MB_FILE_METADATA;
+
+    /**
+     * 部门表
+     */
+    public static final MbIamDept MB_IAM_DEPT = MbIamDept.MB_IAM_DEPT;
+
+    /**
+     * 登录日志
+     */
+    public static final MbIamLoginLog MB_IAM_LOGIN_LOG = MbIamLoginLog.MB_IAM_LOGIN_LOG;
+
+    /**
+     * 菜单表
+     */
+    public static final MbIamMenu MB_IAM_MENU = MbIamMenu.MB_IAM_MENU;
+
+    /**
+     * 密码历史表（防重用）
+     */
+    public static final MbIamPasswordHistory MB_IAM_PASSWORD_HISTORY = MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY;
+
+    /**
+     * 角色表
+     */
+    public static final MbIamRole MB_IAM_ROLE = MbIamRole.MB_IAM_ROLE;
+
+    /**
+     * 角色-数据权限自定义部门关联表（CUSTOM_DEPT 时使用）
+     */
+    public static final MbIamRoleDataScopeDept MB_IAM_ROLE_DATA_SCOPE_DEPT = MbIamRoleDataScopeDept.MB_IAM_ROLE_DATA_SCOPE_DEPT;
+
+    /**
+     * 角色-菜单关联表
+     */
+    public static final MbIamRoleMenu MB_IAM_ROLE_MENU = MbIamRoleMenu.MB_IAM_ROLE_MENU;
+
+    /**
+     * 路由树
+     */
+    public static final MbIamRouteTree MB_IAM_ROUTE_TREE = MbIamRouteTree.MB_IAM_ROUTE_TREE;
+
+    /**
      * 用户表
      */
     public static final MbIamUser MB_IAM_USER = MbIamUser.MB_IAM_USER;
+
+    /**
+     * 用户-角色关联表
+     */
+    public static final MbIamUserRole MB_IAM_USER_ROLE = MbIamUserRole.MB_IAM_USER_ROLE;
+
+    /**
+     * 定时任务日志（追加表）
+     */
+    public static final MbJobLog MB_JOB_LOG = MbJobLog.MB_JOB_LOG;
+
+    /**
+     * 通知公告表
+     */
+    public static final MbNotification MB_NOTIFICATION = MbNotification.MB_NOTIFICATION;
+
+    /**
+     * 通知已读记录（追加表）
+     */
+    public static final MbNotificationRead MB_NOTIFICATION_READ = MbNotificationRead.MB_NOTIFICATION_READ;
+
+    /**
+     * 操作日志（追加表，不注册 DataScope）
+     */
+    public static final MbOperationLog MB_OPERATION_LOG = MbOperationLog.MB_OPERATION_LOG;
 }

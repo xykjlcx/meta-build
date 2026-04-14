@@ -130,6 +130,21 @@ public class MbIamUser extends TableImpl<MbIamUserRecord> {
      */
     public final TableField<MbIamUserRecord, OffsetDateTime> UPDATED_AT = createField(DSL.name("updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("CURRENT_TIMESTAMP"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
 
+    /**
+     * The column <code>public.mb_iam_user.version</code>.
+     */
+    public final TableField<MbIamUserRecord, Integer> VERSION = createField(DSL.name("version"), SQLDataType.INTEGER.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.INTEGER)), this, "");
+
+    /**
+     * The column <code>public.mb_iam_user.password_updated_at</code>.
+     */
+    public final TableField<MbIamUserRecord, OffsetDateTime> PASSWORD_UPDATED_AT = createField(DSL.name("password_updated_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+
+    /**
+     * The column <code>public.mb_iam_user.must_change_password</code>.
+     */
+    public final TableField<MbIamUserRecord, Boolean> MUST_CHANGE_PASSWORD = createField(DSL.name("must_change_password"), SQLDataType.BOOLEAN.nullable(false).defaultValue(DSL.field(DSL.raw("false"), SQLDataType.BOOLEAN)), this, "");
+
     private MbIamUser(Name alias, Table<MbIamUserRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
     }
