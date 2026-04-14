@@ -1,0 +1,9 @@
+# Testcontainers 会通过 @DynamicPropertySource 注入数据源配置
+spring:
+  flyway:
+    clean-disabled: false
+
+logging:
+  level:
+    com.metabuild: DEBUG
+    org.testcontainers: WARN

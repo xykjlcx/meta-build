@@ -1,0 +1,4 @@
+# 生产环境：所有敏感配置通过环境变量注入，启动时 fail-fast 校验
+spring:
+  flyway:
+    clean-disabled: true

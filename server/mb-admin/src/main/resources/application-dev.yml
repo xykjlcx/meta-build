@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:15432/metabuild
+    username: metabuild
+    password: metabuild
+
+logging:
+  level:
+    com.metabuild: DEBUG
+    org.jooq: DEBUG
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"

@@ -1,0 +1,2 @@
+com.metabuild.infra.jooq.MbJooqAutoConfiguration
+com.metabuild.infra.jooq.IdGeneratorConfig

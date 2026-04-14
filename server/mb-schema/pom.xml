@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.metabuild</groupId>
+        <artifactId>meta-build</artifactId>
+        <version>${revision}</version>
+    </parent>
+
+    <artifactId>mb-schema</artifactId>
+    <name>mb-schema</name>
+    <description>数据库契约层：Flyway SQL + jOOQ 生成代码（ADR-0004）</description>
+
+    <!-- 零 mb-* 依赖，仅 jOOQ runtime -->
+    <dependencies>
+        <dependency>
+            <groupId>org.jooq</groupId>
+            <artifactId>jooq</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- 把 jooq-generated 加入编译源码路径 -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-jooq-source</id>
+                        <phase>generate-sources</phase>
+                        <goals><goal>add-source</goal></goals>
+                        <configuration>
+                            <sources>
+                                <source>${project.basedir}/src/main/jooq-generated</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <!--
+            jOOQ 代码生成 profile：mvn -Pcodegen generate-sources -pl mb-schema
+
+            三插件流水线（jOOQ 官方推荐模式）：
+            1. groovy-maven-plugin：启动 Testcontainers PG 16，暴露真实 JDBC URL 到 Maven property
+            2. flyway-maven-plugin：读 URL，执行迁移建表
+            3. jooq-codegen-maven：读 URL，连接同一个容器，反向工程生成 Java 类
+
+            为什么不用 jdbc:tc: URL？Maven 插件各自独立 ClassLoader，static Map 隔离，
+            无法跨插件共享容器实例。用真实 JDBC URL + Maven property 绕过此限制。
+        -->
+        <profile>
+            <id>codegen</id>
+            <properties>
+                <db.username>test</db.username>
+                <db.password>test</db.password>
+            </properties>
+            <build>
+                <plugins>
+                    <!-- Step 1: 启动 PG 容器，暴露真实 JDBC URL -->
+                    <plugin>
+                        <groupId>org.codehaus.gmaven</groupId>
+                        <artifactId>groovy-maven-plugin</artifactId>
+                        <version>2.1.1</version>
+                        <executions>
+                            <execution>
+                                <id>start-pg</id>
+                                <phase>generate-sources</phase>
+                                <goals><goal>execute</goal></goals>
+                                <configuration>
+                                    <source>
+                                        db = new org.testcontainers.containers.PostgreSQLContainer("postgres:16-alpine")
+                                            .withDatabaseName("metabuild")
+                                            .withUsername("${db.username}")
+                                            .withPassword("${db.password}")
+                                        db.start()
+                                        log.info("Testcontainers PG started: ${db.jdbcUrl}")
+                                        project.properties.setProperty('db.url', db.getJdbcUrl())
+                                    </source>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.testcontainers</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>${testcontainers.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+
+                    <!-- Step 2: Flyway 迁移（建表） -->
+                    <plugin>
+                        <groupId>org.flywaydb</groupId>
+                        <artifactId>flyway-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>flyway-migrate</id>
+                                <phase>generate-sources</phase>
+                                <goals><goal>migrate</goal></goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <url>${db.url}</url>
+                            <user>${db.username}</user>
+                            <password>${db.password}</password>
+                            <locations>
+                                <location>filesystem:${project.basedir}/src/main/resources/db/migration</location>
+                            </locations>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.flywaydb</groupId>
+                                <artifactId>flyway-database-postgresql</artifactId>
+                                <version>${flyway.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>${postgresql.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+
+                    <!-- Step 3: jOOQ 代码生成（连接同一个容器） -->
+                    <plugin>
+                        <groupId>org.jooq</groupId>
+                        <artifactId>jooq-codegen-maven</artifactId>
+                        <executions>
+                            <execution>
+                                <id>jooq-codegen</id>
+                                <phase>generate-sources</phase>
+                                <goals><goal>generate</goal></goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <jdbc>
+                                <url>${db.url}</url>
+                                <user>${db.username}</user>
+                                <password>${db.password}</password>
+                            </jdbc>
+                            <generator>
+                                <database>
+                                    <name>org.jooq.meta.postgres.PostgresDatabase</name>
+                                    <includes>mb_.*</includes>
+                                    <excludes>flyway_schema_history</excludes>
+                                    <inputSchema>public</inputSchema>
+                                </database>
+                                <generate>
+                                    <records>true</records>
+                                    <pojos>false</pojos>
+                                    <daos>false</daos>
+                                </generate>
+                                <target>
+                                    <packageName>com.metabuild.schema</packageName>
+                                    <directory>${project.basedir}/src/main/jooq-generated</directory>
+                                </target>
+                            </generator>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.postgresql</groupId>
+                                <artifactId>postgresql</artifactId>
+                                <version>${postgresql.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

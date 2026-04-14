@@ -23,6 +23,9 @@ server/
 └── pom.xml             # 顶层 parent pom，BOM 版本管理
 ```
 
+**根 pom 关键插件**：
+- `flatten-maven-plugin`：CI-friendly `${revision}` 版本号支持。`mvn install` 时将 `${revision}` 替换为实际版本号，确保子模块可被单独运行（如 `spring-boot:run -pl mb-admin`）
+
 **每一层的"存在理由"（拿掉它会怎样）**：
 
 | 层 | 职责 | 拿掉它会怎样 |

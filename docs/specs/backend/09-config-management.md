@@ -124,7 +124,7 @@
 | Env Var | yml 键 | 类型 | 默认值 | 必填 | 敏感 | 说明 |
 |---|---|---|---|---|---|---|
 | `SPRING_DATA_REDIS_HOST` | `spring.data.redis.host` | String | `localhost` | prod | — | Redis 主机 |
-| `SPRING_DATA_REDIS_PORT` | `spring.data.redis.port` | int | `6379` | — | — | Redis 端口 |
+| `SPRING_DATA_REDIS_PORT` | `spring.data.redis.port` | int | `16379` | — | — | Redis 端口（Docker 映射 16379:6379） |
 | `SPRING_DATA_REDIS_PASSWORD` | `spring.data.redis.password` | String | (空) | prod | 🔐 | Redis 密码 |
 | `SPRING_DATA_REDIS_DATABASE` | `spring.data.redis.database` | int | `0` | — | — | Redis database 编号 |
 | `SPRING_DATA_REDIS_LETTUCE_POOL_MAX_ACTIVE` | `spring.data.redis.lettuce.pool.max-active` | int | `8` | — | — | Lettuce 连接池 |
@@ -383,7 +383,7 @@ logging:
 ```yaml
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/metabuild_dev
+    url: jdbc:postgresql://localhost:15432/metabuild_dev
     username: metabuild
     password: dev_only_password    # 仅开发,非生产敏感
   data:
