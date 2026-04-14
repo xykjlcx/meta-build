@@ -79,10 +79,33 @@ public class NotificationLogRepository {
      * 按模块 + 关联 ID 查询发送记录。
      */
     public List<NotificationLogView> findByModuleAndRef(String module, String referenceId) {
-        return dsl.selectFrom(MB_NOTIFICATION_LOG)
+        return dsl.select(
+                        MB_NOTIFICATION_LOG.ID,
+                        MB_NOTIFICATION_LOG.CHANNEL_TYPE,
+                        MB_NOTIFICATION_LOG.RECIPIENT_ID,
+                        MB_NOTIFICATION_LOG.TEMPLATE_CODE,
+                        MB_NOTIFICATION_LOG.MODULE,
+                        MB_NOTIFICATION_LOG.REFERENCE_ID,
+                        MB_NOTIFICATION_LOG.STATUS,
+                        MB_NOTIFICATION_LOG.ERROR_MESSAGE,
+                        MB_NOTIFICATION_LOG.SENT_AT,
+                        MB_NOTIFICATION_LOG.CREATED_AT
+                )
+                .from(MB_NOTIFICATION_LOG)
                 .where(MB_NOTIFICATION_LOG.MODULE.eq(module))
                 .and(MB_NOTIFICATION_LOG.REFERENCE_ID.eq(referenceId))
                 .orderBy(MB_NOTIFICATION_LOG.CREATED_AT.desc())
-                .fetchInto(NotificationLogView.class);
+                .fetch(r -> new NotificationLogView(
+                        r.get(MB_NOTIFICATION_LOG.ID),
+                        r.get(MB_NOTIFICATION_LOG.CHANNEL_TYPE),
+                        r.get(MB_NOTIFICATION_LOG.RECIPIENT_ID),
+                        r.get(MB_NOTIFICATION_LOG.TEMPLATE_CODE),
+                        r.get(MB_NOTIFICATION_LOG.MODULE),
+                        r.get(MB_NOTIFICATION_LOG.REFERENCE_ID),
+                        r.get(MB_NOTIFICATION_LOG.STATUS),
+                        r.get(MB_NOTIFICATION_LOG.ERROR_MESSAGE),
+                        r.get(MB_NOTIFICATION_LOG.SENT_AT),
+                        r.get(MB_NOTIFICATION_LOG.CREATED_AT)
+                ));
     }
 }

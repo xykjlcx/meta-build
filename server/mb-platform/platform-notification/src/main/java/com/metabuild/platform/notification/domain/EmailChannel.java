@@ -69,7 +69,7 @@ public class EmailChannel implements NotificationChannel {
                 .where(MB_IAM_USER.ID.in(message.recipientUserIds()))
                 .and(MB_IAM_USER.EMAIL.isNotNull())
                 .and(MB_IAM_USER.EMAIL.ne(""))
-                .fetchInto(EmailRecipient.class);
+                .fetch(r -> new EmailRecipient(r.get(MB_IAM_USER.ID), r.get(MB_IAM_USER.EMAIL)));
 
         // 逐个发送（避免单个邮箱异常影响其他接收人）
         for (EmailRecipient recipient : recipients) {

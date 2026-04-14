@@ -70,10 +70,27 @@ public class WeChatBindingRepository {
      * 查询用户的所有绑定关系。
      */
     public List<WeChatBindingView> findByUserId(Long userId, Long tenantId) {
-        return dsl.selectFrom(MB_USER_WECHAT_BINDING)
-            .where(MB_USER_WECHAT_BINDING.USER_ID.eq(userId))
-            .and(MB_USER_WECHAT_BINDING.TENANT_ID.eq(tenantId))
-            .orderBy(MB_USER_WECHAT_BINDING.BOUND_AT.desc())
-            .fetchInto(WeChatBindingView.class);
+        return dsl.select(
+                    MB_USER_WECHAT_BINDING.ID,
+                    MB_USER_WECHAT_BINDING.PLATFORM,
+                    MB_USER_WECHAT_BINDING.APP_ID,
+                    MB_USER_WECHAT_BINDING.OPEN_ID,
+                    MB_USER_WECHAT_BINDING.NICKNAME,
+                    MB_USER_WECHAT_BINDING.AVATAR_URL,
+                    MB_USER_WECHAT_BINDING.BOUND_AT
+                )
+                .from(MB_USER_WECHAT_BINDING)
+                .where(MB_USER_WECHAT_BINDING.USER_ID.eq(userId))
+                .and(MB_USER_WECHAT_BINDING.TENANT_ID.eq(tenantId))
+                .orderBy(MB_USER_WECHAT_BINDING.BOUND_AT.desc())
+                .fetch(r -> new WeChatBindingView(
+                        r.get(MB_USER_WECHAT_BINDING.ID),
+                        r.get(MB_USER_WECHAT_BINDING.PLATFORM),
+                        r.get(MB_USER_WECHAT_BINDING.APP_ID),
+                        r.get(MB_USER_WECHAT_BINDING.OPEN_ID),
+                        r.get(MB_USER_WECHAT_BINDING.NICKNAME),
+                        r.get(MB_USER_WECHAT_BINDING.AVATAR_URL),
+                        r.get(MB_USER_WECHAT_BINDING.BOUND_AT)
+                ));
     }
 }
