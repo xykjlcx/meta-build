@@ -6,7 +6,7 @@ spring:
 
   # 数据源
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/metabuild}
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:15432/metabuild}
     username: ${SPRING_DATASOURCE_USERNAME:metabuild}
     password: ${SPRING_DATASOURCE_PASSWORD:metabuild}
     hikari:
