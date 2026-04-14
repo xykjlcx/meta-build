@@ -28,6 +28,16 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
+  # 邮件（SMTP 未配置时邮件渠道自动跳过）
+  mail:
+    host: ${MB_MAIL_HOST:}
+    port: ${MB_MAIL_PORT:587}
+    username: ${MB_MAIL_USERNAME:}
+    password: ${MB_MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
   # Redis
   data:
     redis:
@@ -56,6 +66,8 @@ sa-token:
 
 # Meta-Build 自定义配置
 mb:
+  app:
+    base-url: ${MB_APP_BASE_URL:http://localhost:5173}
   jooq:
     slow-query-threshold-ms: ${MB_JOOQ_SLOW_QUERY_THRESHOLD_MS:500}
   id:
