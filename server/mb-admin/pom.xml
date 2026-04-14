@@ -63,6 +63,12 @@
             <artifactId>infra-captcha</artifactId>
         </dependency>
 
+        <!-- 内部模块 — platform 业务层 -->
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>platform-iam</artifactId>
+        </dependency>
+
         <!-- Spring Boot Starters -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

@@ -110,6 +110,11 @@
                 <artifactId>infra-archunit</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>com.metabuild</groupId>
+                <artifactId>platform-iam</artifactId>
+                <version>${revision}</version>
+            </dependency>
 
             <!-- Lombok -->
             <dependency>
