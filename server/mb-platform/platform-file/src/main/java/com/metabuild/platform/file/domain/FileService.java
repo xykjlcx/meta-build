@@ -137,7 +137,7 @@ public class FileService {
         // 仅上传者或管理员可删除
         if (!currentUser.isAdmin()
                 && !Objects.equals(record.getUploaderId(), currentUser.userId())) {
-            throw new SecurityException("无权删除该文件");
+            throw new com.metabuild.common.exception.ForbiddenException("file.deleteNotAllowed");
         }
         fileStorage.delete(record.getFilePath());
         fileRepository.deleteById(fileId);
@@ -148,7 +148,7 @@ public class FileService {
         Long tenantId = currentUser.isAuthenticated() ? currentUser.tenantId() : 0L;
         if (tenantId == null) tenantId = 0L;
         return fileRepository.findByIdAndTenant(fileId, tenantId)
-            .orElseThrow(() -> new NoSuchElementException("文件不存在: " + fileId));
+            .orElseThrow(() -> new com.metabuild.common.exception.NotFoundException("file.notFound", fileId));
     }
 
     private String computeSha256(MultipartFile file) {
