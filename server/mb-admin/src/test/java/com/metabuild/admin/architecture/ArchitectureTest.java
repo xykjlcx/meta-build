@@ -51,6 +51,16 @@ class ArchitectureTest {
         JooqIsolationRule.DOMAIN_MUST_NOT_USE_JOOQ.check(classes);
     }
 
+    @Test
+    void no_plain_sql_annotation() {
+        JooqIsolationRule.NO_PLAIN_SQL_ANNOTATION.check(classes);
+    }
+
+    @Test
+    void service_jooq_whitelist() {
+        JooqIsolationRule.SERVICE_JOOQ_WHITELIST.check(classes);
+    }
+
     // ========== 分层架构：Sa-Token 隔离 ==========
 
     @Test
@@ -129,8 +139,23 @@ class ArchitectureTest {
     }
 
     @Test
+    void optional_only_return() {
+        CodingStyleRule.OPTIONAL_ONLY_RETURN.check(classes);
+    }
+
+    @Test
+    void no_optional_parameters() {
+        CodingStyleRule.NO_OPTIONAL_PARAMETERS.check(classes);
+    }
+
+    @Test
     void no_at_value_annotation() {
         ConfigManagementRule.NO_AT_VALUE_ANNOTATION.check(classes);
+    }
+
+    @Test
+    void properties_must_be_validated() {
+        ConfigManagementRule.PROPERTIES_MUST_BE_VALIDATED.check(classes);
     }
 
     @Test

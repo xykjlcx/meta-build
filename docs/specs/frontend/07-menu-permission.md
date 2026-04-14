@@ -532,38 +532,38 @@ WHERE id = 12345;
 // client/packages/api-sdk/src/generated/permissions.ts （生成产物）
 // 由后端 mvn springdoc:generate 时根据 @RequirePermission 扫描产出
 export type AppPermission =
-  | 'iam.user.list'
-  | 'iam.user.create'
-  | 'iam.user.update'
-  | 'iam.user.delete'
-  | 'iam.role.list'
-  | 'iam.role.assignPermission'
-  | 'iam.menu.read'
-  | 'iam.menu.write'
-  | 'audit.log.list'
-  | 'audit.log.export'
-  | 'order.read'
-  | 'order.create'
-  | 'order.update'
-  | 'order.delete'
-  | 'order.export';
+  | 'iam:user:list'
+  | 'iam:user:create'
+  | 'iam:user:update'
+  | 'iam:user:delete'
+  | 'iam:role:list'
+  | 'iam:role:assignPermission'
+  | 'iam:menu:read'
+  | 'iam:menu:write'
+  | 'audit:log:list'
+  | 'audit:log:export'
+  | 'order:read'
+  | 'order:create'
+  | 'order:update'
+  | 'order:delete'
+  | 'order:export';
 
 export const ALL_APP_PERMISSIONS: readonly AppPermission[] = [
-  'iam.user.list',
-  'iam.user.create',
-  'iam.user.update',
-  'iam.user.delete',
-  'iam.role.list',
-  'iam.role.assignPermission',
-  'iam.menu.read',
-  'iam.menu.write',
-  'audit.log.list',
-  'audit.log.export',
-  'order.read',
-  'order.create',
-  'order.update',
-  'order.delete',
-  'order.export'
+  'iam:user:list',
+  'iam:user:create',
+  'iam:user:update',
+  'iam:user:delete',
+  'iam:role:list',
+  'iam:role:assignPermission',
+  'iam:menu:read',
+  'iam:menu:write',
+  'audit:log:list',
+  'audit:log:export',
+  'order:read',
+  'order:create',
+  'order:update',
+  'order:delete',
+  'order:export'
 ] as const;
 ```
 

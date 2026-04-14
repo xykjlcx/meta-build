@@ -1,6 +1,7 @@
 package com.metabuild.platform.file.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
@@ -19,6 +20,7 @@ import java.util.List;
  * </pre>
  */
 @ConfigurationProperties(prefix = "mb.file")
+@Validated
 public record MbFileProperties(
     String storagePath,
     int maxSizeMb,
