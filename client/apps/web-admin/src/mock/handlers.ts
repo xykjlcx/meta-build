@@ -1,10 +1,5 @@
+import { ALL_APP_PERMISSIONS } from '@mb/api-sdk';
 import { http, HttpResponse } from 'msw';
-
-// ── 全部权限集合（复用） ──
-const ALL_PERMISSIONS = [
-  'iam:user:list', 'iam:user:detail', 'iam:user:create', 'iam:user:update', 'iam:user:delete',
-  'iam:role:list', 'iam:menu:list', 'iam:menu:detail', 'iam:menu:create', 'iam:menu:delete',
-];
 
 // ── ProblemDetail 工厂 ──
 function problemJson(status: number, title: string, detail: string) {
@@ -102,7 +97,7 @@ export const handlers = [
         userId: 1,
         username: body.username,
         deptId: 1,
-        permissions: ALL_PERMISSIONS,
+        permissions: ALL_APP_PERMISSIONS,
       },
     });
   }),
@@ -127,7 +122,7 @@ export const handlers = [
         userId: 1,
         username: 'admin',
         deptId: 1,
-        permissions: ALL_PERMISSIONS,
+        permissions: ALL_APP_PERMISSIONS,
       },
     });
   }),
@@ -140,7 +135,7 @@ export const handlers = [
       userId: 1,
       username: 'admin',
       deptId: 1,
-      permissions: ALL_PERMISSIONS,
+      permissions: ALL_APP_PERMISSIONS,
       roles: ['admin'],
       isAdmin: true,
     });
@@ -158,7 +153,7 @@ export const handlers = [
 
     return HttpResponse.json({
       tree: menuTree,
-      permissions: ALL_PERMISSIONS,
+      permissions: ALL_APP_PERMISSIONS,
     });
   }),
 

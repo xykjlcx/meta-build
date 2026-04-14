@@ -10,7 +10,7 @@ import {
   PopoverTrigger,
   cn,
 } from '@mb/ui-primitives';
-import { type ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import { type ReactNode, useCallback, useEffect, useId, useRef, useState } from 'react';
 
 /* ------------------------------------------------------------------ */
 /*  类型定义                                                            */
@@ -82,6 +82,7 @@ function ApiSelect<TValue = string>({
   debounceMs = 300,
   disabled,
 }: ApiSelectProps<TValue>) {
+  const listboxId = useId();
   const [open, setOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -139,7 +140,7 @@ function ApiSelect<TValue = string>({
           type="button"
           // biome-ignore lint/a11y/useSemanticElements: Combobox 需要搜索过滤能力，原生 select 不支持
           role="combobox"
-          aria-controls="api-select-listbox"
+          aria-controls={listboxId}
           aria-expanded={open}
           className={cn(
             'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
@@ -167,7 +168,7 @@ function ApiSelect<TValue = string>({
         {/* shouldFilter={false} 禁用 cmdk 的客户端过滤，搜索由远程 fetcher 处理 */}
         <Command shouldFilter={false}>
           <CommandInput value={keyword} onValueChange={setKeyword} />
-          <CommandList id="api-select-listbox">
+          <CommandList id={listboxId}>
             {/* loading 状态 */}
             {loading && (
               <div className="py-6 text-center text-sm" data-testid="api-select-loading">
