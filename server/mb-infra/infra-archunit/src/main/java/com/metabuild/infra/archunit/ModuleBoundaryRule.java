@@ -17,7 +17,7 @@ public final class ModuleBoundaryRule {
 
     /**
      * platform 模块间只能通过 api 子包交互。
-     * 例：platform-iam 的 Service 不能直接 import platform-oplog 的内部实现。
+     * 例：platform-iam 的 Service 不能直接 import platform-log 的内部实现。
      * <p>
      * 使用 slices API 避免误判：同一模块内 domain/web 包互依是合法的，
      * 跨模块依赖仅当 target 在 api 包时允许。

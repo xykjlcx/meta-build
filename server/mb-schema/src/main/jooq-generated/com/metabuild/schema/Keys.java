@@ -19,9 +19,9 @@ import com.metabuild.schema.tables.MbIamRouteTree;
 import com.metabuild.schema.tables.MbIamUser;
 import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
+import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
 import com.metabuild.schema.tables.MbNotificationRead;
-import com.metabuild.schema.tables.MbOperationLog;
 import com.metabuild.schema.tables.records.MbConfigRecord;
 import com.metabuild.schema.tables.records.MbDictDataRecord;
 import com.metabuild.schema.tables.records.MbDictTypeRecord;
@@ -37,9 +37,9 @@ import com.metabuild.schema.tables.records.MbIamRouteTreeRecord;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
 import com.metabuild.schema.tables.records.MbIamUserRoleRecord;
 import com.metabuild.schema.tables.records.MbJobLogRecord;
+import com.metabuild.schema.tables.records.MbLogOperationRecord;
 import com.metabuild.schema.tables.records.MbNotificationReadRecord;
 import com.metabuild.schema.tables.records.MbNotificationRecord;
-import com.metabuild.schema.tables.records.MbOperationLogRecord;
 
 import org.jooq.ForeignKey;
 import org.jooq.TableField;
@@ -74,9 +74,9 @@ public class Keys {
     public static final UniqueKey<MbIamUserRecord> MB_IAM_USER_PKEY = Internal.createUniqueKey(MbIamUser.MB_IAM_USER, DSL.name("mb_iam_user_pkey"), new TableField[] { MbIamUser.MB_IAM_USER.ID }, true);
     public static final UniqueKey<MbIamUserRoleRecord> MB_IAM_USER_ROLE_PKEY = Internal.createUniqueKey(MbIamUserRole.MB_IAM_USER_ROLE, DSL.name("mb_iam_user_role_pkey"), new TableField[] { MbIamUserRole.MB_IAM_USER_ROLE.USER_ID, MbIamUserRole.MB_IAM_USER_ROLE.ROLE_ID }, true);
     public static final UniqueKey<MbJobLogRecord> MB_JOB_LOG_PKEY = Internal.createUniqueKey(MbJobLog.MB_JOB_LOG, DSL.name("mb_job_log_pkey"), new TableField[] { MbJobLog.MB_JOB_LOG.ID }, true);
+    public static final UniqueKey<MbLogOperationRecord> MB_OPERATION_LOG_PKEY = Internal.createUniqueKey(MbLogOperation.MB_LOG_OPERATION, DSL.name("mb_operation_log_pkey"), new TableField[] { MbLogOperation.MB_LOG_OPERATION.ID }, true);
     public static final UniqueKey<MbNotificationRecord> MB_NOTIFICATION_PKEY = Internal.createUniqueKey(MbNotification.MB_NOTIFICATION, DSL.name("mb_notification_pkey"), new TableField[] { MbNotification.MB_NOTIFICATION.ID }, true);
     public static final UniqueKey<MbNotificationReadRecord> MB_NOTIFICATION_READ_PKEY = Internal.createUniqueKey(MbNotificationRead.MB_NOTIFICATION_READ, DSL.name("mb_notification_read_pkey"), new TableField[] { MbNotificationRead.MB_NOTIFICATION_READ.NOTIFICATION_ID, MbNotificationRead.MB_NOTIFICATION_READ.USER_ID }, true);
-    public static final UniqueKey<MbOperationLogRecord> MB_OPERATION_LOG_PKEY = Internal.createUniqueKey(MbOperationLog.MB_OPERATION_LOG, DSL.name("mb_operation_log_pkey"), new TableField[] { MbOperationLog.MB_OPERATION_LOG.ID }, true);
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions
@@ -97,8 +97,8 @@ public class Keys {
     public static final ForeignKey<MbIamUserRecord, MbIamDeptRecord> MB_IAM_USER__FK_IAM_USER_DEPT = Internal.createForeignKey(MbIamUser.MB_IAM_USER, DSL.name("fk_iam_user_dept"), new TableField[] { MbIamUser.MB_IAM_USER.DEPT_ID }, Keys.MB_IAM_DEPT_PKEY, new TableField[] { MbIamDept.MB_IAM_DEPT.ID }, true);
     public static final ForeignKey<MbIamUserRoleRecord, MbIamRoleRecord> MB_IAM_USER_ROLE__FK_IAM_USER_ROLE_ROLE = Internal.createForeignKey(MbIamUserRole.MB_IAM_USER_ROLE, DSL.name("fk_iam_user_role_role"), new TableField[] { MbIamUserRole.MB_IAM_USER_ROLE.ROLE_ID }, Keys.MB_IAM_ROLE_PKEY, new TableField[] { MbIamRole.MB_IAM_ROLE.ID }, true);
     public static final ForeignKey<MbIamUserRoleRecord, MbIamUserRecord> MB_IAM_USER_ROLE__FK_IAM_USER_ROLE_USER = Internal.createForeignKey(MbIamUserRole.MB_IAM_USER_ROLE, DSL.name("fk_iam_user_role_user"), new TableField[] { MbIamUserRole.MB_IAM_USER_ROLE.USER_ID }, Keys.MB_IAM_USER_PKEY, new TableField[] { MbIamUser.MB_IAM_USER.ID }, true);
+    public static final ForeignKey<MbLogOperationRecord, MbIamUserRecord> MB_LOG_OPERATION__FK_LOG_OPERATION_USER = Internal.createForeignKey(MbLogOperation.MB_LOG_OPERATION, DSL.name("fk_log_operation_user"), new TableField[] { MbLogOperation.MB_LOG_OPERATION.USER_ID }, Keys.MB_IAM_USER_PKEY, new TableField[] { MbIamUser.MB_IAM_USER.ID }, true);
     public static final ForeignKey<MbNotificationRecord, MbIamUserRecord> MB_NOTIFICATION__FK_NOTIFICATION_SENDER = Internal.createForeignKey(MbNotification.MB_NOTIFICATION, DSL.name("fk_notification_sender"), new TableField[] { MbNotification.MB_NOTIFICATION.SENDER_ID }, Keys.MB_IAM_USER_PKEY, new TableField[] { MbIamUser.MB_IAM_USER.ID }, true);
     public static final ForeignKey<MbNotificationReadRecord, MbNotificationRecord> MB_NOTIFICATION_READ__FK_NOTIFICATION_READ_NOTIFICATION = Internal.createForeignKey(MbNotificationRead.MB_NOTIFICATION_READ, DSL.name("fk_notification_read_notification"), new TableField[] { MbNotificationRead.MB_NOTIFICATION_READ.NOTIFICATION_ID }, Keys.MB_NOTIFICATION_PKEY, new TableField[] { MbNotification.MB_NOTIFICATION.ID }, true);
     public static final ForeignKey<MbNotificationReadRecord, MbIamUserRecord> MB_NOTIFICATION_READ__FK_NOTIFICATION_READ_USER = Internal.createForeignKey(MbNotificationRead.MB_NOTIFICATION_READ, DSL.name("fk_notification_read_user"), new TableField[] { MbNotificationRead.MB_NOTIFICATION_READ.USER_ID }, Keys.MB_IAM_USER_PKEY, new TableField[] { MbIamUser.MB_IAM_USER.ID }, true);
-    public static final ForeignKey<MbOperationLogRecord, MbIamUserRecord> MB_OPERATION_LOG__FK_OPERATION_LOG_USER = Internal.createForeignKey(MbOperationLog.MB_OPERATION_LOG, DSL.name("fk_operation_log_user"), new TableField[] { MbOperationLog.MB_OPERATION_LOG.USER_ID }, Keys.MB_IAM_USER_PKEY, new TableField[] { MbIamUser.MB_IAM_USER.ID }, true);
 }

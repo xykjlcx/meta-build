@@ -1,10 +1,10 @@
-package com.metabuild.platform.oplog.web;
+package com.metabuild.platform.log.web;
 
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.oplog.api.dto.OperationLogView;
-import com.metabuild.platform.oplog.domain.OperationLogService;
+import com.metabuild.platform.log.api.dto.OperationLogView;
+import com.metabuild.platform.log.domain.OperationLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

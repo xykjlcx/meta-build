@@ -1,4 +1,4 @@
-package com.metabuild.platform.oplog.api.dto;
+package com.metabuild.platform.log.api.dto;
 
 import java.time.OffsetDateTime;
 

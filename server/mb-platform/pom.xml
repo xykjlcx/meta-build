@@ -17,7 +17,7 @@
 
     <modules>
         <module>platform-iam</module>
-        <module>platform-oplog</module>
+        <module>platform-log</module>
         <module>platform-dict</module>
         <module>platform-config</module>
         <module>platform-file</module>

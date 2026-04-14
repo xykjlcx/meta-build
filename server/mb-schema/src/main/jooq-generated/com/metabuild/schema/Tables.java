@@ -19,9 +19,9 @@ import com.metabuild.schema.tables.MbIamRouteTree;
 import com.metabuild.schema.tables.MbIamUser;
 import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
+import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
 import com.metabuild.schema.tables.MbNotificationRead;
-import com.metabuild.schema.tables.MbOperationLog;
 
 
 /**
@@ -106,6 +106,11 @@ public class Tables {
     public static final MbJobLog MB_JOB_LOG = MbJobLog.MB_JOB_LOG;
 
     /**
+     * 操作日志（追加表，不注册 DataScope）
+     */
+    public static final MbLogOperation MB_LOG_OPERATION = MbLogOperation.MB_LOG_OPERATION;
+
+    /**
      * 通知公告表
      */
     public static final MbNotification MB_NOTIFICATION = MbNotification.MB_NOTIFICATION;
@@ -114,9 +119,4 @@ public class Tables {
      * 通知已读记录（追加表）
      */
     public static final MbNotificationRead MB_NOTIFICATION_READ = MbNotificationRead.MB_NOTIFICATION_READ;
-
-    /**
-     * 操作日志（追加表，不注册 DataScope）
-     */
-    public static final MbOperationLog MB_OPERATION_LOG = MbOperationLog.MB_OPERATION_LOG;
 }

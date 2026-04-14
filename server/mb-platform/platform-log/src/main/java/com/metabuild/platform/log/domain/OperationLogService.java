@@ -1,9 +1,9 @@
-package com.metabuild.platform.oplog.domain;
+package com.metabuild.platform.log.domain;
 
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
-import com.metabuild.platform.oplog.api.dto.OperationLogView;
-import com.metabuild.schema.tables.records.MbOperationLogRecord;
+import com.metabuild.platform.log.api.dto.OperationLogView;
+import com.metabuild.schema.tables.records.MbLogOperationRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,7 +25,7 @@ public class OperationLogService {
         return repository.findPage(query).map(this::toResponse);
     }
 
-    private OperationLogView toResponse(MbOperationLogRecord r) {
+    private OperationLogView toResponse(MbLogOperationRecord r) {
         return new OperationLogView(
             r.getId(),
             r.getUserId(),

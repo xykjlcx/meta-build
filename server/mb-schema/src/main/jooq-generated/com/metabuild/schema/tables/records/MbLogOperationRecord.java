@@ -4,7 +4,7 @@
 package com.metabuild.schema.tables.records;
 
 
-import com.metabuild.schema.tables.MbOperationLog;
+import com.metabuild.schema.tables.MbLogOperation;
 
 import java.time.OffsetDateTime;
 
@@ -16,229 +16,229 @@ import org.jooq.impl.UpdatableRecordImpl;
  * 操作日志（追加表，不注册 DataScope）
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
-public class MbOperationLogRecord extends UpdatableRecordImpl<MbOperationLogRecord> {
+public class MbLogOperationRecord extends UpdatableRecordImpl<MbLogOperationRecord> {
 
     private static final long serialVersionUID = 1L;
 
     /**
-     * Setter for <code>public.mb_operation_log.id</code>.
+     * Setter for <code>public.mb_log_operation.id</code>.
      */
     public void setId(Long value) {
         set(0, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.id</code>.
+     * Getter for <code>public.mb_log_operation.id</code>.
      */
     public Long getId() {
         return (Long) get(0);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.tenant_id</code>.
+     * Setter for <code>public.mb_log_operation.tenant_id</code>.
      */
     public void setTenantId(Long value) {
         set(1, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.tenant_id</code>.
+     * Getter for <code>public.mb_log_operation.tenant_id</code>.
      */
     public Long getTenantId() {
         return (Long) get(1);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.user_id</code>.
+     * Setter for <code>public.mb_log_operation.user_id</code>.
      */
     public void setUserId(Long value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.user_id</code>.
+     * Getter for <code>public.mb_log_operation.user_id</code>.
      */
     public Long getUserId() {
         return (Long) get(2);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.username</code>.
+     * Setter for <code>public.mb_log_operation.username</code>.
      */
     public void setUsername(String value) {
         set(3, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.username</code>.
+     * Getter for <code>public.mb_log_operation.username</code>.
      */
     public String getUsername() {
         return (String) get(3);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.module</code>.
+     * Setter for <code>public.mb_log_operation.module</code>.
      */
     public void setModule(String value) {
         set(4, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.module</code>.
+     * Getter for <code>public.mb_log_operation.module</code>.
      */
     public String getModule() {
         return (String) get(4);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.operation</code>.
+     * Setter for <code>public.mb_log_operation.operation</code>.
      */
     public void setOperation(String value) {
         set(5, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.operation</code>.
+     * Getter for <code>public.mb_log_operation.operation</code>.
      */
     public String getOperation() {
         return (String) get(5);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.method</code>.
+     * Setter for <code>public.mb_log_operation.method</code>.
      */
     public void setMethod(String value) {
         set(6, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.method</code>.
+     * Getter for <code>public.mb_log_operation.method</code>.
      */
     public String getMethod() {
         return (String) get(6);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.request_url</code>.
+     * Setter for <code>public.mb_log_operation.request_url</code>.
      */
     public void setRequestUrl(String value) {
         set(7, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.request_url</code>.
+     * Getter for <code>public.mb_log_operation.request_url</code>.
      */
     public String getRequestUrl() {
         return (String) get(7);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.request_params</code>.
+     * Setter for <code>public.mb_log_operation.request_params</code>.
      */
     public void setRequestParams(String value) {
         set(8, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.request_params</code>.
+     * Getter for <code>public.mb_log_operation.request_params</code>.
      */
     public String getRequestParams() {
         return (String) get(8);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.response_result</code>.
+     * Setter for <code>public.mb_log_operation.response_result</code>.
      */
     public void setResponseResult(String value) {
         set(9, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.response_result</code>.
+     * Getter for <code>public.mb_log_operation.response_result</code>.
      */
     public String getResponseResult() {
         return (String) get(9);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.ip</code>.
+     * Setter for <code>public.mb_log_operation.ip</code>.
      */
     public void setIp(String value) {
         set(10, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.ip</code>.
+     * Getter for <code>public.mb_log_operation.ip</code>.
      */
     public String getIp() {
         return (String) get(10);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.user_agent</code>.
+     * Setter for <code>public.mb_log_operation.user_agent</code>.
      */
     public void setUserAgent(String value) {
         set(11, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.user_agent</code>.
+     * Getter for <code>public.mb_log_operation.user_agent</code>.
      */
     public String getUserAgent() {
         return (String) get(11);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.duration_ms</code>.
+     * Setter for <code>public.mb_log_operation.duration_ms</code>.
      */
     public void setDurationMs(Long value) {
         set(12, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.duration_ms</code>.
+     * Getter for <code>public.mb_log_operation.duration_ms</code>.
      */
     public Long getDurationMs() {
         return (Long) get(12);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.success</code>.
+     * Setter for <code>public.mb_log_operation.success</code>.
      */
     public void setSuccess(Boolean value) {
         set(13, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.success</code>.
+     * Getter for <code>public.mb_log_operation.success</code>.
      */
     public Boolean getSuccess() {
         return (Boolean) get(13);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.error_message</code>.
+     * Setter for <code>public.mb_log_operation.error_message</code>.
      */
     public void setErrorMessage(String value) {
         set(14, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.error_message</code>.
+     * Getter for <code>public.mb_log_operation.error_message</code>.
      */
     public String getErrorMessage() {
         return (String) get(14);
     }
 
     /**
-     * Setter for <code>public.mb_operation_log.created_at</code>.
+     * Setter for <code>public.mb_log_operation.created_at</code>.
      */
     public void setCreatedAt(OffsetDateTime value) {
         set(15, value);
     }
 
     /**
-     * Getter for <code>public.mb_operation_log.created_at</code>.
+     * Getter for <code>public.mb_log_operation.created_at</code>.
      */
     public OffsetDateTime getCreatedAt() {
         return (OffsetDateTime) get(15);
@@ -258,17 +258,17 @@ public class MbOperationLogRecord extends UpdatableRecordImpl<MbOperationLogReco
     // -------------------------------------------------------------------------
 
     /**
-     * Create a detached MbOperationLogRecord
+     * Create a detached MbLogOperationRecord
      */
-    public MbOperationLogRecord() {
-        super(MbOperationLog.MB_OPERATION_LOG);
+    public MbLogOperationRecord() {
+        super(MbLogOperation.MB_LOG_OPERATION);
     }
 
     /**
-     * Create a detached, initialised MbOperationLogRecord
+     * Create a detached, initialised MbLogOperationRecord
      */
-    public MbOperationLogRecord(Long id, Long tenantId, Long userId, String username, String module, String operation, String method, String requestUrl, String requestParams, String responseResult, String ip, String userAgent, Long durationMs, Boolean success, String errorMessage, OffsetDateTime createdAt) {
-        super(MbOperationLog.MB_OPERATION_LOG);
+    public MbLogOperationRecord(Long id, Long tenantId, Long userId, String username, String module, String operation, String method, String requestUrl, String requestParams, String responseResult, String ip, String userAgent, Long durationMs, Boolean success, String errorMessage, OffsetDateTime createdAt) {
+        super(MbLogOperation.MB_LOG_OPERATION);
 
         setId(id);
         setTenantId(tenantId);

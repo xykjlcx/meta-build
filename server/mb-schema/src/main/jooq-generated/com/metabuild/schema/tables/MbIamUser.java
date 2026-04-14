@@ -13,9 +13,9 @@ import com.metabuild.schema.tables.MbIamLoginLog.MbIamLoginLogPath;
 import com.metabuild.schema.tables.MbIamPasswordHistory.MbIamPasswordHistoryPath;
 import com.metabuild.schema.tables.MbIamRole.MbIamRolePath;
 import com.metabuild.schema.tables.MbIamUserRole.MbIamUserRolePath;
+import com.metabuild.schema.tables.MbLogOperation.MbLogOperationPath;
 import com.metabuild.schema.tables.MbNotification.MbNotificationPath;
 import com.metabuild.schema.tables.MbNotificationRead.MbNotificationReadPath;
-import com.metabuild.schema.tables.MbOperationLog.MbOperationLogPath;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
 
 import java.time.OffsetDateTime;
@@ -306,6 +306,19 @@ public class MbIamUser extends TableImpl<MbIamUserRecord> {
         return _mbIamUserRole;
     }
 
+    private transient MbLogOperationPath _mbLogOperation;
+
+    /**
+     * Get the implicit to-many join path to the
+     * <code>public.mb_log_operation</code> table
+     */
+    public MbLogOperationPath mbLogOperation() {
+        if (_mbLogOperation == null)
+            _mbLogOperation = new MbLogOperationPath(this, null, Keys.MB_LOG_OPERATION__FK_LOG_OPERATION_USER.getInverseKey());
+
+        return _mbLogOperation;
+    }
+
     private transient MbNotificationReadPath _mbNotificationRead;
 
     /**
@@ -330,19 +343,6 @@ public class MbIamUser extends TableImpl<MbIamUserRecord> {
             _mbNotification = new MbNotificationPath(this, null, Keys.MB_NOTIFICATION__FK_NOTIFICATION_SENDER.getInverseKey());
 
         return _mbNotification;
-    }
-
-    private transient MbOperationLogPath _mbOperationLog;
-
-    /**
-     * Get the implicit to-many join path to the
-     * <code>public.mb_operation_log</code> table
-     */
-    public MbOperationLogPath mbOperationLog() {
-        if (_mbOperationLog == null)
-            _mbOperationLog = new MbOperationLogPath(this, null, Keys.MB_OPERATION_LOG__FK_OPERATION_LOG_USER.getInverseKey());
-
-        return _mbOperationLog;
     }
 
     /**

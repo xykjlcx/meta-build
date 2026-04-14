@@ -1,4 +1,4 @@
-package com.metabuild.platform.oplog.config;
+package com.metabuild.platform.log.config;
 
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
@@ -8,6 +8,6 @@ import org.springframework.context.annotation.ComponentScan;
  * 通过 META-INF/spring/org.springframework.boot.autoconfigure.AutoConfiguration.imports 自动加载。
  */
 @AutoConfiguration
-@ComponentScan(basePackages = "com.metabuild.platform.oplog")
+@ComponentScan(basePackages = "com.metabuild.platform.log")
 public class OplogAutoConfiguration {
 }

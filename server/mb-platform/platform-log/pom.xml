@@ -8,9 +8,9 @@
         <artifactId>mb-platform</artifactId>
         <version>${revision}</version>
     </parent>
-    <artifactId>platform-oplog</artifactId>
-    <name>platform-oplog</name>
-    <description>平台操作日志模块（@OperationLog 注解 + AOP 异步写入）</description>
+    <artifactId>platform-log</artifactId>
+    <name>platform-log</name>
+    <description>平台日志模块（@OperationLog 注解 + AOP 异步写入）</description>
     <dependencies>
         <dependency>
             <groupId>com.metabuild</groupId>

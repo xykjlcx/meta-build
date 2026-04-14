@@ -1,6 +1,6 @@
-package com.metabuild.platform.oplog.domain;
+package com.metabuild.platform.log.domain;
 
-import com.metabuild.schema.tables.records.MbOperationLogRecord;
+import com.metabuild.schema.tables.records.MbLogOperationRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -21,7 +21,7 @@ public class OperationLogWriter {
      * 异步写入操作日志。
      */
     @Async
-    public void writeAsync(MbOperationLogRecord record) {
+    public void writeAsync(MbLogOperationRecord record) {
         try {
             repository.insert(record);
         } catch (Exception e) {

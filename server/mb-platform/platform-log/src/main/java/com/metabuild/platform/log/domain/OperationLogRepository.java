@@ -1,16 +1,16 @@
-package com.metabuild.platform.oplog.domain;
+package com.metabuild.platform.log.domain;
 
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.jooq.SortParser;
-import com.metabuild.schema.tables.records.MbOperationLogRecord;
+import com.metabuild.schema.tables.records.MbLogOperationRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import static com.metabuild.schema.tables.MbOperationLog.MB_OPERATION_LOG;
+import static com.metabuild.schema.tables.MbLogOperation.MB_LOG_OPERATION;
 
 /**
  * 操作日志数据访问层（追加只读，无更新/删除）。
@@ -24,24 +24,24 @@ public class OperationLogRepository {
     /**
      * 写入一条操作日志（追加）。
      */
-    public void insert(MbOperationLogRecord record) {
-        dsl.insertInto(MB_OPERATION_LOG).set(record).execute();
+    public void insert(MbLogOperationRecord record) {
+        dsl.insertInto(MB_LOG_OPERATION).set(record).execute();
     }
 
     /**
      * 分页查询操作日志。
      */
-    public PageResult<MbOperationLogRecord> findPage(PageQuery query) {
+    public PageResult<MbLogOperationRecord> findPage(PageQuery query) {
         var sortFields = SortParser.builder()
-            .forTable(MB_OPERATION_LOG)
-            .allow("createdAt", MB_OPERATION_LOG.CREATED_AT)
-            .allow("module", MB_OPERATION_LOG.MODULE)
-            .allow("userId", MB_OPERATION_LOG.USER_ID)
-            .defaultSort(MB_OPERATION_LOG.CREATED_AT.desc())
+            .forTable(MB_LOG_OPERATION)
+            .allow("createdAt", MB_LOG_OPERATION.CREATED_AT)
+            .allow("module", MB_LOG_OPERATION.MODULE)
+            .allow("userId", MB_LOG_OPERATION.USER_ID)
+            .defaultSort(MB_LOG_OPERATION.CREATED_AT.desc())
             .parse(query.sort());
 
-        long total = dsl.fetchCount(MB_OPERATION_LOG);
-        List<MbOperationLogRecord> records = dsl.selectFrom(MB_OPERATION_LOG)
+        long total = dsl.fetchCount(MB_LOG_OPERATION);
+        List<MbLogOperationRecord> records = dsl.selectFrom(MB_LOG_OPERATION)
             .orderBy(sortFields)
             .limit(query.size())
             .offset(query.offset())
@@ -55,8 +55,8 @@ public class OperationLogRepository {
      */
     public int deleteOlderThanDays(int days) {
         var cutoff = java.time.OffsetDateTime.now().minusDays(days);
-        return dsl.deleteFrom(MB_OPERATION_LOG)
-            .where(MB_OPERATION_LOG.CREATED_AT.lt(cutoff))
+        return dsl.deleteFrom(MB_LOG_OPERATION)
+            .where(MB_LOG_OPERATION.CREATED_AT.lt(cutoff))
             .execute();
     }
 }

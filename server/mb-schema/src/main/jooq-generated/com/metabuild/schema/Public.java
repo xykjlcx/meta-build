@@ -19,9 +19,9 @@ import com.metabuild.schema.tables.MbIamRouteTree;
 import com.metabuild.schema.tables.MbIamUser;
 import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
+import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
 import com.metabuild.schema.tables.MbNotificationRead;
-import com.metabuild.schema.tables.MbOperationLog;
 
 import java.util.Arrays;
 import java.util.List;
@@ -120,6 +120,11 @@ public class Public extends SchemaImpl {
     public final MbJobLog MB_JOB_LOG = MbJobLog.MB_JOB_LOG;
 
     /**
+     * 操作日志（追加表，不注册 DataScope）
+     */
+    public final MbLogOperation MB_LOG_OPERATION = MbLogOperation.MB_LOG_OPERATION;
+
+    /**
      * 通知公告表
      */
     public final MbNotification MB_NOTIFICATION = MbNotification.MB_NOTIFICATION;
@@ -128,11 +133,6 @@ public class Public extends SchemaImpl {
      * 通知已读记录（追加表）
      */
     public final MbNotificationRead MB_NOTIFICATION_READ = MbNotificationRead.MB_NOTIFICATION_READ;
-
-    /**
-     * 操作日志（追加表，不注册 DataScope）
-     */
-    public final MbOperationLog MB_OPERATION_LOG = MbOperationLog.MB_OPERATION_LOG;
 
     /**
      * No further instances allowed
@@ -165,9 +165,9 @@ public class Public extends SchemaImpl {
             MbIamUser.MB_IAM_USER,
             MbIamUserRole.MB_IAM_USER_ROLE,
             MbJobLog.MB_JOB_LOG,
+            MbLogOperation.MB_LOG_OPERATION,
             MbNotification.MB_NOTIFICATION,
-            MbNotificationRead.MB_NOTIFICATION_READ,
-            MbOperationLog.MB_OPERATION_LOG
+            MbNotificationRead.MB_NOTIFICATION_READ
         );
     }
 }

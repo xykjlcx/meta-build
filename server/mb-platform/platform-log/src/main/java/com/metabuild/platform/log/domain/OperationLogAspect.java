@@ -1,10 +1,10 @@
-package com.metabuild.platform.oplog.domain;
+package com.metabuild.platform.log.domain;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.metabuild.common.security.CurrentUser;
-import com.metabuild.platform.oplog.annotation.OperationLog;
-import com.metabuild.schema.tables.records.MbOperationLogRecord;
+import com.metabuild.common.log.OperationLog;
+import com.metabuild.schema.tables.records.MbLogOperationRecord;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -76,7 +76,7 @@ public class OperationLogAspect {
                           String requestParams, Object result,
                           boolean success, String errorMessage, long durationMs) {
         try {
-            MbOperationLogRecord record = new MbOperationLogRecord();
+            MbLogOperationRecord record = new MbLogOperationRecord();
 
             // 用户信息（未登录时使用默认值）
             if (currentUser.isAuthenticated()) {

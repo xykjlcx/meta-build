@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.OffsetDateTime;
 
-import static com.metabuild.schema.tables.MbOperationLog.MB_OPERATION_LOG;
+import static com.metabuild.schema.tables.MbLogOperation.MB_LOG_OPERATION;
 
 /**
  * 操作日志清理 Repository（仅供定时清理任务使用）。
@@ -25,8 +25,8 @@ public class OplogCleanupRepository {
      * @return 实际删除的记录数
      */
     public int deleteOlderThan(OffsetDateTime cutoff) {
-        return dsl.deleteFrom(MB_OPERATION_LOG)
-            .where(MB_OPERATION_LOG.CREATED_AT.lt(cutoff))
+        return dsl.deleteFrom(MB_LOG_OPERATION)
+            .where(MB_LOG_OPERATION.CREATED_AT.lt(cutoff))
             .execute();
     }
 }
