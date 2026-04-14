@@ -11,4 +11,23 @@
     <artifactId>infra-rate-limit</artifactId>
     <name>infra-rate-limit</name>
     <description>Bucket4j 限流（M4 实现）</description>
+
+    <dependencies>
+        <!-- Bucket4j 令牌桶限流（纯内存，v1 单实例） -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j-core</artifactId>
+        </dependency>
+        <!-- Spring MVC（HandlerInterceptor + WebMvcConfigurer） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <!-- 配置属性元数据（IDE 提示） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
 </project>
