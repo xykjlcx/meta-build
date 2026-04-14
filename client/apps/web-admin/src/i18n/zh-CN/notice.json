@@ -1,0 +1,133 @@
+{
+  "title": "通知公告",
+  "list": {
+    "title": "公告列表",
+    "empty": "暂无公告",
+    "export": "导出 Excel"
+  },
+  "form": {
+    "title": "公告标题",
+    "content": "公告内容",
+    "pinned": "置顶",
+    "startTime": "生效时间",
+    "endTime": "失效时间",
+    "attachments": "附件",
+    "targets": "通知范围"
+  },
+  "status": {
+    "draft": "草稿",
+    "published": "已发布",
+    "revoked": "已撤回"
+  },
+  "action": {
+    "create": "新增公告",
+    "edit": "编辑",
+    "delete": "删除",
+    "publish": "发布",
+    "revoke": "撤回",
+    "markRead": "标为已读",
+    "duplicate": "复制为新建",
+    "save": "保存",
+    "cancel": "取消"
+  },
+  "confirm": {
+    "delete": "确定删除此公告？",
+    "publish": "确定发布此公告？",
+    "revoke": "确定撤回此公告？撤回后需通过'复制为新建'重新发布",
+    "batchPublish": "已选择 {{total}} 项，其中 {{valid}} 项为草稿可发布，{{invalid}} 项将被跳过，确认继续？",
+    "batchDelete": "已选择 {{total}} 项，其中 {{valid}} 项可删除，{{invalid}} 项将被跳过，确认继续？",
+    "dirtyClose": "表单有未保存的修改，确定关闭？"
+  },
+  "filter": {
+    "status": "状态",
+    "keyword": "关键词",
+    "dateRange": "日期范围",
+    "startTimeFrom": "生效开始",
+    "startTimeTo": "生效结束",
+    "reset": "重置",
+    "search": "查询"
+  },
+  "batch": {
+    "selected": "已选择 {{count}} 项",
+    "delete": "批量删除",
+    "publish": "批量发布",
+    "clear": "取消选择"
+  },
+  "read": {
+    "unread": "未读",
+    "readLabel": "已读",
+    "unreadCount": "{{count}} 条未读",
+    "readRate": "{{read}}/{{total}}"
+  },
+  "target": {
+    "all": "全员",
+    "dept": "按部门",
+    "role": "按角色",
+    "user": "指定用户",
+    "preview": "将发给 {{count}} 人",
+    "selectTarget": "选择通知范围"
+  },
+  "detail": {
+    "title": "公告详情",
+    "basicInfo": "基本信息",
+    "recipients": "接收人",
+    "readStatus": "阅读状态",
+    "notificationLog": "发送记录",
+    "attachments": "附件列表",
+    "download": "下载",
+    "backToList": "返回列表"
+  },
+  "wechat": {
+    "bindMP": "绑定公众号",
+    "bindMini": "绑定小程序",
+    "unbind": "解绑",
+    "bound": "已绑定",
+    "unbound": "未绑定"
+  },
+  "error": {
+    "onlyDraftCanEdit": "仅草稿可编辑",
+    "onlyDraftCanPublish": "仅草稿可发布",
+    "onlyPublishedCanRevoke": "仅已发布公告可撤回",
+    "onlyDraftOrRevokedCanDelete": "仅草稿或已撤回公告可删除",
+    "attachmentLimitExceeded": "附件数量不能超过 {{max}} 个",
+    "exportRateLimit": "导出过于频繁，请稍后再试"
+  },
+  "sse": {
+    "sessionReplaced": "已在其他标签页登录",
+    "forceLogout": "您已被管理员下线：{{reason}}"
+  },
+  "pagination": {
+    "info": "共 {{total}} 条，第 {{page}}/{{pages}} 页",
+    "prev": "上一页",
+    "next": "下一页"
+  },
+  "upload": {
+    "unsupportedFormat": "不支持的文件格式",
+    "fileTooLarge": "文件大小不能超过 {{max}}MB",
+    "uploading": "上传中...",
+    "uploadFailed": "上传失败",
+    "downloadFailed": "下载失败"
+  },
+  "wechatError": {
+    "authUrlFailed": "获取授权链接失败",
+    "unbindFailed": "解绑失败"
+  },
+  "log": {
+    "channel": "渠道",
+    "recipient": "接收人",
+    "status": "状态",
+    "errorMessage": "错误信息",
+    "sentAt": "发送时间",
+    "channelType": {
+      "IN_APP": "站内信",
+      "EMAIL": "邮件",
+      "WECHAT_MP": "微信公众号",
+      "WECHAT_MINI": "微信小程序"
+    },
+    "statusLabel": {
+      "0": "待发送",
+      "1": "成功",
+      "2": "失败"
+    }
+  }
+}

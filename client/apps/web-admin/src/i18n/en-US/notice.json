@@ -1,0 +1,133 @@
+{
+  "title": "Notices",
+  "list": {
+    "title": "Notice List",
+    "empty": "No notices yet",
+    "export": "Export Excel"
+  },
+  "form": {
+    "title": "Title",
+    "content": "Content",
+    "pinned": "Pinned",
+    "startTime": "Effective Time",
+    "endTime": "Expiry Time",
+    "attachments": "Attachments",
+    "targets": "Target Scope"
+  },
+  "status": {
+    "draft": "Draft",
+    "published": "Published",
+    "revoked": "Revoked"
+  },
+  "action": {
+    "create": "New Notice",
+    "edit": "Edit",
+    "delete": "Delete",
+    "publish": "Publish",
+    "revoke": "Revoke",
+    "markRead": "Mark as Read",
+    "duplicate": "Duplicate as Draft",
+    "save": "Save",
+    "cancel": "Cancel"
+  },
+  "confirm": {
+    "delete": "Are you sure to delete this notice?",
+    "publish": "Are you sure to publish this notice?",
+    "revoke": "Are you sure to revoke this notice? You can create a new one via 'Duplicate as Draft'.",
+    "batchPublish": "Selected {{total}} items: {{valid}} drafts will be published, {{invalid}} will be skipped. Continue?",
+    "batchDelete": "Selected {{total}} items: {{valid}} can be deleted, {{invalid}} will be skipped. Continue?",
+    "dirtyClose": "You have unsaved changes. Discard?"
+  },
+  "filter": {
+    "status": "Status",
+    "keyword": "Keyword",
+    "dateRange": "Date Range",
+    "startTimeFrom": "Start From",
+    "startTimeTo": "Start To",
+    "reset": "Reset",
+    "search": "Search"
+  },
+  "batch": {
+    "selected": "{{count}} selected",
+    "delete": "Batch Delete",
+    "publish": "Batch Publish",
+    "clear": "Clear Selection"
+  },
+  "read": {
+    "unread": "Unread",
+    "readLabel": "Read",
+    "unreadCount": "{{count}} unread",
+    "readRate": "{{read}}/{{total}}"
+  },
+  "target": {
+    "all": "All Users",
+    "dept": "By Department",
+    "role": "By Role",
+    "user": "Specific Users",
+    "preview": "Will send to {{count}} users",
+    "selectTarget": "Select Target Scope"
+  },
+  "detail": {
+    "title": "Notice Detail",
+    "basicInfo": "Basic Info",
+    "recipients": "Recipients",
+    "readStatus": "Read Status",
+    "notificationLog": "Notification Log",
+    "attachments": "Attachments",
+    "download": "Download",
+    "backToList": "Back to List"
+  },
+  "wechat": {
+    "bindMP": "Bind WeChat MP",
+    "bindMini": "Bind Mini Program",
+    "unbind": "Unbind",
+    "bound": "Bound",
+    "unbound": "Unbound"
+  },
+  "error": {
+    "onlyDraftCanEdit": "Only drafts can be edited",
+    "onlyDraftCanPublish": "Only drafts can be published",
+    "onlyPublishedCanRevoke": "Only published notices can be revoked",
+    "onlyDraftOrRevokedCanDelete": "Only drafts or revoked notices can be deleted",
+    "attachmentLimitExceeded": "Attachments cannot exceed {{max}}",
+    "exportRateLimit": "Export too frequent, please try later"
+  },
+  "sse": {
+    "sessionReplaced": "Logged in from another tab",
+    "forceLogout": "You have been logged out by admin: {{reason}}"
+  },
+  "pagination": {
+    "info": "Total {{total}}, Page {{page}}/{{pages}}",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "upload": {
+    "unsupportedFormat": "Unsupported file format",
+    "fileTooLarge": "File size cannot exceed {{max}}MB",
+    "uploading": "Uploading...",
+    "uploadFailed": "Upload failed",
+    "downloadFailed": "Download failed"
+  },
+  "wechatError": {
+    "authUrlFailed": "Failed to get authorization link",
+    "unbindFailed": "Unbind failed"
+  },
+  "log": {
+    "channel": "Channel",
+    "recipient": "Recipient",
+    "status": "Status",
+    "errorMessage": "Error Message",
+    "sentAt": "Sent At",
+    "channelType": {
+      "IN_APP": "In-App",
+      "EMAIL": "Email",
+      "WECHAT_MP": "WeChat MP",
+      "WECHAT_MINI": "WeChat Mini"
+    },
+    "statusLabel": {
+      "0": "Pending",
+      "1": "Success",
+      "2": "Failed"
+    }
+  }
+}
