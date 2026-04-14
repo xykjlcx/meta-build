@@ -1,3 +1,4 @@
+import { customInstance } from '@mb/api-sdk/mutator/custom-instance';
 import { Button } from '@mb/ui-primitives';
 import { Trash2, Upload } from 'lucide-react';
 import { type ChangeEvent, useCallback, useRef, useState } from 'react';
@@ -5,7 +6,6 @@ import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { customInstance } from '@mb/api-sdk/mutator/custom-instance';
 import {
   ATTACHMENT_ALLOWED_EXTENSIONS,
   ATTACHMENT_MAX_COUNT,
@@ -39,6 +39,7 @@ export function FileUploadField({ name, control }: FileUploadFieldProps) {
   const currentFileIds: number[] = field.value ?? [];
 
   const handleFileChange = useCallback(
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 文件上传包含格式/大小/数量多重校验
     async (e: ChangeEvent<HTMLInputElement>) => {
       const selected = e.target.files;
       if (!selected?.length) return;

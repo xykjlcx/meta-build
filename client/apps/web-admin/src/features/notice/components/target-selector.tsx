@@ -1,3 +1,4 @@
+import type { NoticeTarget } from '@mb/api-sdk/generated/models';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -13,7 +14,6 @@ import {
 } from '@mb/ui-primitives';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import type { NoticeTarget } from '@mb/api-sdk/generated/models';
 import { TARGET_TYPE } from '../constants';
 
 interface TargetSelectorProps {

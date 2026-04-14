@@ -1,5 +1,5 @@
-import { Badge } from '@mb/ui-primitives';
 import { NxTable } from '@mb/ui-patterns';
+import { Badge } from '@mb/ui-primitives';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -65,9 +65,7 @@ export function NotificationLogTab({ noticeId: _noticeId }: NotificationLogTabPr
             2: t('log.statusLabel.2'),
           };
           return (
-            <Badge variant={STATUS_VARIANT[s] ?? 'secondary'}>
-              {statusLabels[s] ?? String(s)}
-            </Badge>
+            <Badge variant={STATUS_VARIANT[s] ?? 'secondary'}>{statusLabels[s] ?? String(s)}</Badge>
           );
         },
       },

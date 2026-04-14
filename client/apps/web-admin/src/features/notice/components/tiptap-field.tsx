@@ -1,6 +1,6 @@
 import { cn } from '@mb/ui-primitives';
-import { EditorContent, useEditor } from '@tiptap/react';
 import Image from '@tiptap/extension-image';
+import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';

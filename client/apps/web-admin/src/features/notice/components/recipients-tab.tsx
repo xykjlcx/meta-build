@@ -1,14 +1,14 @@
-import { Badge } from '@mb/ui-primitives';
-import { NxTable } from '@mb/ui-patterns';
-import type { NxTablePagination } from '@mb/ui-patterns';
-import type { ColumnDef } from '@tanstack/react-table';
-import { useMemo, useState } from 'react';
-import { useTranslation } from 'react-i18next';
 import {
   getRecipientsQueryKey,
   useRecipients,
 } from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
 import type { RecipientView } from '@mb/api-sdk/generated/models';
+import { NxTable } from '@mb/ui-patterns';
+import type { NxTablePagination } from '@mb/ui-patterns';
+import { Badge } from '@mb/ui-primitives';
+import type { ColumnDef } from '@tanstack/react-table';
+import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 
 interface RecipientsTabProps {
   noticeId: number;
@@ -29,7 +29,11 @@ export function RecipientsTab({ noticeId }: RecipientsTabProps) {
   });
 
   // orval 响应结构：{ data: PageResultRecipientView, status, headers }
-  const pageResult = (data as { data?: { content?: RecipientView[]; totalElements?: number; totalPages?: number } } | undefined)?.data;
+  const pageResult = (
+    data as
+      | { data?: { content?: RecipientView[]; totalElements?: number; totalPages?: number } }
+      | undefined
+  )?.data;
   const recipients: RecipientView[] = pageResult?.content ?? [];
   const totalElements = pageResult?.totalElements ?? 0;
   const totalPages = pageResult?.totalPages ?? 0;

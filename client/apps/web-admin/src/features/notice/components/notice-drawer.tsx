@@ -1,10 +1,3 @@
-import { Checkbox, Input, Label } from '@mb/ui-primitives';
-import { NxDrawer, NxFormField } from '@mb/ui-patterns';
-import { useQueryClient } from '@tanstack/react-query';
-import { useCallback, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
-import { useTranslation } from 'react-i18next';
-import { toast } from 'sonner';
 import {
   getDetailQueryKey,
   getList4QueryKey,
@@ -15,8 +8,15 @@ import {
   useUpdate2,
 } from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
 import type { NoticeDetailView, NoticeTarget } from '@mb/api-sdk/generated/models';
-import { noticeFormSchema, type NoticeFormValues } from '../schemas';
+import { NxDrawer, NxFormField } from '@mb/ui-patterns';
+import { Checkbox, Input, Label } from '@mb/ui-primitives';
+import { useQueryClient } from '@tanstack/react-query';
+import { useCallback, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
+import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import type { ZodSchema } from 'zod';
+import { type NoticeFormValues, noticeFormSchema } from '../schemas';
 import { FileUploadField } from './file-upload-field';
 import { TargetSelector } from './target-selector';
 import { TipTapField } from './tiptap-field';

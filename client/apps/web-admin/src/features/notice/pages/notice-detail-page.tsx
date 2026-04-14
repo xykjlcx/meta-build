@@ -1,5 +1,17 @@
-import { useCurrentUser } from '@mb/app-shell';
 import { triggerDownload } from '@mb/api-sdk';
+import {
+  getDetailQueryKey,
+  getList4QueryKey,
+  getUnreadCountQueryKey,
+  useDelete2,
+  useDetail,
+  useDuplicate,
+  useMarkRead,
+  usePublish,
+  useRevoke,
+} from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
+import type { NoticeDetailView, NoticeTarget } from '@mb/api-sdk/generated/models';
+import { useCurrentUser } from '@mb/app-shell';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,28 +31,17 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from '@tanstack/react-router';
 import { ArrowLeft, Copy, Download, FilePenLine, Send, Trash2, Undo2 } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import {
-  getDetailQueryKey,
-  getList4QueryKey,
-  getUnreadCountQueryKey,
-  useDelete2,
-  useDetail,
-  useDuplicate,
-  useMarkRead,
-  usePublish,
-  useRevoke,
-} from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
-import type { NoticeDetailView, NoticeTarget } from '@mb/api-sdk/generated/models';
-import { NOTICE_STATUS, type NoticeStatusValue } from '../constants';
 import { NoticeStatusBadge } from '../components/notice-status-badge';
 import { NotificationLogTab } from '../components/notification-log-tab';
 import { RecipientsTab } from '../components/recipients-tab';
 import { TargetSelector } from '../components/target-selector';
+import { NOTICE_STATUS, type NoticeStatusValue } from '../constants';
 import { sanitizeHtml } from '../utils/sanitize';
 
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 详情页包含多状态操作按钮的条件渲染
 export function NoticeDetailPage() {
   const { t } = useTranslation('notice');
   const user = useCurrentUser();
@@ -59,10 +60,16 @@ export function NoticeDetailPage() {
     detailResponse as { data?: NoticeDetailView } | undefined
   )?.data;
 
-  // 标记已读
+  // 标记已读 — 使用 ref 避免 exhaustive-deps 重复触发
   const markReadMutation = useMarkRead();
+  const markedRef = useRef(false);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: 当 noticeId 变化时重置标记
   useEffect(() => {
-    if (noticeId && notice && !notice.read) {
+    markedRef.current = false;
+  }, [noticeId]);
+  useEffect(() => {
+    if (noticeId && notice && !notice.read && !markedRef.current) {
+      markedRef.current = true;
       markReadMutation.mutate(
         { id: noticeId },
         {
@@ -74,9 +81,7 @@ export function NoticeDetailPage() {
         },
       );
     }
-    // 仅在 notice 加载完成时执行一次
-    // biome-ignore lint/correctness/useExhaustiveDependencies: 仅在 notice.id 变化时触发
-  }, [noticeId, notice?.id]);
+  }, [noticeId, notice, markReadMutation, queryClient]);
 
   // Mutations
   const deleteMutation = useDelete2();

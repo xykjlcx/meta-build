@@ -1,4 +1,18 @@
+import {
+  getList4QueryKey,
+  getUnreadCountQueryKey,
+  useBatchDelete,
+  useBatchPublish,
+  useDelete2,
+  useDuplicate,
+  useList4,
+  usePublish,
+  useRevoke,
+} from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
+import type { NoticeView } from '@mb/api-sdk/generated/models';
 import { useCurrentUser } from '@mb/app-shell';
+import { NxBar, NxFilter, NxFilterField, NxTable } from '@mb/ui-patterns';
+import type { NxTablePagination } from '@mb/ui-patterns';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,31 +31,17 @@ import {
   SelectValue,
   cn,
 } from '@mb/ui-primitives';
-import { NxBar, NxFilter, NxFilterField, NxTable } from '@mb/ui-patterns';
-import type { NxTablePagination } from '@mb/ui-patterns';
-import type { ColumnDef, RowSelectionState } from '@tanstack/react-table';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
+import type { ColumnDef, RowSelectionState } from '@tanstack/react-table';
 import { Copy, Download, Eye, FilePenLine, Pin, Plus, Send, Trash2, Undo2 } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import {
-  getList4QueryKey,
-  getUnreadCountQueryKey,
-  useBatchDelete,
-  useBatchPublish,
-  useDelete2,
-  useDuplicate,
-  useList4,
-  usePublish,
-  useRevoke,
-} from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
-import type { NoticeView } from '@mb/api-sdk/generated/models';
-import { NOTICE_STATUS, PAGE_SIZE, type NoticeStatusValue } from '../constants';
 import { BatchConfirmDialog } from '../components/batch-confirm-dialog';
-import { NoticeStatusBadge } from '../components/notice-status-badge';
 import { NoticeDrawer } from '../components/notice-drawer';
+import { NoticeStatusBadge } from '../components/notice-status-badge';
+import { NOTICE_STATUS, type NoticeStatusValue, PAGE_SIZE } from '../constants';
 
 // ─── 筛选类型 ───────────────────────────────────────────
 interface NoticeFilter {
@@ -60,6 +60,7 @@ const DEFAULT_FILTER: NoticeFilter = {
 };
 
 // ─── 列表页组件 ─────────────────────────────────────────
+// biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 列表页包含筛选/批量操作/权限条件渲染
 export function NoticeListPage() {
   const { t } = useTranslation('notice');
   const user = useCurrentUser();
@@ -110,9 +111,9 @@ export function NoticeListPage() {
   });
 
   // 从响应中提取数据和分页信息
-  const notices: NoticeView[] = (data as { data?: { content?: NoticeView[] } })?.data?.content ?? [];
-  const totalElements =
-    (data as { data?: { totalElements?: number } })?.data?.totalElements ?? 0;
+  const notices: NoticeView[] =
+    (data as { data?: { content?: NoticeView[] } })?.data?.content ?? [];
+  const totalElements = (data as { data?: { totalElements?: number } })?.data?.totalElements ?? 0;
   const totalPages = (data as { data?: { totalPages?: number } })?.data?.totalPages ?? 0;
 
   // 同步分页信息
@@ -271,9 +272,7 @@ export function NoticeListPage() {
       {
         accessorKey: 'status',
         header: t('filter.status'),
-        cell: ({ getValue }) => (
-          <NoticeStatusBadge status={getValue<NoticeStatusValue>()} />
-        ),
+        cell: ({ getValue }) => <NoticeStatusBadge status={getValue<NoticeStatusValue>()} />,
       },
       {
         accessorKey: 'startTime',
@@ -325,9 +324,7 @@ export function NoticeListPage() {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() =>
-                  navigate({ to: '/notices/$id', params: { id: String(notice.id) } })
-                }
+                onClick={() => navigate({ to: '/notices/$id', params: { id: String(notice.id) } })}
               >
                 <Eye className="size-4" />
               </Button>
@@ -365,11 +362,7 @@ export function NoticeListPage() {
               {/* 复制为新建 — 已发布/已撤回 */}
               {(status === NOTICE_STATUS.PUBLISHED || status === NOTICE_STATUS.REVOKED) &&
                 user.hasPermission('notice:notice:create') && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDuplicate(notice.id ?? 0)}
-                  >
+                  <Button variant="ghost" size="sm" onClick={() => handleDuplicate(notice.id ?? 0)}>
                     <Copy className="size-4" />
                   </Button>
                 )}
@@ -501,10 +494,7 @@ export function NoticeListPage() {
       />
 
       {/* 单条操作确认框 */}
-      <AlertDialog
-        open={!!confirmAction}
-        onOpenChange={(open) => !open && setConfirmAction(null)}
-      >
+      <AlertDialog open={!!confirmAction} onOpenChange={(open) => !open && setConfirmAction(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
