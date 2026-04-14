@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.metabuild</groupId>
+        <artifactId>mb-platform</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>platform-notification</artifactId>
+    <name>platform-notification</name>
+    <description>平台通知公告模块（Notification + 已读追踪）</description>
+    <dependencies>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>mb-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>mb-schema</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-jooq</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+</project>
