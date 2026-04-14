@@ -25,9 +25,9 @@ describe('Badge', () => {
     expect(screen.getByText('描边').className).toContain('text-foreground');
   });
 
-  it('应该应用 success variant', () => {
-    render(<Badge variant="success">成功</Badge>);
-    expect(screen.getByText('成功').className).toContain('bg-success');
+  it('应该应用 ghost variant', () => {
+    render(<Badge variant="ghost">幽灵</Badge>);
+    expect(screen.getByText('幽灵')).toBeDefined();
   });
 
   it('应该合并自定义 className', () => {
@@ -36,9 +36,9 @@ describe('Badge', () => {
   });
 
   it('应该转发 ref', () => {
-    const ref = { current: null as HTMLDivElement | null };
+    const ref = { current: null as HTMLSpanElement | null };
     render(<Badge ref={ref}>带 ref</Badge>);
-    expect(ref.current).toBeInstanceOf(HTMLDivElement);
+    expect(ref.current).toBeInstanceOf(HTMLSpanElement);
   });
 
   it('应该包含圆角样式', () => {

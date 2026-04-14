@@ -4,9 +4,9 @@ import {
   Loader2Icon,
   OctagonXIcon,
   TriangleAlertIcon,
-} from 'lucide-react'
-import * as React from 'react'
-import { Toaster as Sonner, type ToasterProps } from 'sonner'
+} from 'lucide-react';
+import type * as React from 'react';
+import { Toaster as Sonner, type ToasterProps } from 'sonner';
 
 /**
  * Sonner Toast 容器 — 放在 App 根部渲染。
@@ -35,7 +35,7 @@ function Toaster({ theme = 'system', ...props }: ToasterProps) {
       }
       {...props}
     />
-  )
+  );
 }
 
-export { Toaster, type ToasterProps }
+export { Toaster, type ToasterProps };

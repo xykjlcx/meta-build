@@ -21,6 +21,6 @@ export const Destructive: Story = {
 export const Outline: Story = {
   args: { variant: 'outline', children: '描边' },
 };
-export const Success: Story = {
-  args: { variant: 'success', children: '成功' },
+export const Ghost: Story = {
+  args: { variant: 'ghost', children: '幽灵' },
 };

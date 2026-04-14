@@ -1,32 +1,24 @@
-import * as React from 'react'
-import { type VariantProps, cva } from 'class-variance-authority'
-import { XIcon } from 'lucide-react'
-import { Dialog as DialogPrimitive } from 'radix-ui'
+import { type VariantProps, cva } from 'class-variance-authority';
+import { XIcon } from 'lucide-react';
+import { Dialog as DialogPrimitive } from 'radix-ui';
+import type * as React from 'react';
 
-import { cn } from './lib/utils'
+import { cn } from './lib/utils';
 
-function Drawer({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Root>) {
-  return <DialogPrimitive.Root data-slot="drawer" {...props} />
+function Drawer({ ...props }: React.ComponentProps<typeof DialogPrimitive.Root>) {
+  return <DialogPrimitive.Root data-slot="drawer" {...props} />;
 }
 
-function DrawerTrigger({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
-  return <DialogPrimitive.Trigger data-slot="drawer-trigger" {...props} />
+function DrawerTrigger({ ...props }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
+  return <DialogPrimitive.Trigger data-slot="drawer-trigger" {...props} />;
 }
 
-function DrawerPortal({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="drawer-portal" {...props} />
+function DrawerPortal({ ...props }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
+  return <DialogPrimitive.Portal data-slot="drawer-portal" {...props} />;
 }
 
-function DrawerClose({
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Close>) {
-  return <DialogPrimitive.Close data-slot="drawer-close" {...props} />
+function DrawerClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.Close>) {
+  return <DialogPrimitive.Close data-slot="drawer-close" {...props} />;
 }
 
 function DrawerOverlay({
@@ -42,7 +34,7 @@ function DrawerOverlay({
       )}
       {...props}
     />
-  )
+  );
 }
 
 /** 抽屉内容区域的 CVA 变体定义 */
@@ -63,7 +55,7 @@ const drawerContentVariants = cva(
       side: 'right',
     },
   },
-)
+);
 
 function DrawerContent({
   side = 'right',
@@ -74,7 +66,7 @@ function DrawerContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> &
   VariantProps<typeof drawerContentVariants> & {
     /** 关闭按钮的 ARIA 标签（L2 不假设默认语言，使用方通过 t() 传入） */
-    closeLabel: string
+    closeLabel: string;
   }) {
   return (
     <DrawerPortal>
@@ -91,7 +83,7 @@ function DrawerContent({
         </DialogPrimitive.Close>
       </DialogPrimitive.Content>
     </DrawerPortal>
-  )
+  );
 }
 
 function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
@@ -101,7 +93,7 @@ function DrawerHeader({ className, ...props }: React.ComponentProps<'div'>) {
       className={cn('flex flex-col space-y-2 text-center sm:text-left', className)}
       {...props}
     />
-  )
+  );
 }
 
 function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
@@ -111,20 +103,17 @@ function DrawerFooter({ className, ...props }: React.ComponentProps<'div'>) {
       className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
       {...props}
     />
-  )
+  );
 }
 
-function DrawerTitle({
-  className,
-  ...props
-}: React.ComponentProps<typeof DialogPrimitive.Title>) {
+function DrawerTitle({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Title>) {
   return (
     <DialogPrimitive.Title
       data-slot="drawer-title"
       className={cn('text-lg font-semibold leading-none tracking-tight', className)}
       {...props}
     />
-  )
+  );
 }
 
 function DrawerDescription({
@@ -137,7 +126,7 @@ function DrawerDescription({
       className={cn('text-sm text-muted-foreground', className)}
       {...props}
     />
-  )
+  );
 }
 
 export {
@@ -152,4 +141,4 @@ export {
   DrawerTitle,
   DrawerDescription,
   drawerContentVariants,
-}
+};

@@ -27,7 +27,7 @@ export const Default: Story = {
           打开对话框
         </button>
       </DialogTrigger>
-      <DialogContent closeLabel="关闭">
+      <DialogContent>
         <DialogHeader>
           <DialogTitle>编辑个人信息</DialogTitle>
           <DialogDescription>修改您的个人信息，完成后点击保存。</DialogDescription>

@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { Calendar, DatePicker } from './date-picker';
+import { Calendar } from './calendar';
+import { DatePicker } from './date-picker';
 
 describe('Calendar', () => {
   it('应该渲染日历', () => {

@@ -19,7 +19,7 @@ describe('L2 i18n 隔离', () => {
     const { getByText } = render(
       <Dialog open>
         <DialogTrigger>打开</DialogTrigger>
-        <DialogContent closeLabel="关闭弹窗">
+        <DialogContent>
           <div>正文</div>
         </DialogContent>
       </Dialog>,

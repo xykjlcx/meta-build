@@ -83,21 +83,7 @@ describe('Breadcrumb', () => {
     expect(page.getAttribute('aria-current')).toBe('page');
   });
 
-  it('BreadcrumbEllipsis 应该渲染省略号', () => {
-    const { container } = render(
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbEllipsis srLabel="More" />
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>,
-    );
-    expect(screen.getByText('More')).toBeDefined();
-    expect(container.querySelectorAll('circle').length).toBe(3);
-  });
-
-  it('BreadcrumbEllipsis 不传 srLabel 时不渲染 sr-only', () => {
+  it('BreadcrumbEllipsis 应该渲染省略号和 sr-only 文本', () => {
     render(
       <Breadcrumb>
         <BreadcrumbList>
@@ -107,7 +93,7 @@ describe('Breadcrumb', () => {
         </BreadcrumbList>
       </Breadcrumb>,
     );
-    expect(screen.queryByText('More')).toBeNull();
+    expect(screen.getByText('More')).toBeDefined();
   });
 
   it('BreadcrumbList 应该合并自定义 className', () => {

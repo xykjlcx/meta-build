@@ -16,7 +16,7 @@ describe('Dialog', () => {
     render(
       <Dialog>
         <DialogTrigger>打开</DialogTrigger>
-        <DialogContent closeLabel="关闭">
+        <DialogContent showCloseButton>
           <DialogHeader>
             <DialogTitle>标题</DialogTitle>
           </DialogHeader>
@@ -31,7 +31,7 @@ describe('Dialog', () => {
     render(
       <Dialog>
         <DialogTrigger>打开</DialogTrigger>
-        <DialogContent closeLabel="关闭">
+        <DialogContent showCloseButton>
           <DialogHeader>
             <DialogTitle>标题</DialogTitle>
             <DialogDescription>描述文本</DialogDescription>
@@ -44,18 +44,18 @@ describe('Dialog', () => {
     expect(screen.getByText('描述文本')).toBeDefined();
   });
 
-  it('应该渲染关闭按钮的 ARIA 标签', async () => {
+  it('应该渲染关闭按钮的 sr-only 文本', async () => {
     const user = userEvent.setup();
     render(
       <Dialog>
         <DialogTrigger>打开</DialogTrigger>
-        <DialogContent closeLabel="关闭对话框">
+        <DialogContent showCloseButton>
           <DialogTitle>标题</DialogTitle>
         </DialogContent>
       </Dialog>,
     );
     await user.click(screen.getByText('打开'));
-    expect(screen.getByText('关闭对话框')).toBeDefined();
+    expect(screen.getByText('Close')).toBeDefined();
   });
 
   it('DialogHeader 应该合并自定义 className', async () => {
@@ -63,7 +63,7 @@ describe('Dialog', () => {
     render(
       <Dialog>
         <DialogTrigger>打开</DialogTrigger>
-        <DialogContent closeLabel="关闭">
+        <DialogContent showCloseButton>
           <DialogHeader className="custom-header">
             <DialogTitle>标题</DialogTitle>
           </DialogHeader>
@@ -80,7 +80,7 @@ describe('Dialog', () => {
     render(
       <Dialog>
         <DialogTrigger>打开</DialogTrigger>
-        <DialogContent closeLabel="关闭">
+        <DialogContent showCloseButton>
           <DialogTitle>标题</DialogTitle>
           <DialogFooter>
             <button type="button">确认</button>
@@ -96,7 +96,7 @@ describe('Dialog', () => {
     render(
       <Dialog defaultOpen>
         <DialogTrigger>打开</DialogTrigger>
-        <DialogContent closeLabel="关闭">
+        <DialogContent showCloseButton>
           <DialogTitle>默认打开</DialogTitle>
         </DialogContent>
       </Dialog>,
@@ -107,7 +107,7 @@ describe('Dialog', () => {
   it('DialogTitle 应该包含正确样式', () => {
     render(
       <Dialog defaultOpen>
-        <DialogContent closeLabel="关闭">
+        <DialogContent showCloseButton>
           <DialogTitle>样式标题</DialogTitle>
         </DialogContent>
       </Dialog>,

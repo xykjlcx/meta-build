@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { useState } from 'react';
-import { Calendar, DatePicker } from './date-picker';
+import { Calendar } from './calendar';
+import { DatePicker } from './date-picker';
 
 const calendarMeta = {
   title: 'Primitives/Calendar',
