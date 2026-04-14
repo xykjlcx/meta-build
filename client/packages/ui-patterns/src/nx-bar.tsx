@@ -51,7 +51,7 @@ export function NxBar({
         <span className="text-sm font-medium">{text}</span>
         {onClear && (
           <Button variant="ghost" size="sm" onClick={onClear}>
-            {clearLabel ?? 'Clear'}
+            {clearLabel}
           </Button>
         )}
       </div>

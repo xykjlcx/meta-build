@@ -39,6 +39,12 @@ export interface NxTableProps<TData> {
   onRowClick?: (row: TData) => void;
   pagination?: NxTablePagination;
   onPaginationChange?: (next: NxTablePagination) => void;
+  /** 分页信息模板，包含 {total}、{page}、{pages} 占位符。不传则不渲染分页信息文案 */
+  paginationInfoTemplate?: string;
+  /** 上一页按钮文案。不传则显示 SVG 箭头图标 */
+  previousLabel?: ReactNode;
+  /** 下一页按钮文案。不传则显示 SVG 箭头图标 */
+  nextLabel?: ReactNode;
   sorting?: SortingState;
   onSortingChange?: (next: SortingState) => void;
   rowSelection?: RowSelectionState;
@@ -59,10 +65,13 @@ function NxTable<TData>({
   columns,
   getRowId,
   loading = false,
-  emptyText = 'No data',
+  emptyText,
   onRowClick,
   pagination,
   onPaginationChange,
+  paginationInfoTemplate,
+  previousLabel,
+  nextLabel,
   sorting,
   onSortingChange,
   rowSelection,
@@ -221,13 +230,21 @@ function NxTable<TData>({
       {/* 分页栏 */}
       {pagination && (
         <div className="flex items-center justify-between px-2">
-          <span className="text-sm text-muted-foreground">
-            {pagination.totalElements} items, page {pagination.page} / {pagination.totalPages}
-          </span>
+          {paginationInfoTemplate ? (
+            <span className="text-sm text-muted-foreground">
+              {paginationInfoTemplate
+                .replace('{total}', String(pagination.totalElements))
+                .replace('{page}', String(pagination.page))
+                .replace('{pages}', String(pagination.totalPages))}
+            </span>
+          ) : (
+            <span />
+          )}
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
               size="sm"
+              {...(!previousLabel && { 'aria-label': 'previous page' })}
               disabled={pagination.page <= 1}
               onClick={() =>
                 onPaginationChange?.({
@@ -236,11 +253,14 @@ function NxTable<TData>({
                 })
               }
             >
-              Previous
+              {previousLabel ?? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="15 18 9 12 15 6" /></svg>
+              )}
             </Button>
             <Button
               variant="outline"
               size="sm"
+              {...(!nextLabel && { 'aria-label': 'next page' })}
               disabled={pagination.page >= pagination.totalPages}
               onClick={() =>
                 onPaginationChange?.({
@@ -249,7 +269,9 @@ function NxTable<TData>({
                 })
               }
             >
-              Next
+              {nextLabel ?? (
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
+              )}
             </Button>
           </div>
         </div>

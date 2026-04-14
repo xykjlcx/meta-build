@@ -196,7 +196,7 @@ function NxDrawerForm<TFormValues extends FieldValues>({
             <AlertDialogDescription />
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>{cancelLabel ?? 'Cancel'}</AlertDialogCancel>
+            <AlertDialogCancel>{cancelLabel}</AlertDialogCancel>
             <AlertDialogAction variant="destructive" onClick={handleConfirmDiscard}>
               {closeLabel}
             </AlertDialogAction>

@@ -119,6 +119,9 @@ export const WithPagination: Story = {
         getRowId={(r) => r.id}
         pagination={pagination}
         onPaginationChange={setPagination}
+        paginationInfoTemplate="共 {total} 条，第 {page} / {pages} 页"
+        previousLabel="上一页"
+        nextLabel="下一页"
       />
     );
   },

@@ -86,18 +86,21 @@ describe('NxTable', () => {
         getRowId={(r) => r.id}
         pagination={{ page: 1, size: 10, totalElements: 25, totalPages: 3 }}
         onPaginationChange={handlePaginationChange}
+        paginationInfoTemplate="共 {total} 条，第 {page} / {pages} 页"
+        previousLabel="上一页"
+        nextLabel="下一页"
       />,
     );
 
     // 显示分页信息
-    expect(screen.getByText('25 items, page 1 / 3')).toBeInTheDocument();
+    expect(screen.getByText('共 25 条，第 1 / 3 页')).toBeInTheDocument();
 
     // Previous 按钮应该被禁用（第 1 页）
-    const prevBtn = screen.getByRole('button', { name: 'Previous' });
+    const prevBtn = screen.getByRole('button', { name: '上一页' });
     expect(prevBtn).toBeDisabled();
 
     // 点击 Next
-    const nextBtn = screen.getByRole('button', { name: 'Next' });
+    const nextBtn = screen.getByRole('button', { name: '下一页' });
     await user.click(nextBtn);
 
     expect(handlePaginationChange).toHaveBeenCalledWith({
@@ -161,13 +164,15 @@ describe('NxTable', () => {
         columns={columns}
         getRowId={(r) => r.id}
         pagination={{ page: 3, size: 10, totalElements: 25, totalPages: 3 }}
+        previousLabel="上一页"
+        nextLabel="下一页"
       />,
     );
 
-    const nextBtn = screen.getByRole('button', { name: 'Next' });
+    const nextBtn = screen.getByRole('button', { name: '下一页' });
     expect(nextBtn).toBeDisabled();
 
-    const prevBtn = screen.getByRole('button', { name: 'Previous' });
+    const prevBtn = screen.getByRole('button', { name: '上一页' });
     expect(prevBtn).not.toBeDisabled();
   });
 });
