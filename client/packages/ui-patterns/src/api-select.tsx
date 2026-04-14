@@ -116,15 +116,12 @@ function ApiSelect<TValue = string>({
   }, [open, debouncedKeyword, fetcher, size]);
 
   // 弹窗关闭时重置搜索
-  const handleOpenChange = useCallback(
-    (nextOpen: boolean) => {
-      setOpen(nextOpen);
-      if (!nextOpen) {
-        setKeyword('');
-      }
-    },
-    [],
-  );
+  const handleOpenChange = useCallback((nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) {
+      setKeyword('');
+    }
+  }, []);
 
   // 选中项的 label
   const selectedOption = options.find((opt) => opt.value === value);
@@ -138,15 +135,14 @@ function ApiSelect<TValue = string>({
           type="button"
           // biome-ignore lint/a11y/useSemanticElements: Combobox 需要搜索过滤能力，原生 select 不支持
           role="combobox"
+          aria-controls="api-select-listbox"
           aria-expanded={open}
           className={cn(
             'flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50',
           )}
         >
           {selectedLabel ??
-            (placeholder ? (
-              <span className="text-muted-foreground">{placeholder}</span>
-            ) : null)}
+            (placeholder ? <span className="text-muted-foreground">{placeholder}</span> : null)}
           <svg
             aria-hidden="true"
             xmlns="http://www.w3.org/2000/svg"
@@ -163,17 +159,11 @@ function ApiSelect<TValue = string>({
           </svg>
         </button>
       </PopoverTrigger>
-      <PopoverContent
-        className="w-[var(--radix-popover-trigger-width)] p-0"
-        align="start"
-      >
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0" align="start">
         {/* shouldFilter={false} 禁用 cmdk 的客户端过滤，搜索由远程 fetcher 处理 */}
         <Command shouldFilter={false}>
-          <CommandInput
-            value={keyword}
-            onValueChange={setKeyword}
-          />
-          <CommandList>
+          <CommandInput value={keyword} onValueChange={setKeyword} />
+          <CommandList id="api-select-listbox">
             {/* loading 状态 */}
             {loading && (
               <div className="py-6 text-center text-sm" data-testid="api-select-loading">
@@ -181,15 +171,12 @@ function ApiSelect<TValue = string>({
               </div>
             )}
             {/* 空结果（非 loading 时） */}
-            {!loading && options.length === 0 && (
-              <CommandEmpty>{emptyText}</CommandEmpty>
-            )}
+            {!loading && options.length === 0 && <CommandEmpty>{emptyText}</CommandEmpty>}
             {/* 选项列表 */}
             {!loading && options.length > 0 && (
               <CommandGroup>
                 {options.map((option) => {
-                  const itemValue =
-                    option.searchText ?? String(option.value);
+                  const itemValue = option.searchText ?? String(option.value);
                   return (
                     <CommandItem
                       key={String(option.value)}

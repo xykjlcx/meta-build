@@ -1,5 +1,5 @@
-import type { Preview } from '@storybook/react';
 import { themeRegistry } from '@mb/ui-tokens';
+import type { Preview } from '@storybook/react';
 import '../src/storybook.css';
 
 const preview: Preview = {

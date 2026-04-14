@@ -23,9 +23,7 @@ export function GlobalNotFoundPage() {
       >
         404
       </h1>
-      <p style={{ fontSize: '1.25rem', color: '#666', marginBottom: '1.5rem' }}>
-        页面不存在
-      </p>
+      <p style={{ fontSize: '1.25rem', color: '#666', marginBottom: '1.5rem' }}>页面不存在</p>
       <a href="/" style={{ color: '#3b82f6', textDecoration: 'underline' }}>
         返回首页
       </a>

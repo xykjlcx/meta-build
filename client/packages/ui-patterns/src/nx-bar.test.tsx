@@ -12,9 +12,7 @@ describe('NxBar', () => {
   });
 
   it('selectedCount>0 时显示文案（template 中 {count} 被替换）', () => {
-    render(
-      <NxBar selectedCount={5} selectedTemplate="已选择 {count} 项" actions={null} />,
-    );
+    render(<NxBar selectedCount={5} selectedTemplate="已选择 {count} 项" actions={null} />);
     expect(screen.getByText('已选择 5 项')).toBeDefined();
   });
 
@@ -47,13 +45,9 @@ describe('NxBar', () => {
 
   it('fixed=true 时包含 fixed class', () => {
     const { container } = render(
-      <NxBar
-        selectedCount={1}
-        selectedTemplate="{count} selected"
-        actions={null}
-        fixed
-      />,
+      <NxBar selectedCount={1} selectedTemplate="{count} selected" actions={null} fixed />,
     );
+    // biome-ignore lint/style/noNonNullAssertion: 测试中已知容器必有子元素
     const bar = container.firstElementChild!;
     expect(bar.className).toContain('fixed');
   });

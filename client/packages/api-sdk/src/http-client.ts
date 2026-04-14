@@ -1,10 +1,9 @@
-export interface RequestInterceptor {
-  (url: string, init: RequestInit): Promise<{ url: string; init: RequestInit }> | { url: string; init: RequestInit };
-}
+export type RequestInterceptor = (
+  url: string,
+  init: RequestInit,
+) => Promise<{ url: string; init: RequestInit }> | { url: string; init: RequestInit };
 
-export interface ResponseInterceptor {
-  (response: Response): Promise<Response> | Response;
-}
+export type ResponseInterceptor = (response: Response) => Promise<Response> | Response;
 
 export interface HttpClient {
   request<T>(url: string, init?: RequestInit): Promise<T>;

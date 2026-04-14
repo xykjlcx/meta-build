@@ -1,5 +1,5 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
 import { BasicLayout } from '@mb/app-shell';
+import { Link, createFileRoute } from '@tanstack/react-router';
 import { useTranslation } from 'react-i18next';
 
 export const Route = createFileRoute('/auth/forgot-password')({

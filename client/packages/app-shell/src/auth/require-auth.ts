@@ -15,7 +15,11 @@ export class ForbiddenError extends Error {
 }
 
 export function requireAuth(options: RequireAuthOptions = {}) {
-  return ({ context }: { context: { currentUser?: { isAuthenticated: boolean; permissions: ReadonlySet<string> } } }) => {
+  return ({
+    context,
+  }: {
+    context: { currentUser?: { isAuthenticated: boolean; permissions: ReadonlySet<string> } };
+  }) => {
     const user = context.currentUser;
     if (!user || !user.isAuthenticated) {
       throw redirect({ to: '/auth/login', search: { redirect: location.pathname } });

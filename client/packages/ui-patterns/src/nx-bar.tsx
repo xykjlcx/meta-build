@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import { Button, cn } from '@mb/ui-primitives';
+import type { ReactNode } from 'react';
 
 export interface NxBarProps {
   /** 当前选中的条目数量 */

@@ -1,9 +1,9 @@
+import { Input } from '@mb/ui-primitives';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { NxForm, NxFormField } from './nx-form';
-import { Input } from '@mb/ui-primitives';
 
 const schema = z.object({
   username: z.string().min(2, '至少 2 个字符'),
@@ -85,7 +85,7 @@ describe('NxForm', () => {
     const asterisks = screen.getAllByText('*');
     expect(asterisks.length).toBeGreaterThanOrEqual(1);
     // 星号应该有 destructive 颜色类
-    expect(asterisks[0]!.className).toContain('text-destructive');
+    expect(asterisks[0]?.className).toContain('text-destructive');
   });
 
   it('不传 onCancel 时不渲染取消按钮', () => {

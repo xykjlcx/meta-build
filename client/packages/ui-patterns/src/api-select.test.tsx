@@ -24,6 +24,7 @@ vi.mock('@mb/ui-primitives', async () => {
 
   return {
     ...actual,
+    // biome-ignore lint/suspicious/noExplicitAny: 测试 mock 简化类型
     Popover: ({ children, open, onOpenChange, ...props }: any) => {
       return (
         <PopoverCtx.Provider value={{ open: !!open, onOpenChange }}>
@@ -33,6 +34,7 @@ vi.mock('@mb/ui-primitives', async () => {
         </PopoverCtx.Provider>
       );
     },
+    // biome-ignore lint/suspicious/noExplicitAny: 测试 mock 简化类型
     PopoverTrigger: ({ children, asChild, disabled, ...props }: any) => {
       const ctx = React.useContext(PopoverCtx);
       const handleClick = () => {
@@ -41,6 +43,7 @@ vi.mock('@mb/ui-primitives', async () => {
         }
       };
       if (asChild && React.isValidElement(children)) {
+        // biome-ignore lint/suspicious/noExplicitAny: 测试 mock 简化类型
         return React.cloneElement(children as React.ReactElement<any>, {
           ...props,
           disabled,
@@ -53,6 +56,7 @@ vi.mock('@mb/ui-primitives', async () => {
         </div>
       );
     },
+    // biome-ignore lint/suspicious/noExplicitAny: 测试 mock 简化类型
     PopoverContent: ({ children, ...props }: any) => {
       const ctx = React.useContext(PopoverCtx);
       if (!ctx.open) return null;
@@ -84,8 +88,8 @@ const mockOptions = [
 function createMockFetcher(
   result: ApiSelectFetchResult = { options: mockOptions, totalElements: 3 },
 ) {
-  return vi.fn<(params: ApiSelectFetchParams) => Promise<ApiSelectFetchResult>>(
-    () => Promise.resolve(result),
+  return vi.fn<(params: ApiSelectFetchParams) => Promise<ApiSelectFetchResult>>(() =>
+    Promise.resolve(result),
   );
 }
 

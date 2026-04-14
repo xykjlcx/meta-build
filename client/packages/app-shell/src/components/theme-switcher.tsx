@@ -1,5 +1,3 @@
-import { useTranslation } from 'react-i18next';
-import { Palette } from 'lucide-react';
 import {
   Button,
   DropdownMenu,
@@ -7,7 +5,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@mb/ui-primitives';
-import { themeRegistry, type ThemeId } from '@mb/ui-tokens';
+import { type ThemeId, themeRegistry } from '@mb/ui-tokens';
+import { Palette } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useTheme } from '../theme';
 
 /**
@@ -19,11 +19,11 @@ export function ThemeSwitcher() {
   const { t } = useTranslation('shell');
 
   // 主题 displayName 映射到 i18n key
-  const themeNameKey: Record<ThemeId, string> = {
+  const themeNameKey = {
     default: 'theme.default',
     dark: 'theme.dark',
     compact: 'theme.compact',
-  };
+  } as const satisfies Record<ThemeId, `theme.${string}`>;
 
   return (
     <DropdownMenu>

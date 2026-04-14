@@ -1,5 +1,5 @@
-import { useNavigate } from '@tanstack/react-router';
 import { Button } from '@mb/ui-primitives';
+import { useNavigate } from '@tanstack/react-router';
 import { useMenu } from '../menu';
 import { LanguageSwitcher } from './language-switcher';
 import { ThemeSwitcher } from './theme-switcher';

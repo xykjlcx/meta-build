@@ -1,7 +1,7 @@
+import type { ColumnDef } from '@tanstack/react-table';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import type { ColumnDef } from '@tanstack/react-table';
 import { NxTable } from './nx-table';
 
 // ─── 测试数据 ─────────────────────────────────────────
@@ -152,6 +152,7 @@ describe('NxTable', () => {
     expect(checkboxes).toHaveLength(3); // 全选 + 2 行
 
     // 点击第一行的 checkbox（index 1，0 是全选）
+    // biome-ignore lint/style/noNonNullAssertion: 上方已断言长度为 3
     await user.click(checkboxes[1]!);
 
     expect(handleRowSelectionChange).toHaveBeenCalled();

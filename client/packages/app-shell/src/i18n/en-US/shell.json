@@ -3,5 +3,10 @@
   "header": { "profile": "Profile", "logout": "Logout" },
   "theme": { "switch": "Switch Theme", "default": "Default", "dark": "Dark", "compact": "Compact" },
   "language": { "switch": "Switch Language" },
-  "auth": { "username": "Username", "password": "Password", "login": "Login", "forgotPassword": "Forgot Password" }
+  "auth": {
+    "username": "Username",
+    "password": "Password",
+    "login": "Login",
+    "forgotPassword": "Forgot Password"
+  }
 }

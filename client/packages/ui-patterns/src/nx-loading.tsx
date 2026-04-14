@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
 import { Button, Skeleton, cn } from '@mb/ui-primitives';
+import type { ReactNode } from 'react';
 
 export interface NxLoadingProps {
   /** 是否处于加载状态 */
@@ -35,7 +35,7 @@ function SkeletonRows({ rows, text }: { rows: number; text: ReactNode }) {
     <div className="flex flex-col gap-3">
       {Array.from({ length: rows }, (_, i) => (
         <Skeleton
-          key={i}
+          key={`row-${String(i)}`}
           className={cn('h-4', ROW_WIDTHS[i % ROW_WIDTHS.length])}
         />
       ))}
@@ -57,7 +57,7 @@ function SkeletonTable({ rows, text }: { rows: number; text: ReactNode }) {
       <Skeleton className="h-px w-full" />
       {/* 表体 */}
       {Array.from({ length: rows }, (_, i) => (
-        <div key={i} className="flex gap-4">
+        <div key={`table-row-${String(i)}`} className="flex gap-4">
           <Skeleton className="h-4 w-1/4" />
           <Skeleton className="h-4 w-1/4" />
           <Skeleton className="h-4 w-1/4" />
@@ -78,7 +78,7 @@ function SkeletonDetail({ rows, text }: { rows: number; text: ReactNode }) {
       {/* 内容行 */}
       {Array.from({ length: rows }, (_, i) => (
         <Skeleton
-          key={i}
+          key={`detail-${String(i)}`}
           className={cn('h-4', ROW_WIDTHS[i % ROW_WIDTHS.length])}
         />
       ))}
@@ -95,14 +95,7 @@ function Spinner() {
       fill="none"
       aria-hidden="true"
     >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      />
+      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path
         className="opacity-75"
         fill="currentColor"
@@ -161,15 +154,9 @@ function NxLoading({
             <p className="text-sm text-muted-foreground">{loadingText}</p>
           </div>
         )}
-        {variant === 'skeleton' && (
-          <SkeletonRows rows={rows} text={loadingText} />
-        )}
-        {variant === 'skeleton-table' && (
-          <SkeletonTable rows={rows} text={loadingText} />
-        )}
-        {variant === 'skeleton-detail' && (
-          <SkeletonDetail rows={rows} text={loadingText} />
-        )}
+        {variant === 'skeleton' && <SkeletonRows rows={rows} text={loadingText} />}
+        {variant === 'skeleton-table' && <SkeletonTable rows={rows} text={loadingText} />}
+        {variant === 'skeleton-detail' && <SkeletonDetail rows={rows} text={loadingText} />}
       </div>
     );
   }
@@ -177,12 +164,7 @@ function NxLoading({
   // 优先级 3：空数据
   if (empty) {
     return (
-      <div
-        className={cn(
-          'flex items-center justify-center py-12 text-center',
-          className,
-        )}
-      >
+      <div className={cn('flex items-center justify-center py-12 text-center', className)}>
         <p className="text-sm text-muted-foreground">{emptyText}</p>
       </div>
     );

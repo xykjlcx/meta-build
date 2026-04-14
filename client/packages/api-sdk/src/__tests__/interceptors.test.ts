@@ -1,9 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { ProblemDetailError, isProblemDetail } from '../errors';
 import { createAuthInterceptor } from '../interceptors/auth';
+import { createErrorInterceptor } from '../interceptors/error';
 import { createLanguageInterceptor } from '../interceptors/language';
 import { createRequestIdInterceptor } from '../interceptors/request-id';
-import { createErrorInterceptor } from '../interceptors/error';
-import { ProblemDetailError, isProblemDetail } from '../errors';
 
 // ── Auth 拦截器 ──
 
@@ -67,7 +67,11 @@ describe('createErrorInterceptor', () => {
     vi.clearAllMocks();
   });
 
-  function makeResponse(status: number, body?: unknown, contentType = 'application/json'): Response {
+  function makeResponse(
+    status: number,
+    body?: unknown,
+    contentType = 'application/json',
+  ): Response {
     const headers = new Headers();
     if (contentType) headers.set('Content-Type', contentType);
 
@@ -111,7 +115,11 @@ describe('createErrorInterceptor', () => {
 
   it('500 调用 onServerError 并 throw ProblemDetailError', async () => {
     const interceptor = createErrorInterceptor({ onUnauthenticated, onForbidden, onServerError });
-    const response = makeResponse(500, { type: 'about:blank', status: 500, title: 'Internal Server Error' });
+    const response = makeResponse(500, {
+      type: 'about:blank',
+      status: 500,
+      title: 'Internal Server Error',
+    });
 
     await expect(interceptor(response)).rejects.toThrow(ProblemDetailError);
     expect(onServerError).toHaveBeenCalledOnce();
@@ -138,11 +146,14 @@ describe('createErrorInterceptor', () => {
     }
 
     expect(caught).toBeInstanceOf(ProblemDetailError);
-    expect(caught!.status).toBe(400);
-    expect(caught!.type).toBe('urn:metabuild:validation');
-    expect(caught!.detail).toBe('Validation failed');
-    expect(caught!.validationErrors).toHaveLength(1);
-    expect(caught!.validationErrors[0]).toEqual({ field: 'username', message: 'must not be blank' });
+    expect(caught?.status).toBe(400);
+    expect(caught?.type).toBe('urn:metabuild:validation');
+    expect(caught?.detail).toBe('Validation failed');
+    expect(caught?.validationErrors).toHaveLength(1);
+    expect(caught?.validationErrors[0]).toEqual({
+      field: 'username',
+      message: 'must not be blank',
+    });
 
     expect(onUnauthenticated).not.toHaveBeenCalled();
     expect(onForbidden).not.toHaveBeenCalled();
@@ -165,9 +176,9 @@ describe('createErrorInterceptor', () => {
     }
 
     expect(caught).toBeInstanceOf(ProblemDetailError);
-    expect(caught!.status).toBe(404);
-    expect(caught!.type).toBe('about:blank');
-    expect(caught!.detail).toBe('Unexpected error: 404 Not Found');
+    expect(caught?.status).toBe(404);
+    expect(caught?.type).toBe('about:blank');
+    expect(caught?.detail).toBe('Unexpected error: 404 Not Found');
   });
 });
 

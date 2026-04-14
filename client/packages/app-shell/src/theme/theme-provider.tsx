@@ -1,5 +1,5 @@
-import { createContext, useCallback, useMemo, useState, type ReactNode } from 'react';
-import { applyTheme, loadTheme, type ThemeId } from '@mb/ui-tokens';
+import { type ThemeId, applyTheme, loadTheme } from '@mb/ui-tokens';
+import { type ReactNode, createContext, useCallback, useMemo, useState } from 'react';
 
 interface ThemeContextValue {
   theme: ThemeId;
@@ -8,7 +8,10 @@ interface ThemeContextValue {
 
 export const ThemeContext = createContext<ThemeContextValue | null>(null);
 
-export function ThemeProvider({ children, defaultTheme = 'default' }: { children: ReactNode; defaultTheme?: ThemeId }) {
+export function ThemeProvider({
+  children,
+  defaultTheme = 'default',
+}: { children: ReactNode; defaultTheme?: ThemeId }) {
   const [theme, setThemeState] = useState<ThemeId>(() => loadTheme() ?? defaultTheme);
 
   const setTheme = useCallback((next: ThemeId) => {

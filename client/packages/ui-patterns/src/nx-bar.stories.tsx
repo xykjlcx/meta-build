@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react';
 import { Button } from '@mb/ui-primitives';
+import type { Meta, StoryObj } from '@storybook/react';
 import { NxBar } from './nx-bar';
 
 const meta = {

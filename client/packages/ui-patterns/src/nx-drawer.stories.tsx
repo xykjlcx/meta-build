@@ -1,10 +1,10 @@
+import { Button, Input } from '@mb/ui-primitives';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { useState } from 'react';
 import { z } from 'zod';
 import { NxDrawer } from './nx-drawer';
 import { NxFormField } from './nx-form';
-import { Input, Button } from '@mb/ui-primitives';
 
 // ---------------------------------------------------------------------------
 // Meta
@@ -90,8 +90,7 @@ export const FormMode: Story = {
           closeLabel="Close drawer"
           schema={schema}
           defaultValues={{ name: '', email: '' }}
-          onSubmit={(data) => {
-            console.log('submit', data);
+          onSubmit={(_data) => {
             setOpen(false);
           }}
           submitLabel="Save"
@@ -126,8 +125,7 @@ export const WithDirtyCheck: Story = {
           closeLabel="Close drawer"
           schema={schema}
           defaultValues={{ name: 'Alice', email: 'alice@example.com' }}
-          onSubmit={(data) => {
-            console.log('submit', data);
+          onSubmit={(_data) => {
             setOpen(false);
           }}
           submitLabel="Save"

@@ -1,5 +1,5 @@
 import { getClient } from '../config';
-import type { LoginCommand, LoginResult, CurrentUserDto } from '../types/auth';
+import type { CurrentUserDto, LoginCommand, LoginResult } from '../types/auth';
 
 export const authApi = {
   login(cmd: LoginCommand): Promise<LoginResult> {

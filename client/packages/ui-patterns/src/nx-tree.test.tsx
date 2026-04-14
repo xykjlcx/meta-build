@@ -27,9 +27,7 @@ const treeData: MockNode[] = [
   { id: '2', label: 'Node 2', children: [] },
 ];
 
-const renderLabel = (node: MockNode, _depth: number) => (
-  <span>{node.label}</span>
-);
+const renderLabel = (node: MockNode, _depth: number) => <span>{node.label}</span>;
 
 // ─── 测试用例 ─────────────────────────────────────────
 
@@ -101,13 +99,14 @@ describe('NxTree', () => {
     );
 
     // 点击 Node 1 的展开按钮
+    // biome-ignore lint/style/noNonNullAssertion: getAllByRole 已保证非空
     const expandBtn = screen.getAllByRole('button', { name: 'Expand' })[0]!;
     await user.click(expandBtn);
 
     expect(handleExpandedChange).toHaveBeenCalledTimes(1);
 
     // 应该传入包含 '1' 的新 Set
-    const newSet = handleExpandedChange.mock.calls[0]![0] as Set<string>;
+    const newSet = handleExpandedChange.mock.calls[0]?.[0] as Set<string>;
     expect(newSet.has('1')).toBe(true);
   });
 
@@ -131,18 +130,12 @@ describe('NxTree', () => {
 
     expect(handleExpandedChange).toHaveBeenCalledTimes(1);
 
-    const newSet = handleExpandedChange.mock.calls[0]![0] as Set<string>;
+    const newSet = handleExpandedChange.mock.calls[0]?.[0] as Set<string>;
     expect(newSet.has('1')).toBe(false);
   });
 
   it('空数据显示 emptyText', () => {
-    render(
-      <NxTree
-        data={[]}
-        renderNode={renderLabel}
-        emptyText="No tree data"
-      />,
-    );
+    render(<NxTree data={[]} renderNode={renderLabel} emptyText="No tree data" />);
 
     expect(screen.getByText('No tree data')).toBeInTheDocument();
     // 不应该渲染 tree role

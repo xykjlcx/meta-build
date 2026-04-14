@@ -65,11 +65,7 @@ describe('NxLoading', () => {
     const onRetry = vi.fn();
 
     render(
-      <NxLoading
-        {...defaultTexts}
-        error={new Error('fail')}
-        onRetry={onRetry}
-      >
+      <NxLoading {...defaultTexts} error={new Error('fail')} onRetry={onRetry}>
         <p>content</p>
       </NxLoading>,
     );
@@ -107,13 +103,7 @@ describe('NxLoading', () => {
 
   it('优先级测试：error + loading + empty 同时为 true → 显示 error', () => {
     render(
-      <NxLoading
-        {...defaultTexts}
-        error={new Error('fail')}
-        loading
-        empty
-        onRetry={() => {}}
-      >
+      <NxLoading {...defaultTexts} error={new Error('fail')} loading empty onRetry={() => {}}>
         <p>content</p>
       </NxLoading>,
     );

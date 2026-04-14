@@ -1,10 +1,15 @@
 import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
-import { DEFAULT_LANGUAGE, LANGUAGE_STORAGE_KEY, SUPPORTED_LANGUAGES, type SupportedLanguage } from './types';
-import zhCNShell from './zh-CN/shell.json';
-import zhCNCommon from './zh-CN/common.json';
-import enUSShell from './en-US/shell.json';
 import enUSCommon from './en-US/common.json';
+import enUSShell from './en-US/shell.json';
+import {
+  DEFAULT_LANGUAGE,
+  LANGUAGE_STORAGE_KEY,
+  SUPPORTED_LANGUAGES,
+  type SupportedLanguage,
+} from './types';
+import zhCNCommon from './zh-CN/common.json';
+import zhCNShell from './zh-CN/shell.json';
 
 function resolveInitialLanguage(): SupportedLanguage {
   if (typeof localStorage === 'undefined') return DEFAULT_LANGUAGE;
@@ -28,6 +33,10 @@ i18n.use(initReactI18next).init({
   react: { useSuspense: false },
 });
 
-export function registerResource(language: SupportedLanguage, namespace: string, data: Record<string, unknown>): void {
+export function registerResource(
+  language: SupportedLanguage,
+  namespace: string,
+  data: Record<string, unknown>,
+): void {
   i18n.addResourceBundle(language, namespace, data, true, true);
 }

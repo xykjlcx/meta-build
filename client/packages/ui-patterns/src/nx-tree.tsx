@@ -1,5 +1,5 @@
-import { type ReactNode, useCallback } from 'react';
 import { cn } from '@mb/ui-primitives';
+import { type ReactNode, useCallback } from 'react';
 
 // ─── 类型 ───────────────────────────────────────────────
 
@@ -69,10 +69,7 @@ function TreeNodeItem<TNode extends NxTreeNode>({
 
   return (
     <li role="treeitem" aria-expanded={hasChildren ? isExpanded : undefined}>
-      <div
-        className="flex items-center gap-1 py-1"
-        style={{ paddingLeft: depth * INDENT_PX }}
-      >
+      <div className="flex items-center gap-1 py-1" style={{ paddingLeft: depth * INDENT_PX }}>
         {/* 展开/收起按钮 */}
         {hasChildren ? (
           <button
@@ -94,6 +91,7 @@ function TreeNodeItem<TNode extends NxTreeNode>({
 
       {/* 递归渲染子节点 */}
       {hasChildren && isExpanded && (
+        // biome-ignore lint/a11y/useSemanticElements: tree widget 需要 role="group" 表示子节点分组
         <ul role="group">
           {(node.children as TNode[]).map((child) => (
             <TreeNodeItem

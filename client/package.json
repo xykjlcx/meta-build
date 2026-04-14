@@ -10,7 +10,9 @@
     "check:types": "pnpm -r --parallel exec tsc --noEmit",
     "check:env": "tsx scripts/check-env-example.ts",
     "check:theme": "pnpm -F @mb/ui-tokens check:theme",
-    "test": "pnpm -F @mb/ui-primitives test",
+    "check:i18n": "tsx scripts/check-i18n.ts",
+    "check:business-words": "tsx scripts/check-business-words.ts",
+    "test": "pnpm -F @mb/ui-primitives test && pnpm -F @mb/ui-patterns test && pnpm -F @mb/api-sdk test",
     "storybook": "pnpm -F @mb/ui-primitives storybook"
   },
   "devDependencies": {

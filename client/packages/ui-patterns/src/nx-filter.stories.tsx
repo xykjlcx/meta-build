@@ -1,7 +1,7 @@
-import { useState } from 'react';
-import type { Meta, StoryObj } from '@storybook/react';
-import { NxFilter, NxFilterField } from './nx-filter';
 import { Input } from '@mb/ui-primitives';
+import type { Meta, StoryObj } from '@storybook/react';
+import { useState } from 'react';
+import { NxFilter, NxFilterField } from './nx-filter';
 
 const meta = {
   title: 'Patterns/NxFilter',
@@ -34,9 +34,7 @@ export const Default: Story = {
             <Input placeholder="请输入关键词" />
           </NxFilterField>
         </NxFilter>
-        <pre className="text-sm text-muted-foreground">
-          {JSON.stringify(filter, null, 2)}
-        </pre>
+        <pre className="text-sm text-muted-foreground">{JSON.stringify(filter, null, 2)}</pre>
       </div>
     );
   },
@@ -65,9 +63,7 @@ export const WithMultipleFields: Story = {
             <Input placeholder="请输入电话" />
           </NxFilterField>
         </NxFilter>
-        <pre className="text-sm text-muted-foreground">
-          {JSON.stringify(filter, null, 2)}
-        </pre>
+        <pre className="text-sm text-muted-foreground">{JSON.stringify(filter, null, 2)}</pre>
       </div>
     );
   },
@@ -84,9 +80,7 @@ export const Reset: Story = {
     });
     return (
       <div className="space-y-4">
-        <p className="text-sm text-muted-foreground">
-          点击重置按钮清空所有筛选条件
-        </p>
+        <p className="text-sm text-muted-foreground">点击重置按钮清空所有筛选条件</p>
         <NxFilter value={filter} onChange={setFilter} resetLabel="重置" applyLabel="查询">
           <NxFilterField name="keyword" label="关键词">
             <Input placeholder="请输入关键词" />
@@ -95,9 +89,7 @@ export const Reset: Story = {
             <Input placeholder="请输入状态" />
           </NxFilterField>
         </NxFilter>
-        <pre className="text-sm text-muted-foreground">
-          {JSON.stringify(filter, null, 2)}
-        </pre>
+        <pre className="text-sm text-muted-foreground">{JSON.stringify(filter, null, 2)}</pre>
       </div>
     );
   },

@@ -1,8 +1,8 @@
+import { Input } from '@mb/ui-primitives';
 import type { Meta, StoryObj } from '@storybook/react';
 import { fn } from '@storybook/test';
 import { z } from 'zod';
 import { NxForm, NxFormField } from './nx-form';
-import { Input } from '@mb/ui-primitives';
 
 const schema = z.object({
   username: z.string().min(2, '至少 2 个字符'),
@@ -56,12 +56,11 @@ export const WithValidationErrors: Story = {
   },
   render: (args) => (
     <div className="w-80">
-      <p className="mb-4 text-sm text-muted-foreground">
-        直接点击提交按钮查看校验错误
-      </p>
+      <p className="mb-4 text-sm text-muted-foreground">直接点击提交按钮查看校验错误</p>
       <NxForm<FormValues>
         schema={schema}
         defaultValues={{ username: '', email: '' }}
+        // biome-ignore lint/style/noNonNullAssertion: Storybook args 由框架保证
         onSubmit={args.onSubmit!}
         submitLabel="提交"
       >
@@ -85,6 +84,7 @@ export const Loading: Story = {
     <NxForm<FormValues>
       schema={schema}
       defaultValues={{ username: 'alice', email: 'alice@test.com' }}
+      // biome-ignore lint/style/noNonNullAssertion: Storybook args 由框架保证
       onSubmit={args.onSubmit!}
       submitLabel="提交中..."
       loading
@@ -109,6 +109,7 @@ export const WithCancel: Story = {
     <NxForm<FormValues>
       schema={schema}
       defaultValues={{ username: '', email: '' }}
+      // biome-ignore lint/style/noNonNullAssertion: Storybook args 由框架保证
       onSubmit={args.onSubmit!}
       submitLabel="保存"
       cancelLabel="取消"

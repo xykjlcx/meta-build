@@ -1,25 +1,25 @@
-import { type ReactNode, useState, useCallback } from 'react';
-import type { FieldValues, SubmitHandler, DefaultValues } from 'react-hook-form';
-import type { ZodSchema } from 'zod';
-import { useForm, FormProvider } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerDescription,
-  DrawerFooter,
-  Button,
   AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
   AlertDialogContent,
-  AlertDialogHeader,
-  AlertDialogTitle,
   AlertDialogDescription,
   AlertDialogFooter,
-  AlertDialogCancel,
-  AlertDialogAction,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  Button,
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
 } from '@mb/ui-primitives';
+import { type ReactNode, useCallback, useState } from 'react';
+import type { DefaultValues, FieldValues, SubmitHandler } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
+import type { ZodSchema } from 'zod';
 
 // ---------------------------------------------------------------------------
 // NxDrawer
@@ -159,11 +159,7 @@ function NxDrawerForm<TFormValues extends FieldValues>({
 
           <FormProvider {...methods}>
             <form
-              onSubmit={
-                onSubmit
-                  ? methods.handleSubmit(onSubmit)
-                  : (e) => e.preventDefault()
-              }
+              onSubmit={onSubmit ? methods.handleSubmit(onSubmit) : (e) => e.preventDefault()}
               className="flex flex-1 flex-col overflow-hidden"
               noValidate
             >
@@ -173,11 +169,7 @@ function NxDrawerForm<TFormValues extends FieldValues>({
               {/* 底部按钮区域 */}
               <DrawerFooter>
                 {cancelLabel && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleOpenChange(false)}
-                  >
+                  <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                     {cancelLabel}
                   </Button>
                 )}

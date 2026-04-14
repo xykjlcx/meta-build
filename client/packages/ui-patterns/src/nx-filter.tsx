@@ -1,16 +1,16 @@
-import {
-  type ReactNode,
-  type ReactElement,
-  type FormEvent,
-  useState,
-  useCallback,
-  useEffect,
-  createContext,
-  useContext,
-  cloneElement,
-  isValidElement,
-} from 'react';
 import { Button, Label, cn } from '@mb/ui-primitives';
+import {
+  type FormEvent,
+  type ReactElement,
+  type ReactNode,
+  cloneElement,
+  createContext,
+  isValidElement,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from 'react';
 
 // ---------------------------------------------------------------------------
 // Types
@@ -92,10 +92,7 @@ export function NxFilter<TFilter extends NxFilterValue>({
 
   const handleReset = useCallback(() => {
     // 将所有字段清空为 ''
-    const cleared = Object.keys(value).reduce(
-      (acc, key) => ({ ...acc, [key]: '' }),
-      {} as TFilter,
-    );
+    const cleared = Object.fromEntries(Object.keys(value).map((key) => [key, ''])) as TFilter;
     setDraft(cleared);
     onChange(cleared);
   }, [value, onChange]);

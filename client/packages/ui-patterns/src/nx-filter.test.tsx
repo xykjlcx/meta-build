@@ -1,15 +1,13 @@
+import { Input } from '@mb/ui-primitives';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { NxFilter, NxFilterField } from './nx-filter';
-import { Input } from '@mb/ui-primitives';
 
 type Filter = { keyword: string; status: string };
 
 /** 渲染标准测试筛选栏 */
-function renderFilter(
-  overrides: Partial<React.ComponentProps<typeof NxFilter<Filter>>> = {},
-) {
+function renderFilter(overrides: Partial<React.ComponentProps<typeof NxFilter<Filter>>> = {}) {
   const onChange = vi.fn();
   const defaultValue: Filter = { keyword: '', status: '' };
   const result = render(

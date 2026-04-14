@@ -1,5 +1,5 @@
+import { type LoginCommand, authApi } from '@mb/api-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authApi, type LoginCommand } from '@mb/api-sdk';
 import { useNavigate } from '@tanstack/react-router';
 
 const ACCESS_TOKEN_KEY = 'mb_access_token';

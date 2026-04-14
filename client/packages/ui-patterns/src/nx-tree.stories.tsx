@@ -93,16 +93,12 @@ type Story = StoryObj<typeof NxTree<DemoNode>>;
 /** 默认用法：展开/收起交互 */
 export const Default: Story = {
   render: () => {
-    const [expandedIds, setExpandedIds] = useState<Set<string>>(
-      new Set(['dept-1']),
-    );
+    const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set(['dept-1']));
 
     return (
       <NxTree
         data={sampleData}
-        renderNode={(node) => (
-          <span className="text-sm">{node.label}</span>
-        )}
+        renderNode={(node) => <span className="text-sm">{node.label}</span>}
         expandedIds={expandedIds}
         onExpandedChange={setExpandedIds}
         emptyText="No data"
@@ -134,8 +130,7 @@ export const DeepNested: Story = {
         data={deepData}
         renderNode={(node, depth) => (
           <span className="text-sm">
-            {node.label}{' '}
-            <span className="text-xs text-muted-foreground">(depth: {depth})</span>
+            {node.label} <span className="text-xs text-muted-foreground">(depth: {depth})</span>
           </span>
         )}
         expandedIds={expandedIds}

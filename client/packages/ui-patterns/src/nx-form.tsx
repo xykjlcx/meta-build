@@ -1,24 +1,9 @@
-import {
-  type ReactNode,
-  type ReactElement,
-  cloneElement,
-  isValidElement,
-} from 'react';
-import type {
-  FieldValues,
-  DefaultValues,
-  SubmitHandler,
-  FieldPath,
-} from 'react-hook-form';
-import type { ZodSchema } from 'zod';
-import {
-  useForm,
-  useFormContext,
-  useController,
-  FormProvider,
-} from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button, Label, cn } from '@mb/ui-primitives';
+import { type ReactElement, type ReactNode, cloneElement, isValidElement } from 'react';
+import type { DefaultValues, FieldPath, FieldValues, SubmitHandler } from 'react-hook-form';
+import { FormProvider, useController, useForm, useFormContext } from 'react-hook-form';
+import type { ZodSchema } from 'zod';
 
 // ---------------------------------------------------------------------------
 // NxForm
@@ -125,9 +110,7 @@ export function NxFormField<TFormValues extends FieldValues = FieldValues>({
         {label}
         {required && <span className="text-destructive ml-0.5">*</span>}
       </Label>
-      {description && (
-        <p className="text-sm text-muted-foreground">{description}</p>
-      )}
+      {description && <p className="text-sm text-muted-foreground">{description}</p>}
       {child}
       {error?.message && (
         <p className="text-sm text-destructive" role="alert">

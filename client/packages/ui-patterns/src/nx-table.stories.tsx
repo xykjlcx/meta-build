@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import type { ColumnDef } from '@tanstack/react-table';
+import type { RowSelectionState, SortingState } from '@tanstack/react-table';
 import { useState } from 'react';
 import type { NxTablePagination } from './nx-table';
-import type { SortingState, RowSelectionState } from '@tanstack/react-table';
 import { NxTable } from './nx-table';
 
 // ─── 测试数据 ─────────────────────────────────────────

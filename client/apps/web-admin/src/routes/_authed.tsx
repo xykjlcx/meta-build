@@ -1,6 +1,6 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import { authApi } from '@mb/api-sdk';
 import { SidebarLayout } from '@mb/app-shell';
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_authed')({
   beforeLoad: async ({ context }) => {

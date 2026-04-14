@@ -33,6 +33,6 @@
     "formatter": { "quoteStyle": "single", "trailingCommas": "all" }
   },
   "files": {
-    "ignore": ["node_modules", "dist", "*.css"]
+    "ignore": ["node_modules", "dist", "*.css", "**/routeTree.gen.ts"]
   }
 }

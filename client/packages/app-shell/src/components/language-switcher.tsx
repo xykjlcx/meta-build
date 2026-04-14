@@ -1,5 +1,3 @@
-import { useTranslation } from 'react-i18next';
-import { Globe } from 'lucide-react';
 import {
   Button,
   DropdownMenu,
@@ -7,6 +5,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@mb/ui-primitives';
+import { Globe } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
 import { useLanguage } from '../i18n';
 
 /**

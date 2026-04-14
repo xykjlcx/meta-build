@@ -1,7 +1,7 @@
-import { useTranslation } from 'react-i18next';
-import { LogOut, User } from 'lucide-react';
 import { Avatar, AvatarFallback, Button, Separator } from '@mb/ui-primitives';
-import { useCurrentUser, useAuth } from '../auth';
+import { LogOut, User } from 'lucide-react';
+import { useTranslation } from 'react-i18next';
+import { useAuth, useCurrentUser } from '../auth';
 import { LanguageSwitcher } from './language-switcher';
 import { ThemeSwitcher } from './theme-switcher';
 

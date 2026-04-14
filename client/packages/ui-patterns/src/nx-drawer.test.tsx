@@ -1,10 +1,10 @@
+import { Input } from '@mb/ui-primitives';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { NxDrawer } from './nx-drawer';
 import { NxFormField } from './nx-form';
-import { Input } from '@mb/ui-primitives';
 
 // ---------------------------------------------------------------------------
 // 测试用 schema
@@ -24,12 +24,7 @@ describe('NxDrawer', () => {
   it('open 受控 — open=false 时不渲染内容', () => {
     const onOpenChange = vi.fn();
     render(
-      <NxDrawer
-        open={false}
-        onOpenChange={onOpenChange}
-        title="Test"
-        closeLabel="Close"
-      >
+      <NxDrawer open={false} onOpenChange={onOpenChange} title="Test" closeLabel="Close">
         <p>Hidden content</p>
       </NxDrawer>,
     );
@@ -81,10 +76,7 @@ describe('NxDrawer', () => {
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
     await waitFor(() => {
-      expect(onSubmit).toHaveBeenCalledWith(
-        { name: 'Alice' },
-        expect.anything(),
-      );
+      expect(onSubmit).toHaveBeenCalledWith({ name: 'Alice' }, expect.anything());
     });
   });
 
@@ -191,8 +183,8 @@ describe('NxDrawer', () => {
     // 点确认框中的"Cancel"取消 → 不关闭抽屉
     const cancelButtons = screen.getAllByRole('button', { name: 'Cancel' });
     // 确认框中的 Cancel 按钮
-    const dialogCancelBtn = cancelButtons.find(
-      (btn) => btn.closest('[data-slot="alert-dialog-content"]'),
+    const dialogCancelBtn = cancelButtons.find((btn) =>
+      btn.closest('[data-slot="alert-dialog-content"]'),
     );
     if (dialogCancelBtn) {
       await user.click(dialogCancelBtn);

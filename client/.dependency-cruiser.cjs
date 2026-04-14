@@ -30,6 +30,20 @@ module.exports = {
       to: { path: '^apps' },
     },
     {
+      name: 'features-no-api-sdk-auth',
+      severity: 'error',
+      comment: 'MUST NOT #4: features/** 禁止直接导入 authApi',
+      from: { path: '^apps/web-admin/src/features' },
+      to: { path: '.*api-sdk.*auth' },
+    },
+    {
+      name: 'l3-no-forbidden-deps',
+      severity: 'error',
+      comment: 'L3 隔离：禁止导入路由/查询/i18n',
+      from: { path: '^packages/ui-patterns/src' },
+      to: { path: '@tanstack/react-query|@tanstack/react-router|i18next|react-i18next' },
+    },
+    {
       name: 'no-circular',
       severity: 'error',
       comment: '禁止循环依赖',

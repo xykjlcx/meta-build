@@ -14,9 +14,7 @@ export function GlobalErrorPage({ error }: { error?: Error | null }) {
       }}
     >
       <h1 style={{ fontSize: '2rem', marginBottom: '1rem' }}>出错了</h1>
-      <p style={{ color: '#666', marginBottom: '1rem' }}>
-        {error?.message ?? '页面渲染异常'}
-      </p>
+      <p style={{ color: '#666', marginBottom: '1rem' }}>{error?.message ?? '页面渲染异常'}</p>
       <button
         type="button"
         onClick={() => window.location.reload()}

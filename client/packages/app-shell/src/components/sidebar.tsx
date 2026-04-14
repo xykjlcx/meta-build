@@ -1,8 +1,8 @@
-import { useState, useCallback } from 'react';
-import { useTranslation } from 'react-i18next';
-import { useNavigate } from '@tanstack/react-router';
-import { ChevronDown, ChevronRight, PanelLeftClose, PanelLeft } from 'lucide-react';
 import { Button } from '@mb/ui-primitives';
+import { useNavigate } from '@tanstack/react-router';
+import { ChevronDown, ChevronRight, PanelLeft, PanelLeftClose } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useMenu } from '../menu';
 import type { MenuNode } from '../menu';
 
@@ -21,9 +21,7 @@ export function Sidebar() {
     <aside
       className="flex shrink-0 flex-col border-r bg-sidebar text-sidebar-foreground transition-[width] duration-200"
       style={{
-        width: collapsed
-          ? 'var(--size-sidebar-width-collapsed)'
-          : 'var(--size-sidebar-width)',
+        width: collapsed ? 'var(--size-sidebar-width-collapsed)' : 'var(--size-sidebar-width)',
       }}
     >
       {/* 顶部：Logo / 收起按钮 */}

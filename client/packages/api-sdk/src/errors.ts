@@ -20,7 +20,8 @@ export class ProblemDetailError extends Error {
     this.instance = payload.instance ?? null;
     this.code = payload.code ?? null;
     this.traceId = payload.traceId ?? null;
-    this.validationErrors = (payload.errors as ReadonlyArray<{ field: string; message: string }>) ?? [];
+    this.validationErrors =
+      (payload.errors as ReadonlyArray<{ field: string; message: string }>) ?? [];
   }
 }
 

@@ -1,5 +1,5 @@
+import { type CurrentUserDto, authApi } from '@mb/api-sdk';
 import { useQuery } from '@tanstack/react-query';
-import { authApi, type CurrentUserDto } from '@mb/api-sdk';
 import { ANONYMOUS, type CurrentUser } from './types';
 
 function toCurrentUser(dto: CurrentUserDto): CurrentUser {
