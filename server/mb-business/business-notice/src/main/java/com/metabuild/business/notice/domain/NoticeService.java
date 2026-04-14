@@ -6,6 +6,7 @@ import com.metabuild.business.notice.api.NoticeCreateCommand;
 import com.metabuild.business.notice.api.NoticeDetailView;
 import com.metabuild.business.notice.api.NoticePublishCommand;
 import com.metabuild.business.notice.api.NoticeQuery;
+import com.metabuild.business.notice.api.NoticeTarget;
 import com.metabuild.business.notice.api.NoticeUpdateCommand;
 import com.metabuild.business.notice.api.NoticeView;
 import com.metabuild.common.dto.PageResult;
@@ -14,15 +15,18 @@ import com.metabuild.common.exception.ConflictException;
 import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
-import com.metabuild.schema.tables.records.BizNoticeRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 公告领域服务。
@@ -35,8 +39,11 @@ public class NoticeService {
 
     private final NoticeRepository noticeRepository;
     private final NoticeAttachmentRepository noticeAttachmentRepository;
+    private final NoticeTargetRepository noticeTargetRepository;
+    private final NoticeRecipientRepository noticeRecipientRepository;
     private final CurrentUser currentUser;
     private final SnowflakeIdGenerator idGenerator;
+    private final ApplicationEventPublisher eventPublisher;
 
     /**
      * 分页查询公告列表。
@@ -61,21 +68,14 @@ public class NoticeService {
         Long userId = currentUser.userId();
         Long noticeId = idGenerator.nextId();
 
-        var record = new BizNoticeRecord();
-        record.setId(noticeId);
-        record.setTenantId(0L);
-        record.setTitle(cmd.title());
-        record.setContent(sanitizeHtml(cmd.content()));
-        record.setStatus((short) NoticeStatus.DRAFT.code());
-        record.setPinned(cmd.pinned() != null ? cmd.pinned() : false);
-        record.setStartTime(cmd.startTime());
-        record.setEndTime(cmd.endTime());
-        record.setOwnerDeptId(currentUser.deptId() != null ? currentUser.deptId() : 0L);
-        record.setVersion(0);
-        record.setCreatedBy(userId);
-        record.setUpdatedBy(userId);
-
-        noticeRepository.insert(record);
+        noticeRepository.insert(
+            noticeId, 0L, cmd.title(), sanitizeHtml(cmd.content()),
+            (short) NoticeStatus.DRAFT.code(),
+            cmd.pinned() != null ? cmd.pinned() : false,
+            cmd.startTime(), cmd.endTime(),
+            currentUser.deptId() != null ? currentUser.deptId() : 0L,
+            userId
+        );
 
         // 批量插入附件关联（按 fileIds 顺序设 sortOrder）
         List<Long> fileIds = cmd.attachmentFileIds();
@@ -92,11 +92,11 @@ public class NoticeService {
      */
     @Transactional
     public NoticeDetailView update(Long id, NoticeUpdateCommand cmd) {
-        var existing = noticeRepository.findRecordById(id)
+        var existing = noticeRepository.findSnapshotById(id)
             .orElseThrow(() -> new NotFoundException("notice.notFound", id));
 
         // 仅草稿状态允许编辑
-        if (existing.getStatus() != (short) NoticeStatus.DRAFT.code()) {
+        if (existing.status() != (short) NoticeStatus.DRAFT.code()) {
             throw new BusinessException("notice.onlyDraftCanEdit", 400);
         }
 
@@ -104,7 +104,7 @@ public class NoticeService {
             id,
             cmd.title(),
             sanitizeHtml(cmd.content()),
-            cmd.pinned() != null ? cmd.pinned() : existing.getPinned(),
+            cmd.pinned() != null ? cmd.pinned() : existing.pinned(),
             cmd.startTime(),
             cmd.endTime(),
             cmd.version(),
@@ -131,16 +131,17 @@ public class NoticeService {
      */
     @Transactional
     public void delete(Long id) {
-        var existing = noticeRepository.findRecordById(id)
+        var existing = noticeRepository.findSnapshotById(id)
             .orElseThrow(() -> new NotFoundException("notice.notFound", id));
 
-        NoticeStatus status = NoticeStatus.fromCode(existing.getStatus());
+        NoticeStatus status = NoticeStatus.fromCode(existing.status());
         if (status != NoticeStatus.DRAFT && status != NoticeStatus.REVOKED) {
             throw new BusinessException("notice.onlyDraftOrRevokedCanDelete", 400);
         }
 
-        noticeRepository.deleteAttachments(id);
-        noticeRepository.deleteTargets(id);
+        noticeAttachmentRepository.deleteByNoticeId(id);
+        noticeTargetRepository.deleteByNoticeId(id);
+        noticeRecipientRepository.deleteByNoticeId(id);
         noticeRepository.deleteById(id);
         log.info("删除公告: noticeId={}", id);
     }
@@ -148,23 +149,42 @@ public class NoticeService {
     /**
      * 发布公告：DRAFT → PUBLISHED。
      * <p>
-     * 仅做状态变更 + 写入发送目标，接收人展开由 Task 9 实现。
+     * 完整流程：
+     * 1. 校验 DRAFT 状态
+     * 2. 写入发送目标（先清后插，幂等）
+     * 3. 展开 targets → userIds（去重）
+     * 4. 分批写入接收人（每批 500 条）
+     * 5. 更新状态为 PUBLISHED
+     * 6. 发布 NoticePublishedEvent（事务提交后异步通知）
      */
     @Transactional
     public NoticeDetailView publish(Long id, NoticePublishCommand cmd) {
-        var existing = noticeRepository.findRecordById(id)
+        var existing = noticeRepository.findSnapshotById(id)
             .orElseThrow(() -> new NotFoundException("notice.notFound", id));
 
-        if (existing.getStatus() != (short) NoticeStatus.DRAFT.code()) {
+        if (existing.status() != (short) NoticeStatus.DRAFT.code()) {
             throw new BusinessException("notice.onlyDraftCanPublish", 400);
         }
 
         // 写入发送目标（先清后插，支持重复调用幂等）
-        noticeRepository.deleteTargets(id);
-        noticeRepository.insertTargets(id, cmd.targets());
+        noticeTargetRepository.deleteByNoticeId(id);
+        noticeTargetRepository.batchInsert(id, cmd.targets());
 
+        // 展开 targets → userIds（去重）
+        List<Long> recipientUserIds = expandTargets(cmd.targets());
+
+        // 清理旧接收人（幂等），分批写入新接收人
+        noticeRecipientRepository.deleteByNoticeId(id);
+        noticeRecipientRepository.batchInsert(id, recipientUserIds);
+
+        // 更新状态
         noticeRepository.updateStatus(id, (short) NoticeStatus.PUBLISHED.code(), currentUser.userId());
-        log.info("发布公告: noticeId={}", id);
+
+        log.info("发布公告: noticeId={}, 接收人数={}", id, recipientUserIds.size());
+
+        // 发布事件（事务提交后异步处理通知推送）
+        eventPublisher.publishEvent(new NoticePublishedEvent(id, existing.title(), recipientUserIds));
+
         return detail(id);
     }
 
@@ -173,10 +193,10 @@ public class NoticeService {
      */
     @Transactional
     public NoticeDetailView revoke(Long id) {
-        var existing = noticeRepository.findRecordById(id)
+        var existing = noticeRepository.findSnapshotById(id)
             .orElseThrow(() -> new NotFoundException("notice.notFound", id));
 
-        if (existing.getStatus() != (short) NoticeStatus.PUBLISHED.code()) {
+        if (existing.status() != (short) NoticeStatus.PUBLISHED.code()) {
             throw new BusinessException("notice.onlyPublishedCanRevoke", 400);
         }
 
@@ -192,10 +212,10 @@ public class NoticeService {
      */
     @Transactional
     public NoticeDetailView duplicate(Long id) {
-        var existing = noticeRepository.findRecordById(id)
+        var existing = noticeRepository.findSnapshotById(id)
             .orElseThrow(() -> new NotFoundException("notice.notFound", id));
 
-        NoticeStatus status = NoticeStatus.fromCode(existing.getStatus());
+        NoticeStatus status = NoticeStatus.fromCode(existing.status());
         if (status != NoticeStatus.PUBLISHED && status != NoticeStatus.REVOKED) {
             throw new BusinessException("notice.onlyPublishedOrRevokedCanDuplicate", 400);
         }
@@ -204,25 +224,17 @@ public class NoticeService {
         Long newId = idGenerator.nextId();
 
         // 创建新公告（草稿）
-        var record = new BizNoticeRecord();
-        record.setId(newId);
-        record.setTenantId(0L);
-        record.setTitle(existing.getTitle());
-        record.setContent(existing.getContent());
-        record.setStatus((short) NoticeStatus.DRAFT.code());
-        record.setPinned(existing.getPinned());
-        record.setStartTime(existing.getStartTime());
-        record.setEndTime(existing.getEndTime());
-        record.setOwnerDeptId(currentUser.deptId() != null ? currentUser.deptId() : 0L);
-        record.setVersion(0);
-        record.setCreatedBy(userId);
-        record.setUpdatedBy(userId);
-
-        noticeRepository.insert(record);
+        noticeRepository.insert(
+            newId, 0L, existing.title(), existing.content(),
+            (short) NoticeStatus.DRAFT.code(), existing.pinned(),
+            existing.startTime(), existing.endTime(),
+            currentUser.deptId() != null ? currentUser.deptId() : 0L,
+            userId
+        );
 
         // 复制附件关联和发送目标
         noticeRepository.copyAttachments(id, newId, userId);
-        noticeRepository.copyTargets(id, newId);
+        noticeTargetRepository.copyTargets(id, newId);
 
         log.info("复制公告: sourceId={}, newId={}", id, newId);
         return detail(newId);
@@ -239,8 +251,8 @@ public class NoticeService {
         int skipped = 0;
 
         for (Long id : cmd.ids()) {
-            var opt = noticeRepository.findRecordById(id);
-            if (opt.isEmpty() || opt.get().getStatus() != (short) NoticeStatus.DRAFT.code()) {
+            var opt = noticeRepository.findSnapshotById(id);
+            if (opt.isEmpty() || opt.get().status() != (short) NoticeStatus.DRAFT.code()) {
                 skipped++;
                 continue;
             }
@@ -263,18 +275,19 @@ public class NoticeService {
         int skipped = 0;
 
         for (Long id : cmd.ids()) {
-            var opt = noticeRepository.findRecordById(id);
+            var opt = noticeRepository.findSnapshotById(id);
             if (opt.isEmpty()) {
                 skipped++;
                 continue;
             }
-            NoticeStatus status = NoticeStatus.fromCode(opt.get().getStatus());
+            NoticeStatus status = NoticeStatus.fromCode(opt.get().status());
             if (status != NoticeStatus.DRAFT && status != NoticeStatus.REVOKED) {
                 skipped++;
                 continue;
             }
-            noticeRepository.deleteAttachments(id);
-            noticeRepository.deleteTargets(id);
+            noticeAttachmentRepository.deleteByNoticeId(id);
+            noticeTargetRepository.deleteByNoticeId(id);
+            noticeRecipientRepository.deleteByNoticeId(id);
             noticeRepository.deleteById(id);
             success++;
         }
@@ -284,6 +297,40 @@ public class NoticeService {
     }
 
     // ------ 私有方法 ------
+
+    /**
+     * 展开发送目标到具体用户 ID 列表（去重）。
+     * <p>
+     * ALL → 全部启用用户；DEPT → 该部门下启用用户；
+     * ROLE → 拥有该角色的启用用户；USER → 直接使用 targetId。
+     */
+    private List<Long> expandTargets(List<NoticeTarget> targets) {
+        Set<Long> userIds = new LinkedHashSet<>();
+
+        for (var target : targets) {
+            switch (target.targetType()) {
+                case "ALL" -> userIds.addAll(noticeRecipientRepository.findAllActiveUserIds());
+                case "DEPT" -> {
+                    if (target.targetId() != null) {
+                        userIds.addAll(noticeRecipientRepository.findUserIdsByDeptId(target.targetId()));
+                    }
+                }
+                case "ROLE" -> {
+                    if (target.targetId() != null) {
+                        userIds.addAll(noticeRecipientRepository.findUserIdsByRoleId(target.targetId()));
+                    }
+                }
+                case "USER" -> {
+                    if (target.targetId() != null) {
+                        userIds.add(target.targetId());
+                    }
+                }
+                default -> log.warn("未知的目标类型: {}", target.targetType());
+            }
+        }
+
+        return new ArrayList<>(userIds);
+    }
 
     /**
      * HTML 内容净化（基于 jsoup Safelist.relaxed() 扩展）。

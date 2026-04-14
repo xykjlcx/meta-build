@@ -18,6 +18,7 @@ public record NoticeDetailView(
     OffsetDateTime createdAt,
     OffsetDateTime updatedAt,
     Integer version,
+    Boolean read,
     Integer readCount,
     Integer recipientCount,
     List<AttachmentView> attachments,

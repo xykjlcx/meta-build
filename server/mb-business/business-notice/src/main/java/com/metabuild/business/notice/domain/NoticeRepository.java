@@ -7,7 +7,6 @@ import com.metabuild.business.notice.api.NoticeView;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.infra.jooq.SortParser;
-import com.metabuild.schema.tables.records.BizNoticeRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -151,6 +150,17 @@ public class NoticeRepository {
                 .where(BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(BIZ_NOTICE.ID))
         ).as("recipient_count");
 
+        // 当前用户已读状态
+        var readField = DSL.field(
+            DSL.exists(
+                DSL.selectOne()
+                    .from(BIZ_NOTICE_RECIPIENT)
+                    .where(BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(BIZ_NOTICE.ID))
+                    .and(BIZ_NOTICE_RECIPIENT.USER_ID.eq(currentUserId))
+                    .and(BIZ_NOTICE_RECIPIENT.READ_AT.isNotNull())
+            )
+        ).as("read");
+
         var record = dsl.select(
                 BIZ_NOTICE.ID,
                 BIZ_NOTICE.TITLE,
@@ -163,6 +173,7 @@ public class NoticeRepository {
                 BIZ_NOTICE.CREATED_AT,
                 BIZ_NOTICE.UPDATED_AT,
                 BIZ_NOTICE.VERSION,
+                readField,
                 readCountField,
                 recipientCountField
             )
@@ -210,6 +221,7 @@ public class NoticeRepository {
             record.get(BIZ_NOTICE.CREATED_AT),
             record.get(BIZ_NOTICE.UPDATED_AT),
             record.get(BIZ_NOTICE.VERSION),
+            record.get("read", Boolean.class),
             record.get("read_count", Integer.class),
             record.get("recipient_count", Integer.class),
             attachments,
@@ -218,19 +230,50 @@ public class NoticeRepository {
     }
 
     /**
-     * 根据 ID 查询公告记录（内部使用，返回 jOOQ Record）。
+     * 内部快照 DTO，用于 Service 层做状态校验等逻辑，不暴露 jOOQ Record。
      */
-    public Optional<BizNoticeRecord> findRecordById(Long id) {
-        return dsl.selectFrom(BIZ_NOTICE)
+    public record NoticeSnapshot(
+        Long id, Short status, String title, String content,
+        Boolean pinned, OffsetDateTime startTime, OffsetDateTime endTime
+    ) {}
+
+    /**
+     * 根据 ID 查询公告快照（内部使用，不泄漏 jOOQ 类型）。
+     */
+    public Optional<NoticeSnapshot> findSnapshotById(Long id) {
+        return dsl.select(
+                BIZ_NOTICE.ID, BIZ_NOTICE.STATUS, BIZ_NOTICE.TITLE, BIZ_NOTICE.CONTENT,
+                BIZ_NOTICE.PINNED, BIZ_NOTICE.START_TIME, BIZ_NOTICE.END_TIME
+            )
+            .from(BIZ_NOTICE)
             .where(BIZ_NOTICE.ID.eq(id))
-            .fetchOptional();
+            .fetchOptional(r -> new NoticeSnapshot(
+                r.get(BIZ_NOTICE.ID), r.get(BIZ_NOTICE.STATUS), r.get(BIZ_NOTICE.TITLE),
+                r.get(BIZ_NOTICE.CONTENT), r.get(BIZ_NOTICE.PINNED),
+                r.get(BIZ_NOTICE.START_TIME), r.get(BIZ_NOTICE.END_TIME)
+            ));
     }
 
     /**
      * 插入公告。
      */
-    public int insert(BizNoticeRecord record) {
-        return dsl.insertInto(BIZ_NOTICE).set(record).execute();
+    public void insert(Long id, Long tenantId, String title, String content, short status,
+                       Boolean pinned, OffsetDateTime startTime, OffsetDateTime endTime,
+                       Long ownerDeptId, Long createdBy) {
+        dsl.insertInto(BIZ_NOTICE)
+            .set(BIZ_NOTICE.ID, id)
+            .set(BIZ_NOTICE.TENANT_ID, tenantId)
+            .set(BIZ_NOTICE.TITLE, title)
+            .set(BIZ_NOTICE.CONTENT, content)
+            .set(BIZ_NOTICE.STATUS, status)
+            .set(BIZ_NOTICE.PINNED, pinned)
+            .set(BIZ_NOTICE.START_TIME, startTime)
+            .set(BIZ_NOTICE.END_TIME, endTime)
+            .set(BIZ_NOTICE.OWNER_DEPT_ID, ownerDeptId)
+            .set(BIZ_NOTICE.VERSION, 0)
+            .set(BIZ_NOTICE.CREATED_BY, createdBy)
+            .set(BIZ_NOTICE.UPDATED_BY, createdBy)
+            .execute();
     }
 
     /**
