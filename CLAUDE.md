@@ -300,7 +300,7 @@ cd client && pnpm dev                                     # dev server（localho
 cd client && pnpm build                                   # 生产构建
 
 # === 前端测试 ===
-cd client && pnpm test                                    # 全量测试（271 tests）
+cd client && pnpm test                                    # 全量测试（274 tests）
 cd client && pnpm -F @mb/ui-primitives test               # L2 测试（197 tests）
 cd client && pnpm -F @mb/ui-patterns test                 # L3 测试（55 tests）
 cd client && pnpm -F @mb/api-sdk test                     # api-sdk 测试（19 tests）
