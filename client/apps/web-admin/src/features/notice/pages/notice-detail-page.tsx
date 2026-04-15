@@ -176,11 +176,7 @@ export function NoticeDetailPage() {
       {/* Header：返回按钮 + 标题 + 操作按钮 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => navigate({ to: '/notices' })}
-          >
+          <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/notices' })}>
             <ArrowLeft className="size-4" />
           </Button>
           <h1 className="text-xl font-semibold">{t('detail.title')}</h1>
@@ -287,10 +283,7 @@ export function NoticeDetailPage() {
                       variant="outline"
                       size="sm"
                       onClick={() =>
-                        handleDownloadAttachment(
-                          att.fileId ?? 0,
-                          `attachment_${att.fileId}`,
-                        )
+                        handleDownloadAttachment(att.fileId ?? 0, `attachment_${att.fileId}`)
                       }
                     >
                       <Download className="mr-1.5 size-3.5" />
