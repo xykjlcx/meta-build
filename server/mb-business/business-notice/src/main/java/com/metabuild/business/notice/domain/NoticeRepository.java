@@ -1,9 +1,9 @@
 package com.metabuild.business.notice.domain;
 
-import com.metabuild.business.notice.api.NoticeDetailView;
-import com.metabuild.business.notice.api.NoticeQuery;
+import com.metabuild.business.notice.api.vo.NoticeDetailVo;
+import com.metabuild.business.notice.api.qry.NoticeQry;
 import com.metabuild.business.notice.api.NoticeTarget;
-import com.metabuild.business.notice.api.NoticeView;
+import com.metabuild.business.notice.api.vo.NoticeVo;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
@@ -44,7 +44,7 @@ public class NoticeRepository {
      * <p>
      * LEFT JOIN recipient 获取当前用户已读状态，子查询获取已读数/接收人数。
      */
-    public PageResult<NoticeView> findPage(NoticeQuery query, PageQuery pageQuery, Long currentUserId) {
+    public PageResult<NoticeVo> findPage(NoticeQry query, PageQuery pageQuery, Long currentUserId) {
         // 构建动态查询条件
         var conditions = buildConditions(query);
 
@@ -113,7 +113,7 @@ public class NoticeRepository {
             .offset(pageQuery.offset())
             .fetch();
 
-        List<NoticeView> content = records.map(r -> new NoticeView(
+        List<NoticeVo> content = records.map(r -> new NoticeVo(
             r.get(BIZ_NOTICE.ID),
             r.get(BIZ_NOTICE.TITLE),
             r.get(BIZ_NOTICE.STATUS),
@@ -135,7 +135,7 @@ public class NoticeRepository {
     /**
      * 根据 ID 查询公告详情（含附件和发送目标）。
      */
-    public Optional<NoticeDetailView> findById(Long id, Long currentUserId) {
+    public Optional<NoticeDetailVo> findById(Long id, Long currentUserId) {
         // 已读数
         var readCountField = DSL.field(
             DSL.select(DSL.count())
@@ -188,29 +188,29 @@ public class NoticeRepository {
         }
 
         // 查询附件
-        List<NoticeDetailView.AttachmentView> attachments = dsl
+        List<NoticeDetailVo.AttachmentVo> attachments = dsl
             .select(BIZ_NOTICE_ATTACHMENT.FILE_ID, BIZ_NOTICE_ATTACHMENT.SORT_ORDER)
             .from(BIZ_NOTICE_ATTACHMENT)
             .where(BIZ_NOTICE_ATTACHMENT.NOTICE_ID.eq(id))
             .orderBy(BIZ_NOTICE_ATTACHMENT.SORT_ORDER.asc())
             .fetch()
-            .map(r -> new NoticeDetailView.AttachmentView(
+            .map(r -> new NoticeDetailVo.AttachmentVo(
                 r.get(BIZ_NOTICE_ATTACHMENT.FILE_ID),
                 r.get(BIZ_NOTICE_ATTACHMENT.SORT_ORDER)
             ));
 
         // 查询发送目标
-        List<NoticeDetailView.TargetView> targets = dsl
+        List<NoticeDetailVo.TargetVo> targets = dsl
             .select(BIZ_NOTICE_TARGET.TARGET_TYPE, BIZ_NOTICE_TARGET.TARGET_ID)
             .from(BIZ_NOTICE_TARGET)
             .where(BIZ_NOTICE_TARGET.NOTICE_ID.eq(id))
             .fetch()
-            .map(r -> new NoticeDetailView.TargetView(
+            .map(r -> new NoticeDetailVo.TargetVo(
                 r.get(BIZ_NOTICE_TARGET.TARGET_TYPE),
                 r.get(BIZ_NOTICE_TARGET.TARGET_ID)
             ));
 
-        return Optional.of(new NoticeDetailView(
+        return Optional.of(new NoticeDetailVo(
             record.get(BIZ_NOTICE.ID),
             record.get(BIZ_NOTICE.TITLE),
             record.get(BIZ_NOTICE.CONTENT),
@@ -433,7 +433,7 @@ public class NoticeRepository {
      * @param offset     偏移量
      * @return 导出行列表（可能为空，表示已到末尾）
      */
-    public List<NoticeExportRow> findForExport(NoticeQuery query, int fetchSize, int offset) {
+    public List<NoticeExportRow> findForExport(NoticeQry query, int fetchSize, int offset) {
         var conditions = buildConditions(query);
 
         // 已读数子查询
@@ -487,7 +487,7 @@ public class NoticeRepository {
     /**
      * 根据查询参数构建 jOOQ Condition 列表。
      */
-    private List<Condition> buildConditions(NoticeQuery query) {
+    private List<Condition> buildConditions(NoticeQry query) {
         List<Condition> conditions = new ArrayList<>();
 
         if (query.status() != null) {

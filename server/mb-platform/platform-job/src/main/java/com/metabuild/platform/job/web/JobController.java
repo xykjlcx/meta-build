@@ -4,7 +4,7 @@ import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.web.pagination.PageRequestDto;
 import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.job.api.dto.JobLogView;
+import com.metabuild.platform.job.api.vo.JobLogVo;
 import com.metabuild.platform.job.domain.JobLogService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -25,7 +25,7 @@ public class JobController {
 
     @GetMapping("/logs")
     @RequirePermission("job:log:list")
-    public PageResult<JobLogView> listLogs(@ParameterObject PageRequestDto request) {
+    public PageResult<JobLogVo> listLogs(@ParameterObject PageRequestDto request) {
         return jobLogService.list(paginationPolicy.normalize(request));
     }
 }

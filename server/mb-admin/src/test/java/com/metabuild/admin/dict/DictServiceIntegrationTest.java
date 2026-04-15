@@ -4,10 +4,10 @@ import com.metabuild.admin.BaseIntegrationTest;
 import com.metabuild.admin.TestSecurityConfig;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
-import com.metabuild.platform.dict.api.dto.DictDataCreateCommand;
-import com.metabuild.platform.dict.api.dto.DictDataView;
-import com.metabuild.platform.dict.api.dto.DictTypeCreateCommand;
-import com.metabuild.platform.dict.api.dto.DictTypeView;
+import com.metabuild.platform.dict.api.cmd.DictDataCreateCmd;
+import com.metabuild.platform.dict.api.vo.DictDataVo;
+import com.metabuild.platform.dict.api.cmd.DictTypeCreateCmd;
+import com.metabuild.platform.dict.api.vo.DictTypeVo;
 import com.metabuild.platform.dict.domain.DictService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ class DictServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void createType_should_return_id() {
-        DictTypeCreateCommand req = new DictTypeCreateCommand("用户状态", "user_status", "用户账号状态");
+        DictTypeCreateCmd req = new DictTypeCreateCmd("用户状态", "user_status", "用户账号状态");
 
         Long id = dictService.createType(req);
 
@@ -43,9 +43,9 @@ class DictServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void getTypeById_should_return_type() {
-        Long id = dictService.createType(new DictTypeCreateCommand("性别", "gender", null));
+        Long id = dictService.createType(new DictTypeCreateCmd("性别", "gender", null));
 
-        DictTypeView response = dictService.getTypeById(id);
+        DictTypeVo response = dictService.getTypeById(id);
 
         assertThat(response.id()).isEqualTo(id);
         assertThat(response.code()).isEqualTo("gender");
@@ -56,10 +56,10 @@ class DictServiceIntegrationTest extends BaseIntegrationTest {
     @Test
     void listTypes_should_return_paginated_result() {
         // 创建两条字典类型
-        dictService.createType(new DictTypeCreateCommand("类型A", "type_a", null));
-        dictService.createType(new DictTypeCreateCommand("类型B", "type_b", null));
+        dictService.createType(new DictTypeCreateCmd("类型A", "type_a", null));
+        dictService.createType(new DictTypeCreateCmd("类型B", "type_b", null));
 
-        PageResult<DictTypeView> result = dictService.listTypes(PageQuery.normalized(1, 10, null));
+        PageResult<DictTypeVo> result = dictService.listTypes(PageQuery.normalized(1, 10, null));
 
         assertThat(result.content()).isNotEmpty();
         assertThat(result.totalElements()).isPositive();
@@ -67,18 +67,18 @@ class DictServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void createType_should_throw_on_duplicate_code() {
-        dictService.createType(new DictTypeCreateCommand("已有类型", "duplicate_code", null));
+        dictService.createType(new DictTypeCreateCmd("已有类型", "duplicate_code", null));
 
         assertThatThrownBy(() ->
-            dictService.createType(new DictTypeCreateCommand("另一类型", "duplicate_code", null))
+            dictService.createType(new DictTypeCreateCmd("另一类型", "duplicate_code", null))
         ).isInstanceOf(IllegalArgumentException.class)
          .hasMessageContaining("duplicate_code");
     }
 
     @Test
     void deleteType_should_remove_type_and_its_data() {
-        Long typeId = dictService.createType(new DictTypeCreateCommand("待删除类型", "to_delete", null));
-        dictService.createData(new DictDataCreateCommand(typeId, "选项一", "1", 1, null));
+        Long typeId = dictService.createType(new DictTypeCreateCmd("待删除类型", "to_delete", null));
+        dictService.createData(new DictDataCreateCmd(typeId, "选项一", "1", 1, null));
 
         dictService.deleteType(typeId);
 
@@ -86,7 +86,7 @@ class DictServiceIntegrationTest extends BaseIntegrationTest {
             .isInstanceOf(NoSuchElementException.class);
 
         // 类型下的数据也应被级联删除
-        List<DictDataView> data = dictService.listDataByTypeId(typeId);
+        List<DictDataVo> data = dictService.listDataByTypeId(typeId);
         assertThat(data).isEmpty();
     }
 
@@ -94,8 +94,8 @@ class DictServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void createData_should_return_id() {
-        Long typeId = dictService.createType(new DictTypeCreateCommand("数据测试类型", "data_test", null));
-        DictDataCreateCommand req = new DictDataCreateCommand(typeId, "启用", "1", 1, "账号启用状态");
+        Long typeId = dictService.createType(new DictTypeCreateCmd("数据测试类型", "data_test", null));
+        DictDataCreateCmd req = new DictDataCreateCmd(typeId, "启用", "1", 1, "账号启用状态");
 
         Long dataId = dictService.createData(req);
 
@@ -104,24 +104,24 @@ class DictServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void listDataByTypeId_should_return_data() {
-        Long typeId = dictService.createType(new DictTypeCreateCommand("列表测试", "list_test", null));
-        dictService.createData(new DictDataCreateCommand(typeId, "选项一", "1", 1, null));
-        dictService.createData(new DictDataCreateCommand(typeId, "选项二", "2", 2, null));
+        Long typeId = dictService.createType(new DictTypeCreateCmd("列表测试", "list_test", null));
+        dictService.createData(new DictDataCreateCmd(typeId, "选项一", "1", 1, null));
+        dictService.createData(new DictDataCreateCmd(typeId, "选项二", "2", 2, null));
 
-        List<DictDataView> data = dictService.listDataByTypeId(typeId);
+        List<DictDataVo> data = dictService.listDataByTypeId(typeId);
 
         assertThat(data).hasSize(2);
-        assertThat(data).extracting(DictDataView::label).containsExactlyInAnyOrder("选项一", "选项二");
+        assertThat(data).extracting(DictDataVo::label).containsExactlyInAnyOrder("选项一", "选项二");
     }
 
     @Test
     void deleteData_should_remove_single_item() {
-        Long typeId = dictService.createType(new DictTypeCreateCommand("单删测试", "single_del", null));
-        Long dataId = dictService.createData(new DictDataCreateCommand(typeId, "待删项", "0", 0, null));
+        Long typeId = dictService.createType(new DictTypeCreateCmd("单删测试", "single_del", null));
+        Long dataId = dictService.createData(new DictDataCreateCmd(typeId, "待删项", "0", 0, null));
 
         dictService.deleteData(dataId);
 
-        List<DictDataView> remaining = dictService.listDataByTypeId(typeId);
+        List<DictDataVo> remaining = dictService.listDataByTypeId(typeId);
         assertThat(remaining).isEmpty();
     }
 }

@@ -1,6 +1,6 @@
 package com.metabuild.business.notice.domain;
 
-import com.metabuild.business.notice.api.AttachmentView;
+import com.metabuild.business.notice.api.vo.AttachmentVo;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -66,7 +66,7 @@ public class NoticeAttachmentRepository {
      * @param noticeId 公告 ID
      * @return 附件视图列表
      */
-    public List<AttachmentView> findByNoticeId(Long noticeId) {
+    public List<AttachmentVo> findByNoticeId(Long noticeId) {
         return dsl.select(
                 BIZ_NOTICE_ATTACHMENT.FILE_ID,
                 MB_FILE_METADATA.ORIGINAL_NAME,
@@ -80,7 +80,7 @@ public class NoticeAttachmentRepository {
             .where(BIZ_NOTICE_ATTACHMENT.NOTICE_ID.eq(noticeId))
             .orderBy(BIZ_NOTICE_ATTACHMENT.SORT_ORDER.asc())
             .fetch()
-            .map(r -> new AttachmentView(
+            .map(r -> new AttachmentVo(
                 r.get(BIZ_NOTICE_ATTACHMENT.FILE_ID),
                 r.get(MB_FILE_METADATA.ORIGINAL_NAME),
                 r.get(MB_FILE_METADATA.FILE_SIZE),

@@ -4,8 +4,8 @@ import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.MenuApi;
-import com.metabuild.platform.iam.api.dto.MenuCreateCommand;
-import com.metabuild.platform.iam.api.dto.MenuView;
+import com.metabuild.platform.iam.api.cmd.MenuCreateCmd;
+import com.metabuild.platform.iam.api.vo.MenuVo;
 import com.metabuild.platform.iam.domain.role.RoleRepository;
 import com.metabuild.schema.tables.records.MbIamMenuRecord;
 import lombok.RequiredArgsConstructor;
@@ -32,20 +32,20 @@ public class MenuService implements MenuApi {
     private final CurrentUser currentUser;
 
     @Override
-    public MenuView getById(Long id) {
+    public MenuVo getById(Long id) {
         return menuRepository.findById(id)
             .map(r -> toResponse(r, List.of()))
             .orElseThrow(() -> new NotFoundException(IamErrorCodes.MENU_NOT_FOUND, id));
     }
 
     @Override
-    public List<MenuView> tree() {
+    public List<MenuVo> tree() {
         List<MbIamMenuRecord> all = menuRepository.findAll();
         return buildTree(all, 0L);
     }
 
     @Override
-    public List<MenuView> listByRoleId(Long roleId) {
+    public List<MenuVo> listByRoleId(Long roleId) {
         List<MbIamMenuRecord> menus = menuRepository.findByRoleId(roleId);
         return buildTree(menus, 0L);
     }
@@ -54,7 +54,7 @@ public class MenuService implements MenuApi {
      * 获取当前用户可见的菜单树。
      * 管理员返回全部菜单，普通用户按角色过滤。
      */
-    public List<MenuView> currentUserMenuTree() {
+    public List<MenuVo> currentUserMenuTree() {
         if (currentUser.isAdmin()) {
             // 管理员看全部菜单
             return tree();
@@ -65,7 +65,7 @@ public class MenuService implements MenuApi {
     }
 
     @Transactional
-    public Long createMenu(MenuCreateCommand request) {
+    public Long createMenu(MenuCreateCmd request) {
         var record = new MbIamMenuRecord();
         record.setParentId(request.parentId()); // null 表示顶级菜单
         record.setName(request.name());
@@ -99,27 +99,27 @@ public class MenuService implements MenuApi {
     }
 
     /** 构建菜单树（递归，parentId=0 为根节点） */
-    private List<MenuView> buildTree(List<MbIamMenuRecord> all, Long parentId) {
+    private List<MenuVo> buildTree(List<MbIamMenuRecord> all, Long parentId) {
         Map<Long, List<MbIamMenuRecord>> byParent = all.stream()
             .collect(Collectors.groupingBy(r -> r.getParentId() == null ? 0L : r.getParentId()));
 
         return buildChildren(byParent, parentId);
     }
 
-    private List<MenuView> buildChildren(Map<Long, List<MbIamMenuRecord>> byParent, Long parentId) {
+    private List<MenuVo> buildChildren(Map<Long, List<MbIamMenuRecord>> byParent, Long parentId) {
         List<MbIamMenuRecord> children = byParent.getOrDefault(parentId, List.of());
-        List<MenuView> result = new ArrayList<>(children.size());
+        List<MenuVo> result = new ArrayList<>(children.size());
         for (MbIamMenuRecord r : children) {
-            List<MenuView> subChildren = buildChildren(byParent, r.getId());
+            List<MenuVo> subChildren = buildChildren(byParent, r.getId());
             result.add(toResponse(r, subChildren));
         }
         return result;
     }
 
-    private MenuView toResponse(MbIamMenuRecord r, List<MenuView> children) {
+    private MenuVo toResponse(MbIamMenuRecord r, List<MenuVo> children) {
         // 根节点 parentId=0（DDL DEFAULT 0）转为 null，前端期望 null 表示"无父节点"
         Long parentId = r.getParentId() != null && r.getParentId() == 0L ? null : r.getParentId();
-        return new MenuView(
+        return new MenuVo(
             r.getId(),
             parentId,
             r.getName(),

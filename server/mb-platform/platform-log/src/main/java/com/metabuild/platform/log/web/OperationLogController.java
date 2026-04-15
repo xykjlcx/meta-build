@@ -4,7 +4,7 @@ import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.web.pagination.PageRequestDto;
 import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.log.api.dto.OperationLogView;
+import com.metabuild.platform.log.api.vo.OperationLogVo;
 import com.metabuild.platform.log.domain.OperationLogService;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;
@@ -25,7 +25,7 @@ public class OperationLogController {
 
     @GetMapping
     @RequirePermission("oplog:log:list")
-    public PageResult<OperationLogView> list(@ParameterObject PageRequestDto request) {
+    public PageResult<OperationLogVo> list(@ParameterObject PageRequestDto request) {
         return service.list(paginationPolicy.normalize(request));
     }
 }

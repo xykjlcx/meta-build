@@ -1,16 +1,16 @@
 package com.metabuild.business.notice.domain;
 
-import com.metabuild.business.notice.api.BatchIdsCommand;
-import com.metabuild.business.notice.api.BatchResultView;
-import com.metabuild.business.notice.api.NoticeCreateCommand;
-import com.metabuild.business.notice.api.NoticeDetailView;
+import com.metabuild.business.notice.api.cmd.BatchIdsCmd;
+import com.metabuild.business.notice.api.vo.BatchResultVo;
+import com.metabuild.business.notice.api.cmd.NoticeCreateCmd;
+import com.metabuild.business.notice.api.vo.NoticeDetailVo;
 import com.metabuild.business.notice.api.NoticeErrorCodes;
-import com.metabuild.business.notice.api.NoticePublishCommand;
-import com.metabuild.business.notice.api.NoticeQuery;
+import com.metabuild.business.notice.api.cmd.NoticePublishCmd;
+import com.metabuild.business.notice.api.qry.NoticeQry;
 import com.metabuild.business.notice.api.NoticeTarget;
-import com.metabuild.business.notice.api.NoticeUpdateCommand;
-import com.metabuild.business.notice.api.NoticeView;
-import com.metabuild.business.notice.api.RecipientView;
+import com.metabuild.business.notice.api.cmd.NoticeUpdateCmd;
+import com.metabuild.business.notice.api.vo.NoticeVo;
+import com.metabuild.business.notice.api.vo.RecipientVo;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.exception.BusinessException;
@@ -55,14 +55,14 @@ public class NoticeService {
     /**
      * 分页查询公告列表。
      */
-    public PageResult<NoticeView> list(NoticeQuery query, PageQuery pageQuery) {
+    public PageResult<NoticeVo> list(NoticeQry query, PageQuery pageQuery) {
         return noticeRepository.findPage(query, pageQuery, currentUser.userId());
     }
 
     /**
      * 查询公告详情。
      */
-    public NoticeDetailView detail(Long id) {
+    public NoticeDetailVo detail(Long id) {
         return noticeRepository.findById(id, currentUser.userId())
             .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
     }
@@ -71,7 +71,7 @@ public class NoticeService {
      * 创建公告（草稿状态）。
      */
     @Transactional
-    public NoticeDetailView create(NoticeCreateCommand cmd) {
+    public NoticeDetailVo create(NoticeCreateCmd cmd) {
         Long userId = currentUser.userId();
         Long noticeId = idGenerator.nextId();
 
@@ -98,7 +98,7 @@ public class NoticeService {
      * 更新公告（仅草稿状态允许编辑）。
      */
     @Transactional
-    public NoticeDetailView update(Long id, NoticeUpdateCommand cmd) {
+    public NoticeDetailVo update(Long id, NoticeUpdateCmd cmd) {
         var existing = noticeRepository.findSnapshotById(id)
             .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
 
@@ -165,7 +165,7 @@ public class NoticeService {
      * 6. 发布 NoticePublishedEvent（事务提交后异步通知）
      */
     @Transactional
-    public NoticeDetailView publish(Long id, NoticePublishCommand cmd) {
+    public NoticeDetailVo publish(Long id, NoticePublishCmd cmd) {
         var existing = noticeRepository.findSnapshotById(id)
             .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
 
@@ -199,7 +199,7 @@ public class NoticeService {
      * 撤回公告：PUBLISHED → REVOKED。
      */
     @Transactional
-    public NoticeDetailView revoke(Long id) {
+    public NoticeDetailVo revoke(Long id) {
         var existing = noticeRepository.findSnapshotById(id)
             .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
 
@@ -218,7 +218,7 @@ public class NoticeService {
      * 复制字段：title / content / pinned / startTime / endTime + 附件关联 + 发送目标。
      */
     @Transactional
-    public NoticeDetailView duplicate(Long id) {
+    public NoticeDetailVo duplicate(Long id) {
         var existing = noticeRepository.findSnapshotById(id)
             .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
 
@@ -253,7 +253,7 @@ public class NoticeService {
      * 逐条校验，符合条件（DRAFT）的执行发布（简化版，无接收人展开），不符合的跳过。
      */
     @Transactional
-    public BatchResultView batchPublish(BatchIdsCommand cmd) {
+    public BatchResultVo batchPublish(BatchIdsCmd cmd) {
         int success = 0;
         int skipped = 0;
 
@@ -268,7 +268,7 @@ public class NoticeService {
         }
 
         log.info("批量发布公告: success={}, skipped={}", success, skipped);
-        return new BatchResultView(success, skipped);
+        return new BatchResultVo(success, skipped);
     }
 
     /**
@@ -277,7 +277,7 @@ public class NoticeService {
      * 逐条校验，符合条件（DRAFT 或 REVOKED）的执行删除，不符合的跳过。
      */
     @Transactional
-    public BatchResultView batchDelete(BatchIdsCommand cmd) {
+    public BatchResultVo batchDelete(BatchIdsCmd cmd) {
         int success = 0;
         int skipped = 0;
 
@@ -300,7 +300,7 @@ public class NoticeService {
         }
 
         log.info("批量删除公告: success={}, skipped={}", success, skipped);
-        return new BatchResultView(success, skipped);
+        return new BatchResultVo(success, skipped);
     }
 
     // ------ 已读/未读 ------
@@ -334,7 +334,7 @@ public class NoticeService {
      * @param size       每页条数
      * @return 分页接收人视图
      */
-    public PageResult<RecipientView> recipients(Long noticeId, String readStatus, PageQuery pageQuery) {
+    public PageResult<RecipientVo> recipients(Long noticeId, String readStatus, PageQuery pageQuery) {
         return noticeRecipientRepository.findRecipients(noticeId, readStatus, pageQuery);
     }
 

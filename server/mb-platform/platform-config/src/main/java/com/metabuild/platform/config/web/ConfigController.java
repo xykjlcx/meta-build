@@ -4,8 +4,8 @@ import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.web.pagination.PageRequestDto;
 import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.config.api.dto.ConfigView;
-import com.metabuild.platform.config.api.dto.ConfigSetCommand;
+import com.metabuild.platform.config.api.vo.ConfigVo;
+import com.metabuild.platform.config.api.cmd.ConfigSetCmd;
 import com.metabuild.platform.config.domain.ConfigService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,19 +26,19 @@ public class ConfigController {
 
     @GetMapping
     @RequirePermission("config:config:list")
-    public PageResult<ConfigView> list(@ParameterObject PageRequestDto request) {
+    public PageResult<ConfigVo> list(@ParameterObject PageRequestDto request) {
         return configService.list(paginationPolicy.normalize(request));
     }
 
     @GetMapping("/{key}")
     @RequirePermission("config:config:detail")
-    public ConfigView getByKey(@PathVariable("key") String configKey) {
+    public ConfigVo getByKey(@PathVariable("key") String configKey) {
         return configService.getByKey(configKey);
     }
 
     @PutMapping
     @RequirePermission("config:config:set")
-    public void set(@Valid @RequestBody ConfigSetCommand request) {
+    public void set(@Valid @RequestBody ConfigSetCmd request) {
         configService.set(request);
     }
 

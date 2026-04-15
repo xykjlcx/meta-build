@@ -3,7 +3,7 @@ package com.metabuild.platform.job.domain;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
-import com.metabuild.platform.job.api.dto.JobLogView;
+import com.metabuild.platform.job.api.vo.JobLogVo;
 import com.metabuild.schema.tables.records.MbJobLogRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class JobLogService {
     /**
      * 分页查询任务日志。
      */
-    public PageResult<JobLogView> list(PageQuery query) {
+    public PageResult<JobLogVo> list(PageQuery query) {
         return repository.findPage(query).map(this::toResponse);
     }
 
@@ -65,8 +65,8 @@ public class JobLogService {
         repository.insert(record);
     }
 
-    private JobLogView toResponse(MbJobLogRecord r) {
-        return new JobLogView(
+    private JobLogVo toResponse(MbJobLogRecord r) {
+        return new JobLogVo(
             r.getId(), r.getJobName(), r.getStatus(),
             r.getStartTime(), r.getEndTime(), r.getDurationMs(),
             r.getErrorMessage(), r.getCreatedAt()

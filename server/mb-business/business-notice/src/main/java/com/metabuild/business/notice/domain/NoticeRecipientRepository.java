@@ -1,6 +1,6 @@
 package com.metabuild.business.notice.domain;
 
-import com.metabuild.business.notice.api.RecipientView;
+import com.metabuild.business.notice.api.vo.RecipientVo;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
@@ -191,7 +191,7 @@ public class NoticeRecipientRepository {
      * @return 分页接收人视图
      */
     @BypassDataScope
-    public PageResult<RecipientView> findRecipients(Long noticeId, String readStatus, PageQuery pageQuery) {
+    public PageResult<RecipientVo> findRecipients(Long noticeId, String readStatus, PageQuery pageQuery) {
         // 构造 readStatus 过滤条件
         Condition readCondition = trueCondition();
         if ("read".equalsIgnoreCase(readStatus)) {
@@ -210,7 +210,7 @@ public class NoticeRecipientRepository {
             .fetchOne(0, long.class);
 
         int offset = pageQuery.offset();
-        List<RecipientView> content = dsl
+        List<RecipientVo> content = dsl
             .select(
                 BIZ_NOTICE_RECIPIENT.USER_ID,
                 MB_IAM_USER.USERNAME,
@@ -222,7 +222,7 @@ public class NoticeRecipientRepository {
             .orderBy(BIZ_NOTICE_RECIPIENT.CREATED_AT.asc())
             .limit(pageQuery.size())
             .offset(offset)
-            .fetch(r -> new RecipientView(
+            .fetch(r -> new RecipientVo(
                 r.get(BIZ_NOTICE_RECIPIENT.USER_ID),
                 r.get(MB_IAM_USER.USERNAME),
                 r.get(BIZ_NOTICE_RECIPIENT.READ_AT)

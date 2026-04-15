@@ -6,8 +6,8 @@ import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.DeptApi;
 import com.metabuild.platform.iam.api.IamErrorCodes;
-import com.metabuild.platform.iam.api.dto.DeptCreateCommand;
-import com.metabuild.platform.iam.api.dto.DeptView;
+import com.metabuild.platform.iam.api.cmd.DeptCreateCmd;
+import com.metabuild.platform.iam.api.vo.DeptVo;
 import com.metabuild.schema.tables.records.MbIamDeptRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,20 +33,20 @@ public class DeptService implements DeptApi {
     private final SnowflakeIdGenerator idGenerator;
 
     @Override
-    public DeptView getById(Long id) {
+    public DeptVo getById(Long id) {
         return deptRepository.findById(id)
             .map(r -> toResponse(r, List.of()))
             .orElseThrow(() -> new NotFoundException(IamErrorCodes.DEPT_NOT_FOUND, id));
     }
 
     @Override
-    public List<DeptView> tree() {
+    public List<DeptVo> tree() {
         List<MbIamDeptRecord> all = deptRepository.findAll();
         return buildTree(all, 0L);
     }
 
     @Transactional
-    public Long createDept(DeptCreateCommand request) {
+    public Long createDept(DeptCreateCmd request) {
         var record = new MbIamDeptRecord();
         record.setId(idGenerator.nextId());
         record.setParentId(request.parentId()); // null 表示根部门
@@ -79,24 +79,24 @@ public class DeptService implements DeptApi {
     }
 
     /** 构建部门树 */
-    private List<DeptView> buildTree(List<MbIamDeptRecord> all, Long parentId) {
+    private List<DeptVo> buildTree(List<MbIamDeptRecord> all, Long parentId) {
         Map<Long, List<MbIamDeptRecord>> byParent = all.stream()
             .collect(Collectors.groupingBy(r -> r.getParentId() == null ? 0L : r.getParentId()));
         return buildChildren(byParent, parentId);
     }
 
-    private List<DeptView> buildChildren(Map<Long, List<MbIamDeptRecord>> byParent, Long parentId) {
+    private List<DeptVo> buildChildren(Map<Long, List<MbIamDeptRecord>> byParent, Long parentId) {
         List<MbIamDeptRecord> children = byParent.getOrDefault(parentId, List.of());
-        List<DeptView> result = new ArrayList<>(children.size());
+        List<DeptVo> result = new ArrayList<>(children.size());
         for (MbIamDeptRecord r : children) {
-            List<DeptView> subChildren = buildChildren(byParent, r.getId());
+            List<DeptVo> subChildren = buildChildren(byParent, r.getId());
             result.add(toResponse(r, subChildren));
         }
         return result;
     }
 
-    private DeptView toResponse(MbIamDeptRecord r, List<DeptView> children) {
-        return new DeptView(
+    private DeptVo toResponse(MbIamDeptRecord r, List<DeptVo> children) {
+        return new DeptVo(
             r.getId(),
             r.getParentId(),
             r.getName(),

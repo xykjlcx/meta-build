@@ -4,8 +4,8 @@ import com.metabuild.admin.BaseIntegrationTest;
 import com.metabuild.admin.TestSecurityConfig;
 import com.metabuild.common.exception.UnauthorizedException;
 import com.metabuild.common.security.LoginResult;
-import com.metabuild.platform.iam.api.dto.LoginCommand;
-import com.metabuild.platform.iam.api.dto.UserCreateCommand;
+import com.metabuild.platform.iam.api.cmd.LoginCmd;
+import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
 import com.metabuild.platform.iam.domain.auth.AuthService;
 import com.metabuild.platform.iam.domain.session.LoginLogService;
 import com.metabuild.platform.iam.domain.user.UserService;
@@ -43,7 +43,7 @@ class AuthServiceIntegrationTest extends BaseIntegrationTest {
     @BeforeEach
     void setUp() {
         // 每个测试方法前创建测试用户（@Transactional 保证测试结束后回滚）
-        userService.createUser(new UserCreateCommand(
+        userService.createUser(new UserCreateCmd(
             TEST_USERNAME,
             TEST_PASSWORD,
             "authtest@example.com",
@@ -57,7 +57,7 @@ class AuthServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void login_should_succeed_with_correct_credentials() {
-        LoginCommand request = new LoginCommand(TEST_USERNAME, TEST_PASSWORD, null, null);
+        LoginCmd request = new LoginCmd(TEST_USERNAME, TEST_PASSWORD, null, null);
 
         LoginResult result = authService.login(request);
 
@@ -71,7 +71,7 @@ class AuthServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void login_should_throw_unauthorized_on_wrong_password() {
-        LoginCommand request = new LoginCommand(TEST_USERNAME, "WrongPassword@999", null, null);
+        LoginCmd request = new LoginCmd(TEST_USERNAME, "WrongPassword@999", null, null);
 
         assertThatThrownBy(() -> authService.login(request))
             .isInstanceOf(UnauthorizedException.class);
@@ -81,7 +81,7 @@ class AuthServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void login_should_throw_unauthorized_on_nonexistent_user() {
-        LoginCommand request = new LoginCommand("nobody", "Test@12345", null, null);
+        LoginCmd request = new LoginCmd("nobody", "Test@12345", null, null);
 
         assertThatThrownBy(() -> authService.login(request))
             .isInstanceOf(UnauthorizedException.class);

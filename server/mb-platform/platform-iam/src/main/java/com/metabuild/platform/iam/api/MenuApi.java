@@ -1,6 +1,6 @@
 package com.metabuild.platform.iam.api;
 
-import com.metabuild.platform.iam.api.dto.MenuView;
+import com.metabuild.platform.iam.api.vo.MenuVo;
 import java.util.List;
 
 /**
@@ -8,10 +8,10 @@ import java.util.List;
  */
 public interface MenuApi {
 
-    MenuView getById(Long id);
+    MenuVo getById(Long id);
 
-    List<MenuView> tree();
+    List<MenuVo> tree();
 
     /** 查询指定角色的菜单列表 */
-    List<MenuView> listByRoleId(Long roleId);
+    List<MenuVo> listByRoleId(Long roleId);
 }

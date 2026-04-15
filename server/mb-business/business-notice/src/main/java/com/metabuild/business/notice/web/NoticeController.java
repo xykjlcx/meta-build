@@ -1,14 +1,14 @@
 package com.metabuild.business.notice.web;
 
-import com.metabuild.business.notice.api.BatchIdsCommand;
-import com.metabuild.business.notice.api.BatchResultView;
-import com.metabuild.business.notice.api.NoticeCreateCommand;
-import com.metabuild.business.notice.api.NoticeDetailView;
-import com.metabuild.business.notice.api.NoticePublishCommand;
-import com.metabuild.business.notice.api.NoticeQuery;
-import com.metabuild.business.notice.api.NoticeUpdateCommand;
-import com.metabuild.business.notice.api.NoticeView;
-import com.metabuild.business.notice.api.RecipientView;
+import com.metabuild.business.notice.api.cmd.BatchIdsCmd;
+import com.metabuild.business.notice.api.vo.BatchResultVo;
+import com.metabuild.business.notice.api.cmd.NoticeCreateCmd;
+import com.metabuild.business.notice.api.vo.NoticeDetailVo;
+import com.metabuild.business.notice.api.cmd.NoticePublishCmd;
+import com.metabuild.business.notice.api.qry.NoticeQry;
+import com.metabuild.business.notice.api.cmd.NoticeUpdateCmd;
+import com.metabuild.business.notice.api.vo.NoticeVo;
+import com.metabuild.business.notice.api.vo.RecipientVo;
 import com.metabuild.business.notice.domain.NoticeExportService;
 import com.metabuild.business.notice.domain.NoticeService;
 import com.metabuild.common.dto.PageQuery;
@@ -64,8 +64,8 @@ public class NoticeController {
     @Operation(summary = "分页查询公告列表")
     @GetMapping
     @RequirePermission("notice:notice:list")
-    public PageResult<NoticeView> list(@ParameterObject NoticeListRequestDto request) {
-        var query = new NoticeQuery(
+    public PageResult<NoticeVo> list(@ParameterObject NoticeListRequestDto request) {
+        var query = new NoticeQry(
             request.getStatus(),
             request.getKeyword(),
             request.getStartTimeFrom(),
@@ -77,7 +77,7 @@ public class NoticeController {
     @Operation(summary = "查询公告详情")
     @GetMapping("/{id}")
     @RequirePermission("notice:notice:detail")
-    public NoticeDetailView detail(@Parameter(description = "公告 ID") @PathVariable Long id) {
+    public NoticeDetailVo detail(@Parameter(description = "公告 ID") @PathVariable Long id) {
         return noticeService.detail(id);
     }
 
@@ -86,7 +86,7 @@ public class NoticeController {
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("notice:notice:create")
     @OperationLog(module = "notice", operation = "创建公告")
-    public NoticeDetailView create(@Valid @RequestBody NoticeCreateCommand cmd) {
+    public NoticeDetailVo create(@Valid @RequestBody NoticeCreateCmd cmd) {
         return noticeService.create(cmd);
     }
 
@@ -94,9 +94,9 @@ public class NoticeController {
     @PutMapping("/{id}")
     @RequirePermission("notice:notice:update")
     @OperationLog(module = "notice", operation = "编辑公告")
-    public NoticeDetailView update(
+    public NoticeDetailVo update(
         @Parameter(description = "公告 ID") @PathVariable Long id,
-        @Valid @RequestBody NoticeUpdateCommand cmd
+        @Valid @RequestBody NoticeUpdateCmd cmd
     ) {
         return noticeService.update(id, cmd);
     }
@@ -114,9 +114,9 @@ public class NoticeController {
     @PostMapping("/{id}/publish")
     @RequirePermission("notice:notice:publish")
     @OperationLog(module = "notice", operation = "发布公告")
-    public NoticeDetailView publish(
+    public NoticeDetailVo publish(
         @Parameter(description = "公告 ID") @PathVariable Long id,
-        @Valid @RequestBody NoticePublishCommand cmd
+        @Valid @RequestBody NoticePublishCmd cmd
     ) {
         return noticeService.publish(id, cmd);
     }
@@ -125,7 +125,7 @@ public class NoticeController {
     @PostMapping("/{id}/revoke")
     @RequirePermission("notice:notice:publish")
     @OperationLog(module = "notice", operation = "撤回公告")
-    public NoticeDetailView revoke(@Parameter(description = "公告 ID") @PathVariable Long id) {
+    public NoticeDetailVo revoke(@Parameter(description = "公告 ID") @PathVariable Long id) {
         return noticeService.revoke(id);
     }
 
@@ -134,7 +134,7 @@ public class NoticeController {
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("notice:notice:create")
     @OperationLog(module = "notice", operation = "复制公告")
-    public NoticeDetailView duplicate(@Parameter(description = "公告 ID") @PathVariable Long id) {
+    public NoticeDetailVo duplicate(@Parameter(description = "公告 ID") @PathVariable Long id) {
         return noticeService.duplicate(id);
     }
 
@@ -142,7 +142,7 @@ public class NoticeController {
     @PostMapping("/batch-publish")
     @RequirePermission("notice:notice:publish")
     @OperationLog(module = "notice", operation = "批量发布公告")
-    public BatchResultView batchPublish(@Valid @RequestBody BatchIdsCommand cmd) {
+    public BatchResultVo batchPublish(@Valid @RequestBody BatchIdsCmd cmd) {
         return noticeService.batchPublish(cmd);
     }
 
@@ -150,7 +150,7 @@ public class NoticeController {
     @DeleteMapping("/batch")
     @RequirePermission("notice:notice:delete")
     @OperationLog(module = "notice", operation = "批量删除公告")
-    public BatchResultView batchDelete(@Valid @RequestBody BatchIdsCommand cmd) {
+    public BatchResultVo batchDelete(@Valid @RequestBody BatchIdsCmd cmd) {
         return noticeService.batchDelete(cmd);
     }
 
@@ -170,7 +170,7 @@ public class NoticeController {
     @Operation(summary = "查询公告接收人列表（分页）")
     @GetMapping("/{id}/recipients")
     @RequirePermission("notice:notice:detail")
-    public PageResult<RecipientView> recipients(
+    public PageResult<RecipientVo> recipients(
         @Parameter(description = "公告 ID") @PathVariable Long id,
         @ParameterObject NoticeRecipientsRequestDto request
     ) {
@@ -234,7 +234,7 @@ public class NoticeController {
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             response.setHeader("Content-Disposition", "attachment;filename=notices.xlsx");
 
-            var query = new NoticeQuery(status, keyword, startTimeFrom, startTimeTo);
+            var query = new NoticeQry(status, keyword, startTimeFrom, startTimeTo);
             noticeExportService.export(query, response.getOutputStream());
         } finally {
             exportConcurrentCount.decrementAndGet();

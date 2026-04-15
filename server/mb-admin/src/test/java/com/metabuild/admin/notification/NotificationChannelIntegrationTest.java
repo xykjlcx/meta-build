@@ -7,7 +7,7 @@ import com.metabuild.platform.notification.domain.InAppChannel;
 import com.metabuild.platform.notification.domain.NotificationDispatcher;
 import com.metabuild.platform.notification.domain.NotificationLogRepository;
 import com.metabuild.platform.notification.domain.NotificationLogService;
-import com.metabuild.platform.notification.domain.NotificationLogView;
+import com.metabuild.platform.notification.api.vo.NotificationLogVo;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -100,7 +100,7 @@ class NotificationChannelIntegrationTest extends BaseIntegrationTest {
 
         dispatcher.dispatch(msg);
 
-        List<NotificationLogView> logs = logRepository.findByModuleAndRef("notice", "test-ref-001");
+        List<NotificationLogVo> logs = logRepository.findByModuleAndRef("notice", "test-ref-001");
         // 至少 IN_APP 渠道会写入记录（每个接收人一条）
         assertThat(logs).isNotEmpty();
         assertThat(logs).allMatch(l -> l.status() == 1); // 全部成功
@@ -127,7 +127,7 @@ class NotificationChannelIntegrationTest extends BaseIntegrationTest {
                 Map.of("title", "Service测试"), "notice", "svc-test-ref");
         dispatcher.dispatch(msg);
 
-        List<NotificationLogView> logs = logService.findByModuleAndRef("notice", "svc-test-ref");
+        List<NotificationLogVo> logs = logService.findByModuleAndRef("notice", "svc-test-ref");
         assertThat(logs).isNotEmpty();
         assertThat(logs.getFirst().module()).isEqualTo("notice");
         assertThat(logs.getFirst().referenceId()).isEqualTo("svc-test-ref");
@@ -145,7 +145,7 @@ class NotificationChannelIntegrationTest extends BaseIntegrationTest {
                 Map.of(), "test_module", "idx-test-ref");
         dispatcher.dispatch(msg);
 
-        List<NotificationLogView> logs = logRepository.findByModuleAndRef("test_module", "idx-test-ref");
+        List<NotificationLogVo> logs = logRepository.findByModuleAndRef("test_module", "idx-test-ref");
         assertThat(logs).isNotEmpty();
     }
 

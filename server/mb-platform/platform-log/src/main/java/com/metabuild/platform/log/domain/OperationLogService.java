@@ -2,7 +2,7 @@ package com.metabuild.platform.log.domain;
 
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
-import com.metabuild.platform.log.api.dto.OperationLogView;
+import com.metabuild.platform.log.api.vo.OperationLogVo;
 import com.metabuild.schema.tables.records.MbLogOperationRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,12 +21,12 @@ public class OperationLogService {
     /**
      * 分页查询操作日志列表。
      */
-    public PageResult<OperationLogView> list(PageQuery query) {
+    public PageResult<OperationLogVo> list(PageQuery query) {
         return repository.findPage(query).map(this::toResponse);
     }
 
-    private OperationLogView toResponse(MbLogOperationRecord r) {
-        return new OperationLogView(
+    private OperationLogVo toResponse(MbLogOperationRecord r) {
+        return new OperationLogVo(
             r.getId(),
             r.getUserId(),
             r.getUsername(),

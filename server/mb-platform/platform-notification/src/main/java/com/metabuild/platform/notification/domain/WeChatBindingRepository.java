@@ -1,6 +1,6 @@
 package com.metabuild.platform.notification.domain;
 
-import com.metabuild.platform.notification.api.dto.WeChatBindingView;
+import com.metabuild.platform.notification.api.vo.WeChatBindingVo;
 import com.metabuild.schema.tables.records.MbUserWechatBindingRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -69,7 +69,7 @@ public class WeChatBindingRepository {
     /**
      * 查询用户的所有绑定关系。
      */
-    public List<WeChatBindingView> findByUserId(Long userId, Long tenantId) {
+    public List<WeChatBindingVo> findByUserId(Long userId, Long tenantId) {
         return dsl.select(
                     MB_USER_WECHAT_BINDING.ID,
                     MB_USER_WECHAT_BINDING.PLATFORM,
@@ -83,7 +83,7 @@ public class WeChatBindingRepository {
                 .where(MB_USER_WECHAT_BINDING.USER_ID.eq(userId))
                 .and(MB_USER_WECHAT_BINDING.TENANT_ID.eq(tenantId))
                 .orderBy(MB_USER_WECHAT_BINDING.BOUND_AT.desc())
-                .fetch(r -> new WeChatBindingView(
+                .fetch(r -> new WeChatBindingVo(
                         r.get(MB_USER_WECHAT_BINDING.ID),
                         r.get(MB_USER_WECHAT_BINDING.PLATFORM),
                         r.get(MB_USER_WECHAT_BINDING.APP_ID),

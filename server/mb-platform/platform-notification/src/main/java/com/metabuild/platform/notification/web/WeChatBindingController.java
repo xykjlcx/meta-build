@@ -1,8 +1,8 @@
 package com.metabuild.platform.notification.web;
 
-import com.metabuild.platform.notification.api.dto.WeChatBindingView;
-import com.metabuild.platform.notification.api.dto.WeChatMiniBindCommand;
-import com.metabuild.platform.notification.api.dto.WeChatMpBindCommand;
+import com.metabuild.platform.notification.api.vo.WeChatBindingVo;
+import com.metabuild.platform.notification.api.cmd.WeChatMiniBindCmd;
+import com.metabuild.platform.notification.api.cmd.WeChatMpBindCmd;
 import com.metabuild.platform.notification.domain.WeChatBindingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,14 +37,14 @@ public class WeChatBindingController {
     @PostMapping("/bind-mp")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "公众号绑定", description = "微信 OAuth 授权回调后，用 code + state 完成绑定")
-    public WeChatBindingView bindMp(@Valid @RequestBody WeChatMpBindCommand cmd) {
+    public WeChatBindingVo bindMp(@Valid @RequestBody WeChatMpBindCmd cmd) {
         return bindingService.bindMp(cmd);
     }
 
     @PostMapping("/bind-mini")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "小程序绑定", description = "wx.login() 获取 code 后完成绑定")
-    public WeChatBindingView bindMini(@Valid @RequestBody WeChatMiniBindCommand cmd) {
+    public WeChatBindingVo bindMini(@Valid @RequestBody WeChatMiniBindCmd cmd) {
         return bindingService.bindMini(cmd);
     }
 
@@ -57,7 +57,7 @@ public class WeChatBindingController {
 
     @GetMapping("/bindings")
     @Operation(summary = "查询我的微信绑定", description = "返回当前用户的全部微信绑定关系")
-    public List<WeChatBindingView> myBindings() {
+    public List<WeChatBindingVo> myBindings() {
         return bindingService.myBindings();
     }
 }

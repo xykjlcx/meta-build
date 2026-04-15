@@ -1,7 +1,7 @@
 package com.metabuild.platform.monitor.web;
 
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.monitor.api.dto.ServerInfoView;
+import com.metabuild.platform.monitor.api.vo.ServerInfoVo;
 import com.metabuild.platform.monitor.domain.MonitorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +20,7 @@ public class MonitorController {
 
     @GetMapping("/server-info")
     @RequirePermission("monitor:server:list")
-    public ServerInfoView serverInfo() {
+    public ServerInfoVo serverInfo() {
         return monitorService.getServerInfo();
     }
 }

@@ -1,6 +1,6 @@
 package com.metabuild.platform.notification.api;
 
-import com.metabuild.platform.notification.api.dto.NotificationCreateCommand;
+import com.metabuild.platform.notification.api.cmd.NotificationCreateCmd;
 
 /**
  * 通知模块对外 API 接口。
@@ -16,7 +16,7 @@ public interface NotificationApi {
      * @param command 创建命令
      * @return 通知 ID
      */
-    Long create(NotificationCreateCommand command);
+    Long create(NotificationCreateCmd command);
 
     /**
      * 分发通知到所有配置的渠道。

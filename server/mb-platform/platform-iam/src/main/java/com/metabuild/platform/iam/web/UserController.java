@@ -5,12 +5,12 @@ import com.metabuild.common.security.CurrentUser;
 import com.metabuild.infra.web.pagination.PageRequestDto;
 import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.iam.api.dto.AssignRolesCommand;
-import com.metabuild.platform.iam.api.dto.ChangePasswordCommand;
-import com.metabuild.platform.iam.api.dto.ResetPasswordCommand;
-import com.metabuild.platform.iam.api.dto.UserCreateCommand;
-import com.metabuild.platform.iam.api.dto.UserView;
-import com.metabuild.platform.iam.api.dto.UserUpdateCommand;
+import com.metabuild.platform.iam.api.cmd.AssignRolesCmd;
+import com.metabuild.platform.iam.api.cmd.ChangePasswordCmd;
+import com.metabuild.platform.iam.api.cmd.ResetPasswordCmd;
+import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
+import com.metabuild.platform.iam.api.vo.UserVo;
+import com.metabuild.platform.iam.api.cmd.UserUpdateCmd;
 import com.metabuild.platform.iam.domain.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -34,27 +34,27 @@ public class UserController {
 
     @GetMapping
     @RequirePermission("iam:user:list")
-    public PageResult<UserView> list(@ParameterObject PageRequestDto request) {
+    public PageResult<UserVo> list(@ParameterObject PageRequestDto request) {
         return userService.list(paginationPolicy.normalize(request));
     }
 
     @GetMapping("/{id}")
     @RequirePermission("iam:user:detail")
-    public UserView getById(@PathVariable Long id) {
+    public UserVo getById(@PathVariable Long id) {
         return userService.getById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("iam:user:create")
-    public UserView create(@Valid @RequestBody UserCreateCommand request) {
+    public UserVo create(@Valid @RequestBody UserCreateCmd request) {
         Long id = userService.createUser(request);
         return userService.getById(id);
     }
 
     @PutMapping("/{id}")
     @RequirePermission("iam:user:update")
-    public UserView update(@PathVariable Long id, @Valid @RequestBody UserUpdateCommand request) {
+    public UserVo update(@PathVariable Long id, @Valid @RequestBody UserUpdateCmd request) {
         return userService.updateUser(id, request);
     }
 
@@ -67,21 +67,21 @@ public class UserController {
 
     /** 修改自己的密码（不需要权限，但需要登录） */
     @PutMapping("/me/password")
-    public void changeMyPassword(@Valid @RequestBody ChangePasswordCommand request) {
+    public void changeMyPassword(@Valid @RequestBody ChangePasswordCmd request) {
         userService.changePassword(currentUser.userId(), request);
     }
 
     /** 管理员重置用户密码 */
     @PostMapping("/{id}/reset-password")
     @RequirePermission("iam:user:resetPassword")
-    public void resetPassword(@PathVariable Long id, @Valid @RequestBody ResetPasswordCommand request) {
+    public void resetPassword(@PathVariable Long id, @Valid @RequestBody ResetPasswordCmd request) {
         userService.resetPassword(id, request.newPassword());
     }
 
     /** 为用户分配角色 */
     @PutMapping("/{id}/roles")
     @RequirePermission("iam:user:assignRole")
-    public void assignRoles(@PathVariable Long id, @Valid @RequestBody AssignRolesCommand request) {
+    public void assignRoles(@PathVariable Long id, @Valid @RequestBody AssignRolesCmd request) {
         roleService.assignRolesToUser(id, request);
     }
 }

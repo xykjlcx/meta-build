@@ -3,10 +3,10 @@ package com.metabuild.platform.iam.web;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.common.security.CurrentUserInfo;
 import com.metabuild.common.security.LoginResult;
-import com.metabuild.platform.iam.api.dto.CurrentUserView;
-import com.metabuild.platform.iam.api.dto.LoginCommand;
-import com.metabuild.platform.iam.api.dto.LoginView;
-import com.metabuild.platform.iam.api.dto.RefreshCommand;
+import com.metabuild.platform.iam.api.vo.CurrentUserVo;
+import com.metabuild.platform.iam.api.cmd.LoginCmd;
+import com.metabuild.platform.iam.api.vo.LoginVo;
+import com.metabuild.platform.iam.api.cmd.RefreshCmd;
 import com.metabuild.platform.iam.domain.auth.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -28,8 +28,8 @@ public class AuthController {
      * 需要认证，未登录返回 401。不需要额外权限，登录即可访问。
      */
     @GetMapping("/me")
-    public CurrentUserView me() {
-        return new CurrentUserView(
+    public CurrentUserVo me() {
+        return new CurrentUserVo(
             currentUser.userId(),
             currentUser.username(),
             currentUser.deptId(),
@@ -40,7 +40,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginView login(@Valid @RequestBody LoginCommand request) {
+    public LoginVo login(@Valid @RequestBody LoginCmd request) {
         return toLoginView(authService.login(request));
     }
 
@@ -54,22 +54,22 @@ public class AuthController {
      * 公开端点（已在全局认证拦截器中排除），使用 refresh token 换取新的 access token + refresh token。
      */
     @PostMapping("/refresh")
-    public LoginView refresh(@Valid @RequestBody RefreshCommand request) {
+    public LoginVo refresh(@Valid @RequestBody RefreshCmd request) {
         return toLoginView(authService.refresh(request.refreshToken()));
     }
 
     /**
      * 将内部 LoginResult 转换为 API 视图（移除数据权限字段）。
      */
-    private LoginView toLoginView(LoginResult result) {
+    private LoginVo toLoginView(LoginResult result) {
         CurrentUserInfo userInfo = result.user();
-        LoginView.UserSummary summary = userInfo != null
-            ? new LoginView.UserSummary(
+        LoginVo.UserSummary summary = userInfo != null
+            ? new LoginVo.UserSummary(
                 userInfo.userId(),
                 userInfo.username(),
                 userInfo.deptId(),
                 userInfo.permissions())
             : null;
-        return new LoginView(result.accessToken(), result.refreshToken(), result.expiresInSeconds(), summary);
+        return new LoginVo(result.accessToken(), result.refreshToken(), result.expiresInSeconds(), summary);
     }
 }

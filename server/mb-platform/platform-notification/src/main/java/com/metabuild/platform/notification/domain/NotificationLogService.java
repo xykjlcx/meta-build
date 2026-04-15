@@ -1,5 +1,6 @@
 package com.metabuild.platform.notification.domain;
 
+import com.metabuild.platform.notification.api.vo.NotificationLogVo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +21,7 @@ public class NotificationLogService {
     /**
      * 按模块 + 关联 ID 查询发送记录。
      */
-    public List<NotificationLogView> findByModuleAndRef(String module, String referenceId) {
+    public List<NotificationLogVo> findByModuleAndRef(String module, String referenceId) {
         return logRepository.findByModuleAndRef(module, referenceId);
     }
 }

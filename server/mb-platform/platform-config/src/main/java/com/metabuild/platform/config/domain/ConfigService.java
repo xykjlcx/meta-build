@@ -5,8 +5,8 @@ import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.infra.cache.CacheEvictSupport;
-import com.metabuild.platform.config.api.dto.ConfigView;
-import com.metabuild.platform.config.api.dto.ConfigSetCommand;
+import com.metabuild.platform.config.api.vo.ConfigVo;
+import com.metabuild.platform.config.api.cmd.ConfigSetCmd;
 import com.metabuild.schema.tables.records.MbConfigRecord;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
@@ -36,7 +36,7 @@ public class ConfigService {
     private final Clock clock;
     private final CacheEvictSupport cacheEvictSupport;
 
-    public PageResult<ConfigView> list(PageQuery query) {
+    public PageResult<ConfigVo> list(PageQuery query) {
         return repository.findPage(query).map(this::toResponse);
     }
 
@@ -45,14 +45,14 @@ public class ConfigService {
      * 缓存未命中时查 DB 并自动写入缓存。
      */
     @Cacheable(cacheNames = "config", key = "#configKey")
-    public ConfigView getByKey(String configKey) {
+    public ConfigVo getByKey(String configKey) {
         return repository.findByKey(configKey)
             .map(this::toResponse)
             .orElseThrow(() -> new NoSuchElementException("配置项不存在: " + configKey));
     }
 
     @Transactional
-    public void set(ConfigSetCommand req) {
+    public void set(ConfigSetCmd req) {
         MbConfigRecord record = new MbConfigRecord();
         // 检查是否已存在（复用原 id）
         repository.findByKey(req.configKey()).ifPresentOrElse(
@@ -88,8 +88,8 @@ public class ConfigService {
         cacheEvictSupport.evictAfterCommit(CACHE_PREFIX + configKey);
     }
 
-    private ConfigView toResponse(MbConfigRecord r) {
-        return new ConfigView(
+    private ConfigVo toResponse(MbConfigRecord r) {
+        return new ConfigVo(
             r.getId(), r.getConfigKey(), r.getConfigValue(),
             r.getConfigType(), r.getRemark(), r.getUpdatedAt()
         );

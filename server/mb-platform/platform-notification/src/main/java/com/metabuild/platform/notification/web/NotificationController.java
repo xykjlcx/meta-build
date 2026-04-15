@@ -4,8 +4,8 @@ import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.web.pagination.PageRequestDto;
 import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.notification.api.dto.NotificationCreateCommand;
-import com.metabuild.platform.notification.api.dto.NotificationView;
+import com.metabuild.platform.notification.api.cmd.NotificationCreateCmd;
+import com.metabuild.platform.notification.api.vo.NotificationVo;
 import com.metabuild.platform.notification.domain.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,14 +26,14 @@ public class NotificationController {
 
     @GetMapping
     @RequirePermission("notification:notification:list")
-    public PageResult<NotificationView> list(@ParameterObject PageRequestDto request) {
+    public PageResult<NotificationVo> list(@ParameterObject PageRequestDto request) {
         return notificationService.list(paginationPolicy.normalize(request));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("notification:notification:create")
-    public Long create(@Valid @RequestBody NotificationCreateCommand request) {
+    public Long create(@Valid @RequestBody NotificationCreateCmd request) {
         return notificationService.create(request);
     }
 

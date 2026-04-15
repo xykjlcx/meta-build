@@ -3,9 +3,9 @@ package com.metabuild.platform.notification.domain;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.notification.api.NotificationException;
-import com.metabuild.platform.notification.api.dto.WeChatBindingView;
-import com.metabuild.platform.notification.api.dto.WeChatMiniBindCommand;
-import com.metabuild.platform.notification.api.dto.WeChatMpBindCommand;
+import com.metabuild.platform.notification.api.vo.WeChatBindingVo;
+import com.metabuild.platform.notification.api.cmd.WeChatMiniBindCmd;
+import com.metabuild.platform.notification.api.cmd.WeChatMpBindCmd;
 import com.metabuild.platform.notification.config.WeChatProperties;
 import com.metabuild.schema.tables.records.MbUserWechatBindingRecord;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +67,7 @@ public class WeChatBindingService {
      */
     @Transactional
     @SuppressWarnings("unchecked")
-    public WeChatBindingView bindMp(WeChatMpBindCommand cmd) {
+    public WeChatBindingVo bindMp(WeChatMpBindCmd cmd) {
         // 1. 校验 state（CSRF 防护）
         String stateKey = STATE_KEY_PREFIX + cmd.state();
         String storedUserId = redisTemplate.opsForValue().get(stateKey);
@@ -111,7 +111,7 @@ public class WeChatBindingService {
 
         log.info("公众号绑定成功: userId={}, openId={}", currentUser.userId(), openId);
 
-        return new WeChatBindingView(record.getId(), "MP", mp.appId(), openId, nickname, avatarUrl, record.getBoundAt());
+        return new WeChatBindingVo(record.getId(), "MP", mp.appId(), openId, nickname, avatarUrl, record.getBoundAt());
     }
 
     /**
@@ -119,7 +119,7 @@ public class WeChatBindingService {
      */
     @Transactional
     @SuppressWarnings("unchecked")
-    public WeChatBindingView bindMini(WeChatMiniBindCommand cmd) {
+    public WeChatBindingVo bindMini(WeChatMiniBindCmd cmd) {
         WeChatProperties.MiniConfig mini = weChatProperties.mini();
 
         // code 换 openid + session_key
@@ -145,7 +145,7 @@ public class WeChatBindingService {
 
         log.info("小程序绑定成功: userId={}, openId={}", currentUser.userId(), openId);
 
-        return new WeChatBindingView(record.getId(), "MINI", mini.appId(), openId, null, null, record.getBoundAt());
+        return new WeChatBindingVo(record.getId(), "MINI", mini.appId(), openId, null, null, record.getBoundAt());
     }
 
     /**
@@ -167,7 +167,7 @@ public class WeChatBindingService {
     /**
      * 查询当前用户的微信绑定状态。
      */
-    public List<WeChatBindingView> myBindings() {
+    public List<WeChatBindingVo> myBindings() {
         return bindingRepository.findByUserId(currentUser.userId(), currentUser.tenantId());
     }
 }

@@ -4,9 +4,9 @@ import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.web.pagination.PageRequestDto;
 import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.iam.api.dto.RoleCreateCommand;
-import com.metabuild.platform.iam.api.dto.RoleView;
-import com.metabuild.platform.iam.api.dto.RoleUpdateCommand;
+import com.metabuild.platform.iam.api.cmd.RoleCreateCmd;
+import com.metabuild.platform.iam.api.vo.RoleVo;
+import com.metabuild.platform.iam.api.cmd.RoleUpdateCmd;
 import com.metabuild.platform.iam.domain.menu.MenuService;
 import com.metabuild.platform.iam.domain.role.RoleService;
 import jakarta.validation.Valid;
@@ -31,27 +31,27 @@ public class RoleController {
 
     @GetMapping
     @RequirePermission("iam:role:list")
-    public PageResult<RoleView> list(@ParameterObject PageRequestDto request) {
+    public PageResult<RoleVo> list(@ParameterObject PageRequestDto request) {
         return roleService.listPage(paginationPolicy.normalize(request));
     }
 
     @GetMapping("/{id}")
     @RequirePermission("iam:role:detail")
-    public RoleView getById(@PathVariable Long id) {
+    public RoleVo getById(@PathVariable Long id) {
         return roleService.getById(id);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     @RequirePermission("iam:role:create")
-    public RoleView create(@Valid @RequestBody RoleCreateCommand request) {
+    public RoleVo create(@Valid @RequestBody RoleCreateCmd request) {
         Long id = roleService.createRole(request);
         return roleService.getById(id);
     }
 
     @PutMapping("/{id}")
     @RequirePermission("iam:role:update")
-    public RoleView update(@PathVariable Long id, @Valid @RequestBody RoleUpdateCommand request) {
+    public RoleVo update(@PathVariable Long id, @Valid @RequestBody RoleUpdateCmd request) {
         return roleService.updateRole(id, request);
     }
 

@@ -2,6 +2,7 @@ package com.metabuild.platform.notification.domain;
 
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.platform.notification.api.NotificationMessage;
+import com.metabuild.platform.notification.api.vo.NotificationLogVo;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.springframework.stereotype.Repository;
@@ -78,7 +79,7 @@ public class NotificationLogRepository {
     /**
      * 按模块 + 关联 ID 查询发送记录。
      */
-    public List<NotificationLogView> findByModuleAndRef(String module, String referenceId) {
+    public List<NotificationLogVo> findByModuleAndRef(String module, String referenceId) {
         return dsl.select(
                         MB_NOTIFICATION_LOG.ID,
                         MB_NOTIFICATION_LOG.CHANNEL_TYPE,
@@ -95,7 +96,7 @@ public class NotificationLogRepository {
                 .where(MB_NOTIFICATION_LOG.MODULE.eq(module))
                 .and(MB_NOTIFICATION_LOG.REFERENCE_ID.eq(referenceId))
                 .orderBy(MB_NOTIFICATION_LOG.CREATED_AT.desc())
-                .fetch(r -> new NotificationLogView(
+                .fetch(r -> new NotificationLogVo(
                         r.get(MB_NOTIFICATION_LOG.ID),
                         r.get(MB_NOTIFICATION_LOG.CHANNEL_TYPE),
                         r.get(MB_NOTIFICATION_LOG.RECIPIENT_ID),

@@ -2,7 +2,7 @@ package com.metabuild.platform.notification.web;
 
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.notification.domain.NotificationLogService;
-import com.metabuild.platform.notification.domain.NotificationLogView;
+import com.metabuild.platform.notification.api.vo.NotificationLogVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -28,7 +28,7 @@ public class NotificationLogController {
     @GetMapping
     @RequirePermission("notification:notification:list")
     @Operation(summary = "按模块和关联 ID 查询发送记录")
-    public List<NotificationLogView> findByModuleAndRef(
+    public List<NotificationLogVo> findByModuleAndRef(
             @Parameter(description = "来源模块", example = "notice") @RequestParam String module,
             @Parameter(description = "关联业务 ID", example = "123456") @RequestParam String referenceId) {
         return logService.findByModuleAndRef(module, referenceId);

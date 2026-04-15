@@ -6,7 +6,7 @@ import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.file.api.FileErrorCodes;
 import com.metabuild.platform.file.api.FileStorage;
-import com.metabuild.platform.file.api.dto.FileUploadView;
+import com.metabuild.platform.file.api.vo.FileUploadVo;
 import com.metabuild.platform.file.config.MbFileProperties;
 import com.metabuild.schema.tables.records.MbFileMetadataRecord;
 import lombok.RequiredArgsConstructor;
@@ -49,7 +49,7 @@ public class FileService {
      * 此处负责从 MultipartFile 提取参数后委托给 {@link #doUploadStream}。
      */
     @Transactional
-    public FileUploadView upload(MultipartFile file) {
+    public FileUploadVo upload(MultipartFile file) {
         // 1. 扩展名校验
         String originalFilename = file.getOriginalFilename() != null ? file.getOriginalFilename() : "";
         validateExtension(originalFilename);
@@ -88,7 +88,7 @@ public class FileService {
             });
     }
 
-    private FileUploadView doUploadStream(String originalName, InputStream input,
+    private FileUploadVo doUploadStream(String originalName, InputStream input,
                                           String contentType, long size,
                                           String sha256, Long tenantId) {
         // 通过 FileStorage 接口存储（与 HTTP 传输层解耦）
@@ -182,8 +182,8 @@ public class FileService {
         }
     }
 
-    private FileUploadView toResponse(MbFileMetadataRecord r) {
-        return new FileUploadView(
+    private FileUploadVo toResponse(MbFileMetadataRecord r) {
+        return new FileUploadVo(
             r.getId(), r.getOriginalName(), r.getFilePath(),
             r.getFileSize(), r.getContentType(), r.getSha256(), r.getCreatedAt()
         );

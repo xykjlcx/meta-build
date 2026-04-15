@@ -1,7 +1,7 @@
 package com.metabuild.business.notice.domain;
 
 import com.metabuild.business.notice.api.NoticeTarget;
-import com.metabuild.business.notice.api.NoticeTargetView;
+import com.metabuild.business.notice.api.vo.NoticeTargetVo;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -66,7 +66,7 @@ public class NoticeTargetRepository {
      * @param noticeId 公告 ID
      * @return 发送目标视图列表
      */
-    public List<NoticeTargetView> findByNoticeId(Long noticeId) {
+    public List<NoticeTargetVo> findByNoticeId(Long noticeId) {
         // 使用 CASE 表达式 + LEFT JOIN 多表获取目标名称
         var targetNameField = DSL.case_(BIZ_NOTICE_TARGET.TARGET_TYPE)
             .when("ALL", DSL.val("全员"))
@@ -93,7 +93,7 @@ public class NoticeTargetRepository {
                     .and(BIZ_NOTICE_TARGET.TARGET_ID.eq(MB_IAM_USER.ID)))
             .where(BIZ_NOTICE_TARGET.NOTICE_ID.eq(noticeId))
             .fetch()
-            .map(r -> new NoticeTargetView(
+            .map(r -> new NoticeTargetVo(
                 r.get(BIZ_NOTICE_TARGET.TARGET_TYPE),
                 r.get(BIZ_NOTICE_TARGET.TARGET_ID),
                 r.get("target_name", String.class)

@@ -2,16 +2,16 @@ package com.metabuild.admin.notice;
 
 import com.metabuild.admin.BaseIntegrationTest;
 import com.metabuild.admin.MockCurrentUser;
-import com.metabuild.business.notice.api.BatchIdsCommand;
-import com.metabuild.business.notice.api.BatchResultView;
-import com.metabuild.business.notice.api.NoticeCreateCommand;
-import com.metabuild.business.notice.api.NoticeDetailView;
+import com.metabuild.business.notice.api.cmd.BatchIdsCmd;
+import com.metabuild.business.notice.api.vo.BatchResultVo;
+import com.metabuild.business.notice.api.cmd.NoticeCreateCmd;
+import com.metabuild.business.notice.api.vo.NoticeDetailVo;
 import com.metabuild.business.notice.api.NoticeErrorCodes;
-import com.metabuild.business.notice.api.NoticePublishCommand;
-import com.metabuild.business.notice.api.NoticeQuery;
+import com.metabuild.business.notice.api.cmd.NoticePublishCmd;
+import com.metabuild.business.notice.api.qry.NoticeQry;
 import com.metabuild.business.notice.api.NoticeTarget;
-import com.metabuild.business.notice.api.NoticeUpdateCommand;
-import com.metabuild.business.notice.api.RecipientView;
+import com.metabuild.business.notice.api.cmd.NoticeUpdateCmd;
+import com.metabuild.business.notice.api.vo.RecipientVo;
 import com.metabuild.business.notice.domain.NoticeService;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
@@ -95,12 +95,12 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void createDraft_returnsDetailWithCorrectFields() {
-            var cmd = new NoticeCreateCommand(
+            var cmd = new NoticeCreateCmd(
                 "测试公告标题", "<p>测试内容</p>", false,
                 null, null, null
             );
 
-            NoticeDetailView result = noticeService.create(cmd);
+            NoticeDetailVo result = noticeService.create(cmd);
 
             assertThat(result).isNotNull();
             assertThat(result.id()).isNotNull();
@@ -114,16 +114,16 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void updateDraft_returnsUpdatedFields() {
             // 创建草稿
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "原始标题", "<p>原始内容</p>", false, null, null, null
             ));
 
             // 更新
-            var updateCmd = new NoticeUpdateCommand(
+            var updateCmd = new NoticeUpdateCmd(
                 "更新后标题", "<p>更新后内容</p>", true,
                 null, null, null, created.version()
             );
-            NoticeDetailView updated = noticeService.update(created.id(), updateCmd);
+            NoticeDetailVo updated = noticeService.update(created.id(), updateCmd);
 
             assertThat(updated.title()).isEqualTo("更新后标题");
             assertThat(updated.content()).isEqualTo("<p>更新后内容</p>");
@@ -134,13 +134,13 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void updatePublished_throwsBusinessException() {
             // 创建并发布
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "已发布公告", "<p>内容</p>", false, null, null, null
             ));
             noticeService.publish(created.id(), publishCmdWithUserTarget(ADMIN_USER_ID));
 
             // 尝试编辑已发布公告
-            var updateCmd = new NoticeUpdateCommand(
+            var updateCmd = new NoticeUpdateCmd(
                 "尝试修改", "<p>新内容</p>", false, null, null, null, 1
             );
 
@@ -152,13 +152,13 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void updateRevoked_throwsBusinessException() {
             // 创建 → 发布 → 撤回
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "已撤回公告", "<p>内容</p>", false, null, null, null
             ));
             noticeService.publish(created.id(), publishCmdWithUserTarget(ADMIN_USER_ID));
             noticeService.revoke(created.id());
 
-            var updateCmd = new NoticeUpdateCommand(
+            var updateCmd = new NoticeUpdateCmd(
                 "尝试修改", "<p>新内容</p>", false, null, null, null, 2
             );
 
@@ -169,7 +169,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void deleteDraft_succeeds() {
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "待删除草稿", "<p>内容</p>", false, null, null, null
             ));
 
@@ -182,7 +182,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void deletePublished_throwsBusinessException() {
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "已发布不能删", "<p>内容</p>", false, null, null, null
             ));
             noticeService.publish(created.id(), publishCmdWithUserTarget(ADMIN_USER_ID));
@@ -202,13 +202,13 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void publishDraft_statusBecomes1_andRecipientsExpanded() {
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "待发布公告", "<p>内容</p>", false, null, null, null
             ));
             assertThat(created.status()).isEqualTo((short) 0);
 
             // 发布，指定用户目标
-            NoticeDetailView published = noticeService.publish(
+            NoticeDetailVo published = noticeService.publish(
                 created.id(), publishCmdWithUserTarget(ADMIN_USER_ID)
             );
 
@@ -219,12 +219,12 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void revokePublished_statusBecomes2() {
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "待撤回公告", "<p>内容</p>", false, null, null, null
             ));
             noticeService.publish(created.id(), publishCmdWithUserTarget(ADMIN_USER_ID));
 
-            NoticeDetailView revoked = noticeService.revoke(created.id());
+            NoticeDetailVo revoked = noticeService.revoke(created.id());
 
             assertThat(revoked.status()).isEqualTo((short) 2); // REVOKED
         }
@@ -232,7 +232,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void duplicatePublished_returnsNewDraft() {
             // 创建带附件和发送目标的公告并发布
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "待复制公告", "<p>原始内容</p>", true,
                 OffsetDateTime.now(), OffsetDateTime.now().plusDays(7),
                 null
@@ -240,7 +240,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
             noticeService.publish(created.id(), publishCmdWithUserTarget(ADMIN_USER_ID));
 
             // 复制
-            NoticeDetailView duplicated = noticeService.duplicate(created.id());
+            NoticeDetailVo duplicated = noticeService.duplicate(created.id());
 
             assertThat(duplicated.id()).isNotEqualTo(created.id()); // 新 ID
             assertThat(duplicated.status()).isEqualTo((short) 0); // DRAFT
@@ -251,13 +251,13 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void duplicateRevoked_returnsNewDraft() {
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "撤回后复制", "<p>内容</p>", false, null, null, null
             ));
             noticeService.publish(created.id(), publishCmdWithUserTarget(ADMIN_USER_ID));
             noticeService.revoke(created.id());
 
-            NoticeDetailView duplicated = noticeService.duplicate(created.id());
+            NoticeDetailVo duplicated = noticeService.duplicate(created.id());
 
             assertThat(duplicated.id()).isNotEqualTo(created.id());
             assertThat(duplicated.status()).isEqualTo((short) 0);
@@ -266,17 +266,17 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void optimisticLockConflict_throwsConflictException() {
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "乐观锁测试", "<p>内容</p>", false, null, null, null
             ));
 
             // 第一次更新成功（version=0）
-            noticeService.update(created.id(), new NoticeUpdateCommand(
+            noticeService.update(created.id(), new NoticeUpdateCmd(
                 "第一次更新", "<p>内容</p>", false, null, null, null, 0
             ));
 
             // 第二次使用旧 version=0 更新，应触发乐观锁冲突
-            assertThatThrownBy(() -> noticeService.update(created.id(), new NoticeUpdateCommand(
+            assertThatThrownBy(() -> noticeService.update(created.id(), new NoticeUpdateCmd(
                 "第二次更新", "<p>内容</p>", false, null, null, null, 0
             ))).isInstanceOf(ConflictException.class);
         }
@@ -292,20 +292,20 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void batchPublish_returnsSuccessAndSkipped() {
             // 创建 2 个草稿 + 1 个已发布
-            Long draftId1 = noticeService.create(new NoticeCreateCommand(
+            Long draftId1 = noticeService.create(new NoticeCreateCmd(
                 "批量草稿1", null, false, null, null, null
             )).id();
-            Long draftId2 = noticeService.create(new NoticeCreateCommand(
+            Long draftId2 = noticeService.create(new NoticeCreateCmd(
                 "批量草稿2", null, false, null, null, null
             )).id();
-            Long publishedId = noticeService.create(new NoticeCreateCommand(
+            Long publishedId = noticeService.create(new NoticeCreateCmd(
                 "已发布", null, false, null, null, null
             )).id();
             noticeService.publish(publishedId, publishCmdWithUserTarget(ADMIN_USER_ID));
 
             // 批量发布（含已发布的，应 skip）
-            BatchResultView result = noticeService.batchPublish(
-                new BatchIdsCommand(List.of(draftId1, draftId2, publishedId))
+            BatchResultVo result = noticeService.batchPublish(
+                new BatchIdsCmd(List.of(draftId1, draftId2, publishedId))
             );
 
             assertThat(result.success()).isEqualTo(2);
@@ -314,16 +314,16 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void batchDelete_returnsSuccessAndSkipped() {
-            Long draftId = noticeService.create(new NoticeCreateCommand(
+            Long draftId = noticeService.create(new NoticeCreateCmd(
                 "待删草稿", null, false, null, null, null
             )).id();
-            Long publishedId = noticeService.create(new NoticeCreateCommand(
+            Long publishedId = noticeService.create(new NoticeCreateCmd(
                 "已发布不删", null, false, null, null, null
             )).id();
             noticeService.publish(publishedId, publishCmdWithUserTarget(ADMIN_USER_ID));
 
-            BatchResultView result = noticeService.batchDelete(
-                new BatchIdsCommand(List.of(draftId, publishedId))
+            BatchResultVo result = noticeService.batchDelete(
+                new BatchIdsCmd(List.of(draftId, publishedId))
             );
 
             assertThat(result.success()).isEqualTo(1);
@@ -342,12 +342,12 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         void listWithPagination_returnsPageResult() {
             // 创建 3 条公告
             for (int i = 1; i <= 3; i++) {
-                noticeService.create(new NoticeCreateCommand(
+                noticeService.create(new NoticeCreateCmd(
                     "分页测试公告" + i, null, false, null, null, null
                 ));
             }
 
-            var query = new NoticeQuery(null, null, null, null);
+            var query = new NoticeQry(null, null, null, null);
             PageResult<?> result = noticeService.list(query, PageQuery.normalized(1, 2, null));
 
             assertThat(result.content()).hasSize(2);
@@ -358,14 +358,14 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void listWithKeyword_matchesTitleOnly() {
-            noticeService.create(new NoticeCreateCommand(
+            noticeService.create(new NoticeCreateCmd(
                 "UNIQUE_KEYWORD_TITLE", "<p>普通内容</p>", false, null, null, null
             ));
-            noticeService.create(new NoticeCreateCommand(
+            noticeService.create(new NoticeCreateCmd(
                 "普通标题", "<p>UNIQUE_KEYWORD_TITLE在内容里</p>", false, null, null, null
             ));
 
-            var query = new NoticeQuery(null, "UNIQUE_KEYWORD_TITLE", null, null);
+            var query = new NoticeQry(null, "UNIQUE_KEYWORD_TITLE", null, null);
             PageResult<?> result = noticeService.list(query, PageQuery.normalized(1, 20, null));
 
             // keyword 搜索仅匹配 title（见 NoticeRepository.buildConditions）
@@ -374,7 +374,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void deleteRevoked_succeeds() {
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "撤回后删除", "<p>内容</p>", false, null, null, null
             ));
             noticeService.publish(created.id(), publishCmdWithUserTarget(ADMIN_USER_ID));
@@ -398,13 +398,13 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void createWithAttachments_attachmentsLinked() {
             // 注意：biz_notice_attachment.file_id 没有 FK 约束，可直接使用任意 ID
-            var cmd = new NoticeCreateCommand(
+            var cmd = new NoticeCreateCmd(
                 "带附件公告", "<p>内容</p>", false,
                 null, null,
                 List.of(100001L, 100002L, 100003L)
             );
 
-            NoticeDetailView result = noticeService.create(cmd);
+            NoticeDetailVo result = noticeService.create(cmd);
 
             assertThat(result.attachments()).hasSize(3);
             // 验证排序顺序
@@ -415,10 +415,10 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void createWithTooManyAttachments_throwsValidation() {
-            // NoticeCreateCommand 的 @Size(max = 10) 限制在 Controller 层由 @Valid 校验
+            // NoticeCreateCmd 的 @Size(max = 10) 限制在 Controller 层由 @Valid 校验
             // Service 层直接调用不走 Bean Validation，这里测试附件超过 10 个时创建是否正常
             // （实际拦截在 Controller @Valid，此处验证 Service 层兼容性）
-            var cmd = new NoticeCreateCommand(
+            var cmd = new NoticeCreateCmd(
                 "超多附件", "<p>内容</p>", false,
                 null, null,
                 List.of(1L, 2L, 3L, 4L, 5L, 6L, 7L, 8L, 9L, 10L, 11L)
@@ -426,7 +426,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
             // Service 层不做 size 限制校验，11 个附件应正常插入
             // （@Size(max=10) 由 Controller @Valid 拦截，Service 层测试此行为是 by-design）
-            NoticeDetailView result = noticeService.create(cmd);
+            NoticeDetailVo result = noticeService.create(cmd);
             assertThat(result.attachments()).hasSize(11);
         }
     }
@@ -441,7 +441,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void markRead_readAtUpdated() {
             // 创建 → 发布（接收人包含当前用户）
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "标记已读测试", "<p>内容</p>", false, null, null, null
             ));
             noticeService.publish(created.id(), publishCmdWithUserTarget(ADMIN_USER_ID));
@@ -461,7 +461,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void markReadIdempotent_doesNotThrow() {
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "幂等已读测试", "<p>内容</p>", false, null, null, null
             ));
             noticeService.publish(created.id(), publishCmdWithUserTarget(ADMIN_USER_ID));
@@ -483,12 +483,12 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void unreadCount_returnsCorrectCount() {
             // 创建并发布 2 条公告，接收人均为 ADMIN_USER_ID
-            var n1 = noticeService.create(new NoticeCreateCommand(
+            var n1 = noticeService.create(new NoticeCreateCmd(
                 "未读计数1", null, false, null, null, null
             ));
             noticeService.publish(n1.id(), publishCmdWithUserTarget(ADMIN_USER_ID));
 
-            var n2 = noticeService.create(new NoticeCreateCommand(
+            var n2 = noticeService.create(new NoticeCreateCmd(
                 "未读计数2", null, false, null, null, null
             ));
             noticeService.publish(n2.id(), publishCmdWithUserTarget(ADMIN_USER_ID));
@@ -504,10 +504,10 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void readRate_correctCounts() {
             // 创建并发布，接收人 2 人
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "已读率测试", null, false, null, null, null
             ));
-            noticeService.publish(created.id(), new NoticePublishCommand(
+            noticeService.publish(created.id(), new NoticePublishCmd(
                 List.of(
                     new NoticeTarget("USER", ADMIN_USER_ID),
                     new NoticeTarget("USER", NORMAL_USER_ID)
@@ -518,7 +518,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
             noticeService.markRead(created.id());
 
             // 查看详情验证 readCount / recipientCount
-            NoticeDetailView detail = noticeService.detail(created.id());
+            NoticeDetailVo detail = noticeService.detail(created.id());
             assertThat(detail.recipientCount()).isEqualTo(2);
             assertThat(detail.readCount()).isEqualTo(1);
         }
@@ -526,10 +526,10 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void recipientsList_paginationAndFilter() {
             // 创建并发布，2 个接收人
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "接收人列表测试", null, false, null, null, null
             ));
-            noticeService.publish(created.id(), new NoticePublishCommand(
+            noticeService.publish(created.id(), new NoticePublishCmd(
                 List.of(
                     new NoticeTarget("USER", ADMIN_USER_ID),
                     new NoticeTarget("USER", NORMAL_USER_ID)
@@ -540,19 +540,19 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
             noticeService.markRead(created.id());
 
             // 查全部接收人
-            PageResult<RecipientView> allRecipients = noticeService.recipients(
+            PageResult<RecipientVo> allRecipients = noticeService.recipients(
                 created.id(), "all", PageQuery.normalized(1, 20, null)
             );
             assertThat(allRecipients.totalElements()).isEqualTo(2);
 
             // 筛选已读
-            PageResult<RecipientView> readOnly = noticeService.recipients(
+            PageResult<RecipientVo> readOnly = noticeService.recipients(
                 created.id(), "read", PageQuery.normalized(1, 20, null)
             );
             assertThat(readOnly.totalElements()).isEqualTo(1);
 
             // 筛选未读
-            PageResult<RecipientView> unreadOnly = noticeService.recipients(
+            PageResult<RecipientVo> unreadOnly = noticeService.recipients(
                 created.id(), "unread", PageQuery.normalized(1, 20, null)
             );
             assertThat(unreadOnly.totalElements()).isEqualTo(1);
@@ -572,11 +572,11 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void export_serviceCanBeInvoked() {
             // 创建一条公告作为导出数据
-            noticeService.create(new NoticeCreateCommand(
+            noticeService.create(new NoticeCreateCmd(
                 "导出测试公告", "<p>内容</p>", false, null, null, null
             ));
 
-            var query = new NoticeQuery(null, null, null, null);
+            var query = new NoticeQry(null, null, null, null);
             var out = new java.io.ByteArrayOutputStream();
 
             // FastExcel + POI 在测试类路径下存在 commons-compress 版本冲突
@@ -601,11 +601,11 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         void exportRateLimit_controllerLevel() {
             // 导出限流在 Controller 层实现（ConcurrentHashMap + AtomicInteger），
             // Service 层 NoticeExportService.export() 本身不做限流。
-            noticeService.create(new NoticeCreateCommand(
+            noticeService.create(new NoticeCreateCmd(
                 "限流测试公告", null, false, null, null, null
             ));
 
-            var query = new NoticeQuery(null, null, null, null);
+            var query = new NoticeQry(null, null, null, null);
             var out1 = new java.io.ByteArrayOutputStream();
             var out2 = new java.io.ByteArrayOutputStream();
 
@@ -700,12 +700,12 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
         @Test
         void contentXssSanitize_scriptRemoved() {
-            var cmd = new NoticeCreateCommand(
+            var cmd = new NoticeCreateCmd(
                 "XSS测试", "<p>正常内容</p><script>alert('xss')</script>", false,
                 null, null, null
             );
 
-            NoticeDetailView result = noticeService.create(cmd);
+            NoticeDetailVo result = noticeService.create(cmd);
 
             // script 标签应被 jsoup 移除
             assertThat(result.content()).doesNotContain("<script>");
@@ -717,14 +717,14 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         void contentStyleOnNonWhitelistedElement_stripped() {
             // sanitizeHtml 扩展允许 img/span/p/div 的 style 属性，
             // 但 <table style="..."> 不在白名单中，style 应被移除
-            var cmd = new NoticeCreateCommand(
+            var cmd = new NoticeCreateCmd(
                 "Style测试",
                 "<table style=\"color:red\"><tr><td>内容</td></tr></table>"
                     + "<p style=\"text-align:center\">居中</p>",
                 false, null, null, null
             );
 
-            NoticeDetailView result = noticeService.create(cmd);
+            NoticeDetailVo result = noticeService.create(cmd);
 
             // table 的 style 应被移除（不在扩展白名单中）
             assertThat(result.content()).doesNotContain("style=\"color:red\"");
@@ -745,7 +745,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void publishTriggersEvent_recipientsExpanded() {
             // 创建并发布
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "通知事件测试", "<p>内容</p>", false, null, null, null
             ));
 
@@ -763,10 +763,10 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
         @Test
         void recipientExpansion_allType_queriesAllActiveUsers() {
             // 使用 ALL 类型目标发布
-            var created = noticeService.create(new NoticeCreateCommand(
+            var created = noticeService.create(new NoticeCreateCmd(
                 "全员发布测试", "<p>内容</p>", false, null, null, null
             ));
-            noticeService.publish(created.id(), new NoticePublishCommand(
+            noticeService.publish(created.id(), new NoticePublishCmd(
                 List.of(new NoticeTarget("ALL", null))
             ));
 
@@ -832,8 +832,8 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
     }
 
     /** 构建单用户目标的发布命令（测试辅助） */
-    private NoticePublishCommand publishCmdWithUserTarget(Long userId) {
-        return new NoticePublishCommand(
+    private NoticePublishCmd publishCmdWithUserTarget(Long userId) {
+        return new NoticePublishCmd(
             List.of(new NoticeTarget("USER", userId))
         );
     }

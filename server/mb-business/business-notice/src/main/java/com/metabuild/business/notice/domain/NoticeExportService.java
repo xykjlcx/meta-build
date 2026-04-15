@@ -3,7 +3,7 @@ package com.metabuild.business.notice.domain;
 import cn.idev.excel.ExcelWriter;
 import cn.idev.excel.FastExcel;
 import cn.idev.excel.write.metadata.WriteSheet;
-import com.metabuild.business.notice.api.NoticeQuery;
+import com.metabuild.business.notice.api.qry.NoticeQry;
 import com.metabuild.common.security.CurrentUser;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +55,7 @@ public class NoticeExportService {
      * @param query 查询条件（与列表接口相同）
      * @param out   响应输出流
      */
-    public void export(NoticeQuery query, OutputStream out) {
+    public void export(NoticeQry query, OutputStream out) {
         try (ExcelWriter excelWriter = FastExcel.write(out)
             .registerWriteHandler(new FormulaInjectionHandler())
             .build()) {

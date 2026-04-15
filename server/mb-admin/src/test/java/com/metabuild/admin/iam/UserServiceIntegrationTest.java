@@ -6,8 +6,8 @@ import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.exception.ConflictException;
 import com.metabuild.common.exception.NotFoundException;
-import com.metabuild.platform.iam.api.dto.UserCreateCommand;
-import com.metabuild.platform.iam.api.dto.UserView;
+import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
+import com.metabuild.platform.iam.api.vo.UserVo;
 import com.metabuild.platform.iam.domain.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,7 +30,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void createUser_should_return_generated_id() {
-        UserCreateCommand request = new UserCreateCommand(
+        UserCreateCmd request = new UserCreateCmd(
             "testuser01",
             "Test@12345",
             "test01@example.com",
@@ -46,7 +46,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void createUser_password_should_be_encoded() {
-        UserCreateCommand request = new UserCreateCommand(
+        UserCreateCmd request = new UserCreateCmd(
             "testuser02",
             "Test@12345",
             "test02@example.com",
@@ -56,9 +56,9 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
         );
 
         Long userId = userService.createUser(request);
-        UserView user = userService.getById(userId);
+        UserVo user = userService.getById(userId);
 
-        // 密码不以明文暴露在 UserView 中
+        // 密码不以明文暴露在 UserVo 中
         assertThat(user.username()).isEqualTo("testuser02");
         assertThat(user.email()).isEqualTo("test02@example.com");
         assertThat(user.nickname()).isEqualTo("测试用户02");
@@ -68,7 +68,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void createUser_should_throw_conflict_on_duplicate_username() {
-        UserCreateCommand req1 = new UserCreateCommand(
+        UserCreateCmd req1 = new UserCreateCmd(
             "duplicateuser",
             "Test@12345",
             "dup1@example.com",
@@ -78,7 +78,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
         );
         userService.createUser(req1);
 
-        UserCreateCommand req2 = new UserCreateCommand(
+        UserCreateCmd req2 = new UserCreateCmd(
             "duplicateuser",
             "Test@12345",
             "dup2@example.com",
@@ -94,7 +94,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
 
     @Test
     void getById_should_return_user() {
-        UserCreateCommand request = new UserCreateCommand(
+        UserCreateCmd request = new UserCreateCmd(
             "findme",
             "Test@12345",
             "findme@example.com",
@@ -104,7 +104,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
         );
         Long userId = userService.createUser(request);
 
-        UserView found = userService.getById(userId);
+        UserVo found = userService.getById(userId);
 
         assertThat(found.id()).isEqualTo(userId);
         assertThat(found.username()).isEqualTo("findme");
@@ -124,7 +124,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
     void list_should_return_paginated_result() {
         // 创建几个用户确保有数据
         for (int i = 1; i <= 3; i++) {
-            userService.createUser(new UserCreateCommand(
+            userService.createUser(new UserCreateCmd(
                 "pageuser" + i,
                 "Test@12345",
                 "pageuser" + i + "@example.com",
@@ -135,7 +135,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
         }
 
         PageQuery query = PageQuery.normalized(1, 10, null);
-        PageResult<UserView> result = userService.list(query);
+        PageResult<UserVo> result = userService.list(query);
 
         assertThat(result).isNotNull();
         assertThat(result.content()).isNotEmpty();

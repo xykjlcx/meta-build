@@ -13,7 +13,7 @@ import com.metabuild.common.security.SessionData;
 import com.metabuild.infra.captcha.CaptchaService;
 import com.metabuild.platform.iam.api.AuthApi;
 import com.metabuild.platform.iam.api.IamErrorCodes;
-import com.metabuild.platform.iam.api.dto.LoginCommand;
+import com.metabuild.platform.iam.api.cmd.LoginCmd;
 import com.metabuild.platform.iam.domain.dept.DeptRepository;
 import com.metabuild.platform.iam.domain.permission.PermissionService;
 import com.metabuild.platform.iam.domain.role.RoleRepository;
@@ -58,7 +58,7 @@ public class AuthService implements AuthApi {
 
     @Override
     @Transactional
-    public LoginResult login(LoginCommand request) {
+    public LoginResult login(LoginCmd request) {
         String username = request.username();
         String failKey = FAIL_COUNT_KEY_PREFIX + username;
 
