@@ -11,8 +11,7 @@ import {
 } from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
 import type { NoticeView } from '@mb/api-sdk/generated/models';
 import { useCurrentUser } from '@mb/app-shell';
-import { NxBar, NxFilter, NxFilterField, NxTable } from '@mb/ui-patterns';
-import type { NxTablePagination } from '@mb/ui-patterns';
+import { NxBar, NxTable } from '@mb/ui-patterns';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +21,19 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
   Button,
+  Card,
+  CardContent,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
   Input,
   Select,
   SelectContent,
@@ -34,30 +45,36 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { Link, useNavigate } from '@tanstack/react-router';
 import type { ColumnDef, RowSelectionState } from '@tanstack/react-table';
-import { Copy, Download, Eye, FilePenLine, Pin, Plus, Send, Trash2, Undo2 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Download,
+  MoreHorizontal,
+  Pin,
+  Plus,
+  Search,
+  Send,
+  Trash2,
+  Undo2,
+} from 'lucide-react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { BatchConfirmDialog } from '../components/batch-confirm-dialog';
-import { NoticeDrawer } from '../components/notice-drawer';
+import { NoticeDialog } from '../components/notice-dialog';
 import { NoticeStatusBadge } from '../components/notice-status-badge';
 import { NOTICE_STATUS, type NoticeStatusValue, PAGE_SIZE } from '../constants';
 
-// ─── 筛选类型 ───────────────────────────────────────────
-interface NoticeFilter {
-  [key: string]: unknown;
-  status: string;
-  keyword: string;
-  startTimeFrom: string;
-  startTimeTo: string;
+// ─── debounce hook ──────────────────────────────────────
+function useDebounced<T>(value: T, delay: number): T {
+  const [debounced, setDebounced] = useState(value);
+  useEffect(() => {
+    const timer = setTimeout(() => setDebounced(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return debounced;
 }
-
-const DEFAULT_FILTER: NoticeFilter = {
-  status: '',
-  keyword: '',
-  startTimeFrom: '',
-  startTimeTo: '',
-};
 
 // ─── 列表页组件 ─────────────────────────────────────────
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 列表页包含筛选/批量操作/权限条件渲染
@@ -67,22 +84,19 @@ export function NoticeListPage() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  // 筛选状态
-  const [filter, setFilter] = useState<NoticeFilter>(DEFAULT_FILTER);
+  // ─── 筛选状态 ───────────────────────────────────────
+  const [keyword, setKeyword] = useState('');
+  const debouncedKeyword = useDebounced(keyword, 300);
+  const [statusFilter, setStatusFilter] = useState('ALL');
 
   // 分页状态
-  const [pagination, setPagination] = useState<NxTablePagination>({
-    page: 1,
-    size: PAGE_SIZE,
-    totalElements: 0,
-    totalPages: 0,
-  });
+  const [pagination, setPagination] = useState({ page: 1, size: PAGE_SIZE });
 
   // 行选择状态
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
-  // Drawer 状态（新增/编辑）
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  // Dialog 状态（新增/编辑）
+  const [dialogOpen, setDialogOpen] = useState(false);
   const [editingNoticeId, setEditingNoticeId] = useState<number | null>(null);
 
   // 单条操作确认框
@@ -102,10 +116,8 @@ export function NoticeListPage() {
 
   // ─── 数据查询 ───────────────────────────────────────
   const { data, isLoading } = useList4({
-    status: filter.status && filter.status !== 'ALL' ? Number(filter.status) : undefined,
-    keyword: filter.keyword || undefined,
-    startTimeFrom: filter.startTimeFrom || undefined,
-    startTimeTo: filter.startTimeTo || undefined,
+    status: statusFilter !== 'ALL' ? Number(statusFilter) : undefined,
+    keyword: debouncedKeyword || undefined,
     page: pagination.page,
     size: pagination.size,
   });
@@ -115,16 +127,6 @@ export function NoticeListPage() {
     (data as { data?: { content?: NoticeView[] } })?.data?.content ?? [];
   const totalElements = (data as { data?: { totalElements?: number } })?.data?.totalElements ?? 0;
   const totalPages = (data as { data?: { totalPages?: number } })?.data?.totalPages ?? 0;
-
-  // 同步分页信息
-  const currentPagination = useMemo(
-    () => ({
-      ...pagination,
-      totalElements,
-      totalPages,
-    }),
-    [pagination, totalElements, totalPages],
-  );
 
   // ─── Mutations ──────────────────────────────────────
   const deleteMutation = useDelete2();
@@ -223,30 +225,35 @@ export function NoticeListPage() {
   // ─── 导出 ──────────────────────────────────────────
   const handleExport = useCallback(() => {
     const params = new URLSearchParams();
-    if (filter.status && filter.status !== 'ALL') params.set('status', filter.status);
-    if (filter.keyword) params.set('keyword', filter.keyword);
-    if (filter.startTimeFrom) params.set('startTimeFrom', filter.startTimeFrom);
-    if (filter.startTimeTo) params.set('startTimeTo', filter.startTimeTo);
+    if (statusFilter !== 'ALL') params.set('status', statusFilter);
+    if (debouncedKeyword) params.set('keyword', debouncedKeyword);
     const qs = params.toString();
     window.open(`/api/v1/notices/export${qs ? `?${qs}` : ''}`, '_blank');
-  }, [filter]);
+  }, [statusFilter, debouncedKeyword]);
 
   // ─── 新增/编辑 ─────────────────────────────────────
   const handleCreate = useCallback(() => {
     setEditingNoticeId(null);
-    setDrawerOpen(true);
+    setDialogOpen(true);
   }, []);
 
   const handleEdit = useCallback((id: number) => {
     setEditingNoticeId(id);
-    setDrawerOpen(true);
+    setDialogOpen(true);
   }, []);
 
-  const handleDrawerSuccess = useCallback(() => {
-    setDrawerOpen(false);
+  const handleDialogSuccess = useCallback(() => {
+    setDialogOpen(false);
     setEditingNoticeId(null);
     invalidateNotices();
   }, [invalidateNotices]);
+
+  // ─── 筛选重置 ───────────────────────────────────────
+  const handleReset = useCallback(() => {
+    setKeyword('');
+    setStatusFilter('ALL');
+    setPagination((prev) => ({ ...prev, page: 1 }));
+  }, []);
 
   // ─── 表格列定义 ─────────────────────────────────────
   const columns = useMemo<ColumnDef<NoticeView, unknown>[]>(
@@ -258,14 +265,19 @@ export function NoticeListPage() {
           const notice = row.original;
           const isUnread = !notice.read;
           return (
-            <Link
-              to="/notices/$id"
-              params={{ id: String(notice.id) }}
-              className={cn('hover:underline', isUnread && 'font-bold')}
-            >
-              {notice.pinned && <Pin className="mr-1 inline size-3.5 text-amber-500" />}
-              {notice.title}
-            </Link>
+            <div className="flex items-center gap-2">
+              {/* 未读指示点 */}
+              {isUnread && <span className="size-1.5 shrink-0 rounded-full bg-blue-500" />}
+              <Link
+                to="/notices/$id"
+                params={{ id: String(notice.id) }}
+                className={cn('hover:underline', isUnread && 'font-semibold')}
+                onClick={(e) => e.stopPropagation()}
+              >
+                {notice.pinned && <Pin className="mr-1 inline size-3.5 text-amber-500" />}
+                {notice.title}
+              </Link>
+            </div>
           );
         },
       },
@@ -284,20 +296,21 @@ export function NoticeListPage() {
       },
       {
         id: 'readRate',
-        header: t('read.readLabel'),
+        header: t('list.readRate'),
         cell: ({ row }) => {
           const notice = row.original;
-          if (
-            notice.readCount !== undefined &&
-            notice.recipientCount !== undefined &&
-            notice.recipientCount > 0
-          ) {
-            return t('read.readRate', {
-              read: notice.readCount,
-              total: notice.recipientCount,
-            });
-          }
-          return notice.read ? t('read.readLabel') : t('read.unread');
+          const readCount = notice.readCount ?? 0;
+          const total = notice.recipientCount ?? 0;
+          if (total === 0) return <span className="text-muted-foreground">—</span>;
+          const pct = Math.round((readCount / total) * 100);
+          return (
+            <div className="flex items-center gap-2">
+              <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
+                <div className="h-full rounded-full bg-green-500" style={{ width: `${pct}%` }} />
+              </div>
+              <span className="text-xs text-muted-foreground">{pct}%</span>
+            </div>
+          );
         },
       },
       {
@@ -314,70 +327,110 @@ export function NoticeListPage() {
       },
       {
         id: 'actions',
-        header: '',
+        header: () => <span className="sr-only">{t('common:actions', { defaultValue: '操作' })}</span>,
         cell: ({ row }) => {
           const notice = row.original;
           const status = notice.status as NoticeStatusValue;
+
+          // 收集次要操作
+          const secondaryActions: Array<{
+            key: string;
+            icon: typeof Send;
+            label: string;
+            onClick: () => void;
+            destructive?: boolean;
+          }> = [];
+
+          if (status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:publish')) {
+            secondaryActions.push({
+              key: 'publish',
+              icon: Send,
+              label: t('action.publish'),
+              onClick: () => setConfirmAction({ type: 'publish', id: notice.id ?? 0 }),
+            });
+          }
+          if (
+            (status === NOTICE_STATUS.PUBLISHED || status === NOTICE_STATUS.REVOKED) &&
+            user.hasPermission('notice:notice:create')
+          ) {
+            secondaryActions.push({
+              key: 'duplicate',
+              icon: Copy,
+              label: t('action.duplicate'),
+              onClick: () => handleDuplicate(notice.id ?? 0),
+            });
+          }
+          if (status === NOTICE_STATUS.PUBLISHED && user.hasPermission('notice:notice:publish')) {
+            secondaryActions.push({
+              key: 'revoke',
+              icon: Undo2,
+              label: t('action.revoke'),
+              onClick: () => setConfirmAction({ type: 'revoke', id: notice.id ?? 0 }),
+            });
+          }
+          if (
+            (status === NOTICE_STATUS.DRAFT || status === NOTICE_STATUS.REVOKED) &&
+            user.hasPermission('notice:notice:delete')
+          ) {
+            secondaryActions.push({
+              key: 'delete',
+              icon: Trash2,
+              label: t('action.delete'),
+              onClick: () => setConfirmAction({ type: 'delete', id: notice.id ?? 0 }),
+              destructive: true,
+            });
+          }
+
           return (
-            <div className="flex items-center gap-1">
-              {/* 详情 — 所有状态可查看 */}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => navigate({ to: '/notices/$id', params: { id: String(notice.id) } })}
-              >
-                <Eye className="size-4" />
-              </Button>
-
-              {/* 编辑 — 仅草稿 */}
-              {status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:update') && (
-                <Button variant="ghost" size="sm" onClick={() => handleEdit(notice.id ?? 0)}>
-                  <FilePenLine className="size-4" />
-                </Button>
-              )}
-
-              {/* 发布 — 仅草稿 */}
-              {status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:publish') && (
+            <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+              {/* 主操作：草稿→编辑，其他→详情 */}
+              {status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:update') ? (
                 <Button
-                  variant="ghost"
+                  variant="link"
                   size="sm"
-                  onClick={() => setConfirmAction({ type: 'publish', id: notice.id ?? 0 })}
+                  className="h-auto p-0 text-primary"
+                  onClick={() => handleEdit(notice.id ?? 0)}
                 >
-                  <Send className="size-4" />
+                  {t('action.edit')}
+                </Button>
+              ) : (
+                <Button
+                  variant="link"
+                  size="sm"
+                  className="h-auto p-0 text-primary"
+                  onClick={() =>
+                    navigate({ to: '/notices/$id', params: { id: String(notice.id) } })
+                  }
+                >
+                  {t('detail.title')}
                 </Button>
               )}
 
-              {/* 撤回 — 仅已发布 */}
-              {status === NOTICE_STATUS.PUBLISHED &&
-                user.hasPermission('notice:notice:publish') && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setConfirmAction({ type: 'revoke', id: notice.id ?? 0 })}
-                  >
-                    <Undo2 className="size-4" />
-                  </Button>
-                )}
-
-              {/* 复制为新建 — 已发布/已撤回 */}
-              {(status === NOTICE_STATUS.PUBLISHED || status === NOTICE_STATUS.REVOKED) &&
-                user.hasPermission('notice:notice:create') && (
-                  <Button variant="ghost" size="sm" onClick={() => handleDuplicate(notice.id ?? 0)}>
-                    <Copy className="size-4" />
-                  </Button>
-                )}
-
-              {/* 删除 — 草稿/已撤回 */}
-              {(status === NOTICE_STATUS.DRAFT || status === NOTICE_STATUS.REVOKED) &&
-                user.hasPermission('notice:notice:delete') && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setConfirmAction({ type: 'delete', id: notice.id ?? 0 })}
-                  >
-                    <Trash2 className="size-4 text-destructive" />
-                  </Button>
-                )}
+              {/* ⋯ 下拉次要操作 */}
+              {secondaryActions.length > 0 && (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="size-8">
+                      <MoreHorizontal className="size-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {secondaryActions.map((action) => {
+                      const Icon = action.icon;
+                      return (
+                        <DropdownMenuItem
+                          key={action.key}
+                          className={action.destructive ? 'text-destructive' : undefined}
+                          onClick={action.onClick}
+                        >
+                          <Icon className="mr-2 size-4" />
+                          {action.label}
+                        </DropdownMenuItem>
+                      );
+                    })}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             </div>
           );
         },
@@ -388,10 +441,26 @@ export function NoticeListPage() {
 
   // ─── 渲染 ──────────────────────────────────────────
   return (
-    <div className="space-y-4">
-      {/* 页头 */}
+    <div className="space-y-6">
+      {/* 面包屑 */}
+      <Breadcrumb>
+        <BreadcrumbList>
+          <BreadcrumbItem>
+            <BreadcrumbLink href="#">{t('breadcrumb.system')}</BreadcrumbLink>
+          </BreadcrumbItem>
+          <BreadcrumbSeparator />
+          <BreadcrumbItem>
+            <BreadcrumbPage>{t('breadcrumb.notice')}</BreadcrumbPage>
+          </BreadcrumbItem>
+        </BreadcrumbList>
+      </Breadcrumb>
+
+      {/* 页面 Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">{t('list.title')}</h1>
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
+          <p className="text-sm text-muted-foreground">{t('list.subtitle')}</p>
+        </div>
         <div className="flex items-center gap-2">
           {user.hasPermission('notice:notice:export') && (
             <Button variant="outline" size="sm" onClick={handleExport}>
@@ -408,59 +477,116 @@ export function NoticeListPage() {
         </div>
       </div>
 
-      {/* 筛选栏 */}
-      <NxFilter
-        value={filter}
-        defaultValue={DEFAULT_FILTER}
-        onChange={(next) => {
-          setFilter(next as NoticeFilter);
-          setPagination((prev) => ({ ...prev, page: 1 }));
-        }}
-        resetLabel={t('filter.reset')}
-        applyLabel={t('filter.search')}
-      >
-        <NxFilterField name="status" label={t('filter.status')}>
-          <Select>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder={t('filter.status')} />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="ALL">{t('common:all', { defaultValue: '全部' })}</SelectItem>
-              <SelectItem value="0">{t('status.draft')}</SelectItem>
-              <SelectItem value="1">{t('status.published')}</SelectItem>
-              <SelectItem value="2">{t('status.revoked')}</SelectItem>
-            </SelectContent>
-          </Select>
-        </NxFilterField>
-        <NxFilterField name="keyword" label={t('filter.keyword')}>
-          <Input placeholder={t('filter.keyword')} className="w-48" />
-        </NxFilterField>
-        <NxFilterField name="startTimeFrom" label={t('filter.startTimeFrom')}>
-          <Input type="date" className="w-40" />
-        </NxFilterField>
-        <NxFilterField name="startTimeTo" label={t('filter.startTimeTo')}>
-          <Input type="date" className="w-40" />
-        </NxFilterField>
-      </NxFilter>
+      {/* 即时筛选栏 */}
+      <div className="flex items-center gap-3 flex-wrap">
+        {/* 搜索框 */}
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder={t('filter.searchPlaceholder')}
+            className="w-64 pl-9"
+            value={keyword}
+            onChange={(e) => {
+              setKeyword(e.target.value);
+              setPagination((prev) => ({ ...prev, page: 1 }));
+            }}
+          />
+        </div>
 
-      {/* 数据表格 */}
-      <NxTable
-        data={notices}
-        columns={columns}
-        getRowId={(row) => String(row.id)}
-        loading={isLoading}
-        emptyText={t('list.empty')}
-        pagination={currentPagination}
-        onPaginationChange={setPagination}
-        paginationInfoTemplate={t('pagination.info', {
-          total: currentPagination.totalElements,
-          page: currentPagination.page,
-          pages: currentPagination.totalPages,
-        })}
-        rowSelection={rowSelection}
-        onRowSelectionChange={setRowSelection}
-        onRowClick={(row) => navigate({ to: '/notices/$id', params: { id: String(row.id) } })}
-      />
+        {/* 状态下拉 */}
+        <Select
+          value={statusFilter}
+          onValueChange={(v) => {
+            setStatusFilter(v);
+            setPagination((prev) => ({ ...prev, page: 1 }));
+          }}
+        >
+          <SelectTrigger className="w-36">
+            <SelectValue placeholder={t('filter.allStatus')} />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">{t('filter.allStatus')}</SelectItem>
+            <SelectItem value="0">{t('status.draft')}</SelectItem>
+            <SelectItem value="1">{t('status.published')}</SelectItem>
+            <SelectItem value="2">{t('status.revoked')}</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* 重置按钮 */}
+        <Button variant="link" size="sm" onClick={handleReset}>
+          {t('filter.reset')}
+        </Button>
+      </div>
+
+      {/* Card 包裹表格 + 分页 */}
+      <Card>
+        <CardContent className="p-0">
+          <NxTable
+            data={notices}
+            columns={columns}
+            getRowId={(row) => String(row.id)}
+            loading={isLoading}
+            emptyText={t('list.empty')}
+            rowSelection={rowSelection}
+            onRowSelectionChange={setRowSelection}
+            onRowClick={(row) =>
+              navigate({ to: '/notices/$id', params: { id: String(row.id) } })
+            }
+            className="[&_thead_tr]:bg-muted/50"
+          />
+
+          {/* 自定义分页栏 */}
+          <div className="flex items-center justify-between border-t px-4 py-3">
+            <span className="text-sm text-muted-foreground">
+              {selectedIds.length > 0
+                ? t('pagination.selected', { selected: selectedIds.length, total: totalElements })
+                : t('pagination.total', { total: totalElements })}
+            </span>
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-muted-foreground">{t('pagination.perPage')}</span>
+              <Select
+                value={String(pagination.size)}
+                onValueChange={(v) =>
+                  setPagination({ size: Number(v), page: 1 })
+                }
+              >
+                <SelectTrigger className="h-8 w-16">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="10">10</SelectItem>
+                  <SelectItem value="20">20</SelectItem>
+                  <SelectItem value="50">50</SelectItem>
+                </SelectContent>
+              </Select>
+              <span className="text-muted-foreground">
+                {t('pagination.pageInfo', {
+                  page: pagination.page,
+                  pages: totalPages || 1,
+                })}
+              </span>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                disabled={pagination.page <= 1}
+                onClick={() => setPagination((p) => ({ ...p, page: p.page - 1 }))}
+              >
+                <ChevronLeft className="size-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon"
+                className="size-8"
+                disabled={pagination.page >= totalPages}
+                onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))}
+              >
+                <ChevronRight className="size-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* 批量操作栏 */}
       <NxBar
@@ -485,12 +611,12 @@ export function NoticeListPage() {
         }
       />
 
-      {/* 新增/编辑抽屉 */}
-      <NoticeDrawer
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+      {/* 新增/编辑弹窗 */}
+      <NoticeDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
         noticeId={editingNoticeId}
-        onSuccess={handleDrawerSuccess}
+        onSuccess={handleDialogSuccess}
       />
 
       {/* 单条操作确认框 */}
