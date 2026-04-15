@@ -1,6 +1,7 @@
 package com.metabuild.platform.iam.domain.auth;
 
 import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.TooManyRequestsException;
 import com.metabuild.common.exception.UnauthorizedException;
 import com.metabuild.common.security.AuthFacade;
 import com.metabuild.common.security.DataScope;
@@ -76,7 +77,7 @@ public class AuthService implements AuthApi {
             int delaySeconds = failCount >= passwordPolicy.delayThreshold() * 2
                 ? passwordPolicy.longDelaySeconds()
                 : passwordPolicy.shortDelaySeconds();
-            throw new BusinessException("iam.auth.tooManyFailures", 429, delaySeconds);
+            throw new TooManyRequestsException("iam.auth.tooManyFailures", delaySeconds);
         }
 
         // 4. 查询用户
@@ -157,7 +158,7 @@ public class AuthService implements AuthApi {
 
         // 2. 查询用户，确保仍然有效
         MbIamUserRecord user = userRepository.findById(userId)
-                .orElseThrow(() -> new UnauthorizedException("errors.auth.refreshTokenInvalid"));
+                .orElseThrow(() -> new UnauthorizedException("auth.refreshTokenInvalid"));
 
         if (user.getStatus() == null || user.getStatus() == 0) {
             throw new BusinessException("iam.auth.userDisabled", 403);

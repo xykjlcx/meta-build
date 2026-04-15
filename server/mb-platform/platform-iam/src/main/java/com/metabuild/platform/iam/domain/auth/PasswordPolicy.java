@@ -27,10 +27,10 @@ public class PasswordPolicy {
 
         int len = password.length();
         if (len < props.minLength()) {
-            throw new BusinessException("iam.password.tooShort", 400, props.minLength());
+            throw new BusinessException("iam.password.tooShort", (Object) props.minLength());
         }
         if (len > props.maxLength()) {
-            throw new BusinessException("iam.password.tooLong", 400, props.maxLength());
+            throw new BusinessException("iam.password.tooLong", (Object) props.maxLength());
         }
         if (props.requireDigit() && !containsDigit(password)) {
             throw new BusinessException("iam.password.requireDigit", 400);

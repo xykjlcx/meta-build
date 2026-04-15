@@ -54,13 +54,13 @@ public class RefreshTokenService {
      */
     public Long validateAndRotate(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new UnauthorizedException("errors.auth.refreshTokenInvalid");
+            throw new UnauthorizedException("auth.refreshTokenInvalid");
         }
         String key = PREFIX + refreshToken;
         String userIdStr = redisTemplate.opsForValue().getAndDelete(key);
         if (userIdStr == null) {
             log.warn("Refresh token 无效或已过期: token={}...", refreshToken.substring(0, Math.min(8, refreshToken.length())));
-            throw new UnauthorizedException("errors.auth.refreshTokenInvalid");
+            throw new UnauthorizedException("auth.refreshTokenInvalid");
         }
         return Long.parseLong(userIdStr);
     }

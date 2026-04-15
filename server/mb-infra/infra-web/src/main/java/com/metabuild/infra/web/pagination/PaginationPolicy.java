@@ -24,10 +24,10 @@ public class PaginationPolicy {
         List<String> sort = normalizeSort(request.getSort());
 
         if (page < 1) {
-            throw new BusinessException("errors.common.pagination.invalidPage", 400);
+            throw new BusinessException("common.pagination.invalidPage");
         }
         if (size < 1 || size > props.maxSize()) {
-            throw new BusinessException("errors.common.pagination.invalidSize", 400, props.maxSize());
+            throw new BusinessException("common.pagination.invalidSize", (Object) props.maxSize());
         }
 
         return PageQuery.normalized(page, size, sort);

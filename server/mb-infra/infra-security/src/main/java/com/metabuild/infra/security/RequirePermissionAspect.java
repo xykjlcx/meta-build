@@ -29,7 +29,7 @@ public class RequirePermissionAspect {
                                   RequirePermission requirePermission) throws Throwable {
         // 第一步：确认已登录（防御纵深，全局拦截器未覆盖的场景）
         if (!StpUtil.isLogin()) {
-            throw new UnauthorizedException("errors.auth.unauthorized");
+            throw new UnauthorizedException("auth.unauthorized");
         }
 
         String[] codes = requirePermission.value();
@@ -45,7 +45,7 @@ public class RequirePermissionAspect {
         if (!granted) {
             log.warn("权限不足: userId={}, required={}, logic={}, actual={}",
                     currentUser.userId(), codes, logic, currentUser.permissions());
-            throw new ForbiddenException("errors.auth.forbidden");
+            throw new ForbiddenException("auth.forbidden");
         }
 
         return joinPoint.proceed();

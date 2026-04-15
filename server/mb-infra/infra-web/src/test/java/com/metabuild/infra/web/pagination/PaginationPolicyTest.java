@@ -44,7 +44,7 @@ class PaginationPolicyTest {
 
         assertThatThrownBy(() -> policy.normalize(request))
             .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("errors.common.pagination.invalidPage");
+            .hasMessageContaining("common.pagination.invalidPage");
     }
 
     @Test
@@ -54,6 +54,6 @@ class PaginationPolicyTest {
 
         assertThatThrownBy(() -> policy.normalize(request))
             .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("errors.common.pagination.invalidSize");
+            .hasMessageContaining("common.pagination.invalidSize");
     }
 }

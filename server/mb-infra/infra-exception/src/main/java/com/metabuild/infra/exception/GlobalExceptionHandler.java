@@ -68,7 +68,7 @@ public class GlobalExceptionHandler {
         var pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         pd.setTitle("Validation Failed");
         pd.setDetail("请求参数校验失败");
-        pd.setProperty("code", "errors.validation");
+        pd.setProperty("code", "validation");
         pd.setProperty("errors", errors);
         pd.setProperty("traceId", MDC.get("traceId"));
         return pd;
@@ -80,12 +80,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(org.jooq.exception.DataChangedException.class)
     public ProblemDetail handleOptimisticLock(org.jooq.exception.DataChangedException ex) {
         var locale = LocaleContextHolder.getLocale();
-        String message = messageSource.getMessage("errors.common.optimisticLock", null, "数据已被修改，请刷新后重试", locale);
+        String message = messageSource.getMessage("common.optimisticLock", null, "数据已被修改，请刷新后重试", locale);
 
         var pd = ProblemDetail.forStatus(HttpStatus.CONFLICT);
         pd.setTitle("Conflict");
         pd.setDetail(message);
-        pd.setProperty("code", "errors.common.optimisticLock");
+        pd.setProperty("code", "common.optimisticLock");
         pd.setProperty("traceId", MDC.get("traceId"));
         return pd;
     }
@@ -96,14 +96,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotLoginException.class)
     public ProblemDetail handleNotLogin(NotLoginException ex) {
         var locale = LocaleContextHolder.getLocale();
-        String message = messageSource.getMessage("errors.auth.unauthorized", null, "请先登录", locale);
+        String message = messageSource.getMessage("auth.unauthorized", null, "请先登录", locale);
 
         var pd = ProblemDetail.forStatus(HttpStatus.UNAUTHORIZED);
         pd.setTitle("Unauthorized");
         pd.setDetail(message);
-        pd.setProperty("code", "errors.auth.unauthorized");
+        pd.setProperty("code", "auth.unauthorized");
         pd.setProperty("traceId", MDC.get("traceId"));
-        log.warn("认证失败 [errors.auth.unauthorized]: {}", ex.getMessage());
+        log.warn("认证失败 [auth.unauthorized]: {}", ex.getMessage());
         return pd;
     }
 
@@ -113,14 +113,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotPermissionException.class)
     public ProblemDetail handleNotPermission(NotPermissionException ex) {
         var locale = LocaleContextHolder.getLocale();
-        String message = messageSource.getMessage("errors.auth.forbidden", null, "无操作权限", locale);
+        String message = messageSource.getMessage("auth.forbidden", null, "无操作权限", locale);
 
         var pd = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
         pd.setTitle("Forbidden");
         pd.setDetail(message);
-        pd.setProperty("code", "errors.auth.forbidden");
+        pd.setProperty("code", "auth.forbidden");
         pd.setProperty("traceId", MDC.get("traceId"));
-        log.warn("权限拒绝 [errors.auth.forbidden]: permission={}", ex.getPermission());
+        log.warn("权限拒绝 [auth.forbidden]: permission={}", ex.getPermission());
         return pd;
     }
 
@@ -130,15 +130,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DisableServiceException.class)
     public ProblemDetail handleDisableService(DisableServiceException ex) {
         var locale = LocaleContextHolder.getLocale();
-        String message = messageSource.getMessage("errors.auth.accountDisabled", null, "账号已被封禁", locale);
+        String message = messageSource.getMessage("auth.accountDisabled", null, "账号已被封禁", locale);
 
         var pd = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
         pd.setTitle("Forbidden");
         pd.setDetail(message);
-        pd.setProperty("code", "errors.auth.accountDisabled");
+        pd.setProperty("code", "auth.accountDisabled");
         pd.setProperty("disableTime", ex.getDisableTime());
         pd.setProperty("traceId", MDC.get("traceId"));
-        log.warn("账号封禁 [errors.auth.accountDisabled]: service={}, level={}", ex.getService(), ex.getLevel());
+        log.warn("账号封禁 [auth.accountDisabled]: service={}, level={}", ex.getService(), ex.getLevel());
         return pd;
     }
 
@@ -148,14 +148,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(NotRoleException.class)
     public ProblemDetail handleNotRole(NotRoleException ex) {
         var locale = LocaleContextHolder.getLocale();
-        String message = messageSource.getMessage("errors.auth.forbidden", null, "无操作权限", locale);
+        String message = messageSource.getMessage("auth.forbidden", null, "无操作权限", locale);
 
         var pd = ProblemDetail.forStatus(HttpStatus.FORBIDDEN);
         pd.setTitle("Forbidden");
         pd.setDetail(message);
-        pd.setProperty("code", "errors.auth.forbidden");
+        pd.setProperty("code", "auth.forbidden");
         pd.setProperty("traceId", MDC.get("traceId"));
-        log.warn("角色拒绝 [errors.auth.forbidden]: role={}", ex.getRole());
+        log.warn("角色拒绝 [auth.forbidden]: role={}", ex.getRole());
         return pd;
     }
 
@@ -169,7 +169,7 @@ public class GlobalExceptionHandler {
         var pd = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         pd.setTitle("Internal Server Error");
         pd.setDetail("系统内部错误，请稍后重试");
-        pd.setProperty("code", "errors.system.internal");
+        pd.setProperty("code", "system.internal");
         pd.setProperty("traceId", MDC.get("traceId"));
         return pd;
     }

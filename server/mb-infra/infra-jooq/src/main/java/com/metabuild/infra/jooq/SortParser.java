@@ -127,7 +127,7 @@ public class SortParser {
             }
 
             if (field == null) {
-                throw new BusinessException("common.pagination.invalidSortField", 400, fieldName);
+                throw new BusinessException("common.pagination.invalidSortField", fieldName);
             }
 
             return ascending ? field.asc() : field.desc();

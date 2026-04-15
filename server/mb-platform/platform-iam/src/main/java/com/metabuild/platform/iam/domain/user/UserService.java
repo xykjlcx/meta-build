@@ -166,7 +166,7 @@ public class UserService implements UserApi {
             .anyMatch(hash -> passwordEncoder.matches(newPassword, hash));
 
         if (isReused) {
-            throw new BusinessException("iam.auth.passwordReused", 400, passwordPolicy.historyCount());
+            throw new BusinessException("iam.auth.passwordReused", (Object) passwordPolicy.historyCount());
         }
     }
 
