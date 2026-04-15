@@ -32,18 +32,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `oplog:log:list`
  */
-export type list5Response200 = {
-  data: PageResultOperationLogView
-  status: 200
-}
-    
-export type list5ResponseSuccess = (list5Response200) & {
-  headers: Headers;
-};
-;
-
-export type list5Response = (list5ResponseSuccess)
-
 export const getList5Url = (params: List5Params,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -59,9 +47,9 @@ export const getList5Url = (params: List5Params,) => {
   return stringifiedParams.length > 0 ? `/api/v1/oplog?${stringifiedParams}` : `/api/v1/oplog`
 }
 
-export const list5 = async (params: List5Params, options?: RequestInit): Promise<list5Response> => {
+export const list5 = async (params: List5Params, options?: RequestInit): Promise<PageResultOperationLogView> => {
   
-  return customInstance<list5Response>(getList5Url(params),
+  return customInstance<PageResultOperationLogView>(getList5Url(params),
   {      
     ...options,
     method: 'GET'

@@ -494,7 +494,7 @@ export const Route = createFileRoute('/_authed/orders/')({
 
 ### 3.4 MUST #4：L5 业务代码必须通过 `@mb/api-sdk` 调后端 [M3]
 
-**必做内容**：`apps/web-admin/src/features/**` 里的所有 API 调用必须通过 `@mb/api-sdk`（由 OpenAPI Generator 从后端 springdoc 生成的 TypeScript 客户端）。禁止手写 `fetch` / `axios` / `ky` / `got` 等 HTTP 请求。
+**必做内容**：`apps/web-admin/src/features/**` 里的所有 API 调用必须通过 `@mb/api-sdk`（由 orval 基于后端 springdoc/OpenAPI 生成的 TypeScript 客户端）。禁止手写 `fetch` / `axios` / `ky` / `got` 等 HTTP 请求。
 
 **具体示例**：
 
@@ -891,7 +891,7 @@ export default defineConfig({
   webServer: {
     command: 'pnpm dev',
     url: 'http://localhost:5173',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
   },
 });
 ```

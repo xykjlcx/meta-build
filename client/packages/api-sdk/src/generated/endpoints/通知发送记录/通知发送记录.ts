@@ -33,18 +33,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 **权限:** `notice:notice:detail`
  * @summary 按模块和关联 ID 查询发送记录
  */
-export type findByModuleAndRefResponse200 = {
-  data: NotificationLogView[]
-  status: 200
-}
-    
-export type findByModuleAndRefResponseSuccess = (findByModuleAndRefResponse200) & {
-  headers: Headers;
-};
-;
-
-export type findByModuleAndRefResponse = (findByModuleAndRefResponseSuccess)
-
 export const getFindByModuleAndRefUrl = (params: FindByModuleAndRefParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -60,9 +48,9 @@ export const getFindByModuleAndRefUrl = (params: FindByModuleAndRefParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/notification-logs?${stringifiedParams}` : `/api/v1/notification-logs`
 }
 
-export const findByModuleAndRef = async (params: FindByModuleAndRefParams, options?: RequestInit): Promise<findByModuleAndRefResponse> => {
+export const findByModuleAndRef = async (params: FindByModuleAndRefParams, options?: RequestInit): Promise<NotificationLogView[]> => {
   
-  return customInstance<findByModuleAndRefResponse>(getFindByModuleAndRefUrl(params),
+  return customInstance<NotificationLogView[]>(getFindByModuleAndRefUrl(params),
   {      
     ...options,
     method: 'GET'

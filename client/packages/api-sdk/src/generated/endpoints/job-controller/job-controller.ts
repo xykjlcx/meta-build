@@ -32,18 +32,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `job:log:list`
  */
-export type listLogsResponse200 = {
-  data: PageResultJobLogView
-  status: 200
-}
-    
-export type listLogsResponseSuccess = (listLogsResponse200) & {
-  headers: Headers;
-};
-;
-
-export type listLogsResponse = (listLogsResponseSuccess)
-
 export const getListLogsUrl = (params: ListLogsParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -59,9 +47,9 @@ export const getListLogsUrl = (params: ListLogsParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/jobs/logs?${stringifiedParams}` : `/api/v1/jobs/logs`
 }
 
-export const listLogs = async (params: ListLogsParams, options?: RequestInit): Promise<listLogsResponse> => {
+export const listLogs = async (params: ListLogsParams, options?: RequestInit): Promise<PageResultJobLogView> => {
   
-  return customInstance<listLogsResponse>(getListLogsUrl(params),
+  return customInstance<PageResultJobLogView>(getListLogsUrl(params),
   {      
     ...options,
     method: 'GET'

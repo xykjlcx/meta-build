@@ -36,18 +36,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `iam:dept:list`
  */
-export type tree1Response200 = {
-  data: DeptView[]
-  status: 200
-}
-    
-export type tree1ResponseSuccess = (tree1Response200) & {
-  headers: Headers;
-};
-;
-
-export type tree1Response = (tree1ResponseSuccess)
-
 export const getTree1Url = () => {
 
 
@@ -56,9 +44,9 @@ export const getTree1Url = () => {
   return `/api/v1/depts`
 }
 
-export const tree1 = async ( options?: RequestInit): Promise<tree1Response> => {
+export const tree1 = async ( options?: RequestInit): Promise<DeptView[]> => {
   
-  return customInstance<tree1Response>(getTree1Url(),
+  return customInstance<DeptView[]>(getTree1Url(),
   {      
     ...options,
     method: 'GET'
@@ -123,18 +111,6 @@ export function useTree1<TData = Awaited<ReturnType<typeof tree1>>, TError = unk
 
 **权限:** `iam:dept:create`
  */
-export type create5Response201 = {
-  data: DeptView
-  status: 201
-}
-    
-export type create5ResponseSuccess = (create5Response201) & {
-  headers: Headers;
-};
-;
-
-export type create5Response = (create5ResponseSuccess)
-
 export const getCreate5Url = () => {
 
 
@@ -143,9 +119,9 @@ export const getCreate5Url = () => {
   return `/api/v1/depts`
 }
 
-export const create5 = async (deptCreateCommand: DeptCreateCommand, options?: RequestInit): Promise<create5Response> => {
+export const create5 = async (deptCreateCommand: DeptCreateCommand, options?: RequestInit): Promise<DeptView> => {
   
-  return customInstance<create5Response>(getCreate5Url(),
+  return customInstance<DeptView>(getCreate5Url(),
   {      
     ...options,
     method: 'POST',
@@ -205,18 +181,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:dept:detail`
  */
-export type getById3Response200 = {
-  data: DeptView
-  status: 200
-}
-    
-export type getById3ResponseSuccess = (getById3Response200) & {
-  headers: Headers;
-};
-;
-
-export type getById3Response = (getById3ResponseSuccess)
-
 export const getGetById3Url = (id: number,) => {
 
 
@@ -225,9 +189,9 @@ export const getGetById3Url = (id: number,) => {
   return `/api/v1/depts/${id}`
 }
 
-export const getById3 = async (id: number, options?: RequestInit): Promise<getById3Response> => {
+export const getById3 = async (id: number, options?: RequestInit): Promise<DeptView> => {
   
-  return customInstance<getById3Response>(getGetById3Url(id),
+  return customInstance<DeptView>(getGetById3Url(id),
   {      
     ...options,
     method: 'GET'
@@ -292,18 +256,6 @@ export function useGetById3<TData = Awaited<ReturnType<typeof getById3>>, TError
 
 **权限:** `iam:dept:delete`
  */
-export type delete4Response204 = {
-  data: void
-  status: 204
-}
-    
-export type delete4ResponseSuccess = (delete4Response204) & {
-  headers: Headers;
-};
-;
-
-export type delete4Response = (delete4ResponseSuccess)
-
 export const getDelete4Url = (id: number,) => {
 
 
@@ -312,9 +264,9 @@ export const getDelete4Url = (id: number,) => {
   return `/api/v1/depts/${id}`
 }
 
-export const delete4 = async (id: number, options?: RequestInit): Promise<delete4Response> => {
+export const delete4 = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<delete4Response>(getDelete4Url(id),
+  return customInstance<void>(getDelete4Url(id),
   {      
     ...options,
     method: 'DELETE'

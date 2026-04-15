@@ -58,9 +58,7 @@ export function NoticeDetailPage() {
   });
 
   // orval 响应结构：{ data: NoticeDetailView, status, headers }
-  const notice: NoticeDetailView | undefined = (
-    detailResponse as { data?: NoticeDetailView } | undefined
-  )?.data;
+  const notice: NoticeDetailView | undefined = detailResponse;
 
   // 标记已读 — 使用 ref 避免 exhaustive-deps 重复触发
   const markReadMutation = useMarkRead();
@@ -108,7 +106,7 @@ export function NoticeDetailPage() {
       {
         onSuccess: () => {
           invalidateAll();
-          navigate({ to: '/notices' });
+          navigate({ to: '/notices', search: { edit: undefined } });
         },
       },
     );
@@ -142,7 +140,7 @@ export function NoticeDetailPage() {
         onSuccess: (result) => {
           invalidateAll();
           toast.success(t('action.duplicate'));
-          const newId = (result as { data?: { id?: number } })?.data?.id;
+          const newId = result?.id;
           if (newId) {
             navigate({ to: '/notices/$id', params: { id: String(newId) } });
           }
@@ -176,7 +174,12 @@ export function NoticeDetailPage() {
       {/* Header：返回按钮 + 标题 + 操作按钮 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate({ to: '/notices' })}>
+          <Button
+            variant="ghost"
+            size="icon"
+            aria-label={t('detail.backToList')}
+            onClick={() => navigate({ to: '/notices', search: { edit: undefined } })}
+          >
             <ArrowLeft className="size-4" />
           </Button>
           <h1 className="text-xl font-semibold">{t('detail.title')}</h1>

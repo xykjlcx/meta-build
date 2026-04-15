@@ -37,18 +37,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `notification:notification:list`
  */
-export type list3Response200 = {
-  data: PageResultNotificationView
-  status: 200
-}
-    
-export type list3ResponseSuccess = (list3Response200) & {
-  headers: Headers;
-};
-;
-
-export type list3Response = (list3ResponseSuccess)
-
 export const getList3Url = (params: List3Params,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -64,9 +52,9 @@ export const getList3Url = (params: List3Params,) => {
   return stringifiedParams.length > 0 ? `/api/v1/notifications?${stringifiedParams}` : `/api/v1/notifications`
 }
 
-export const list3 = async (params: List3Params, options?: RequestInit): Promise<list3Response> => {
+export const list3 = async (params: List3Params, options?: RequestInit): Promise<PageResultNotificationView> => {
   
-  return customInstance<list3Response>(getList3Url(params),
+  return customInstance<PageResultNotificationView>(getList3Url(params),
   {      
     ...options,
     method: 'GET'
@@ -131,18 +119,6 @@ export function useList3<TData = Awaited<ReturnType<typeof list3>>, TError = unk
 
 **权限:** `notification:notification:create`
  */
-export type create2Response201 = {
-  data: number
-  status: 201
-}
-    
-export type create2ResponseSuccess = (create2Response201) & {
-  headers: Headers;
-};
-;
-
-export type create2Response = (create2ResponseSuccess)
-
 export const getCreate2Url = () => {
 
 
@@ -151,9 +127,9 @@ export const getCreate2Url = () => {
   return `/api/v1/notifications`
 }
 
-export const create2 = async (notificationCreateCommand: NotificationCreateCommand, options?: RequestInit): Promise<create2Response> => {
+export const create2 = async (notificationCreateCommand: NotificationCreateCommand, options?: RequestInit): Promise<number> => {
   
-  return customInstance<create2Response>(getCreate2Url(),
+  return customInstance<number>(getCreate2Url(),
   {      
     ...options,
     method: 'POST',
@@ -213,18 +189,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `notification:notification:read`
  */
-export type markRead1Response200 = {
-  data: void
-  status: 200
-}
-    
-export type markRead1ResponseSuccess = (markRead1Response200) & {
-  headers: Headers;
-};
-;
-
-export type markRead1Response = (markRead1ResponseSuccess)
-
 export const getMarkRead1Url = (id: number,) => {
 
 
@@ -233,9 +197,9 @@ export const getMarkRead1Url = (id: number,) => {
   return `/api/v1/notifications/${id}/read`
 }
 
-export const markRead1 = async (id: number, options?: RequestInit): Promise<markRead1Response> => {
+export const markRead1 = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<markRead1Response>(getMarkRead1Url(id),
+  return customInstance<void>(getMarkRead1Url(id),
   {      
     ...options,
     method: 'POST'
@@ -294,18 +258,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `notification:notification:delete`
  */
-export type delete6Response204 = {
-  data: void
-  status: 204
-}
-    
-export type delete6ResponseSuccess = (delete6Response204) & {
-  headers: Headers;
-};
-;
-
-export type delete6Response = (delete6ResponseSuccess)
-
 export const getDelete6Url = (id: number,) => {
 
 
@@ -314,9 +266,9 @@ export const getDelete6Url = (id: number,) => {
   return `/api/v1/notifications/${id}`
 }
 
-export const delete6 = async (id: number, options?: RequestInit): Promise<delete6Response> => {
+export const delete6 = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<delete6Response>(getDelete6Url(id),
+  return customInstance<void>(getDelete6Url(id),
   {      
     ...options,
     method: 'DELETE'

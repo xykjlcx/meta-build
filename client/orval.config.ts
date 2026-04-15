@@ -13,6 +13,9 @@ export default defineConfig({
       mode: 'tags-split',
       mock: true,
       override: {
+        fetch: {
+          includeHttpResponseReturnType: false,
+        },
         mutator: {
           path: './packages/api-sdk/src/mutator/custom-instance.ts',
           name: 'customInstance',

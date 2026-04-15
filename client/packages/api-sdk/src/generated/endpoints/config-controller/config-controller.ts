@@ -38,18 +38,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `config:config:list`
  */
-export type listResponse200 = {
-  data: PageResultConfigView
-  status: 200
-}
-    
-export type listResponseSuccess = (listResponse200) & {
-  headers: Headers;
-};
-;
-
-export type listResponse = (listResponseSuccess)
-
 export const getListUrl = (params: ListParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -65,9 +53,9 @@ export const getListUrl = (params: ListParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/configs?${stringifiedParams}` : `/api/v1/configs`
 }
 
-export const list = async (params: ListParams, options?: RequestInit): Promise<listResponse> => {
+export const list = async (params: ListParams, options?: RequestInit): Promise<PageResultConfigView> => {
   
-  return customInstance<listResponse>(getListUrl(params),
+  return customInstance<PageResultConfigView>(getListUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -132,18 +120,6 @@ export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unkno
 
 **权限:** `config:config:set`
  */
-export type setResponse200 = {
-  data: void
-  status: 200
-}
-    
-export type setResponseSuccess = (setResponse200) & {
-  headers: Headers;
-};
-;
-
-export type setResponse = (setResponseSuccess)
-
 export const getSetUrl = () => {
 
 
@@ -152,9 +128,9 @@ export const getSetUrl = () => {
   return `/api/v1/configs`
 }
 
-export const set = async (configSetCommand: ConfigSetCommand, options?: RequestInit): Promise<setResponse> => {
+export const set = async (configSetCommand: ConfigSetCommand, options?: RequestInit): Promise<void> => {
   
-  return customInstance<setResponse>(getSetUrl(),
+  return customInstance<void>(getSetUrl(),
   {      
     ...options,
     method: 'PUT',
@@ -214,18 +190,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `config:config:detail`
  */
-export type getByKeyResponse200 = {
-  data: ConfigView
-  status: 200
-}
-    
-export type getByKeyResponseSuccess = (getByKeyResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getByKeyResponse = (getByKeyResponseSuccess)
-
 export const getGetByKeyUrl = (key: string,) => {
 
 
@@ -234,9 +198,9 @@ export const getGetByKeyUrl = (key: string,) => {
   return `/api/v1/configs/${key}`
 }
 
-export const getByKey = async (key: string, options?: RequestInit): Promise<getByKeyResponse> => {
+export const getByKey = async (key: string, options?: RequestInit): Promise<ConfigView> => {
   
-  return customInstance<getByKeyResponse>(getGetByKeyUrl(key),
+  return customInstance<ConfigView>(getGetByKeyUrl(key),
   {      
     ...options,
     method: 'GET'
@@ -301,18 +265,6 @@ export function useGetByKey<TData = Awaited<ReturnType<typeof getByKey>>, TError
 
 **权限:** `config:config:delete`
  */
-export type delete5Response204 = {
-  data: void
-  status: 204
-}
-    
-export type delete5ResponseSuccess = (delete5Response204) & {
-  headers: Headers;
-};
-;
-
-export type delete5Response = (delete5ResponseSuccess)
-
 export const getDelete5Url = (key: string,) => {
 
 
@@ -321,9 +273,9 @@ export const getDelete5Url = (key: string,) => {
   return `/api/v1/configs/${key}`
 }
 
-export const delete5 = async (key: string, options?: RequestInit): Promise<delete5Response> => {
+export const delete5 = async (key: string, options?: RequestInit): Promise<void> => {
   
-  return customInstance<delete5Response>(getDelete5Url(key),
+  return customInstance<void>(getDelete5Url(key),
   {      
     ...options,
     method: 'DELETE'

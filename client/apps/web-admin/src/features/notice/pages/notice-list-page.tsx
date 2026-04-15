@@ -1,4 +1,6 @@
+import { triggerDownload } from '@mb/api-sdk';
 import {
+  getExportUrl,
   getList4QueryKey,
   getUnreadCountQueryKey,
   useBatchDelete,
@@ -10,6 +12,7 @@ import {
   useRevoke,
 } from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
 import type { NoticeView } from '@mb/api-sdk/generated/models';
+import { customInstance } from '@mb/api-sdk/mutator/custom-instance';
 import { useCurrentUser } from '@mb/app-shell';
 import { NxBar, NxTable } from '@mb/ui-patterns';
 import {
@@ -43,7 +46,7 @@ import {
   cn,
 } from '@mb/ui-primitives';
 import { useQueryClient } from '@tanstack/react-query';
-import { Link, useNavigate } from '@tanstack/react-router';
+import { Link, useNavigate, useSearch } from '@tanstack/react-router';
 import type { ColumnDef, RowSelectionState } from '@tanstack/react-table';
 import {
   ChevronLeft,
@@ -76,136 +79,13 @@ function useDebounced<T>(value: T, delay: number): T {
   return debounced;
 }
 
-// ─── 行操作子组件(抽出以避免主组件 cell 函数复杂度超标)────────────
-type NoticeRowActionsProps = {
-  notice: NoticeView;
-  t: ReturnType<typeof useTranslation>['t'];
-  user: ReturnType<typeof useCurrentUser>;
-  navigate: ReturnType<typeof useNavigate>;
-  handleEdit: (id: number) => void;
-  handleDuplicate: (id: number) => void;
-  setConfirmAction: (value: { type: 'delete' | 'publish' | 'revoke'; id: number } | null) => void;
-};
-
-function NoticeRowActions({
-  notice,
-  t,
-  user,
-  navigate,
-  handleEdit,
-  handleDuplicate,
-  setConfirmAction,
-}: NoticeRowActionsProps) {
-  const status = notice.status as NoticeStatusValue;
-
-  // 收集次要操作
-  const secondaryActions: Array<{
-    key: string;
-    icon: typeof Send;
-    label: string;
-    onClick: () => void;
-    destructive?: boolean;
-  }> = [];
-
-  if (status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:publish')) {
-    secondaryActions.push({
-      key: 'publish',
-      icon: Send,
-      label: t('action.publish'),
-      onClick: () => setConfirmAction({ type: 'publish', id: notice.id ?? 0 }),
-    });
-  }
-  if (
-    (status === NOTICE_STATUS.PUBLISHED || status === NOTICE_STATUS.REVOKED) &&
-    user.hasPermission('notice:notice:create')
-  ) {
-    secondaryActions.push({
-      key: 'duplicate',
-      icon: Copy,
-      label: t('action.duplicate'),
-      onClick: () => handleDuplicate(notice.id ?? 0),
-    });
-  }
-  if (status === NOTICE_STATUS.PUBLISHED && user.hasPermission('notice:notice:publish')) {
-    secondaryActions.push({
-      key: 'revoke',
-      icon: Undo2,
-      label: t('action.revoke'),
-      onClick: () => setConfirmAction({ type: 'revoke', id: notice.id ?? 0 }),
-    });
-  }
-  if (
-    (status === NOTICE_STATUS.DRAFT || status === NOTICE_STATUS.REVOKED) &&
-    user.hasPermission('notice:notice:delete')
-  ) {
-    secondaryActions.push({
-      key: 'delete',
-      icon: Trash2,
-      label: t('action.delete'),
-      onClick: () => setConfirmAction({ type: 'delete', id: notice.id ?? 0 }),
-      destructive: true,
-    });
-  }
-
-  return (
-    // biome-ignore lint/a11y/useKeyWithClickEvents: 操作列 stopPropagation 防止触发行点击
-    <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-      {/* 主操作:草稿→编辑,其他→详情 */}
-      {status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:update') ? (
-        <Button
-          variant="link"
-          size="sm"
-          className="h-auto p-0 text-primary"
-          onClick={() => handleEdit(notice.id ?? 0)}
-        >
-          {t('action.edit')}
-        </Button>
-      ) : (
-        <Button
-          variant="link"
-          size="sm"
-          className="h-auto p-0 text-primary"
-          onClick={() => navigate({ to: '/notices/$id', params: { id: String(notice.id) } })}
-        >
-          {t('detail.title')}
-        </Button>
-      )}
-
-      {/* ⋯ 下拉次要操作 */}
-      {secondaryActions.length > 0 && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="size-8">
-              <MoreHorizontal className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {secondaryActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <DropdownMenuItem
-                  key={action.key}
-                  className={action.destructive ? 'text-destructive' : undefined}
-                  onClick={action.onClick}
-                >
-                  <Icon className="mr-2 size-4" />
-                  {action.label}
-                </DropdownMenuItem>
-              );
-            })}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-    </div>
-  );
-}
-
 // ─── 列表页组件 ─────────────────────────────────────────
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 列表页包含筛选/批量操作/权限条件渲染
 export function NoticeListPage() {
   const { t } = useTranslation('notice');
   const user = useCurrentUser();
   const navigate = useNavigate();
+  const search = useSearch({ from: '/_authed/notices/' });
   const queryClient = useQueryClient();
 
   // ─── 筛选状态 ───────────────────────────────────────
@@ -224,10 +104,7 @@ export function NoticeListPage() {
   const [editingNoticeId, setEditingNoticeId] = useState<number | null>(null);
 
   // 单条操作确认框
-  const [confirmAction, setConfirmAction] = useState<{
-    type: 'delete' | 'publish' | 'revoke';
-    id: number;
-  } | null>(null);
+  const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
 
   // 批量操作确认框
   const [batchConfirm, setBatchConfirm] = useState<{
@@ -247,10 +124,9 @@ export function NoticeListPage() {
   });
 
   // 从响应中提取数据和分页信息
-  const notices: NoticeView[] =
-    (data as { data?: { content?: NoticeView[] } })?.data?.content ?? [];
-  const totalElements = (data as { data?: { totalElements?: number } })?.data?.totalElements ?? 0;
-  const totalPages = (data as { data?: { totalPages?: number } })?.data?.totalPages ?? 0;
+  const notices: NoticeView[] = data?.content ?? [];
+  const totalElements = data?.totalElements ?? 0;
+  const totalPages = data?.totalPages ?? 0;
 
   // ─── Mutations ──────────────────────────────────────
   const deleteMutation = useDelete2();
@@ -348,11 +224,16 @@ export function NoticeListPage() {
 
   // ─── 导出 ──────────────────────────────────────────
   const handleExport = useCallback(() => {
-    const params = new URLSearchParams();
-    if (statusFilter !== 'ALL') params.set('status', statusFilter);
-    if (debouncedKeyword) params.set('keyword', debouncedKeyword);
-    const qs = params.toString();
-    window.open(`/api/v1/notices/export${qs ? `?${qs}` : ''}`, '_blank');
+    const exportParams = {
+      status: statusFilter !== 'ALL' ? Number(statusFilter) : undefined,
+      keyword: debouncedKeyword || undefined,
+    };
+    void customInstance<Blob>(getExportUrl(exportParams), {
+      method: 'GET',
+      responseType: 'blob',
+    }).then((blob) => {
+      triggerDownload(blob, 'notices.xlsx');
+    });
   }, [statusFilter, debouncedKeyword]);
 
   // ─── 新增/编辑 ─────────────────────────────────────
@@ -370,7 +251,28 @@ export function NoticeListPage() {
     setDialogOpen(false);
     setEditingNoticeId(null);
     invalidateNotices();
-  }, [invalidateNotices]);
+    if (search.edit) {
+      navigate({ to: '/notices', search: { edit: undefined }, replace: true });
+    }
+  }, [invalidateNotices, navigate, search.edit]);
+
+  useEffect(() => {
+    if (search.edit && Number.isFinite(search.edit)) {
+      setEditingNoticeId(search.edit);
+      setDialogOpen(true);
+    }
+  }, [search.edit]);
+
+  const handleDialogOpenChange = useCallback(
+    (open: boolean) => {
+      setDialogOpen(open);
+      if (!open && search.edit) {
+        setEditingNoticeId(null);
+        navigate({ to: '/notices', search: { edit: undefined }, replace: true });
+      }
+    },
+    [navigate, search.edit],
+  );
 
   // ─── 筛选重置 ───────────────────────────────────────
   const handleReset = useCallback(() => {
@@ -457,12 +359,12 @@ export function NoticeListPage() {
         cell: ({ row }) => (
           <NoticeRowActions
             notice={row.original}
-            t={t}
+            t={t as Translate}
             user={user}
-            navigate={navigate}
-            handleEdit={handleEdit}
-            handleDuplicate={handleDuplicate}
-            setConfirmAction={setConfirmAction}
+            navigateToDetail={(id) => navigate({ to: '/notices/$id', params: { id: String(id) } })}
+            onEdit={handleEdit}
+            onDuplicate={handleDuplicate}
+            onConfirmAction={(action) => setConfirmAction(action)}
           />
         ),
       },
@@ -500,7 +402,7 @@ export function NoticeListPage() {
             </Button>
           )}
           {user.hasPermission('notice:notice:create') && (
-            <Button size="sm" onClick={handleCreate}>
+            <Button size="sm" onClick={handleCreate} data-testid="notice-create-button">
               <Plus className="mr-1 size-4" />
               {t('action.create')}
             </Button>
@@ -514,6 +416,7 @@ export function NoticeListPage() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
+            data-testid="notice-search-input"
             placeholder={t('filter.searchPlaceholder')}
             className="w-64 pl-9"
             value={keyword}
@@ -532,7 +435,7 @@ export function NoticeListPage() {
             setPagination((prev) => ({ ...prev, page: 1 }));
           }}
         >
-          <SelectTrigger className="w-36">
+          <SelectTrigger className="w-36" data-testid="notice-status-filter">
             <SelectValue placeholder={t('filter.allStatus')} />
           </SelectTrigger>
           <SelectContent>
@@ -641,7 +544,7 @@ export function NoticeListPage() {
       {/* 新增/编辑弹窗 */}
       <NoticeDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={handleDialogOpenChange}
         noticeId={editingNoticeId}
         onSuccess={handleDialogSuccess}
       />
@@ -690,3 +593,170 @@ export function NoticeListPage() {
     </div>
   );
 }
+
+type ConfirmAction = {
+  type: 'delete' | 'publish' | 'revoke';
+  id: number;
+};
+
+interface NoticeRowAction {
+  key: string;
+  icon: typeof Send;
+  label: string;
+  onClick: () => void;
+  destructive?: boolean;
+}
+
+function NoticeRowActions({
+  notice,
+  t,
+  user,
+  navigateToDetail,
+  onEdit,
+  onDuplicate,
+  onConfirmAction,
+}: {
+  notice: NoticeView;
+  t: Translate;
+  user: ReturnType<typeof useCurrentUser>;
+  navigateToDetail: (id: number) => void;
+  onEdit: (id: number) => void;
+  onDuplicate: (id: number) => void;
+  onConfirmAction: (action: ConfirmAction) => void;
+}) {
+  const noticeId = notice.id ?? 0;
+  const status = notice.status as NoticeStatusValue;
+  const secondaryActions = buildSecondaryActions({
+    noticeId,
+    status,
+    t,
+    user,
+    onDuplicate,
+    onConfirmAction,
+  });
+
+  const primaryAction =
+    status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:update')
+      ? {
+          label: t('action.edit'),
+          onClick: () => onEdit(noticeId),
+          testId: `notice-action-edit-${noticeId}`,
+        }
+      : {
+          label: t('detail.title'),
+          onClick: () => navigateToDetail(noticeId),
+          testId: `notice-action-detail-${noticeId}`,
+        };
+
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: 操作列 stopPropagation 防止触发行点击
+    <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+      <Button
+        variant="link"
+        size="sm"
+        className="h-auto p-0 text-primary"
+        onClick={primaryAction.onClick}
+        data-testid={primaryAction.testId}
+      >
+        {primaryAction.label}
+      </Button>
+
+      {secondaryActions.length > 0 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8"
+              aria-label={t('common:actions', { defaultValue: '操作' })}
+              data-testid={`notice-actions-menu-${noticeId}`}
+            >
+              <MoreHorizontal className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {secondaryActions.map((action) => {
+              const Icon = action.icon;
+              return (
+                <DropdownMenuItem
+                  key={action.key}
+                  className={action.destructive ? 'text-destructive' : undefined}
+                  onClick={action.onClick}
+                  data-testid={`notice-action-${action.key}-${noticeId}`}
+                >
+                  <Icon className="mr-2 size-4" />
+                  {action.label}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
+  );
+}
+
+function buildSecondaryActions({
+  noticeId,
+  status,
+  t,
+  user,
+  onDuplicate,
+  onConfirmAction,
+}: {
+  noticeId: number;
+  status: NoticeStatusValue;
+  t: Translate;
+  user: ReturnType<typeof useCurrentUser>;
+  onDuplicate: (id: number) => void;
+  onConfirmAction: (action: ConfirmAction) => void;
+}): NoticeRowAction[] {
+  const actions: NoticeRowAction[] = [];
+
+  if (status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:publish')) {
+    actions.push({
+      key: 'publish',
+      icon: Send,
+      label: t('action.publish'),
+      onClick: () => onConfirmAction({ type: 'publish', id: noticeId }),
+    });
+  }
+
+  if (
+    (status === NOTICE_STATUS.PUBLISHED || status === NOTICE_STATUS.REVOKED) &&
+    user.hasPermission('notice:notice:create')
+  ) {
+    actions.push({
+      key: 'duplicate',
+      icon: Copy,
+      label: t('action.duplicate'),
+      onClick: () => onDuplicate(noticeId),
+    });
+  }
+
+  if (status === NOTICE_STATUS.PUBLISHED && user.hasPermission('notice:notice:publish')) {
+    actions.push({
+      key: 'revoke',
+      icon: Undo2,
+      label: t('action.revoke'),
+      onClick: () => onConfirmAction({ type: 'revoke', id: noticeId }),
+    });
+  }
+
+  if (
+    (status === NOTICE_STATUS.DRAFT || status === NOTICE_STATUS.REVOKED) &&
+    user.hasPermission('notice:notice:delete')
+  ) {
+    actions.push({
+      key: 'delete',
+      icon: Trash2,
+      label: t('action.delete'),
+      onClick: () => onConfirmAction({ type: 'delete', id: noticeId }),
+      destructive: true,
+    });
+  }
+
+  return actions;
+}
+
+type Translate = (key: string, options?: Record<string, unknown>) => string;

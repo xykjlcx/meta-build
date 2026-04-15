@@ -37,18 +37,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * 微信 OAuth 授权回调后，用 code + state 完成绑定
  * @summary 公众号绑定
  */
-export type bindMpResponse201 = {
-  data: WeChatBindingView
-  status: 201
-}
-    
-export type bindMpResponseSuccess = (bindMpResponse201) & {
-  headers: Headers;
-};
-;
-
-export type bindMpResponse = (bindMpResponseSuccess)
-
 export const getBindMpUrl = () => {
 
 
@@ -57,9 +45,9 @@ export const getBindMpUrl = () => {
   return `/api/v1/wechat/bind-mp`
 }
 
-export const bindMp = async (weChatMpBindCommand: WeChatMpBindCommand, options?: RequestInit): Promise<bindMpResponse> => {
+export const bindMp = async (weChatMpBindCommand: WeChatMpBindCommand, options?: RequestInit): Promise<WeChatBindingView> => {
   
-  return customInstance<bindMpResponse>(getBindMpUrl(),
+  return customInstance<WeChatBindingView>(getBindMpUrl(),
   {      
     ...options,
     method: 'POST',
@@ -121,18 +109,6 @@ export const useBindMp = <TError = unknown,
  * wx.login() 获取 code 后完成绑定
  * @summary 小程序绑定
  */
-export type bindMiniResponse201 = {
-  data: WeChatBindingView
-  status: 201
-}
-    
-export type bindMiniResponseSuccess = (bindMiniResponse201) & {
-  headers: Headers;
-};
-;
-
-export type bindMiniResponse = (bindMiniResponseSuccess)
-
 export const getBindMiniUrl = () => {
 
 
@@ -141,9 +117,9 @@ export const getBindMiniUrl = () => {
   return `/api/v1/wechat/bind-mini`
 }
 
-export const bindMini = async (weChatMiniBindCommand: WeChatMiniBindCommand, options?: RequestInit): Promise<bindMiniResponse> => {
+export const bindMini = async (weChatMiniBindCommand: WeChatMiniBindCommand, options?: RequestInit): Promise<WeChatBindingView> => {
   
-  return customInstance<bindMiniResponse>(getBindMiniUrl(),
+  return customInstance<WeChatBindingView>(getBindMiniUrl(),
   {      
     ...options,
     method: 'POST',
@@ -205,18 +181,6 @@ export const useBindMini = <TError = unknown,
  * 返回 state 值，前端拼接微信授权 URL
  * @summary 生成公众号 OAuth state
  */
-export type generateMpOAuthStateResponse200 = {
-  data: GenerateMpOAuthState200
-  status: 200
-}
-    
-export type generateMpOAuthStateResponseSuccess = (generateMpOAuthStateResponse200) & {
-  headers: Headers;
-};
-;
-
-export type generateMpOAuthStateResponse = (generateMpOAuthStateResponseSuccess)
-
 export const getGenerateMpOAuthStateUrl = () => {
 
 
@@ -225,9 +189,9 @@ export const getGenerateMpOAuthStateUrl = () => {
   return `/api/v1/wechat/mp/oauth-state`
 }
 
-export const generateMpOAuthState = async ( options?: RequestInit): Promise<generateMpOAuthStateResponse> => {
+export const generateMpOAuthState = async ( options?: RequestInit): Promise<GenerateMpOAuthState200> => {
   
-  return customInstance<generateMpOAuthStateResponse>(getGenerateMpOAuthStateUrl(),
+  return customInstance<GenerateMpOAuthState200>(getGenerateMpOAuthStateUrl(),
   {      
     ...options,
     method: 'GET'
@@ -294,18 +258,6 @@ export function useGenerateMpOAuthState<TData = Awaited<ReturnType<typeof genera
  * 返回当前用户的全部微信绑定关系
  * @summary 查询我的微信绑定
  */
-export type myBindingsResponse200 = {
-  data: WeChatBindingView[]
-  status: 200
-}
-    
-export type myBindingsResponseSuccess = (myBindingsResponse200) & {
-  headers: Headers;
-};
-;
-
-export type myBindingsResponse = (myBindingsResponseSuccess)
-
 export const getMyBindingsUrl = () => {
 
 
@@ -314,9 +266,9 @@ export const getMyBindingsUrl = () => {
   return `/api/v1/wechat/bindings`
 }
 
-export const myBindings = async ( options?: RequestInit): Promise<myBindingsResponse> => {
+export const myBindings = async ( options?: RequestInit): Promise<WeChatBindingView[]> => {
   
-  return customInstance<myBindingsResponse>(getMyBindingsUrl(),
+  return customInstance<WeChatBindingView[]>(getMyBindingsUrl(),
   {      
     ...options,
     method: 'GET'
@@ -383,18 +335,6 @@ export function useMyBindings<TData = Awaited<ReturnType<typeof myBindings>>, TE
  * 解绑指定平台（MP/MINI）的微信绑定关系
  * @summary 解绑微信
  */
-export type unbindResponse204 = {
-  data: void
-  status: 204
-}
-    
-export type unbindResponseSuccess = (unbindResponse204) & {
-  headers: Headers;
-};
-;
-
-export type unbindResponse = (unbindResponseSuccess)
-
 export const getUnbindUrl = (platform: string,) => {
 
 
@@ -403,9 +343,9 @@ export const getUnbindUrl = (platform: string,) => {
   return `/api/v1/wechat/unbind/${platform}`
 }
 
-export const unbind = async (platform: string, options?: RequestInit): Promise<unbindResponse> => {
+export const unbind = async (platform: string, options?: RequestInit): Promise<void> => {
   
-  return customInstance<unbindResponse>(getUnbindUrl(platform),
+  return customInstance<void>(getUnbindUrl(platform),
   {      
     ...options,
     method: 'DELETE'

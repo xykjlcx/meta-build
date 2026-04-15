@@ -30,18 +30,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * 已登录用户建立 SSE 长连接，接收实时消息
  * @summary 建立 SSE 连接
  */
-export type connectResponse200 = {
-  data: SseEmitter
-  status: 200
-}
-    
-export type connectResponseSuccess = (connectResponse200) & {
-  headers: Headers;
-};
-;
-
-export type connectResponse = (connectResponseSuccess)
-
 export const getConnectUrl = () => {
 
 
@@ -50,9 +38,9 @@ export const getConnectUrl = () => {
   return `/api/v1/sse/connect`
 }
 
-export const connect = async ( options?: RequestInit): Promise<connectResponse> => {
+export const connect = async ( options?: RequestInit): Promise<SseEmitter> => {
   
-  return customInstance<connectResponse>(getConnectUrl(),
+  return customInstance<SseEmitter>(getConnectUrl(),
   {      
     ...options,
     method: 'GET'

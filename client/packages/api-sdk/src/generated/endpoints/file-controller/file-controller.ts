@@ -36,18 +36,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `file:file:upload`
  */
-export type uploadResponse201 = {
-  data: FileUploadView
-  status: 201
-}
-    
-export type uploadResponseSuccess = (uploadResponse201) & {
-  headers: Headers;
-};
-;
-
-export type uploadResponse = (uploadResponseSuccess)
-
 export const getUploadUrl = () => {
 
 
@@ -56,11 +44,11 @@ export const getUploadUrl = () => {
   return `/api/v1/files`
 }
 
-export const upload = async (uploadBody: UploadBody, options?: RequestInit): Promise<uploadResponse> => {
+export const upload = async (uploadBody: UploadBody, options?: RequestInit): Promise<FileUploadView> => {
     const formData = new FormData();
 formData.append(`file`, uploadBody.file)
 
-  return customInstance<uploadResponse>(getUploadUrl(),
+  return customInstance<FileUploadView>(getUploadUrl(),
   {      
     ...options,
     method: 'POST'
@@ -120,18 +108,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `file:file:download`
  */
-export type downloadResponse200 = {
-  data: void
-  status: 200
-}
-    
-export type downloadResponseSuccess = (downloadResponse200) & {
-  headers: Headers;
-};
-;
-
-export type downloadResponse = (downloadResponseSuccess)
-
 export const getDownloadUrl = (id: number,) => {
 
 
@@ -140,9 +116,9 @@ export const getDownloadUrl = (id: number,) => {
   return `/api/v1/files/${id}/download`
 }
 
-export const download = async (id: number, options?: RequestInit): Promise<downloadResponse> => {
+export const download = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<downloadResponse>(getDownloadUrl(id),
+  return customInstance<void>(getDownloadUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -207,18 +183,6 @@ export function useDownload<TData = Awaited<ReturnType<typeof download>>, TError
 
 **权限:** `file:file:delete`
  */
-export type delete7Response204 = {
-  data: void
-  status: 204
-}
-    
-export type delete7ResponseSuccess = (delete7Response204) & {
-  headers: Headers;
-};
-;
-
-export type delete7Response = (delete7ResponseSuccess)
-
 export const getDelete7Url = (id: number,) => {
 
 
@@ -227,9 +191,9 @@ export const getDelete7Url = (id: number,) => {
   return `/api/v1/files/${id}`
 }
 
-export const delete7 = async (id: number, options?: RequestInit): Promise<delete7Response> => {
+export const delete7 = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<delete7Response>(getDelete7Url(id),
+  return customInstance<void>(getDelete7Url(id),
   {      
     ...options,
     method: 'DELETE'

@@ -39,18 +39,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `iam:role:detail`
  */
-export type getById1Response200 = {
-  data: RoleView
-  status: 200
-}
-    
-export type getById1ResponseSuccess = (getById1Response200) & {
-  headers: Headers;
-};
-;
-
-export type getById1Response = (getById1ResponseSuccess)
-
 export const getGetById1Url = (id: number,) => {
 
 
@@ -59,9 +47,9 @@ export const getGetById1Url = (id: number,) => {
   return `/api/v1/roles/${id}`
 }
 
-export const getById1 = async (id: number, options?: RequestInit): Promise<getById1Response> => {
+export const getById1 = async (id: number, options?: RequestInit): Promise<RoleView> => {
   
-  return customInstance<getById1Response>(getGetById1Url(id),
+  return customInstance<RoleView>(getGetById1Url(id),
   {      
     ...options,
     method: 'GET'
@@ -126,18 +114,6 @@ export function useGetById1<TData = Awaited<ReturnType<typeof getById1>>, TError
 
 **权限:** `iam:role:update`
  */
-export type update1Response200 = {
-  data: RoleView
-  status: 200
-}
-    
-export type update1ResponseSuccess = (update1Response200) & {
-  headers: Headers;
-};
-;
-
-export type update1Response = (update1ResponseSuccess)
-
 export const getUpdate1Url = (id: number,) => {
 
 
@@ -147,9 +123,9 @@ export const getUpdate1Url = (id: number,) => {
 }
 
 export const update1 = async (id: number,
-    roleUpdateCommand: RoleUpdateCommand, options?: RequestInit): Promise<update1Response> => {
+    roleUpdateCommand: RoleUpdateCommand, options?: RequestInit): Promise<RoleView> => {
   
-  return customInstance<update1Response>(getUpdate1Url(id),
+  return customInstance<RoleView>(getUpdate1Url(id),
   {      
     ...options,
     method: 'PUT',
@@ -209,18 +185,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:role:delete`
  */
-export type delete1Response204 = {
-  data: void
-  status: 204
-}
-    
-export type delete1ResponseSuccess = (delete1Response204) & {
-  headers: Headers;
-};
-;
-
-export type delete1Response = (delete1ResponseSuccess)
-
 export const getDelete1Url = (id: number,) => {
 
 
@@ -229,9 +193,9 @@ export const getDelete1Url = (id: number,) => {
   return `/api/v1/roles/${id}`
 }
 
-export const delete1 = async (id: number, options?: RequestInit): Promise<delete1Response> => {
+export const delete1 = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<delete1Response>(getDelete1Url(id),
+  return customInstance<void>(getDelete1Url(id),
   {      
     ...options,
     method: 'DELETE'
@@ -290,18 +254,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:role:assignMenu`
  */
-export type assignMenusResponse200 = {
-  data: void
-  status: 200
-}
-    
-export type assignMenusResponseSuccess = (assignMenusResponse200) & {
-  headers: Headers;
-};
-;
-
-export type assignMenusResponse = (assignMenusResponseSuccess)
-
 export const getAssignMenusUrl = (id: number,) => {
 
 
@@ -311,9 +263,9 @@ export const getAssignMenusUrl = (id: number,) => {
 }
 
 export const assignMenus = async (id: number,
-    assignMenusBody: number[], options?: RequestInit): Promise<assignMenusResponse> => {
+    assignMenusBody: number[], options?: RequestInit): Promise<void> => {
   
-  return customInstance<assignMenusResponse>(getAssignMenusUrl(id),
+  return customInstance<void>(getAssignMenusUrl(id),
   {      
     ...options,
     method: 'PUT',
@@ -373,18 +325,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:role:list`
  */
-export type list2Response200 = {
-  data: PageResultRoleView
-  status: 200
-}
-    
-export type list2ResponseSuccess = (list2Response200) & {
-  headers: Headers;
-};
-;
-
-export type list2Response = (list2ResponseSuccess)
-
 export const getList2Url = (params: List2Params,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -400,9 +340,9 @@ export const getList2Url = (params: List2Params,) => {
   return stringifiedParams.length > 0 ? `/api/v1/roles?${stringifiedParams}` : `/api/v1/roles`
 }
 
-export const list2 = async (params: List2Params, options?: RequestInit): Promise<list2Response> => {
+export const list2 = async (params: List2Params, options?: RequestInit): Promise<PageResultRoleView> => {
   
-  return customInstance<list2Response>(getList2Url(params),
+  return customInstance<PageResultRoleView>(getList2Url(params),
   {      
     ...options,
     method: 'GET'
@@ -467,18 +407,6 @@ export function useList2<TData = Awaited<ReturnType<typeof list2>>, TError = unk
 
 **权限:** `iam:role:create`
  */
-export type create1Response201 = {
-  data: RoleView
-  status: 201
-}
-    
-export type create1ResponseSuccess = (create1Response201) & {
-  headers: Headers;
-};
-;
-
-export type create1Response = (create1ResponseSuccess)
-
 export const getCreate1Url = () => {
 
 
@@ -487,9 +415,9 @@ export const getCreate1Url = () => {
   return `/api/v1/roles`
 }
 
-export const create1 = async (roleCreateCommand: RoleCreateCommand, options?: RequestInit): Promise<create1Response> => {
+export const create1 = async (roleCreateCommand: RoleCreateCommand, options?: RequestInit): Promise<RoleView> => {
   
-  return customInstance<create1Response>(getCreate1Url(),
+  return customInstance<RoleView>(getCreate1Url(),
   {      
     ...options,
     method: 'POST',

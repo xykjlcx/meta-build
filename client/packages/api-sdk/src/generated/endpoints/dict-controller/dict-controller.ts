@@ -40,18 +40,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `dict:type:list`
  */
-export type listTypesResponse200 = {
-  data: PageResultDictTypeView
-  status: 200
-}
-    
-export type listTypesResponseSuccess = (listTypesResponse200) & {
-  headers: Headers;
-};
-;
-
-export type listTypesResponse = (listTypesResponseSuccess)
-
 export const getListTypesUrl = (params: ListTypesParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -67,9 +55,9 @@ export const getListTypesUrl = (params: ListTypesParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/dict/types?${stringifiedParams}` : `/api/v1/dict/types`
 }
 
-export const listTypes = async (params: ListTypesParams, options?: RequestInit): Promise<listTypesResponse> => {
+export const listTypes = async (params: ListTypesParams, options?: RequestInit): Promise<PageResultDictTypeView> => {
   
-  return customInstance<listTypesResponse>(getListTypesUrl(params),
+  return customInstance<PageResultDictTypeView>(getListTypesUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -134,18 +122,6 @@ export function useListTypes<TData = Awaited<ReturnType<typeof listTypes>>, TErr
 
 **权限:** `dict:type:create`
  */
-export type createTypeResponse201 = {
-  data: DictTypeView
-  status: 201
-}
-    
-export type createTypeResponseSuccess = (createTypeResponse201) & {
-  headers: Headers;
-};
-;
-
-export type createTypeResponse = (createTypeResponseSuccess)
-
 export const getCreateTypeUrl = () => {
 
 
@@ -154,9 +130,9 @@ export const getCreateTypeUrl = () => {
   return `/api/v1/dict/types`
 }
 
-export const createType = async (dictTypeCreateCommand: DictTypeCreateCommand, options?: RequestInit): Promise<createTypeResponse> => {
+export const createType = async (dictTypeCreateCommand: DictTypeCreateCommand, options?: RequestInit): Promise<DictTypeView> => {
   
-  return customInstance<createTypeResponse>(getCreateTypeUrl(),
+  return customInstance<DictTypeView>(getCreateTypeUrl(),
   {      
     ...options,
     method: 'POST',
@@ -216,18 +192,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `dict:data:create`
  */
-export type createDataResponse201 = {
-  data: DictDataView
-  status: 201
-}
-    
-export type createDataResponseSuccess = (createDataResponse201) & {
-  headers: Headers;
-};
-;
-
-export type createDataResponse = (createDataResponseSuccess)
-
 export const getCreateDataUrl = () => {
 
 
@@ -236,9 +200,9 @@ export const getCreateDataUrl = () => {
   return `/api/v1/dict/data`
 }
 
-export const createData = async (dictDataCreateCommand: DictDataCreateCommand, options?: RequestInit): Promise<createDataResponse> => {
+export const createData = async (dictDataCreateCommand: DictDataCreateCommand, options?: RequestInit): Promise<DictDataView> => {
   
-  return customInstance<createDataResponse>(getCreateDataUrl(),
+  return customInstance<DictDataView>(getCreateDataUrl(),
   {      
     ...options,
     method: 'POST',
@@ -298,18 +262,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `dict:data:list`
  */
-export type listDataResponse200 = {
-  data: DictDataView[]
-  status: 200
-}
-    
-export type listDataResponseSuccess = (listDataResponse200) & {
-  headers: Headers;
-};
-;
-
-export type listDataResponse = (listDataResponseSuccess)
-
 export const getListDataUrl = (typeId: number,) => {
 
 
@@ -318,9 +270,9 @@ export const getListDataUrl = (typeId: number,) => {
   return `/api/v1/dict/types/${typeId}/data`
 }
 
-export const listData = async (typeId: number, options?: RequestInit): Promise<listDataResponse> => {
+export const listData = async (typeId: number, options?: RequestInit): Promise<DictDataView[]> => {
   
-  return customInstance<listDataResponse>(getListDataUrl(typeId),
+  return customInstance<DictDataView[]>(getListDataUrl(typeId),
   {      
     ...options,
     method: 'GET'
@@ -385,18 +337,6 @@ export function useListData<TData = Awaited<ReturnType<typeof listData>>, TError
 
 **权限:** `dict:type:detail`
  */
-export type getTypeResponse200 = {
-  data: DictTypeView
-  status: 200
-}
-    
-export type getTypeResponseSuccess = (getTypeResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getTypeResponse = (getTypeResponseSuccess)
-
 export const getGetTypeUrl = (id: number,) => {
 
 
@@ -405,9 +345,9 @@ export const getGetTypeUrl = (id: number,) => {
   return `/api/v1/dict/types/${id}`
 }
 
-export const getType = async (id: number, options?: RequestInit): Promise<getTypeResponse> => {
+export const getType = async (id: number, options?: RequestInit): Promise<DictTypeView> => {
   
-  return customInstance<getTypeResponse>(getGetTypeUrl(id),
+  return customInstance<DictTypeView>(getGetTypeUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -472,18 +412,6 @@ export function useGetType<TData = Awaited<ReturnType<typeof getType>>, TError =
 
 **权限:** `dict:type:delete`
  */
-export type deleteTypeResponse204 = {
-  data: void
-  status: 204
-}
-    
-export type deleteTypeResponseSuccess = (deleteTypeResponse204) & {
-  headers: Headers;
-};
-;
-
-export type deleteTypeResponse = (deleteTypeResponseSuccess)
-
 export const getDeleteTypeUrl = (id: number,) => {
 
 
@@ -492,9 +420,9 @@ export const getDeleteTypeUrl = (id: number,) => {
   return `/api/v1/dict/types/${id}`
 }
 
-export const deleteType = async (id: number, options?: RequestInit): Promise<deleteTypeResponse> => {
+export const deleteType = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<deleteTypeResponse>(getDeleteTypeUrl(id),
+  return customInstance<void>(getDeleteTypeUrl(id),
   {      
     ...options,
     method: 'DELETE'
@@ -553,18 +481,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `dict:data:delete`
  */
-export type deleteDataResponse204 = {
-  data: void
-  status: 204
-}
-    
-export type deleteDataResponseSuccess = (deleteDataResponse204) & {
-  headers: Headers;
-};
-;
-
-export type deleteDataResponse = (deleteDataResponseSuccess)
-
 export const getDeleteDataUrl = (id: number,) => {
 
 
@@ -573,9 +489,9 @@ export const getDeleteDataUrl = (id: number,) => {
   return `/api/v1/dict/data/${id}`
 }
 
-export const deleteData = async (id: number, options?: RequestInit): Promise<deleteDataResponse> => {
+export const deleteData = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<deleteDataResponse>(getDeleteDataUrl(id),
+  return customInstance<void>(getDeleteDataUrl(id),
   {      
     ...options,
     method: 'DELETE'

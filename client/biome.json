@@ -36,6 +36,9 @@
     "ignore": [
       "node_modules",
       "dist",
+      "playwright-report",
+      "test-results",
+      "**/.playwright-artifacts/**",
       "*.css",
       "**/routeTree.gen.ts",
       "**/generated/**",

@@ -30,7 +30,7 @@
 
 | 子任务 | milestone |
 |---|---|
-| 30 个原子组件最小可用版本 | [M2] |
+| 42 个原子组件最小可用版本 | [M2] |
 | 全部组件 Storybook stories | [M2] |
 | Vitest 单元测试覆盖 | [M2] |
 | Visual Regression 快照 | [M6] |
@@ -106,7 +106,7 @@ packages:
 
 ---
 
-## 3. 30 个原子组件清单
+## 3. 42 个原子组件清单
 
 按职责分 4 类。每个组件 1-2 行说明 + 底层 Radix 原语来源。所有组件都遵循 §4 的 API 约定。
 
@@ -160,7 +160,7 @@ packages:
 | 29 | `Accordion` | `accordion.tsx` | `@radix-ui/react-accordion` | 折叠面板（FAQ 等） |
 | 30 | `Table` | `table.tsx` | 无（语义化 `<table>`） | 表格容器（含 TableHeader / TableBody / TableRow / TableHead / TableCell 子组件），L3 NxTable 的底层原子 |
 
-> **总计 30 个原子组件**，每个组件对应一个文件。`Card` / `Dialog` / `AlertDialog` / `Drawer` / `Table` 等会导出多个子组件（`Card` / `CardHeader` / `CardContent` / `CardFooter`），统一打包在同一文件内导出。文件清单与决策表保持 1:1。
+> **总计 42 个原子组件**，每个组件对应一个文件。`Card` / `Dialog` / `AlertDialog` / `Drawer` / `Table` 等会导出多个子组件（`Card` / `CardHeader` / `CardContent` / `CardFooter`），统一打包在同一文件内导出。文件清单与决策表保持 1:1。
 
 ### 3.5 不在 L2 范围
 

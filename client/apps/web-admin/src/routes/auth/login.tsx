@@ -37,6 +37,7 @@ function LoginPage() {
               <Label htmlFor="username">{t('auth.username')}</Label>
               <Input
                 id="username"
+                name="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -47,6 +48,7 @@ function LoginPage() {
               <Label htmlFor="password">{t('auth.password')}</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

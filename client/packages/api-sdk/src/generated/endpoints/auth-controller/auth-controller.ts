@@ -33,18 +33,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 
 
-export type refreshResponse200 = {
-  data: LoginView
-  status: 200
-}
-    
-export type refreshResponseSuccess = (refreshResponse200) & {
-  headers: Headers;
-};
-;
-
-export type refreshResponse = (refreshResponseSuccess)
-
 export const getRefreshUrl = () => {
 
 
@@ -53,9 +41,9 @@ export const getRefreshUrl = () => {
   return `/api/v1/auth/refresh`
 }
 
-export const refresh = async (refreshCommand: RefreshCommand, options?: RequestInit): Promise<refreshResponse> => {
+export const refresh = async (refreshCommand: RefreshCommand, options?: RequestInit): Promise<LoginView> => {
   
-  return customInstance<refreshResponse>(getRefreshUrl(),
+  return customInstance<LoginView>(getRefreshUrl(),
   {      
     ...options,
     method: 'POST',
@@ -110,19 +98,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions);
     }
-    export type logoutResponse200 = {
-  data: void
-  status: 200
-}
-    
-export type logoutResponseSuccess = (logoutResponse200) & {
-  headers: Headers;
-};
-;
-
-export type logoutResponse = (logoutResponseSuccess)
-
-export const getLogoutUrl = () => {
+    export const getLogoutUrl = () => {
 
 
   
@@ -130,9 +106,9 @@ export const getLogoutUrl = () => {
   return `/api/v1/auth/logout`
 }
 
-export const logout = async ( options?: RequestInit): Promise<logoutResponse> => {
+export const logout = async ( options?: RequestInit): Promise<void> => {
   
-  return customInstance<logoutResponse>(getLogoutUrl(),
+  return customInstance<void>(getLogoutUrl(),
   {      
     ...options,
     method: 'POST'
@@ -186,19 +162,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions);
     }
-    export type loginResponse200 = {
-  data: LoginView
-  status: 200
-}
-    
-export type loginResponseSuccess = (loginResponse200) & {
-  headers: Headers;
-};
-;
-
-export type loginResponse = (loginResponseSuccess)
-
-export const getLoginUrl = () => {
+    export const getLoginUrl = () => {
 
 
   
@@ -206,9 +170,9 @@ export const getLoginUrl = () => {
   return `/api/v1/auth/login`
 }
 
-export const login = async (loginCommand: LoginCommand, options?: RequestInit): Promise<loginResponse> => {
+export const login = async (loginCommand: LoginCommand, options?: RequestInit): Promise<LoginView> => {
   
-  return customInstance<loginResponse>(getLoginUrl(),
+  return customInstance<LoginView>(getLoginUrl(),
   {      
     ...options,
     method: 'POST',
@@ -263,19 +227,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions);
     }
-    export type meResponse200 = {
-  data: CurrentUserView
-  status: 200
-}
-    
-export type meResponseSuccess = (meResponse200) & {
-  headers: Headers;
-};
-;
-
-export type meResponse = (meResponseSuccess)
-
-export const getMeUrl = () => {
+    export const getMeUrl = () => {
 
 
   
@@ -283,9 +235,9 @@ export const getMeUrl = () => {
   return `/api/v1/auth/me`
 }
 
-export const me = async ( options?: RequestInit): Promise<meResponse> => {
+export const me = async ( options?: RequestInit): Promise<CurrentUserView> => {
   
-  return customInstance<meResponse>(getMeUrl(),
+  return customInstance<CurrentUserView>(getMeUrl(),
   {      
     ...options,
     method: 'GET'

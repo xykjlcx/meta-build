@@ -23,7 +23,9 @@ public class OpenApiConfig {
                         .title("Meta-Build API")
                         .version("v1")
                         .description("AI 时代的可定制全栈技术底座")
-                        .license(new License().name("MIT")))
+                        .license(new License()
+                                .name("MIT")
+                                .url("https://opensource.org/licenses/MIT")))
                 .components(new Components()
                         .addSecuritySchemes("bearer-jwt",
                                 new SecurityScheme()

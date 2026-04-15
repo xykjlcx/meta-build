@@ -47,18 +47,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 **权限:** `notice:notice:detail`
  * @summary 查询公告详情
  */
-export type detailResponse200 = {
-  data: NoticeDetailView
-  status: 200
-}
-    
-export type detailResponseSuccess = (detailResponse200) & {
-  headers: Headers;
-};
-;
-
-export type detailResponse = (detailResponseSuccess)
-
 export const getDetailUrl = (id: number,) => {
 
 
@@ -67,9 +55,9 @@ export const getDetailUrl = (id: number,) => {
   return `/api/v1/notices/${id}`
 }
 
-export const detail = async (id: number, options?: RequestInit): Promise<detailResponse> => {
+export const detail = async (id: number, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<detailResponse>(getDetailUrl(id),
+  return customInstance<NoticeDetailView>(getDetailUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -138,18 +126,6 @@ export function useDetail<TData = Awaited<ReturnType<typeof detail>>, TError = u
 **权限:** `notice:notice:update`
  * @summary 更新公告
  */
-export type update2Response200 = {
-  data: NoticeDetailView
-  status: 200
-}
-    
-export type update2ResponseSuccess = (update2Response200) & {
-  headers: Headers;
-};
-;
-
-export type update2Response = (update2ResponseSuccess)
-
 export const getUpdate2Url = (id: number,) => {
 
 
@@ -159,9 +135,9 @@ export const getUpdate2Url = (id: number,) => {
 }
 
 export const update2 = async (id: number,
-    noticeUpdateCommand: NoticeUpdateCommand, options?: RequestInit): Promise<update2Response> => {
+    noticeUpdateCommand: NoticeUpdateCommand, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<update2Response>(getUpdate2Url(id),
+  return customInstance<NoticeDetailView>(getUpdate2Url(id),
   {      
     ...options,
     method: 'PUT',
@@ -225,18 +201,6 @@ export const useUpdate2 = <TError = unknown,
 **权限:** `notice:notice:delete`
  * @summary 删除公告
  */
-export type delete2Response204 = {
-  data: void
-  status: 204
-}
-    
-export type delete2ResponseSuccess = (delete2Response204) & {
-  headers: Headers;
-};
-;
-
-export type delete2Response = (delete2ResponseSuccess)
-
 export const getDelete2Url = (id: number,) => {
 
 
@@ -245,9 +209,9 @@ export const getDelete2Url = (id: number,) => {
   return `/api/v1/notices/${id}`
 }
 
-export const delete2 = async (id: number, options?: RequestInit): Promise<delete2Response> => {
+export const delete2 = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<delete2Response>(getDelete2Url(id),
+  return customInstance<void>(getDelete2Url(id),
   {      
     ...options,
     method: 'DELETE'
@@ -307,18 +271,6 @@ export const useDelete2 = <TError = unknown,
     /**
  * @summary 标记已读（登录用户均可调用，幂等）
  */
-export type markReadResponse204 = {
-  data: void
-  status: 204
-}
-    
-export type markReadResponseSuccess = (markReadResponse204) & {
-  headers: Headers;
-};
-;
-
-export type markReadResponse = (markReadResponseSuccess)
-
 export const getMarkReadUrl = (id: number,) => {
 
 
@@ -327,9 +279,9 @@ export const getMarkReadUrl = (id: number,) => {
   return `/api/v1/notices/${id}/read`
 }
 
-export const markRead = async (id: number, options?: RequestInit): Promise<markReadResponse> => {
+export const markRead = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<markReadResponse>(getMarkReadUrl(id),
+  return customInstance<void>(getMarkReadUrl(id),
   {      
     ...options,
     method: 'PUT'
@@ -392,18 +344,6 @@ export const useMarkRead = <TError = unknown,
 **权限:** `notice:notice:list`
  * @summary 分页查询公告列表
  */
-export type list4Response200 = {
-  data: PageResultNoticeView
-  status: 200
-}
-    
-export type list4ResponseSuccess = (list4Response200) & {
-  headers: Headers;
-};
-;
-
-export type list4Response = (list4ResponseSuccess)
-
 export const getList4Url = (params?: List4Params,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -427,9 +367,9 @@ export const getList4Url = (params?: List4Params,) => {
   return stringifiedParams.length > 0 ? `/api/v1/notices?${stringifiedParams}` : `/api/v1/notices`
 }
 
-export const list4 = async (params?: List4Params, options?: RequestInit): Promise<list4Response> => {
+export const list4 = async (params?: List4Params, options?: RequestInit): Promise<PageResultNoticeView> => {
   
-  return customInstance<list4Response>(getList4Url(params),
+  return customInstance<PageResultNoticeView>(getList4Url(params),
   {      
     ...options,
     method: 'GET'
@@ -498,18 +438,6 @@ export function useList4<TData = Awaited<ReturnType<typeof list4>>, TError = unk
 **权限:** `notice:notice:create`
  * @summary 创建公告
  */
-export type create3Response201 = {
-  data: NoticeDetailView
-  status: 201
-}
-    
-export type create3ResponseSuccess = (create3Response201) & {
-  headers: Headers;
-};
-;
-
-export type create3Response = (create3ResponseSuccess)
-
 export const getCreate3Url = () => {
 
 
@@ -518,9 +446,9 @@ export const getCreate3Url = () => {
   return `/api/v1/notices`
 }
 
-export const create3 = async (noticeCreateCommand: NoticeCreateCommand, options?: RequestInit): Promise<create3Response> => {
+export const create3 = async (noticeCreateCommand: NoticeCreateCommand, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<create3Response>(getCreate3Url(),
+  return customInstance<NoticeDetailView>(getCreate3Url(),
   {      
     ...options,
     method: 'POST',
@@ -584,18 +512,6 @@ export const useCreate3 = <TError = unknown,
 **权限:** `notice:notice:publish`
  * @summary 撤回公告
  */
-export type revokeResponse200 = {
-  data: NoticeDetailView
-  status: 200
-}
-    
-export type revokeResponseSuccess = (revokeResponse200) & {
-  headers: Headers;
-};
-;
-
-export type revokeResponse = (revokeResponseSuccess)
-
 export const getRevokeUrl = (id: number,) => {
 
 
@@ -604,9 +520,9 @@ export const getRevokeUrl = (id: number,) => {
   return `/api/v1/notices/${id}/revoke`
 }
 
-export const revoke = async (id: number, options?: RequestInit): Promise<revokeResponse> => {
+export const revoke = async (id: number, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<revokeResponse>(getRevokeUrl(id),
+  return customInstance<NoticeDetailView>(getRevokeUrl(id),
   {      
     ...options,
     method: 'POST'
@@ -669,18 +585,6 @@ export const useRevoke = <TError = unknown,
 **权限:** `notice:notice:publish`
  * @summary 发布公告
  */
-export type publishResponse200 = {
-  data: NoticeDetailView
-  status: 200
-}
-    
-export type publishResponseSuccess = (publishResponse200) & {
-  headers: Headers;
-};
-;
-
-export type publishResponse = (publishResponseSuccess)
-
 export const getPublishUrl = (id: number,) => {
 
 
@@ -690,9 +594,9 @@ export const getPublishUrl = (id: number,) => {
 }
 
 export const publish = async (id: number,
-    noticePublishCommand: NoticePublishCommand, options?: RequestInit): Promise<publishResponse> => {
+    noticePublishCommand: NoticePublishCommand, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<publishResponse>(getPublishUrl(id),
+  return customInstance<NoticeDetailView>(getPublishUrl(id),
   {      
     ...options,
     method: 'POST',
@@ -756,18 +660,6 @@ export const usePublish = <TError = unknown,
 **权限:** `notice:notice:create`
  * @summary 复制公告
  */
-export type duplicateResponse201 = {
-  data: NoticeDetailView
-  status: 201
-}
-    
-export type duplicateResponseSuccess = (duplicateResponse201) & {
-  headers: Headers;
-};
-;
-
-export type duplicateResponse = (duplicateResponseSuccess)
-
 export const getDuplicateUrl = (id: number,) => {
 
 
@@ -776,9 +668,9 @@ export const getDuplicateUrl = (id: number,) => {
   return `/api/v1/notices/${id}/duplicate`
 }
 
-export const duplicate = async (id: number, options?: RequestInit): Promise<duplicateResponse> => {
+export const duplicate = async (id: number, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<duplicateResponse>(getDuplicateUrl(id),
+  return customInstance<NoticeDetailView>(getDuplicateUrl(id),
   {      
     ...options,
     method: 'POST'
@@ -841,18 +733,6 @@ export const useDuplicate = <TError = unknown,
 **权限:** `notice:notice:publish`
  * @summary 批量发布公告
  */
-export type batchPublishResponse200 = {
-  data: BatchResultView
-  status: 200
-}
-    
-export type batchPublishResponseSuccess = (batchPublishResponse200) & {
-  headers: Headers;
-};
-;
-
-export type batchPublishResponse = (batchPublishResponseSuccess)
-
 export const getBatchPublishUrl = () => {
 
 
@@ -861,9 +741,9 @@ export const getBatchPublishUrl = () => {
   return `/api/v1/notices/batch-publish`
 }
 
-export const batchPublish = async (batchIdsCommand: BatchIdsCommand, options?: RequestInit): Promise<batchPublishResponse> => {
+export const batchPublish = async (batchIdsCommand: BatchIdsCommand, options?: RequestInit): Promise<BatchResultView> => {
   
-  return customInstance<batchPublishResponse>(getBatchPublishUrl(),
+  return customInstance<BatchResultView>(getBatchPublishUrl(),
   {      
     ...options,
     method: 'POST',
@@ -927,18 +807,6 @@ export const useBatchPublish = <TError = unknown,
 **权限:** `notice:notice:detail`
  * @summary 查询公告接收人列表（分页）
  */
-export type recipientsResponse200 = {
-  data: PageResultRecipientView
-  status: 200
-}
-    
-export type recipientsResponseSuccess = (recipientsResponse200) & {
-  headers: Headers;
-};
-;
-
-export type recipientsResponse = (recipientsResponseSuccess)
-
 export const getRecipientsUrl = (id: number,
     params?: RecipientsParams,) => {
   const normalizedParams = new URLSearchParams();
@@ -956,9 +824,9 @@ export const getRecipientsUrl = (id: number,
 }
 
 export const recipients = async (id: number,
-    params?: RecipientsParams, options?: RequestInit): Promise<recipientsResponse> => {
+    params?: RecipientsParams, options?: RequestInit): Promise<PageResultRecipientView> => {
   
-  return customInstance<recipientsResponse>(getRecipientsUrl(id,params),
+  return customInstance<PageResultRecipientView>(getRecipientsUrl(id,params),
   {      
     ...options,
     method: 'GET'
@@ -1027,18 +895,6 @@ export function useRecipients<TData = Awaited<ReturnType<typeof recipients>>, TE
 /**
  * @summary 查询当前用户未读公告数量（登录用户均可调用）
  */
-export type unreadCountResponse200 = {
-  data: UnreadCount200
-  status: 200
-}
-    
-export type unreadCountResponseSuccess = (unreadCountResponse200) & {
-  headers: Headers;
-};
-;
-
-export type unreadCountResponse = (unreadCountResponseSuccess)
-
 export const getUnreadCountUrl = () => {
 
 
@@ -1047,9 +903,9 @@ export const getUnreadCountUrl = () => {
   return `/api/v1/notices/unread-count`
 }
 
-export const unreadCount = async ( options?: RequestInit): Promise<unreadCountResponse> => {
+export const unreadCount = async ( options?: RequestInit): Promise<UnreadCount200> => {
   
-  return customInstance<unreadCountResponse>(getUnreadCountUrl(),
+  return customInstance<UnreadCount200>(getUnreadCountUrl(),
   {      
     ...options,
     method: 'GET'
@@ -1118,18 +974,6 @@ export function useUnreadCount<TData = Awaited<ReturnType<typeof unreadCount>>, 
 **权限:** `notice:notice:export`
  * @summary 导出公告列表（Excel）
  */
-export type _exportResponse200 = {
-  data: void
-  status: 200
-}
-    
-export type _exportResponseSuccess = (_exportResponse200) & {
-  headers: Headers;
-};
-;
-
-export type _exportResponse = (_exportResponseSuccess)
-
 export const getExportUrl = (params?: _ExportParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -1145,9 +989,9 @@ export const getExportUrl = (params?: _ExportParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/notices/export?${stringifiedParams}` : `/api/v1/notices/export`
 }
 
-export const _export = async (params?: _ExportParams, options?: RequestInit): Promise<_exportResponse> => {
+export const _export = async (params?: _ExportParams, options?: RequestInit): Promise<void> => {
   
-  return customInstance<_exportResponse>(getExportUrl(params),
+  return customInstance<void>(getExportUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -1216,18 +1060,6 @@ export function useExport<TData = Awaited<ReturnType<typeof _export>>, TError = 
 **权限:** `notice:notice:delete`
  * @summary 批量删除公告
  */
-export type batchDeleteResponse200 = {
-  data: BatchResultView
-  status: 200
-}
-    
-export type batchDeleteResponseSuccess = (batchDeleteResponse200) & {
-  headers: Headers;
-};
-;
-
-export type batchDeleteResponse = (batchDeleteResponseSuccess)
-
 export const getBatchDeleteUrl = () => {
 
 
@@ -1236,9 +1068,9 @@ export const getBatchDeleteUrl = () => {
   return `/api/v1/notices/batch`
 }
 
-export const batchDelete = async (batchIdsCommand: BatchIdsCommand, options?: RequestInit): Promise<batchDeleteResponse> => {
+export const batchDelete = async (batchIdsCommand: BatchIdsCommand, options?: RequestInit): Promise<BatchResultView> => {
   
-  return customInstance<batchDeleteResponse>(getBatchDeleteUrl(),
+  return customInstance<BatchResultView>(getBatchDeleteUrl(),
   {      
     ...options,
     method: 'DELETE',

@@ -213,7 +213,7 @@ errors.iam.user.duplicateEmail.detail=Email {0} is already in use
 
 ### 6.1 决策结论
 
-**做最小集 MVP**（springdoc + OpenAPI Generator → @mb/api-sdk），不做 Spectral lint 和 oasdiff 检查（延后到 M6）。
+**做最小集 MVP**（springdoc + orval → `@mb/api-sdk/generated` + 手写薄包装层），不做 Spectral lint 和 oasdiff 检查（延后到 M6）。
 
 ### 6.2 工作流图
 
@@ -231,13 +231,13 @@ errors.iam.user.duplicateEmail.detail=Email {0} is already in use
 │ 基线: api-contract/      │
 │   openapi-v1.json (git) │
 └───────────┬─────────────┘
-            │ OpenAPI Generator (CI 触发)
+            │ orval (CI 触发)
             ▼
 ┌─────────────────────────┐
 │ TypeScript client       │
-│ @mb/api-sdk             │
+│ @mb/api-sdk/generated   │
 │ (client/packages/       │
-│  api-sdk/，不入 git)    │
+│  api-sdk/，generated/ 不入 git) │
 └───────────┬─────────────┘
             │ import
             ▼
@@ -343,20 +343,37 @@ public class UserController {
 }
 ```
 
-## 9. OpenAPI Generator 配置 [M4]
+## 9. orval 配置 [M4]
 
-`tools/openapi-generator/config.yaml`:
+`client/orval.config.ts`:
 
-```yaml
-generatorName: typescript-fetch
-inputSpec: server/mb-admin/target/openapi.json
-outputDir: client/packages/api-sdk/src/generated
-additionalProperties:
-  npmName: "@mb/api-sdk"
-  withInterfaces: true
-  supportsES6: true
-  typescriptThreePlus: true
-  modelPropertyNaming: original
+```ts
+import { defineConfig } from 'orval';
+
+export default defineConfig({
+  metaBuild: {
+    input: {
+      target: '../server/api-contract/openapi-v1.json',
+    },
+    output: {
+      target: './packages/api-sdk/src/generated/endpoints',
+      schemas: './packages/api-sdk/src/generated/models',
+      client: 'react-query',
+      httpClient: 'fetch',
+      mode: 'tags-split',
+      mock: true,
+      override: {
+        fetch: {
+          includeHttpResponseReturnType: false,
+        },
+        mutator: {
+          path: './packages/api-sdk/src/mutator/custom-instance.ts',
+          name: 'customInstance',
+        },
+      },
+    },
+  },
+});
 ```
 
 ## 10. @mb/api-sdk 输出位置与 git 策略 [M4]
@@ -374,7 +391,7 @@ additionalProperties:
 CI 流程:
 1. `mvn springdoc:generate -pl mb-admin` → 生成到 `server/mb-admin/target/openapi.json`
 2. 对比 `server/api-contract/openapi-v1.json`（git 基线），有差异 → CI fail（提示开发者先更新基线）
-3. `openapi-generator generate` → `client/packages/api-sdk/src/generated/`
+3. `pnpm -C client generate:api-sdk` → `client/packages/api-sdk/src/generated/`
 4. `pnpm -C client tsc --noEmit` → 类型检查
 
 **基线更新约定**: 后端改 DTO 后，开发者本地运行 `mvn springdoc:generate && cp server/mb-admin/target/openapi.json server/api-contract/openapi-v1.json && git add server/api-contract/`，然后和业务代码一起 commit。
@@ -543,7 +560,7 @@ List<SortField<?>> orderBy = SortParser.builder()
 
 ## 13. AppPermission 生成链路（前后端权限点契约）[M4]
 
-> **关注点**：后端 `@RequirePermission` 注解 → springdoc 扫描 → OpenAPI extension `x-permission` → OpenAPI Generator → 前端 `AppPermission` 联合类型。
+> **关注点**：后端 `@RequirePermission` 注解 → springdoc 扫描 → OpenAPI extension `x-permission` → orval 生成客户端 → 前端 `AppPermission` 联合类型。
 >
 > **目标**：权限点拼写的**编译期校验**。前端用错权限 code 直接 tsc 报错，不等到运行时。
 
@@ -563,7 +580,7 @@ List<SortField<?>> orderBy = SortParser.builder()
 3. openapi.json
    包含所有 @RequirePermission 扫描到的 code 清单
          │
-         │ OpenAPI Generator
+         │ orval
          ▼
 4. TypeScript 生成
    client/packages/api-sdk/src/generated/permissions.ts

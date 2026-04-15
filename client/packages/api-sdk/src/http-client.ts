@@ -15,6 +15,7 @@ export interface RequestOptions extends RequestInit {
 
 export interface HttpClient {
   request<T>(url: string, init?: RequestOptions): Promise<T>;
+  requestWithMeta<T>(url: string, init?: RequestOptions): Promise<HttpResponseMeta<T>>;
 }
 
 export interface HttpClientOptions {
@@ -25,6 +26,12 @@ export interface HttpClientOptions {
   tryRefreshToken?: () => Promise<string | null>;
   /** refresh 失败或未配置时的回调（跳登录页） */
   onUnauthenticated?: () => void;
+}
+
+export interface HttpResponseMeta<T> {
+  data: T;
+  status: number;
+  headers: Headers;
 }
 
 export function createHttpClient(options: HttpClientOptions): HttpClient;
@@ -39,21 +46,16 @@ export function createHttpClient(
   requestInterceptors?: RequestInterceptor[],
   responseInterceptors?: ResponseInterceptor[],
 ): HttpClient {
-  const opts: HttpClientOptions =
-    typeof optionsOrBasePath === 'string'
-      ? {
-          basePath: optionsOrBasePath,
-          requestInterceptors: requestInterceptors ?? [],
-          responseInterceptors: responseInterceptors ?? [],
-        }
-      : optionsOrBasePath;
+  const opts = normalizeClientOptions(optionsOrBasePath, requestInterceptors, responseInterceptors);
 
   // refresh 锁：防止并发请求同时触发多次 refresh
   let refreshPromise: Promise<string | null> | null = null;
 
-  async function executeRequest<T>(url: string, init: RequestOptions): Promise<T> {
+  async function executeRequest<T>(
+    url: string,
+    init: RequestOptions,
+  ): Promise<HttpResponseMeta<T>> {
     let finalUrl = `${opts.basePath}${url}`;
-    // 提取 responseType，不传给 fetch（fetch 不认识这个字段）
     const { responseType, ...fetchInit } = init;
     let finalInit: RequestInit = { ...fetchInit };
 
@@ -69,61 +71,114 @@ export function createHttpClient(
       response = await interceptor(response);
     }
 
-    // 204 No Content — 调用方应声明 Promise<void>，此时 undefined as T 对 void 类型安全
-    if (response.status === 204) return undefined as T;
+    return {
+      data: await parseResponseBody<T>(response, responseType),
+      status: response.status,
+      headers: response.headers,
+    };
+  }
 
-    // blob 响应（文件下载）
-    if (responseType === 'blob') {
-      return response.blob() as Promise<T>;
+  async function requestWithRetry<T>(
+    init: RequestOptions,
+    executor: (requestInit: RequestOptions) => Promise<T>,
+  ): Promise<T> {
+    try {
+      return await executor(init);
+    } catch (err) {
+      if (!(err instanceof ProblemDetailError) || err.status !== 401) {
+        throw err;
+      }
+
+      return retryWithFreshToken(err, init, executor);
+    }
+  }
+
+  async function retryWithFreshToken<T>(
+    err: ProblemDetailError,
+    init: RequestOptions,
+    executor: (requestInit: RequestOptions) => Promise<T>,
+  ): Promise<T> {
+    const newToken = await resolveRefreshedToken();
+    if (!newToken) {
+      opts.onUnauthenticated?.();
+      throw err;
     }
 
-    return response.json() as Promise<T>;
+    try {
+      return await executor(withAuthorization(init, newToken));
+    } catch (retryErr) {
+      if (retryErr instanceof ProblemDetailError && retryErr.status === 401) {
+        opts.onUnauthenticated?.();
+      }
+      throw retryErr;
+    }
+  }
+
+  async function resolveRefreshedToken(): Promise<string | null> {
+    if (!opts.tryRefreshToken) {
+      return null;
+    }
+
+    if (!refreshPromise) {
+      refreshPromise = opts.tryRefreshToken().finally(() => {
+        refreshPromise = null;
+      });
+    }
+
+    return refreshPromise;
   }
 
   return {
-    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 401 → refresh token 锁 → 重试 → onUnauthenticated 回调 的完整容错链路内聚在此,拆分反而降低可读性
     async request<T>(url: string, init: RequestOptions = {}): Promise<T> {
-      try {
-        return await executeRequest<T>(url, init);
-      } catch (err) {
-        if (!(err instanceof ProblemDetailError) || err.status !== 401) {
-          throw err;
-        }
-
-        // 401 → 尝试 refresh token
-        if (opts.tryRefreshToken) {
-          // 复用正在进行的 refresh 请求（并发安全）
-          if (!refreshPromise) {
-            refreshPromise = opts.tryRefreshToken().finally(() => {
-              refreshPromise = null;
-            });
-          }
-
-          const newToken = await refreshPromise;
-          if (newToken) {
-            // refresh 成功 → 用新 token 重试原请求
-            const retryInit = { ...init };
-            const headers = new Headers(retryInit.headers);
-            headers.set('Authorization', `Bearer ${newToken}`);
-            retryInit.headers = headers;
-            try {
-              return await executeRequest<T>(url, retryInit);
-            } catch (retryErr) {
-              // 重试也 401 → 不再递归，直接失败
-              if (retryErr instanceof ProblemDetailError && retryErr.status === 401) {
-                opts.onUnauthenticated?.();
-              }
-              throw retryErr;
-            }
-          }
-        }
-
-        // refresh 失败或未配置 → 跳登录页
-        opts.onUnauthenticated?.();
-        throw err;
-      }
+      const response = await requestWithRetry(init, (requestInit) =>
+        executeRequest<T>(url, requestInit),
+      );
+      return response.data;
+    },
+    async requestWithMeta<T>(url: string, init: RequestOptions = {}): Promise<HttpResponseMeta<T>> {
+      return requestWithRetry(init, (requestInit) => executeRequest<T>(url, requestInit));
     },
   };
+}
+
+function normalizeClientOptions(
+  optionsOrBasePath: HttpClientOptions | string,
+  requestInterceptors: RequestInterceptor[] = [],
+  responseInterceptors: ResponseInterceptor[] = [],
+): HttpClientOptions {
+  if (typeof optionsOrBasePath !== 'string') {
+    return optionsOrBasePath;
+  }
+
+  return {
+    basePath: optionsOrBasePath,
+    requestInterceptors,
+    responseInterceptors,
+  };
+}
+
+async function parseResponseBody<T>(
+  response: Response,
+  responseType?: RequestOptions['responseType'],
+): Promise<T> {
+  // 204 No Content — 调用方应声明 Promise<void>，此时 undefined as T 对 void 类型安全
+  if (response.status === 204) {
+    return undefined as T;
+  }
+
+  if (responseType === 'blob') {
+    return (await response.blob()) as T;
+  }
+
+  return response.json() as Promise<T>;
+}
+
+function withAuthorization(init: RequestOptions, token: string): RequestOptions {
+  const retryInit = { ...init };
+  const headers = new Headers(retryInit.headers);
+  headers.set('Authorization', `Bearer ${token}`);
+  retryInit.headers = headers;
+  return retryInit;
 }
 
 /**

@@ -1,4 +1,5 @@
 import { getClient } from '../config';
+import type { RequestOptions } from '../http-client';
 
 /**
  * orval mutator — 薄包装，委托给现有 HttpClient。
@@ -8,7 +9,7 @@ import { getClient } from '../config';
  *
  * 签名匹配 orval fetch 模式要求：(url: string, options: RequestInit) => Promise<T>
  */
-export const customInstance = async <T>(url: string, options: RequestInit): Promise<T> => {
+export const customInstance = async <T>(url: string, options: RequestOptions): Promise<T> => {
   return getClient().request<T>(url, options);
 };
 

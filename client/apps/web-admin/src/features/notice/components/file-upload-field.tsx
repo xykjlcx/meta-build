@@ -76,13 +76,13 @@ export function FileUploadField({ name, control }: FileUploadFieldProps) {
           // 上传到 platform-file API
           const formData = new FormData();
           formData.append('file', file);
-          const result = await customInstance<{ data: { fileId: number; fileName: string } }>(
+          const result = await customInstance<{ id: number; originalName: string }>(
             '/api/v1/files/upload',
             { method: 'POST', body: formData },
           );
-          const uploaded = result.data;
-          newFiles.push({ fileId: uploaded.fileId, fileName: uploaded.fileName ?? file.name });
-          newFileIds.push(uploaded.fileId);
+          const uploaded = result;
+          newFiles.push({ fileId: uploaded.id, fileName: uploaded.originalName ?? file.name });
+          newFileIds.push(uploaded.id);
         } catch {
           toast.error(`${file.name}: ${t('upload.uploadFailed')}`);
         }

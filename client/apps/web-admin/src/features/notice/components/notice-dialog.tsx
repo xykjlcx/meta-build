@@ -67,9 +67,7 @@ export function NoticeDialog({ open, onOpenChange, noticeId, onSuccess }: Notice
   });
 
   // orval 生成的响应结构：{ data: NoticeDetailView, status: 200, headers }
-  const detail: NoticeDetailView | undefined = (
-    detailResponse as { data?: NoticeDetailView } | undefined
-  )?.data;
+  const detail: NoticeDetailView | undefined = detailResponse;
 
   const createMutation = useCreate3();
   const updateMutation = useUpdate2();

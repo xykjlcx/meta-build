@@ -45,7 +45,7 @@ function AuthedLayout() {
         <NotificationBadge
           queryFn={unreadQueryFn}
           queryKey={['/api/v1/notices/unread-count']}
-          onClick={() => navigate({ to: '/notices' })}
+          onClick={() => navigate({ to: '/notices', search: { edit: undefined } })}
         />
       }
     >

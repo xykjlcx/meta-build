@@ -14,7 +14,7 @@
 
 | 铁律 | 具体含义 |
 |------|---------|
-| **后端是契约的权威** | Controller `@Operation` + DTO 注解驱动 OpenAPI 3.1 → OpenAPI Generator → 前端 `@mb/api-sdk`；前端**不能**手写 DTO 类型，全部从契约生成 |
+| **后端是契约的权威** | Controller `@Operation` + DTO 注解驱动 OpenAPI 3.1 → orval → 前端 `@mb/api-sdk/generated`；前端**不能**手写 DTO 类型，全部从契约生成 |
 | **所有 API 调用必须通过 `@mb/api-sdk`** | L5 业务代码禁止手写 `fetch` / `axios`；编译期通过 dependency-cruiser + `no-restricted-imports` 强制 |
 | **拦截器是单点** | `Authorization` / `Accept-Language` / `X-Request-ID` 三个 header 的注入在 SDK 工厂层统一完成，业务代码零感知 |
 
@@ -34,7 +34,7 @@ v1 只做"契约生成 + 客户端消费 + 拦截器 + 错误处理"的最小闭
 | 阶段 | 内容 |
 |------|------|
 | `[M3]` | `@mb/api-sdk` 包骨架 + 拦截器实现 + L4 `GlobalErrorHandler` + `ProblemDetailError` 异常类型 |
-| `[M4]` | 后端 springdoc 配置齐全 + OpenAPI Generator CI 任务 + 首个业务模块（platform-iam）端到端跑通 |
+| `[M4]` | 后端 springdoc 配置齐全 + orval CI 任务 + 首个业务模块（platform-iam）端到端跑通 |
 | `[M3+M4]` | 联调 + dependency-cruiser 豁免规则 + 权限清单同步 |
 
 ---
@@ -58,7 +58,7 @@ v1 只做"契约生成 + 客户端消费 + 拦截器 + 错误处理"的最小闭
 │ 基线：server/api-contract/     │
 │       openapi-v1.json（入 git）│
 └───────────────┬────────────────┘
-                │ OpenAPI Generator (typescript-fetch)
+                │ orval（react-query + models + msw）
                 ▼
 ┌────────────────────────────────┐
 │ @mb/api-sdk                    │
@@ -80,7 +80,7 @@ v1 只做"契约生成 + 客户端消费 + 拦截器 + 错误处理"的最小闭
 └────────────────────────────────┘
 
   后端改 DTO → springdoc 重新扫描 → openapi-v1.json 变化 →
-  OpenAPI Generator 重跑 → generated/*.ts 变化 →
+  orval 重跑 → generated/*.ts 变化 →
   L5 业务代码 tsc 立即报错（字段不同步 → CI 红）
 ```
 

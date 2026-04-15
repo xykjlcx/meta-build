@@ -29,11 +29,7 @@ export function RecipientsTab({ noticeId }: RecipientsTabProps) {
   });
 
   // orval 响应结构：{ data: PageResultRecipientView, status, headers }
-  const pageResult = (
-    data as
-      | { data?: { content?: RecipientView[]; totalElements?: number; totalPages?: number } }
-      | undefined
-  )?.data;
+  const pageResult = data;
   const recipients: RecipientView[] = pageResult?.content ?? [];
   const totalElements = pageResult?.totalElements ?? 0;
   const totalPages = pageResult?.totalPages ?? 0;

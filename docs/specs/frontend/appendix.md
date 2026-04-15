@@ -86,7 +86,7 @@
 ```mermaid
 graph LR
     tokens[&commat;mb/ui-tokens<br/>L1 设计令牌]
-    primitives[&commat;mb/ui-primitives<br/>L2 30 原子组件]
+    primitives[&commat;mb/ui-primitives<br/>L2 42 原子组件]
     patterns[&commat;mb/ui-patterns<br/>L3 8 业务组件]
     shell[&commat;mb/app-shell<br/>L4 布局 Provider 壳]
     sdk[&commat;mb/api-sdk<br/>契约生成物]
@@ -152,9 +152,9 @@ springdoc-openapi 扫描
   ↓
 openapi.json（OpenAPI 3.1 规范，入 git）
   ↓
-OpenAPI Generator (typescript-fetch / typescript-axios)
+orval（TanStack Query hooks + models + mock handlers）
   ↓
-@mb/api-sdk（不入 git，CI/本地构建生成）
+@mb/api-sdk/generated（不入 git，CI/本地构建生成）
   ↓ 类型：interface OrderDto / interface PageResult<T> / ProblemDetail
   ↓ 方法：orderApi.list / orderApi.create / orderApi.update / orderApi.delete
   ↓

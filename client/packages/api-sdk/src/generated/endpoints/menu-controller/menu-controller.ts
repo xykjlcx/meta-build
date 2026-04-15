@@ -37,18 +37,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `iam:menu:list`
  */
-export type treeResponse200 = {
-  data: MenuView[]
-  status: 200
-}
-    
-export type treeResponseSuccess = (treeResponse200) & {
-  headers: Headers;
-};
-;
-
-export type treeResponse = (treeResponseSuccess)
-
 export const getTreeUrl = () => {
 
 
@@ -57,9 +45,9 @@ export const getTreeUrl = () => {
   return `/api/v1/menus`
 }
 
-export const tree = async ( options?: RequestInit): Promise<treeResponse> => {
+export const tree = async ( options?: RequestInit): Promise<MenuView[]> => {
   
-  return customInstance<treeResponse>(getTreeUrl(),
+  return customInstance<MenuView[]>(getTreeUrl(),
   {      
     ...options,
     method: 'GET'
@@ -124,18 +112,6 @@ export function useTree<TData = Awaited<ReturnType<typeof tree>>, TError = unkno
 
 **权限:** `iam:menu:create`
  */
-export type create4Response201 = {
-  data: MenuView
-  status: 201
-}
-    
-export type create4ResponseSuccess = (create4Response201) & {
-  headers: Headers;
-};
-;
-
-export type create4Response = (create4ResponseSuccess)
-
 export const getCreate4Url = () => {
 
 
@@ -144,9 +120,9 @@ export const getCreate4Url = () => {
   return `/api/v1/menus`
 }
 
-export const create4 = async (menuCreateCommand: MenuCreateCommand, options?: RequestInit): Promise<create4Response> => {
+export const create4 = async (menuCreateCommand: MenuCreateCommand, options?: RequestInit): Promise<MenuView> => {
   
-  return customInstance<create4Response>(getCreate4Url(),
+  return customInstance<MenuView>(getCreate4Url(),
   {      
     ...options,
     method: 'POST',
@@ -206,18 +182,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:menu:detail`
  */
-export type getById2Response200 = {
-  data: MenuView
-  status: 200
-}
-    
-export type getById2ResponseSuccess = (getById2Response200) & {
-  headers: Headers;
-};
-;
-
-export type getById2Response = (getById2ResponseSuccess)
-
 export const getGetById2Url = (id: number,) => {
 
 
@@ -226,9 +190,9 @@ export const getGetById2Url = (id: number,) => {
   return `/api/v1/menus/${id}`
 }
 
-export const getById2 = async (id: number, options?: RequestInit): Promise<getById2Response> => {
+export const getById2 = async (id: number, options?: RequestInit): Promise<MenuView> => {
   
-  return customInstance<getById2Response>(getGetById2Url(id),
+  return customInstance<MenuView>(getGetById2Url(id),
   {      
     ...options,
     method: 'GET'
@@ -293,18 +257,6 @@ export function useGetById2<TData = Awaited<ReturnType<typeof getById2>>, TError
 
 **权限:** `iam:menu:delete`
  */
-export type delete3Response204 = {
-  data: void
-  status: 204
-}
-    
-export type delete3ResponseSuccess = (delete3Response204) & {
-  headers: Headers;
-};
-;
-
-export type delete3Response = (delete3ResponseSuccess)
-
 export const getDelete3Url = (id: number,) => {
 
 
@@ -313,9 +265,9 @@ export const getDelete3Url = (id: number,) => {
   return `/api/v1/menus/${id}`
 }
 
-export const delete3 = async (id: number, options?: RequestInit): Promise<delete3Response> => {
+export const delete3 = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<delete3Response>(getDelete3Url(id),
+  return customInstance<void>(getDelete3Url(id),
   {      
     ...options,
     method: 'DELETE'
@@ -369,19 +321,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions);
     }
-    export type currentUserMenuResponse200 = {
-  data: CurrentUserMenuView
-  status: 200
-}
-    
-export type currentUserMenuResponseSuccess = (currentUserMenuResponse200) & {
-  headers: Headers;
-};
-;
-
-export type currentUserMenuResponse = (currentUserMenuResponseSuccess)
-
-export const getCurrentUserMenuUrl = () => {
+    export const getCurrentUserMenuUrl = () => {
 
 
   
@@ -389,9 +329,9 @@ export const getCurrentUserMenuUrl = () => {
   return `/api/v1/menus/current-user`
 }
 
-export const currentUserMenu = async ( options?: RequestInit): Promise<currentUserMenuResponse> => {
+export const currentUserMenu = async ( options?: RequestInit): Promise<CurrentUserMenuView> => {
   
-  return customInstance<currentUserMenuResponse>(getCurrentUserMenuUrl(),
+  return customInstance<CurrentUserMenuView>(getCurrentUserMenuUrl(),
   {      
     ...options,
     method: 'GET'

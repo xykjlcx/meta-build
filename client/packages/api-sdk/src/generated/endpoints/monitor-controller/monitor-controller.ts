@@ -31,18 +31,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `monitor:server:list`
  */
-export type serverInfoResponse200 = {
-  data: ServerInfoView
-  status: 200
-}
-    
-export type serverInfoResponseSuccess = (serverInfoResponse200) & {
-  headers: Headers;
-};
-;
-
-export type serverInfoResponse = (serverInfoResponseSuccess)
-
 export const getServerInfoUrl = () => {
 
 
@@ -51,9 +39,9 @@ export const getServerInfoUrl = () => {
   return `/api/v1/monitor/server-info`
 }
 
-export const serverInfo = async ( options?: RequestInit): Promise<serverInfoResponse> => {
+export const serverInfo = async ( options?: RequestInit): Promise<ServerInfoView> => {
   
-  return customInstance<serverInfoResponse>(getServerInfoUrl(),
+  return customInstance<ServerInfoView>(getServerInfoUrl(),
   {      
     ...options,
     method: 'GET'

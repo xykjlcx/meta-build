@@ -42,18 +42,6 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `iam:user:detail`
  */
-export type getByIdResponse200 = {
-  data: UserView
-  status: 200
-}
-    
-export type getByIdResponseSuccess = (getByIdResponse200) & {
-  headers: Headers;
-};
-;
-
-export type getByIdResponse = (getByIdResponseSuccess)
-
 export const getGetByIdUrl = (id: number,) => {
 
 
@@ -62,9 +50,9 @@ export const getGetByIdUrl = (id: number,) => {
   return `/api/v1/users/${id}`
 }
 
-export const getById = async (id: number, options?: RequestInit): Promise<getByIdResponse> => {
+export const getById = async (id: number, options?: RequestInit): Promise<UserView> => {
   
-  return customInstance<getByIdResponse>(getGetByIdUrl(id),
+  return customInstance<UserView>(getGetByIdUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -129,18 +117,6 @@ export function useGetById<TData = Awaited<ReturnType<typeof getById>>, TError =
 
 **权限:** `iam:user:update`
  */
-export type updateResponse200 = {
-  data: UserView
-  status: 200
-}
-    
-export type updateResponseSuccess = (updateResponse200) & {
-  headers: Headers;
-};
-;
-
-export type updateResponse = (updateResponseSuccess)
-
 export const getUpdateUrl = (id: number,) => {
 
 
@@ -150,9 +126,9 @@ export const getUpdateUrl = (id: number,) => {
 }
 
 export const update = async (id: number,
-    userUpdateCommand: UserUpdateCommand, options?: RequestInit): Promise<updateResponse> => {
+    userUpdateCommand: UserUpdateCommand, options?: RequestInit): Promise<UserView> => {
   
-  return customInstance<updateResponse>(getUpdateUrl(id),
+  return customInstance<UserView>(getUpdateUrl(id),
   {      
     ...options,
     method: 'PUT',
@@ -212,18 +188,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:user:delete`
  */
-export type _deleteResponse204 = {
-  data: void
-  status: 204
-}
-    
-export type _deleteResponseSuccess = (_deleteResponse204) & {
-  headers: Headers;
-};
-;
-
-export type _deleteResponse = (_deleteResponseSuccess)
-
 export const getDeleteUrl = (id: number,) => {
 
 
@@ -232,9 +196,9 @@ export const getDeleteUrl = (id: number,) => {
   return `/api/v1/users/${id}`
 }
 
-export const _delete = async (id: number, options?: RequestInit): Promise<_deleteResponse> => {
+export const _delete = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<_deleteResponse>(getDeleteUrl(id),
+  return customInstance<void>(getDeleteUrl(id),
   {      
     ...options,
     method: 'DELETE'
@@ -293,18 +257,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:user:assignRole`
  */
-export type assignRolesResponse200 = {
-  data: void
-  status: 200
-}
-    
-export type assignRolesResponseSuccess = (assignRolesResponse200) & {
-  headers: Headers;
-};
-;
-
-export type assignRolesResponse = (assignRolesResponseSuccess)
-
 export const getAssignRolesUrl = (id: number,) => {
 
 
@@ -314,9 +266,9 @@ export const getAssignRolesUrl = (id: number,) => {
 }
 
 export const assignRoles = async (id: number,
-    assignRolesCommand: AssignRolesCommand, options?: RequestInit): Promise<assignRolesResponse> => {
+    assignRolesCommand: AssignRolesCommand, options?: RequestInit): Promise<void> => {
   
-  return customInstance<assignRolesResponse>(getAssignRolesUrl(id),
+  return customInstance<void>(getAssignRolesUrl(id),
   {      
     ...options,
     method: 'PUT',
@@ -371,19 +323,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
       return useMutation(mutationOptions);
     }
-    export type changeMyPasswordResponse200 = {
-  data: void
-  status: 200
-}
-    
-export type changeMyPasswordResponseSuccess = (changeMyPasswordResponse200) & {
-  headers: Headers;
-};
-;
-
-export type changeMyPasswordResponse = (changeMyPasswordResponseSuccess)
-
-export const getChangeMyPasswordUrl = () => {
+    export const getChangeMyPasswordUrl = () => {
 
 
   
@@ -391,9 +331,9 @@ export const getChangeMyPasswordUrl = () => {
   return `/api/v1/users/me/password`
 }
 
-export const changeMyPassword = async (changePasswordCommand: ChangePasswordCommand, options?: RequestInit): Promise<changeMyPasswordResponse> => {
+export const changeMyPassword = async (changePasswordCommand: ChangePasswordCommand, options?: RequestInit): Promise<void> => {
   
-  return customInstance<changeMyPasswordResponse>(getChangeMyPasswordUrl(),
+  return customInstance<void>(getChangeMyPasswordUrl(),
   {      
     ...options,
     method: 'PUT',
@@ -453,18 +393,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:user:list`
  */
-export type list1Response200 = {
-  data: PageResultUserView
-  status: 200
-}
-    
-export type list1ResponseSuccess = (list1Response200) & {
-  headers: Headers;
-};
-;
-
-export type list1Response = (list1ResponseSuccess)
-
 export const getList1Url = (params: List1Params,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -480,9 +408,9 @@ export const getList1Url = (params: List1Params,) => {
   return stringifiedParams.length > 0 ? `/api/v1/users?${stringifiedParams}` : `/api/v1/users`
 }
 
-export const list1 = async (params: List1Params, options?: RequestInit): Promise<list1Response> => {
+export const list1 = async (params: List1Params, options?: RequestInit): Promise<PageResultUserView> => {
   
-  return customInstance<list1Response>(getList1Url(params),
+  return customInstance<PageResultUserView>(getList1Url(params),
   {      
     ...options,
     method: 'GET'
@@ -547,18 +475,6 @@ export function useList1<TData = Awaited<ReturnType<typeof list1>>, TError = unk
 
 **权限:** `iam:user:create`
  */
-export type createResponse201 = {
-  data: UserView
-  status: 201
-}
-    
-export type createResponseSuccess = (createResponse201) & {
-  headers: Headers;
-};
-;
-
-export type createResponse = (createResponseSuccess)
-
 export const getCreateUrl = () => {
 
 
@@ -567,9 +483,9 @@ export const getCreateUrl = () => {
   return `/api/v1/users`
 }
 
-export const create = async (userCreateCommand: UserCreateCommand, options?: RequestInit): Promise<createResponse> => {
+export const create = async (userCreateCommand: UserCreateCommand, options?: RequestInit): Promise<UserView> => {
   
-  return customInstance<createResponse>(getCreateUrl(),
+  return customInstance<UserView>(getCreateUrl(),
   {      
     ...options,
     method: 'POST',
@@ -629,18 +545,6 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:user:resetPassword`
  */
-export type resetPasswordResponse200 = {
-  data: void
-  status: 200
-}
-    
-export type resetPasswordResponseSuccess = (resetPasswordResponse200) & {
-  headers: Headers;
-};
-;
-
-export type resetPasswordResponse = (resetPasswordResponseSuccess)
-
 export const getResetPasswordUrl = (id: number,) => {
 
 
@@ -650,9 +554,9 @@ export const getResetPasswordUrl = (id: number,) => {
 }
 
 export const resetPassword = async (id: number,
-    resetPasswordCommand: ResetPasswordCommand, options?: RequestInit): Promise<resetPasswordResponse> => {
+    resetPasswordCommand: ResetPasswordCommand, options?: RequestInit): Promise<void> => {
   
-  return customInstance<resetPasswordResponse>(getResetPasswordUrl(id),
+  return customInstance<void>(getResetPasswordUrl(id),
   {      
     ...options,
     method: 'POST',
