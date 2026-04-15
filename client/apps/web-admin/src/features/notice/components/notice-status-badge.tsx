@@ -2,22 +2,28 @@ import { Badge } from '@mb/ui-primitives';
 import { useTranslation } from 'react-i18next';
 import { NOTICE_STATUS, type NoticeStatusValue } from '../constants';
 
-const STATUS_VARIANT: Record<NoticeStatusValue, 'secondary' | 'default' | 'destructive'> = {
-  [NOTICE_STATUS.DRAFT]: 'secondary',
-  [NOTICE_STATUS.PUBLISHED]: 'default',
-  [NOTICE_STATUS.REVOKED]: 'destructive',
-};
+interface StatusConfig {
+  variant: 'secondary' | 'default' | 'destructive';
+  className?: string;
+  labelKey: 'status.draft' | 'status.published' | 'status.revoked';
+}
 
-const STATUS_I18N_KEY = {
-  [NOTICE_STATUS.DRAFT]: 'status.draft',
-  [NOTICE_STATUS.PUBLISHED]: 'status.published',
-  [NOTICE_STATUS.REVOKED]: 'status.revoked',
-} as const;
+const STATUS_CONFIG: Record<NoticeStatusValue, StatusConfig> = {
+  [NOTICE_STATUS.DRAFT]: { variant: 'secondary', labelKey: 'status.draft' },
+  [NOTICE_STATUS.PUBLISHED]: {
+    variant: 'default',
+    className: 'bg-green-100 text-green-800 hover:bg-green-100 border-green-200',
+    labelKey: 'status.published',
+  },
+  [NOTICE_STATUS.REVOKED]: { variant: 'destructive', labelKey: 'status.revoked' },
+};
 
 export function NoticeStatusBadge({ status }: { status: NoticeStatusValue }) {
   const { t } = useTranslation('notice');
-  const variant = STATUS_VARIANT[status] ?? 'secondary';
-  const key = STATUS_I18N_KEY[status];
-
-  return <Badge variant={variant}>{key ? t(key) : String(status)}</Badge>;
+  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG[NOTICE_STATUS.DRAFT];
+  return (
+    <Badge variant={config.variant} className={config.className}>
+      {t(config.labelKey)}
+    </Badge>
+  );
 }

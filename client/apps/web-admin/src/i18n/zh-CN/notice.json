@@ -1,9 +1,15 @@
 {
   "title": "通知公告",
+  "breadcrumb": {
+    "system": "系统管理",
+    "notice": "通知公告"
+  },
   "list": {
     "title": "公告列表",
     "empty": "暂无公告",
-    "export": "导出 Excel"
+    "export": "导出 Excel",
+    "subtitle": "管理系统通知和公告",
+    "readRate": "已读率"
   },
   "form": {
     "title": "公告标题",
@@ -45,7 +51,16 @@
     "startTimeFrom": "生效开始",
     "startTimeTo": "生效结束",
     "reset": "重置",
-    "search": "查询"
+    "search": "查询",
+    "searchPlaceholder": "搜索公告标题...",
+    "priority": "优先级",
+    "allStatus": "全部状态",
+    "allPriority": "全部优先级"
+  },
+  "priority": {
+    "normal": "普通",
+    "high": "紧急",
+    "urgent": "特急"
   },
   "batch": {
     "selected": "已选择 {{count}} 项",
@@ -75,7 +90,12 @@
     "notificationLog": "发送记录",
     "attachments": "附件列表",
     "download": "下载",
-    "backToList": "返回列表"
+    "backToList": "返回列表",
+    "back": "返回列表",
+    "publishedBy": "发布人",
+    "publishedAt": "发布时间",
+    "createdBy": "创建人",
+    "createdAt": "创建时间"
   },
   "settings": {
     "title": "设置",
@@ -85,6 +105,13 @@
     "mpDesc": "通过微信公众号接收通知消息",
     "miniDesc": "通过微信小程序接收订阅消息",
     "miniNotInWebview": "请在微信小程序中操作"
+  },
+  "dialog": {
+    "createTitle": "新建公告",
+    "editTitle": "编辑公告",
+    "saveDraft": "存为草稿",
+    "saveAndPublish": "保存并发布",
+    "publishSettings": "发布设置"
   },
   "wechat": {
     "bindMP": "绑定公众号",
@@ -108,7 +135,11 @@
   "pagination": {
     "info": "共 {{total}} 条，第 {{page}}/{{pages}} 页",
     "prev": "上一页",
-    "next": "下一页"
+    "next": "下一页",
+    "selected": "已选 {{selected}} 条，共 {{total}} 条",
+    "total": "共 {{total}} 条",
+    "perPage": "每页",
+    "pageInfo": "第 {{page}} 页，共 {{pages}} 页"
   },
   "upload": {
     "unsupportedFormat": "不支持的文件格式",

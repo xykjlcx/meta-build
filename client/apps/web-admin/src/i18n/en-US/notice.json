@@ -1,9 +1,15 @@
 {
   "title": "Notices",
+  "breadcrumb": {
+    "system": "System",
+    "notice": "Notices"
+  },
   "list": {
     "title": "Notice List",
     "empty": "No notices yet",
-    "export": "Export Excel"
+    "export": "Export Excel",
+    "subtitle": "Manage system notices and announcements",
+    "readRate": "Read Rate"
   },
   "form": {
     "title": "Title",
@@ -45,7 +51,16 @@
     "startTimeFrom": "Start From",
     "startTimeTo": "Start To",
     "reset": "Reset",
-    "search": "Search"
+    "search": "Search",
+    "searchPlaceholder": "Search notices...",
+    "priority": "Priority",
+    "allStatus": "All Status",
+    "allPriority": "All Priority"
+  },
+  "priority": {
+    "normal": "Normal",
+    "high": "High",
+    "urgent": "Urgent"
   },
   "batch": {
     "selected": "{{count}} selected",
@@ -75,7 +90,12 @@
     "notificationLog": "Notification Log",
     "attachments": "Attachments",
     "download": "Download",
-    "backToList": "Back to List"
+    "backToList": "Back to List",
+    "back": "Back to list",
+    "publishedBy": "Published by",
+    "publishedAt": "Published at",
+    "createdBy": "Created by",
+    "createdAt": "Created at"
   },
   "settings": {
     "title": "Settings",
@@ -85,6 +105,13 @@
     "mpDesc": "Receive notifications via WeChat Official Account",
     "miniDesc": "Receive subscribe messages via WeChat Mini Program",
     "miniNotInWebview": "Please operate in WeChat Mini Program"
+  },
+  "dialog": {
+    "createTitle": "New Notice",
+    "editTitle": "Edit Notice",
+    "saveDraft": "Save as Draft",
+    "saveAndPublish": "Save & Publish",
+    "publishSettings": "Publish Settings"
   },
   "wechat": {
     "bindMP": "Bind WeChat MP",
@@ -108,7 +135,11 @@
   "pagination": {
     "info": "Total {{total}}, Page {{page}}/{{pages}}",
     "prev": "Previous",
-    "next": "Next"
+    "next": "Next",
+    "selected": "{{selected}} of {{total}} selected",
+    "total": "{{total}} total",
+    "perPage": "Per page",
+    "pageInfo": "Page {{page}} of {{pages}}"
   },
   "upload": {
     "unsupportedFormat": "Unsupported file format",
