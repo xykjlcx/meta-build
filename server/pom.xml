@@ -105,11 +105,6 @@
             </dependency>
             <dependency>
                 <groupId>com.metabuild</groupId>
-                <artifactId>infra-websocket</artifactId>
-                <version>${revision}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.metabuild</groupId>
                 <artifactId>infra-captcha</artifactId>
                 <version>${revision}</version>
             </dependency>
@@ -301,6 +296,28 @@
                         <id>flatten.clean</id>
                         <phase>clean</phase>
                         <goals><goal>clean</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 强制运行时 JDK = 21（防止开发者用 JDK 25 跑出 ArchUnit ASM WARN 海洋） -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-java-21</id>
+                        <goals><goal>enforce</goal></goals>
+                        <configuration>
+                            <rules>
+                                <requireJavaVersion>
+                                    <version>[21,22)</version>
+                                    <message>本项目要求 JDK 21（实际运行：${java.version}）。请使用 ./mvnw 或 export JAVA_HOME=$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home</message>
+                                </requireJavaVersion>
+                            </rules>
+                            <fail>true</fail>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>

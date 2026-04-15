@@ -12,7 +12,7 @@ import com.metabuild.platform.iam.domain.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,7 +21,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 /**
  * AuthService 集成测试：覆盖登录成功、密码错误两条关键路径。
  *
- * <p>LoginLogService 使用 @MockBean 屏蔽异步写入（@Async + REQUIRES_NEW 在
+ * <p>LoginLogService 使用 @MockitoBean 屏蔽异步写入（@Async + REQUIRES_NEW 在
  * 测试事务回滚场景下行为不稳定）。</p>
  */
 @Import(TestSecurityConfig.class)
@@ -34,7 +34,7 @@ class AuthServiceIntegrationTest extends BaseIntegrationTest {
     private UserService userService;
 
     /** 屏蔽异步登录日志，避免 @Transactional 回滚与 REQUIRES_NEW 的冲突 */
-    @MockBean
+    @MockitoBean
     private LoginLogService loginLogService;
 
     private static final String TEST_USERNAME = "authtest";

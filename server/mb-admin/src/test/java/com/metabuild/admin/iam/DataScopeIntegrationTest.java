@@ -8,7 +8,7 @@ import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.Set;
@@ -31,12 +31,12 @@ import static org.mockito.Mockito.when;
  * <p>数据写入通过 JdbcTemplate 直接操作（绕过 jOOQ RecordListener，确保 created_by / owner_dept_id 精确可控）。
  * 数据查询通过 jOOQ DSLContext（SELECT 走 DataScopeVisitListener）。
  *
- * <p>使用 @MockBean CurrentUser，通过 Mockito 按测试方法配置不同的数据权限类型。
+ * <p>使用 @MockitoBean CurrentUser，通过 Mockito 按测试方法配置不同的数据权限类型。
  * @Transactional 保证测试结束后回滚，不影响其他测试。
  */
 class DataScopeIntegrationTest extends BaseIntegrationTest {
 
-    @MockBean
+    @MockitoBean
     private CurrentUser currentUser;
 
     @Autowired

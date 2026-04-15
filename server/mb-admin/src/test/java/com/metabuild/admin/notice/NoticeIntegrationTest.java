@@ -25,7 +25,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.time.OffsetDateTime;
@@ -41,19 +41,19 @@ import static org.mockito.Mockito.when;
 /**
  * 公告模块集成测试：覆盖 CRUD、状态机、批量操作、查询、附件、已读/未读、导出、权限、XSS 净化。
  *
- * <p>使用 @MockBean CurrentUser 精确控制当前用户身份和权限，
+ * <p>使用 @MockitoBean CurrentUser 精确控制当前用户身份和权限，
  * 直接调用 NoticeService 验证业务逻辑（与 GlobalExceptionHandler 映射一致）。
  *
- * <p>NotificationService 使用 @MockBean 屏蔽异步通知推送（@TransactionalEventListener + @Async
+ * <p>NotificationService 使用 @MockitoBean 屏蔽异步通知推送（@TransactionalEventListener + @Async
  * 在事务回滚场景下不触发）。
  */
 class NoticeIntegrationTest extends BaseIntegrationTest {
 
-    @MockBean
+    @MockitoBean
     private CurrentUser currentUser;
 
     /** 屏蔽异步通知推送，避免 @Async + REQUIRES_NEW 在事务回滚测试中的不稳定行为 */
-    @MockBean
+    @MockitoBean
     private NotificationService notificationService;
 
     @Autowired

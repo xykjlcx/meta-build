@@ -24,7 +24,6 @@
         <module>infra-async</module>
         <module>infra-rate-limit</module>
         <module>infra-sse</module>
-        <module>infra-websocket</module>
         <module>infra-observability</module>
         <module>infra-archunit</module>
         <module>infra-captcha</module>

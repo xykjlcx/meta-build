@@ -5,7 +5,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.metabuild.common.security.CurrentUser;
 import io.github.bucket4j.Bandwidth;
 import io.github.bucket4j.Bucket;
-import io.github.bucket4j.Refill;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -56,7 +55,10 @@ public class SseConnectionController {
         // 每用户每分钟 5 次建连限流（Bucket4j）
         Bucket bucket = RATE_LIMIT_BUCKETS.get(userId, id ->
                 Bucket.builder()
-                        .addLimit(Bandwidth.classic(5, Refill.greedy(5, Duration.ofMinutes(1))))
+                        .addLimit(Bandwidth.builder()
+                                .capacity(5)
+                                .refillGreedy(5, Duration.ofMinutes(1))
+                                .build())
                         .build());
         if (!bucket.tryConsume(1)) {
             log.warn("SSE 建连限流：用户 {} 每分钟建连次数超过 5 次", userId);
