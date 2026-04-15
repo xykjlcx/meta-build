@@ -80,7 +80,13 @@
     "role": "By Role",
     "user": "Specific Users",
     "preview": "Will send to {{count}} users",
-    "selectTarget": "Select Target Scope"
+    "selectTarget": "Select Target Scope",
+    "description": "Choose a publish target. All users can publish directly; other target types require a concrete selection.",
+    "selectDept": "Select department",
+    "selectRole": "Select role",
+    "selectUser": "Select user",
+    "loading": "Loading options...",
+    "empty": "No options found"
   },
   "detail": {
     "title": "Notice Detail",

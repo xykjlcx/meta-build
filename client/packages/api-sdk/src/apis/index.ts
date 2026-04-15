@@ -12,6 +12,7 @@ export {
   useMarkNoticeRead,
   useNoticeDetail,
   useNoticeList,
+  useNoticeNotificationLogs,
   useNoticeRecipients,
   usePublishNotice,
   useRevokeNotice,

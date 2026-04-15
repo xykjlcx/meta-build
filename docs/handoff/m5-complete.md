@@ -7,7 +7,7 @@
 ## 当前状态
 
 - **M5 已完成并合并到 main**(2026-04-15,commit 区间 `50db465..e58aa3b`,共 29 commits,+6671/-631 行)
-- **后端**:`mvn verify` 96 tests, 0 failures,24 ArchUnit 规则通过
+- **后端**:`mvn verify` 全绿，ArchitectureTest 28 条 ArchUnit 规则通过
 - **前端**:`pnpm build` + `pnpm check:types` + `pnpm test`(274 单元)+ `pnpm playwright test`(19 E2E,15 可执行 + 4 fixme)全绿
 - **交付范围**:business-notice canonical reference + SSE 基础设施 + 4 通道通知分发 + OpenAPI 驱动的 api-sdk + 前端 Notice 全量 + SSE 集成 + 微信绑定页
 - **未交付**:order / approval 两个 canonical reference(M5 规划但未开始)、8 个平台模块前端页面(见 gap-analysis)
@@ -90,10 +90,10 @@
 | `pages/notice-detail-page.tsx` | 349 | Tabs(基本信息 / 接收人 / 发送记录)+ Card 包裹 + SSE |
 | `components/notice-dialog.tsx` | 354 | 全屏 Dialog 双栏(左表单 + 右设置)+ 手动 RHF + 脏检查 |
 | `components/file-upload-field.tsx` | 160 | 文件上传 |
-| `components/target-selector.tsx` | 83 | 通知范围(全部/部门/角色/用户;部门/角色/用户选择器仍 TODO) |
+| `components/target-selector.tsx` | 83 | 通知范围(全部/部门/角色/用户，已接入真实选择器) |
 | `components/recipients-tab.tsx` | 81 | 接收人列表(已读/未读) |
 | `components/sse-handlers.tsx` | 77 | SSE 事件处理 |
-| `components/notification-log-tab.tsx` | 90 | 发送记录(Plan B 联动,部分 TODO) |
+| `components/notification-log-tab.tsx` | 90 | 发送记录(已接入 notification-log API) |
 | `components/batch-confirm-dialog.tsx` | 59 | 批量操作确认 |
 | `components/tiptap-field.tsx` | 44 | 富文本编辑器 |
 | `components/notice-status-badge.tsx` | 29 | 状态徽章 |
@@ -168,7 +168,6 @@
 详见 [frontend-gap-analysis.md](frontend-gap-analysis.md) §5 清单:
 
 - **侧边栏菜单不可点击**(M3 遗留)— MENU 类型没有路由导航逻辑
-- **Notice 2 个 TODO** — target-selector 的部门/角色/用户选择、notification-log-tab 部分内容
 - **orval hook 命名不友好** — `useList4` / `useCreate3`,需要后端 `@Operation(operationId)` 或 orval override
 - **Zod 校验消息硬编码中文** — 需要运行时 i18n 方案
 - **FileUploadField 编辑模式** — files state 与 field.value 不同步
@@ -194,7 +193,7 @@
 ```bash
 # 后端
 cd server && mvn verify                                         # 96 tests
-cd server && mvn test -pl mb-admin -Dtest=ArchitectureTest      # 24 ArchUnit 规则
+cd server && mvn test -pl mb-admin -Dtest=ArchitectureTest      # 28 ArchUnit 规则
 cd server && mvn spring-boot:run -pl mb-admin                   # 启动应用(产出 openapi.json)
 
 # jOOQ codegen(DDL 变更后)

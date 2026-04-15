@@ -80,7 +80,13 @@
     "role": "按角色",
     "user": "指定用户",
     "preview": "将发给 {{count}} 人",
-    "selectTarget": "选择通知范围"
+    "selectTarget": "选择通知范围",
+    "description": "选择发布目标，全员可直接发布，其余类型需指定一个目标。",
+    "selectDept": "选择部门",
+    "selectRole": "选择角色",
+    "selectUser": "选择用户",
+    "loading": "加载选项中...",
+    "empty": "暂无可选项"
   },
   "detail": {
     "title": "公告详情",

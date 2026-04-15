@@ -17,6 +17,7 @@ export type {
   NoticeDetailView,
   NoticeExportParams,
   NoticeListParams,
+  NotificationLogView,
   NoticePublishInput,
   NoticeRecipientsParams,
   NoticeTarget,
@@ -64,12 +65,23 @@ export {
   useMarkNoticeRead,
   useNoticeDetail,
   useNoticeList,
+  useNoticeNotificationLogs,
   useNoticeRecipients,
   usePublishNotice,
   useRevokeNotice,
   useUnreadNoticeCount,
   useUpdateNotice,
 } from './apis/notice-api';
+export { getDept, useGetDept } from './generated/endpoints/dept-controller/dept-controller';
+export { getRole, useGetRole } from './generated/endpoints/role-controller/role-controller';
+export { getUser, useGetUser } from './generated/endpoints/user-controller/user-controller';
+export type {
+  DeptView,
+  GetRoleParams,
+  GetUserParams,
+  RoleView,
+  UserView,
+} from './generated/models';
 export {
   useBindWechatMini,
   useBindWechatMp,

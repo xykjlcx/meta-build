@@ -32,12 +32,18 @@ import {
   usePutNoticeById,
   usePutNoticeByIdRead,
 } from '../generated/endpoints/公告管理/公告管理';
+import {
+  getGetNotificationLogQueryKey,
+  getNotificationLog,
+  useGetNotificationLog,
+} from '../generated/endpoints/通知发送记录/通知发送记录';
 import type {
   BatchIdsCommand,
   BatchResultView,
   NoticeDetailView as GeneratedNoticeDetailView,
   NoticeTarget as GeneratedNoticeTarget,
   NoticeView as GeneratedNoticeView,
+  NotificationLogView as GeneratedNotificationLogView,
   RecipientView as GeneratedRecipientView,
   GetNoticeByIdRecipientParams,
   GetNoticeExportParams,
@@ -53,6 +59,7 @@ export type NoticeView = GeneratedNoticeView;
 export type NoticeDetailView = GeneratedNoticeDetailView;
 export type NoticeTarget = GeneratedNoticeTarget;
 export type RecipientView = GeneratedRecipientView;
+export type NotificationLogView = GeneratedNotificationLogView;
 export type NoticeListParams = GetNoticeParams;
 export type NoticeRecipientsParams = GetNoticeByIdRecipientParams;
 export type NoticeCreateInput = NoticeCreateCommand;
@@ -68,6 +75,8 @@ export const noticeQueryKeys = {
   detail: getGetNoticeByIdQueryKey,
   recipients: getGetNoticeByIdRecipientQueryKey,
   unreadCount: getGetNoticeUnreadCountQueryKey,
+  notificationLogs: (noticeId: number) =>
+    getGetNotificationLogQueryKey({ module: 'notice', referenceId: String(noticeId) }),
 };
 
 export const noticeApi = {
@@ -94,6 +103,9 @@ export const noticeApi = {
     triggerDownload(blob, filename);
   },
   markRead: putNoticeByIdRead,
+  notificationLogs(noticeId: number) {
+    return getNotificationLog({ module: 'notice', referenceId: String(noticeId) });
+  },
 };
 
 export const useNoticeList = useGetNotice;
@@ -109,3 +121,14 @@ export const useBatchDeleteNotices = useDeleteNoticeBatch;
 export const useNoticeRecipients = useGetNoticeByIdRecipient;
 export const useUnreadNoticeCount = useGetNoticeUnreadCount;
 export const useMarkNoticeRead = usePutNoticeByIdRead;
+export function useNoticeNotificationLogs(noticeId: number) {
+  return useGetNotificationLog(
+    { module: 'notice', referenceId: String(noticeId) },
+    {
+      query: {
+        enabled: noticeId > 0,
+        queryKey: noticeQueryKeys.notificationLogs(noticeId),
+      },
+    },
+  );
+}

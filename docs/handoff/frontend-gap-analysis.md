@@ -4,7 +4,7 @@
 >
 > **写作时间**：2026-04-15
 > **状态**：M5 分支（原 `feat/m5-openapi-notice-backend`）已合并到 main（2026-04-15）；本文档列出的 P0-P4 前端缺口仍然有效。
-> **上下文**：M1-M5 执行过程中，后端完成度 ~85%，前端除组件库和空壳外没有业务页面。本文档详细分析这个缺口。
+> **上下文**：M1-M5 执行过程中，后端完成度 ~85%，前端已补上 notice / settings 等业务页面，但平台模块页面仍大面积缺失。本文档聚焦这些剩余缺口。
 
 ---
 
@@ -18,7 +18,7 @@
 | M2 | L2 原子组件 + Theme | ✅ 42 个 shadcn/ui v4 组件 + 3 主题 | 无 |
 | M3 | L3 业务组件 + L4 壳层 + **user 模块前端骨架** | ✅ L3 八组件 + L4 壳 ❌ **user 骨架未做** | user 前端 |
 | M4 | **前后端联调 8 个平台模块** | ✅ 后端 8 模块 ❌ **前端 0 页面** | 全部 platform 前端 |
-| M5 | **notice/order/approval 完整前后端** | ✅ notice 后端 31 测试 ⚠️ notice 前端在分支上（未合并） ❌ order/approval 未开始 | order + approval |
+| M5 | **notice/order/approval 完整前后端** | ✅ notice 后端 31 测试 + 前端已合并 ❌ order/approval 未开始 | order + approval |
 
 **下班信号达成情况**：
 - M3 下班信号："user 模块完全用 @mb/ui-patterns 拼出" → **未达成**
@@ -57,7 +57,7 @@ client/
 | HTTP | @mb/api-sdk（原生 fetch + 4 拦截器，已切 OpenAPI 生成） |
 | Toast | Sonner（命令式 `toast()`） |
 | Mock | MSW（开发时自动启用） |
-| 测试 | Vitest 271 tests + Storybook 8 |
+| 测试 | Vitest 274 tests + Storybook 8 |
 | 代码质量 | Biome + Stylelint + dependency-cruiser（7 条规则） |
 
 ### 2.3 依赖方向（严格单向，dependency-cruiser 守护）
@@ -145,7 +145,7 @@ export { BreadcrumbNav, NotificationBadge } from './components';
 
 ### 3.4 API SDK（`@mb/api-sdk`）
 
-**M5 分支已切换到 OpenAPI 生成**（orval），生成了所有后端 Controller 对应的：
+**当前主干已切换到 OpenAPI 生成**（orval），生成了所有后端 Controller 对应的：
 - TanStack Query hooks（`useQuery` / `useMutation`）
 - TypeScript 类型定义
 - MSW mock handlers
@@ -224,7 +224,7 @@ export { BreadcrumbNav, NotificationBadge } from './components';
 - `GET /api/v1/menus/current-user` — 当前用户菜单 + 权限
 - `GET /api/v1/menus` — 菜单树
 
-**M5 分支新增**：
+**M5 新增**：
 - `GET /api/v1/notices/unread-count` — 未读数
 - `GET /api/v1/notices` — 公告列表（含分页 mock）
 - `GET /api/v1/notices/:id` — 公告详情
@@ -268,7 +268,7 @@ export { BreadcrumbNav, NotificationBadge } from './components';
 - `common.json` — 通用动作（确认/取消/保存）+ 通用错误
 
 **L5 层**（`web-admin/src/i18n/`）：
-- `notice.json` — 公告模块完整文案（M5 分支）
+- `notice.json` — 公告模块完整文案（已合并）
 - **缺失**：user / role / menu / dept / dict / config / log / monitor / file 的 i18n 资源
 
 ### 3.9 已修复的 CSS 问题
@@ -282,7 +282,7 @@ export { BreadcrumbNav, NotificationBadge } from './components';
 @source "../../../packages/api-sdk/src";
 ```
 
-修复后 CSS 从 16.59 KB → 80.98 KB。**此修改在 M5 分支上，需合并到 main。**
+修复后 CSS 从 16.59 KB → 80.98 KB。**该修改已在 main。**
 
 ---
 
@@ -396,7 +396,7 @@ export { BreadcrumbNav, NotificationBadge } from './components';
 | POST | `/api/v1/notifications/{id}/read` | 标记已读 | `notification:notification:read` |
 | DELETE | `/api/v1/notifications/{id}` | 删除 | `notification:notification:delete` |
 
-### 4.13 公告管理 — business 层（⚠️ M5 分支已有前端，未合并）
+### 4.13 公告管理 — business 层（✅ 前端已合并）
 
 | HTTP | 路径 | 功能 | 权限 |
 |------|------|------|------|
@@ -505,7 +505,7 @@ client/apps/web-admin/src/features/user/
 
 ### 6.3 API 调用方式
 
-**方式 A：使用 OpenAPI 生成的 hooks**（推荐，M5 分支已生成）
+**方式 A：使用 OpenAPI 生成的 hooks**（推荐，主干已生成）
 
 ```typescript
 // 直接使用生成的 hooks
@@ -609,10 +609,9 @@ pnpm check:env               # 环境变量一致性
 
 ## 九、建议执行顺序
 
-1. **先合并 M5 分支到 main**（notice 后端 + OpenAPI 生成 + notice 前端 + CSS 修复）
-2. **以 notice 前端为模板，开发用户管理页面**（最复杂的 CRUD，做完后其他页面可以复制模式）
-3. 角色管理 → 菜单管理 → 部门管理 → 字典管理（按复杂度递减）
-4. 操作日志 → 系统配置 → 定时任务日志（只读/简单页面）
-5. Sidebar 重构 + Dashboard 充实（壳层优化）
-6. 服务监控 + 文件管理（需要特殊 UI）
-7. order + approval（M5 剩余业务模块，后端也要先做）
+1. **以已经合并的 notice 前端为模板，开发用户管理页面**（最复杂的 CRUD，做完后其他页面可以复制模式）
+2. 角色管理 → 菜单管理 → 部门管理 → 字典管理（按复杂度递减）
+3. 操作日志 → 系统配置 → 定时任务日志（只读/简单页面）
+4. Sidebar 重构 + Dashboard 充实（壳层优化）
+5. 服务监控 + 文件管理（需要特殊 UI）
+6. order + approval（M5 剩余业务模块，后端也要先做）

@@ -1,20 +1,9 @@
+import { type NotificationLogView, useNoticeNotificationLogs } from '@mb/api-sdk';
 import { NxTable } from '@mb/ui-patterns';
 import { Badge } from '@mb/ui-primitives';
 import type { ColumnDef } from '@tanstack/react-table';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-
-// 发送记录需要 Plan B 的 notification-log API
-// 此组件使用占位数据结构，Plan B 完成后接入实际 API
-
-interface NotificationLogEntry {
-  id: number;
-  channelType: string;
-  recipientName: string;
-  status: number;
-  errorMessage?: string;
-  sentAt?: string;
-}
 
 interface NotificationLogTabProps {
   noticeId: number;
@@ -26,14 +15,12 @@ const STATUS_VARIANT: Record<number, 'secondary' | 'default' | 'destructive'> = 
   2: 'destructive',
 };
 
-export function NotificationLogTab({ noticeId: _noticeId }: NotificationLogTabProps) {
+export function NotificationLogTab({ noticeId }: NotificationLogTabProps) {
   const { t } = useTranslation('notice');
+  const { data, isLoading } = useNoticeNotificationLogs(noticeId);
+  const logs = data ?? [];
 
-  // TODO: Plan B 完成后替换为 useNotificationLogs(noticeId) 生成的 hook
-  const logs: NotificationLogEntry[] = [];
-  const isLoading = false;
-
-  const columns = useMemo<ColumnDef<NotificationLogEntry, unknown>[]>(
+  const columns = useMemo<ColumnDef<NotificationLogView, unknown>[]>(
     () => [
       {
         accessorKey: 'channelType',
@@ -51,14 +38,18 @@ export function NotificationLogTab({ noticeId: _noticeId }: NotificationLogTabPr
         },
       },
       {
-        accessorKey: 'recipientName',
+        accessorKey: 'recipientId',
         header: t('log.recipient'),
+        cell: ({ getValue }) => {
+          const recipientId = getValue<number | undefined>();
+          return recipientId ? `#${recipientId}` : '-';
+        },
       },
       {
         accessorKey: 'status',
         header: t('log.status'),
         cell: ({ getValue }) => {
-          const s = getValue<number>();
+          const s = getValue<number | undefined>() ?? 0;
           const statusLabels: Record<number, string> = {
             0: t('log.statusLabel.0'),
             1: t('log.statusLabel.1'),
@@ -72,14 +63,17 @@ export function NotificationLogTab({ noticeId: _noticeId }: NotificationLogTabPr
       {
         accessorKey: 'errorMessage',
         header: t('log.errorMessage'),
-        cell: ({ getValue }) => getValue<string>() || '-',
+        cell: ({ getValue }) => {
+          const errorMessage = getValue<string | undefined>();
+          return errorMessage || '-';
+        },
       },
       {
         accessorKey: 'sentAt',
         header: t('log.sentAt'),
         cell: ({ getValue }) => {
-          const val = getValue<string>();
-          return val ? new Date(val).toLocaleString() : '-';
+          const sentAt = getValue<string | undefined>();
+          return sentAt ? new Date(sentAt).toLocaleString() : '-';
         },
       },
     ],
