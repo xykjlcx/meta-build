@@ -6,6 +6,7 @@ import com.metabuild.business.notice.api.BatchIdsCommand;
 import com.metabuild.business.notice.api.BatchResultView;
 import com.metabuild.business.notice.api.NoticeCreateCommand;
 import com.metabuild.business.notice.api.NoticeDetailView;
+import com.metabuild.business.notice.api.NoticeErrorCodes;
 import com.metabuild.business.notice.api.NoticePublishCommand;
 import com.metabuild.business.notice.api.NoticeQuery;
 import com.metabuild.business.notice.api.NoticeTarget;
@@ -145,7 +146,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
             assertThatThrownBy(() -> noticeService.update(created.id(), updateCmd))
                 .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("code", "notice.onlyDraftCanEdit");
+                .hasFieldOrPropertyWithValue("code", NoticeErrorCodes.ONLY_DRAFT_CAN_EDIT);
         }
 
         @Test
@@ -163,7 +164,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
             assertThatThrownBy(() -> noticeService.update(created.id(), updateCmd))
                 .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("code", "notice.onlyDraftCanEdit");
+                .hasFieldOrPropertyWithValue("code", NoticeErrorCodes.ONLY_DRAFT_CAN_EDIT);
         }
 
         @Test
@@ -188,7 +189,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
             assertThatThrownBy(() -> noticeService.delete(created.id()))
                 .isInstanceOf(BusinessException.class)
-                .hasFieldOrPropertyWithValue("code", "notice.onlyDraftOrRevokedCanDelete");
+                .hasFieldOrPropertyWithValue("code", NoticeErrorCodes.ONLY_DRAFT_OR_REVOKED_CAN_DELETE);
         }
     }
 

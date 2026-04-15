@@ -3,10 +3,12 @@ package com.metabuild.platform.iam.domain.user;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.CommonErrorCodes;
 import com.metabuild.common.exception.ConflictException;
 import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
+import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.UserApi;
 import com.metabuild.platform.iam.api.dto.ChangePasswordCommand;
 import com.metabuild.platform.iam.api.dto.UserCreateCommand;
@@ -46,7 +48,7 @@ public class UserService implements UserApi {
     public UserView getById(Long id) {
         return userRepository.findById(id)
             .map(this::toResponse)
-            .orElseThrow(() -> new NotFoundException("iam.user.notFound", id));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.USER_NOT_FOUND, id));
     }
 
     @Override
@@ -63,7 +65,7 @@ public class UserService implements UserApi {
 
         // 检查用户名唯一性
         if (userRepository.existsByUsername(request.username())) {
-            throw new ConflictException("iam.user.usernameExists", request.username());
+            throw new ConflictException(IamErrorCodes.USER_USERNAME_EXISTS, request.username());
         }
 
         var record = new MbIamUserRecord();
@@ -90,7 +92,7 @@ public class UserService implements UserApi {
     @Transactional
     public UserView updateUser(Long id, UserUpdateCommand request) {
         var record = userRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("iam.user.notFound", id));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.USER_NOT_FOUND, id));
 
         if (request.email() != null) record.setEmail(request.email());
         if (request.phone() != null) record.setPhone(request.phone());
@@ -104,7 +106,7 @@ public class UserService implements UserApi {
 
         int updated = userRepository.update(record, currentUser.userIdOrSystem());
         if (updated == 0) {
-            throw new BusinessException("common.concurrentModification", 409);
+            throw new ConflictException(CommonErrorCodes.CONCURRENT_MODIFICATION);
         }
         return toResponse(record);
     }
@@ -112,7 +114,7 @@ public class UserService implements UserApi {
     @Transactional
     public void deleteUser(Long id) {
         userRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("iam.user.notFound", id));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.USER_NOT_FOUND, id));
         userRepository.deleteById(id);
         log.info("删除用户: userId={}", id);
     }
@@ -120,11 +122,11 @@ public class UserService implements UserApi {
     @Transactional
     public void changePassword(Long userId, ChangePasswordCommand request) {
         var record = userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException("iam.user.notFound", userId));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.USER_NOT_FOUND, userId));
 
         // 验证旧密码
         if (!passwordEncoder.matches(request.oldPassword(), record.getPasswordHash())) {
-            throw new BusinessException("iam.auth.wrongPassword", 400);
+            throw new BusinessException(IamErrorCodes.AUTH_WRONG_PASSWORD);
         }
 
         // 验证密码策略
@@ -147,7 +149,7 @@ public class UserService implements UserApi {
     @Transactional
     public void resetPassword(Long userId, String newPassword) {
         var record = userRepository.findById(userId)
-            .orElseThrow(() -> new NotFoundException("iam.user.notFound", userId));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.USER_NOT_FOUND, userId));
 
         passwordPolicy.validate(newPassword);
 
@@ -166,7 +168,7 @@ public class UserService implements UserApi {
             .anyMatch(hash -> passwordEncoder.matches(newPassword, hash));
 
         if (isReused) {
-            throw new BusinessException("iam.auth.passwordReused", (Object) passwordPolicy.historyCount());
+            throw new BusinessException(IamErrorCodes.AUTH_PASSWORD_REUSED, (Object) passwordPolicy.historyCount());
         }
     }
 

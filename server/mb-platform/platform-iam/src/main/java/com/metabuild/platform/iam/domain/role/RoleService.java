@@ -2,11 +2,12 @@ package com.metabuild.platform.iam.domain.role;
 
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
-import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.CommonErrorCodes;
 import com.metabuild.common.exception.ConflictException;
 import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
+import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.RoleApi;
 import com.metabuild.platform.iam.api.dto.AssignRolesCommand;
 import com.metabuild.platform.iam.api.dto.RoleCreateCommand;
@@ -37,7 +38,7 @@ public class RoleService implements RoleApi {
     public RoleView getById(Long id) {
         return roleRepository.findById(id)
             .map(this::toResponse)
-            .orElseThrow(() -> new NotFoundException("iam.role.notFound", id));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.ROLE_NOT_FOUND, id));
     }
 
     @Override
@@ -56,7 +57,7 @@ public class RoleService implements RoleApi {
     @Transactional
     public Long createRole(RoleCreateCommand request) {
         if (roleRepository.existsByCode(request.code())) {
-            throw new ConflictException("iam.role.codeExists", request.code());
+            throw new ConflictException(IamErrorCodes.ROLE_CODE_EXISTS, request.code());
         }
 
         var record = new MbIamRoleRecord();
@@ -80,7 +81,7 @@ public class RoleService implements RoleApi {
     @Transactional
     public RoleView updateRole(Long id, RoleUpdateCommand request) {
         var record = roleRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("iam.role.notFound", id));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.ROLE_NOT_FOUND, id));
 
         if (request.name() != null) record.setName(request.name());
         if (request.dataScope() != null) record.setDataScope(request.dataScope());
@@ -90,7 +91,7 @@ public class RoleService implements RoleApi {
 
         int updated = roleRepository.update(record, currentUser.userIdOrSystem());
         if (updated == 0) {
-            throw new BusinessException("common.concurrentModification", 409);
+            throw new ConflictException(CommonErrorCodes.CONCURRENT_MODIFICATION);
         }
         return toResponse(record);
     }
@@ -98,7 +99,7 @@ public class RoleService implements RoleApi {
     @Transactional
     public void deleteRole(Long id) {
         roleRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("iam.role.notFound", id));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.ROLE_NOT_FOUND, id));
         // 显式清理关联数据（FK CASCADE 也会删，但显式操作意图更清晰）
         roleRepository.deleteUserRolesByRoleId(id);
         roleRepository.deleteRoleMenusByRoleId(id);

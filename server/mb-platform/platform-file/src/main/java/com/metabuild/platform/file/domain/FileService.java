@@ -1,7 +1,10 @@
 package com.metabuild.platform.file.domain;
 
 import com.metabuild.common.id.SnowflakeIdGenerator;
+import com.metabuild.common.exception.ForbiddenException;
+import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.security.CurrentUser;
+import com.metabuild.platform.file.api.FileErrorCodes;
 import com.metabuild.platform.file.api.FileStorage;
 import com.metabuild.platform.file.api.dto.FileUploadView;
 import com.metabuild.platform.file.config.MbFileProperties;
@@ -137,7 +140,7 @@ public class FileService {
         // 仅上传者或管理员可删除
         if (!currentUser.isAdmin()
                 && !Objects.equals(record.getUploaderId(), currentUser.userId())) {
-            throw new com.metabuild.common.exception.ForbiddenException("file.deleteNotAllowed");
+            throw new ForbiddenException(FileErrorCodes.DELETE_NOT_ALLOWED);
         }
         fileStorage.delete(record.getFilePath());
         fileRepository.deleteById(fileId);
@@ -148,7 +151,7 @@ public class FileService {
         Long tenantId = currentUser.isAuthenticated() ? currentUser.tenantId() : 0L;
         if (tenantId == null) tenantId = 0L;
         return fileRepository.findByIdAndTenant(fileId, tenantId)
-            .orElseThrow(() -> new com.metabuild.common.exception.NotFoundException("file.notFound", fileId));
+            .orElseThrow(() -> new NotFoundException(FileErrorCodes.NOT_FOUND, fileId));
     }
 
     private String computeSha256(MultipartFile file) {

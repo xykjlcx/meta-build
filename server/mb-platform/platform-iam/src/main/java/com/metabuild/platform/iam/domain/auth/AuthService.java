@@ -1,6 +1,8 @@
 package com.metabuild.platform.iam.domain.auth;
 
 import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.CommonErrorCodes;
+import com.metabuild.common.exception.ForbiddenException;
 import com.metabuild.common.exception.TooManyRequestsException;
 import com.metabuild.common.exception.UnauthorizedException;
 import com.metabuild.common.security.AuthFacade;
@@ -10,6 +12,7 @@ import com.metabuild.common.security.LoginResult;
 import com.metabuild.common.security.SessionData;
 import com.metabuild.infra.captcha.CaptchaService;
 import com.metabuild.platform.iam.api.AuthApi;
+import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.dto.LoginCommand;
 import com.metabuild.platform.iam.domain.dept.DeptRepository;
 import com.metabuild.platform.iam.domain.permission.PermissionService;
@@ -65,10 +68,10 @@ public class AuthService implements AuthApi {
         // 2. 验证码校验（失败次数达到阈值时必须提供）
         if (failCount >= passwordPolicy.captchaThreshold()) {
             if (request.captchaToken() == null || request.captchaCode() == null) {
-                throw new BusinessException("iam.auth.captchaRequired", 400);
+                throw new BusinessException(IamErrorCodes.AUTH_CAPTCHA_REQUIRED);
             }
             if (!captchaService.verify(request.captchaToken(), request.captchaCode())) {
-                throw new BusinessException("iam.auth.captchaInvalid", 400);
+                throw new BusinessException(IamErrorCodes.AUTH_CAPTCHA_INVALID);
             }
         }
 
@@ -77,7 +80,7 @@ public class AuthService implements AuthApi {
             int delaySeconds = failCount >= passwordPolicy.delayThreshold() * 2
                 ? passwordPolicy.longDelaySeconds()
                 : passwordPolicy.shortDelaySeconds();
-            throw new TooManyRequestsException("iam.auth.tooManyFailures", delaySeconds);
+            throw new TooManyRequestsException(IamErrorCodes.AUTH_TOO_MANY_FAILURES, delaySeconds);
         }
 
         // 4. 查询用户
@@ -88,13 +91,13 @@ public class AuthService implements AuthApi {
             // 增加失败次数
             incrementFailCount(failKey);
             loginLogService.recordFailure(username, "用户名或密码错误");
-            throw new UnauthorizedException("iam.auth.badCredentials");
+            throw new UnauthorizedException(IamErrorCodes.AUTH_BAD_CREDENTIALS);
         }
 
         // 5. 检查用户状态
         if (user.getStatus() == null || user.getStatus() == 0) {
             loginLogService.recordFailure(username, "账号已停用");
-            throw new BusinessException("iam.auth.userDisabled", 403);
+            throw new ForbiddenException(IamErrorCodes.AUTH_USER_DISABLED);
         }
 
         // 6. 构建 SessionData
@@ -158,10 +161,10 @@ public class AuthService implements AuthApi {
 
         // 2. 查询用户，确保仍然有效
         MbIamUserRecord user = userRepository.findById(userId)
-                .orElseThrow(() -> new UnauthorizedException("auth.refreshTokenInvalid"));
+                .orElseThrow(() -> new UnauthorizedException(CommonErrorCodes.AUTH_REFRESH_TOKEN_INVALID));
 
         if (user.getStatus() == null || user.getStatus() == 0) {
-            throw new BusinessException("iam.auth.userDisabled", 403);
+            throw new ForbiddenException(IamErrorCodes.AUTH_USER_DISABLED);
         }
 
         // 3. 重建 SessionData（与登录流程保持一致）

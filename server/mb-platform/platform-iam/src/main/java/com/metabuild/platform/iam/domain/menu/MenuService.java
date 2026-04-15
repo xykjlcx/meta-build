@@ -1,8 +1,8 @@
 package com.metabuild.platform.iam.domain.menu;
 
-import com.metabuild.common.exception.BusinessException;
 import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.security.CurrentUser;
+import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.MenuApi;
 import com.metabuild.platform.iam.api.dto.MenuCreateCommand;
 import com.metabuild.platform.iam.api.dto.MenuView;
@@ -35,7 +35,7 @@ public class MenuService implements MenuApi {
     public MenuView getById(Long id) {
         return menuRepository.findById(id)
             .map(r -> toResponse(r, List.of()))
-            .orElseThrow(() -> new NotFoundException("iam.menu.notFound", id));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.MENU_NOT_FOUND, id));
     }
 
     @Override
@@ -86,7 +86,7 @@ public class MenuService implements MenuApi {
     @Transactional
     public void deleteMenu(Long id) {
         menuRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("iam.menu.notFound", id));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.MENU_NOT_FOUND, id));
         menuRepository.deleteById(id);
         log.info("删除菜单: menuId={}", id);
     }

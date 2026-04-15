@@ -1,5 +1,6 @@
 package com.metabuild.infra.security;
 
+import com.metabuild.common.exception.CommonErrorCodes;
 import com.metabuild.common.exception.UnauthorizedException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -54,13 +55,13 @@ public class RefreshTokenService {
      */
     public Long validateAndRotate(String refreshToken) {
         if (refreshToken == null || refreshToken.isBlank()) {
-            throw new UnauthorizedException("auth.refreshTokenInvalid");
+            throw new UnauthorizedException(CommonErrorCodes.AUTH_REFRESH_TOKEN_INVALID);
         }
         String key = PREFIX + refreshToken;
         String userIdStr = redisTemplate.opsForValue().getAndDelete(key);
         if (userIdStr == null) {
             log.warn("Refresh token 无效或已过期: token={}...", refreshToken.substring(0, Math.min(8, refreshToken.length())));
-            throw new UnauthorizedException("auth.refreshTokenInvalid");
+            throw new UnauthorizedException(CommonErrorCodes.AUTH_REFRESH_TOKEN_INVALID);
         }
         return Long.parseLong(userIdStr);
     }

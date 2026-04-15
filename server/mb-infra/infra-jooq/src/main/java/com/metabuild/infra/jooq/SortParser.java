@@ -1,6 +1,7 @@
 package com.metabuild.infra.jooq;
 
 import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.CommonErrorCodes;
 import org.jooq.Field;
 import org.jooq.SortField;
 import org.jooq.Table;
@@ -127,7 +128,7 @@ public class SortParser {
             }
 
             if (field == null) {
-                throw new BusinessException("common.pagination.invalidSortField", fieldName);
+                throw new BusinessException(CommonErrorCodes.PAGINATION_INVALID_SORT_FIELD, fieldName);
             }
 
             return ascending ? field.asc() : field.desc();

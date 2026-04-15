@@ -5,6 +5,7 @@ import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.DeptApi;
+import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.dto.DeptCreateCommand;
 import com.metabuild.platform.iam.api.dto.DeptView;
 import com.metabuild.schema.tables.records.MbIamDeptRecord;
@@ -35,7 +36,7 @@ public class DeptService implements DeptApi {
     public DeptView getById(Long id) {
         return deptRepository.findById(id)
             .map(r -> toResponse(r, List.of()))
-            .orElseThrow(() -> new NotFoundException("iam.dept.notFound", id));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.DEPT_NOT_FOUND, id));
     }
 
     @Override
@@ -66,12 +67,12 @@ public class DeptService implements DeptApi {
     @Transactional
     public void deleteDept(Long id) {
         deptRepository.findById(id)
-            .orElseThrow(() -> new NotFoundException("iam.dept.notFound", id));
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.DEPT_NOT_FOUND, id));
         if (deptRepository.hasChildren(id)) {
-            throw new BusinessException("iam.dept.hasChildren", 400);
+            throw new BusinessException(IamErrorCodes.DEPT_HAS_CHILDREN);
         }
         if (deptRepository.hasUsers(id)) {
-            throw new BusinessException("iam.dept.hasUsers", 400);
+            throw new BusinessException(IamErrorCodes.DEPT_HAS_USERS);
         }
         deptRepository.deleteById(id);
         log.info("删除部门: deptId={}", id);

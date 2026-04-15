@@ -1,6 +1,7 @@
 package com.metabuild.platform.iam.domain.auth;
 
 import com.metabuild.common.exception.BusinessException;
+import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.config.MbIamPasswordProperties;
 import lombok.RequiredArgsConstructor;
 
@@ -22,27 +23,27 @@ public class PasswordPolicy {
      */
     public void validate(String password) {
         if (password == null || password.isBlank()) {
-            throw new BusinessException("iam.password.blank", 400);
+            throw new BusinessException(IamErrorCodes.PASSWORD_BLANK);
         }
 
         int len = password.length();
         if (len < props.minLength()) {
-            throw new BusinessException("iam.password.tooShort", (Object) props.minLength());
+            throw new BusinessException(IamErrorCodes.PASSWORD_TOO_SHORT, (Object) props.minLength());
         }
         if (len > props.maxLength()) {
-            throw new BusinessException("iam.password.tooLong", (Object) props.maxLength());
+            throw new BusinessException(IamErrorCodes.PASSWORD_TOO_LONG, (Object) props.maxLength());
         }
         if (props.requireDigit() && !containsDigit(password)) {
-            throw new BusinessException("iam.password.requireDigit", 400);
+            throw new BusinessException(IamErrorCodes.PASSWORD_REQUIRE_DIGIT);
         }
         if (props.requireLetter() && !containsLetter(password)) {
-            throw new BusinessException("iam.password.requireLetter", 400);
+            throw new BusinessException(IamErrorCodes.PASSWORD_REQUIRE_LETTER);
         }
         if (props.requireUppercase() && !containsUppercase(password)) {
-            throw new BusinessException("iam.password.requireUppercase", 400);
+            throw new BusinessException(IamErrorCodes.PASSWORD_REQUIRE_UPPERCASE);
         }
         if (props.requireSpecial() && !containsSpecial(password)) {
-            throw new BusinessException("iam.password.requireSpecial", 400);
+            throw new BusinessException(IamErrorCodes.PASSWORD_REQUIRE_SPECIAL);
         }
     }
 

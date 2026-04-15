@@ -2,6 +2,7 @@ package com.metabuild.infra.web.pagination;
 
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.CommonErrorCodes;
 
 import java.util.List;
 
@@ -24,10 +25,10 @@ public class PaginationPolicy {
         List<String> sort = normalizeSort(request.getSort());
 
         if (page < 1) {
-            throw new BusinessException("common.pagination.invalidPage");
+            throw new BusinessException(CommonErrorCodes.PAGINATION_INVALID_PAGE);
         }
         if (size < 1 || size > props.maxSize()) {
-            throw new BusinessException("common.pagination.invalidSize", (Object) props.maxSize());
+            throw new BusinessException(CommonErrorCodes.PAGINATION_INVALID_SIZE, (Object) props.maxSize());
         }
 
         return PageQuery.normalized(page, size, sort);

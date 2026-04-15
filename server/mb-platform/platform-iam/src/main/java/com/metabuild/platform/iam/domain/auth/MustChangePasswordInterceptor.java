@@ -3,6 +3,7 @@ package com.metabuild.platform.iam.domain.auth;
 import com.metabuild.common.exception.ForbiddenException;
 import com.metabuild.common.security.AuthFacade;
 import com.metabuild.common.security.CurrentUser;
+import com.metabuild.platform.iam.api.IamErrorCodes;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +54,7 @@ public class MustChangePasswordInterceptor implements HandlerInterceptor {
         Object mustChange = authFacade.getSessionFlag(SESSION_KEY_MUST_CHANGE_PASSWORD);
         if (Boolean.TRUE.equals(mustChange)) {
             log.warn("用户需要修改密码，拒绝访问: path={}", path);
-            throw new ForbiddenException("iam.auth.mustChangePassword");
+            throw new ForbiddenException(IamErrorCodes.AUTH_MUST_CHANGE_PASSWORD);
         }
 
         return true;

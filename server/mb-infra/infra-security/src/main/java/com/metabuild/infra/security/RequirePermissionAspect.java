@@ -1,5 +1,6 @@
 package com.metabuild.infra.security;
 
+import com.metabuild.common.exception.CommonErrorCodes;
 import cn.dev33.satoken.stp.StpUtil;
 import com.metabuild.common.exception.ForbiddenException;
 import com.metabuild.common.exception.UnauthorizedException;
@@ -29,7 +30,7 @@ public class RequirePermissionAspect {
                                   RequirePermission requirePermission) throws Throwable {
         // 第一步：确认已登录（防御纵深，全局拦截器未覆盖的场景）
         if (!StpUtil.isLogin()) {
-            throw new UnauthorizedException("auth.unauthorized");
+            throw new UnauthorizedException(CommonErrorCodes.AUTH_UNAUTHORIZED);
         }
 
         String[] codes = requirePermission.value();
@@ -45,7 +46,7 @@ public class RequirePermissionAspect {
         if (!granted) {
             log.warn("权限不足: userId={}, required={}, logic={}, actual={}",
                     currentUser.userId(), codes, logic, currentUser.permissions());
-            throw new ForbiddenException("auth.forbidden");
+            throw new ForbiddenException(CommonErrorCodes.AUTH_FORBIDDEN);
         }
 
         return joinPoint.proceed();

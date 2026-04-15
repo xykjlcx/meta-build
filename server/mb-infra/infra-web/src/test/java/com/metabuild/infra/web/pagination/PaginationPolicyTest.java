@@ -1,6 +1,7 @@
 package com.metabuild.infra.web.pagination;
 
 import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.CommonErrorCodes;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -44,7 +45,7 @@ class PaginationPolicyTest {
 
         assertThatThrownBy(() -> policy.normalize(request))
             .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("common.pagination.invalidPage");
+            .hasMessageContaining(CommonErrorCodes.PAGINATION_INVALID_PAGE);
     }
 
     @Test
@@ -54,6 +55,6 @@ class PaginationPolicyTest {
 
         assertThatThrownBy(() -> policy.normalize(request))
             .isInstanceOf(BusinessException.class)
-            .hasMessageContaining("common.pagination.invalidSize");
+            .hasMessageContaining(CommonErrorCodes.PAGINATION_INVALID_SIZE);
     }
 }

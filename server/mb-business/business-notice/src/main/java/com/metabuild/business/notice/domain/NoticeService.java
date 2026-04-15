@@ -4,6 +4,7 @@ import com.metabuild.business.notice.api.BatchIdsCommand;
 import com.metabuild.business.notice.api.BatchResultView;
 import com.metabuild.business.notice.api.NoticeCreateCommand;
 import com.metabuild.business.notice.api.NoticeDetailView;
+import com.metabuild.business.notice.api.NoticeErrorCodes;
 import com.metabuild.business.notice.api.NoticePublishCommand;
 import com.metabuild.business.notice.api.NoticeQuery;
 import com.metabuild.business.notice.api.NoticeTarget;
@@ -13,6 +14,7 @@ import com.metabuild.business.notice.api.RecipientView;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.CommonErrorCodes;
 import com.metabuild.common.exception.ConflictException;
 import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.id.SnowflakeIdGenerator;
@@ -62,7 +64,7 @@ public class NoticeService {
      */
     public NoticeDetailView detail(Long id) {
         return noticeRepository.findById(id, currentUser.userId())
-            .orElseThrow(() -> new NotFoundException("notice.notFound", id));
+            .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
     }
 
     /**
@@ -98,11 +100,11 @@ public class NoticeService {
     @Transactional
     public NoticeDetailView update(Long id, NoticeUpdateCommand cmd) {
         var existing = noticeRepository.findSnapshotById(id)
-            .orElseThrow(() -> new NotFoundException("notice.notFound", id));
+            .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
 
         // 仅草稿状态允许编辑
         if (existing.status() != (short) NoticeStatus.DRAFT.code()) {
-            throw new BusinessException("notice.onlyDraftCanEdit", 400);
+            throw new BusinessException(NoticeErrorCodes.ONLY_DRAFT_CAN_EDIT);
         }
 
         int updated = noticeRepository.update(
@@ -117,7 +119,7 @@ public class NoticeService {
         );
 
         if (updated == 0) {
-            throw new ConflictException("common.concurrentModification");
+            throw new ConflictException(CommonErrorCodes.CONCURRENT_MODIFICATION);
         }
 
         // 附件关联：全量替换（先删后插）
@@ -137,11 +139,11 @@ public class NoticeService {
     @Transactional
     public void delete(Long id) {
         var existing = noticeRepository.findSnapshotById(id)
-            .orElseThrow(() -> new NotFoundException("notice.notFound", id));
+            .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
 
         NoticeStatus status = NoticeStatus.fromCode(existing.status());
         if (status != NoticeStatus.DRAFT && status != NoticeStatus.REVOKED) {
-            throw new BusinessException("notice.onlyDraftOrRevokedCanDelete", 400);
+            throw new BusinessException(NoticeErrorCodes.ONLY_DRAFT_OR_REVOKED_CAN_DELETE);
         }
 
         noticeAttachmentRepository.deleteByNoticeId(id);
@@ -165,10 +167,10 @@ public class NoticeService {
     @Transactional
     public NoticeDetailView publish(Long id, NoticePublishCommand cmd) {
         var existing = noticeRepository.findSnapshotById(id)
-            .orElseThrow(() -> new NotFoundException("notice.notFound", id));
+            .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
 
         if (existing.status() != (short) NoticeStatus.DRAFT.code()) {
-            throw new BusinessException("notice.onlyDraftCanPublish", 400);
+            throw new BusinessException(NoticeErrorCodes.ONLY_DRAFT_CAN_PUBLISH);
         }
 
         // 写入发送目标（先清后插，支持重复调用幂等）
@@ -199,10 +201,10 @@ public class NoticeService {
     @Transactional
     public NoticeDetailView revoke(Long id) {
         var existing = noticeRepository.findSnapshotById(id)
-            .orElseThrow(() -> new NotFoundException("notice.notFound", id));
+            .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
 
         if (existing.status() != (short) NoticeStatus.PUBLISHED.code()) {
-            throw new BusinessException("notice.onlyPublishedCanRevoke", 400);
+            throw new BusinessException(NoticeErrorCodes.ONLY_PUBLISHED_CAN_REVOKE);
         }
 
         noticeRepository.updateStatus(id, (short) NoticeStatus.REVOKED.code(), currentUser.userId());
@@ -218,11 +220,11 @@ public class NoticeService {
     @Transactional
     public NoticeDetailView duplicate(Long id) {
         var existing = noticeRepository.findSnapshotById(id)
-            .orElseThrow(() -> new NotFoundException("notice.notFound", id));
+            .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
 
         NoticeStatus status = NoticeStatus.fromCode(existing.status());
         if (status != NoticeStatus.PUBLISHED && status != NoticeStatus.REVOKED) {
-            throw new BusinessException("notice.onlyPublishedOrRevokedCanDuplicate", 400);
+            throw new BusinessException(NoticeErrorCodes.ONLY_PUBLISHED_OR_REVOKED_CAN_DUPLICATE);
         }
 
         Long userId = currentUser.userId();
