@@ -21,8 +21,10 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  Badge,
   Button,
+  Card,
+  CardContent,
+  Separator,
   Tabs,
   TabsContent,
   TabsList,
@@ -30,7 +32,7 @@ import {
 } from '@mb/ui-primitives';
 import { useQueryClient } from '@tanstack/react-query';
 import { useNavigate, useParams } from '@tanstack/react-router';
-import { ArrowLeft, Copy, Download, FilePenLine, Send, Trash2, Undo2 } from 'lucide-react';
+import { ArrowLeft, Copy, Download, FilePenLine, Pin, Send, Trash2, Undo2 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -171,15 +173,17 @@ export function NoticeDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* 页头 */}
+      {/* Header：返回按钮 + 标题 + 操作按钮 */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" onClick={() => navigate({ to: '/notices' })}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate({ to: '/notices' })}
+          >
             <ArrowLeft className="size-4" />
-            {t('detail.backToList')}
           </Button>
-          <h1 className="text-2xl font-bold">{notice.title}</h1>
-          <NoticeStatusBadge status={status} />
+          <h1 className="text-xl font-semibold">{t('detail.title')}</h1>
         </div>
 
         {/* 操作按钮 */}
@@ -232,93 +236,91 @@ export function NoticeDetailPage() {
         </div>
       </div>
 
-      {/* Tab 内容 */}
-      <Tabs defaultValue="info">
-        <TabsList>
-          <TabsTrigger value="info">{t('detail.basicInfo')}</TabsTrigger>
-          <TabsTrigger value="recipients">{t('detail.recipients')}</TabsTrigger>
-          <TabsTrigger value="logs">{t('detail.notificationLog')}</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="info" className="space-y-4 pt-4">
-          {/* 元信息 */}
-          <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground">
-            <div>
-              {t('common:creator', { defaultValue: '创建人' })}：{notice.createdByName}
+      {/* 内容 Card */}
+      <Card>
+        <CardContent className="p-6">
+          {/* 元信息区 */}
+          <div className="mb-6">
+            <div className="mb-2 flex items-center gap-3">
+              {notice.pinned && <Pin className="size-4 text-amber-500" />}
+              <h2 className="text-xl font-semibold">{notice.title}</h2>
+              <NoticeStatusBadge status={status} />
             </div>
-            <div>
-              {t('common:createdAt', { defaultValue: '创建时间' })}：
-              {notice.createdAt ? new Date(notice.createdAt).toLocaleString() : '-'}
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              {notice.createdByName && (
+                <span>
+                  {t('detail.createdBy')}: {notice.createdByName}
+                </span>
+              )}
+              {notice.createdAt && (
+                <span>
+                  {t('detail.createdAt')}: {new Date(notice.createdAt).toLocaleString()}
+                </span>
+              )}
+              {notice.startTime && (
+                <span>
+                  {t('form.startTime')}: {new Date(notice.startTime).toLocaleString()}
+                </span>
+              )}
             </div>
-            {notice.startTime && (
-              <div>
-                {t('form.startTime')}：{new Date(notice.startTime).toLocaleString()}
-              </div>
-            )}
-            {notice.endTime && (
-              <div>
-                {t('form.endTime')}：{new Date(notice.endTime).toLocaleString()}
-              </div>
-            )}
           </div>
 
-          {/* 已读率 */}
-          {notice.recipientCount !== undefined && notice.recipientCount > 0 && (
-            <div className="text-sm">
-              <Badge variant="outline">
-                {t('read.readRate', {
-                  read: notice.readCount ?? 0,
-                  total: notice.recipientCount,
-                })}
-              </Badge>
-            </div>
-          )}
+          <Separator className="mb-6" />
 
           {/* 富文本内容 — DOMPurify 净化 */}
           <div
-            className="prose prose-sm max-w-none rounded-md border p-4"
+            className="prose prose-sm max-w-none"
             // biome-ignore lint/security/noDangerouslySetInnerHtml: 已通过 DOMPurify 净化
             dangerouslySetInnerHTML={{ __html: sanitizeHtml(notice.content ?? '') }}
           />
 
           {/* 附件列表 */}
           {notice.attachments && notice.attachments.length > 0 && (
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">{t('detail.attachments')}</h3>
-              <ul className="space-y-1">
-                {notice.attachments.map((attachment) => (
-                  <li key={attachment.fileId} className="flex items-center gap-2 text-sm">
-                    <span>
-                      {t('form.attachments')} #{attachment.sortOrder ?? attachment.fileId}
-                    </span>
+            <>
+              <Separator className="my-6" />
+              <div className="space-y-2">
+                <h3 className="text-sm font-medium">{t('detail.attachments')}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {notice.attachments.map((att) => (
                     <Button
-                      variant="ghost"
+                      key={att.fileId}
+                      variant="outline"
                       size="sm"
                       onClick={() =>
                         handleDownloadAttachment(
-                          attachment.fileId ?? 0,
-                          `attachment_${attachment.fileId}`,
+                          att.fileId ?? 0,
+                          `attachment_${att.fileId}`,
                         )
                       }
                     >
-                      <Download className="size-3.5" />
-                      {t('detail.download')}
+                      <Download className="mr-1.5 size-3.5" />
+                      {t('form.attachments')} #{att.sortOrder ?? att.fileId}
                     </Button>
-                  </li>
-                ))}
-              </ul>
-            </div>
+                  ))}
+                </div>
+              </div>
+            </>
           )}
-        </TabsContent>
+        </CardContent>
+      </Card>
 
-        <TabsContent value="recipients" className="pt-4">
-          <RecipientsTab noticeId={noticeId} />
-        </TabsContent>
-
-        <TabsContent value="logs" className="pt-4">
-          <NotificationLogTab noticeId={noticeId} />
-        </TabsContent>
-      </Tabs>
+      {/* Tab 区：接收人 + 发送记录 */}
+      <Card>
+        <CardContent className="p-0">
+          <Tabs defaultValue="recipients">
+            <TabsList className="w-full justify-start rounded-none border-b bg-transparent px-4 pt-2">
+              <TabsTrigger value="recipients">{t('detail.recipients')}</TabsTrigger>
+              <TabsTrigger value="log">{t('detail.notificationLog')}</TabsTrigger>
+            </TabsList>
+            <TabsContent value="recipients" className="p-4">
+              <RecipientsTab noticeId={noticeId} />
+            </TabsContent>
+            <TabsContent value="log" className="p-4">
+              <NotificationLogTab noticeId={noticeId} />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
 
       {/* 目标选择器 */}
       <TargetSelector
