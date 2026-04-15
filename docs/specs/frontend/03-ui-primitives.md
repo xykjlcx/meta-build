@@ -1,6 +1,6 @@
 ## 03 - L2 原子组件库 ui-primitives
 
-> **关注点**：L2 `@mb/ui-primitives` 的隔离哲学、30 个原子组件清单、shadcn 式文案 props 约定、CVA variants 风格、Storybook 规范、L2 白名单依赖。
+> **关注点**：L2 `@mb/ui-primitives` 的隔离哲学、42 个原子组件清单、shadcn 式文案 props 约定、CVA variants 风格、Storybook 规范、L2 白名单依赖。
 >
 > L2 是 meta-build 千人千面的"骨架层"——上层永不直接 import Radix，所有底层 UI 库的更换由 L2 内部消化。
 
@@ -10,7 +10,7 @@
 
 ### 1.1 一句话定位
 
-`@mb/ui-primitives` 是 meta-build 前端的**底层 UI 库隔离层**，提供 30 个 shadcn 风格的原子组件，所有组件源码作为使用者资产存在，由使用者直接修改 `*.tsx` 文件完成定制（**不是**通过 theme override 或 props 注入样式）。
+`@mb/ui-primitives` 是 meta-build 前端的**底层 UI 库隔离层**，提供 42 个 shadcn 风格的原子组件（M2 shadcn/ui v4 升级后扩充），所有组件源码作为使用者资产存在，由使用者直接修改 `*.tsx` 文件完成定制（**不是**通过 theme override 或 props 注入样式）。
 
 ### 1.2 核心约定速查
 

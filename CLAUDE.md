@@ -89,7 +89,7 @@ meta-build/
 │   │   ├── backend/                 # 后端完整设计（9 子文件 + README + appendix，~4200 行总量）
 │   │   └── frontend/                # 前端完整设计（12 子文件 + README + appendix）
 │   ├── adr/                         # 架构决策记录（14 份）
-│   ├── handoff/                     # Milestone 交接文档（m1~m4 complete + m2-shadcn-upgrade-supplement + frontend-gap-analysis）
+│   ├── handoff/                     # Milestone 交接文档（m1~m5 complete + m2-shadcn-upgrade-supplement + frontend-gap-analysis）
 │   └── 日志/                        # 每日工作日志
 │
 ├── docs/meta-build规划_v1_最终对齐.md # ground truth 基线（17 项决策）
@@ -355,7 +355,7 @@ docker compose up -d                                      # PG(15432) + Redis(16
 | [docs/specs/backend/README.md](docs/specs/backend/README.md) | **后端设计入口**（9 子文件 + 反向索引；4000+ 行，已从单文件拆分） | **定稿** |
 | [docs/specs/frontend/README.md](docs/specs/frontend/README.md) | **前端设计入口**（12 子文件 + 反向索引 + appendix） | **定稿** |
 | [docs/adr/](docs/adr/) | 架构决策记录（14 份） | 定稿 |
-| [docs/handoff/](docs/handoff/) | **Milestone 交接文档**（m1-complete / m2-complete / m2-shadcn-upgrade-supplement / m3-complete / m4-complete / frontend-gap-analysis） | 持续更新 |
+| [docs/handoff/](docs/handoff/) | **Milestone 交接文档**（m1-complete / m2-complete / m2-shadcn-upgrade-supplement / m3-complete / m4-complete / m5-complete / frontend-gap-analysis） | 持续更新 |
 | [docs/日志/](docs/日志/) | 每日工作日志 | 持续更新 |
 | [.claude/rules/](.claude/rules/) | **项目规则库**（pitfall + playbook，自动加载，持续积累） | 持续更新 |
 

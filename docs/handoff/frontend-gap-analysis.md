@@ -3,7 +3,7 @@
 > **文档目的**：完整记录 meta-build 前端的当前状态、已有资产、缺失部分，供后续 AI 或开发者接手开发。
 >
 > **写作时间**：2026-04-15
-> **当前分支**：`feat/m5-openapi-notice-backend`（未合并到 main）
+> **状态**：M5 分支（原 `feat/m5-openapi-notice-backend`）已合并到 main（2026-04-15）；本文档列出的 P0-P4 前端缺口仍然有效。
 > **上下文**：M1-M5 执行过程中，后端完成度 ~85%，前端除组件库和空壳外没有业务页面。本文档详细分析这个缺口。
 
 ---
@@ -186,7 +186,7 @@ export { BreadcrumbNav, NotificationBadge } from './components';
 | `/auth/forgot-password` | `auth/forgot-password.tsx` | 26 | 占位 |
 | `/_authed/dashboard` | `_authed/dashboard.tsx` | 27 | **3 个占位 Card，无实际内容** |
 
-**M5 分支新增的页面**（`feat/m5-openapi-notice-backend`，+2900 行）：
+**M5 新增的页面**（+2900 行，已合并到 main）：
 
 | 路由 | 文件 | 行数 | 内容 |
 |------|------|------|------|
