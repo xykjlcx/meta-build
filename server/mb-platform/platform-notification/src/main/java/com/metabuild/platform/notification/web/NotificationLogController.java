@@ -26,7 +26,7 @@ public class NotificationLogController {
     private final NotificationLogService logService;
 
     @GetMapping
-    @RequirePermission("notice:notice:detail")
+    @RequirePermission("notification:notification:list")
     @Operation(summary = "按模块和关联 ID 查询发送记录")
     public List<NotificationLogView> findByModuleAndRef(
             @Parameter(description = "来源模块", example = "notice") @RequestParam String module,

@@ -76,6 +76,130 @@ function useDebounced<T>(value: T, delay: number): T {
   return debounced;
 }
 
+// ─── 行操作子组件(抽出以避免主组件 cell 函数复杂度超标)────────────
+type NoticeRowActionsProps = {
+  notice: NoticeView;
+  t: ReturnType<typeof useTranslation>['t'];
+  user: ReturnType<typeof useCurrentUser>;
+  navigate: ReturnType<typeof useNavigate>;
+  handleEdit: (id: number) => void;
+  handleDuplicate: (id: number) => void;
+  setConfirmAction: (value: { type: 'delete' | 'publish' | 'revoke'; id: number } | null) => void;
+};
+
+function NoticeRowActions({
+  notice,
+  t,
+  user,
+  navigate,
+  handleEdit,
+  handleDuplicate,
+  setConfirmAction,
+}: NoticeRowActionsProps) {
+  const status = notice.status as NoticeStatusValue;
+
+  // 收集次要操作
+  const secondaryActions: Array<{
+    key: string;
+    icon: typeof Send;
+    label: string;
+    onClick: () => void;
+    destructive?: boolean;
+  }> = [];
+
+  if (status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:publish')) {
+    secondaryActions.push({
+      key: 'publish',
+      icon: Send,
+      label: t('action.publish'),
+      onClick: () => setConfirmAction({ type: 'publish', id: notice.id ?? 0 }),
+    });
+  }
+  if (
+    (status === NOTICE_STATUS.PUBLISHED || status === NOTICE_STATUS.REVOKED) &&
+    user.hasPermission('notice:notice:create')
+  ) {
+    secondaryActions.push({
+      key: 'duplicate',
+      icon: Copy,
+      label: t('action.duplicate'),
+      onClick: () => handleDuplicate(notice.id ?? 0),
+    });
+  }
+  if (status === NOTICE_STATUS.PUBLISHED && user.hasPermission('notice:notice:publish')) {
+    secondaryActions.push({
+      key: 'revoke',
+      icon: Undo2,
+      label: t('action.revoke'),
+      onClick: () => setConfirmAction({ type: 'revoke', id: notice.id ?? 0 }),
+    });
+  }
+  if (
+    (status === NOTICE_STATUS.DRAFT || status === NOTICE_STATUS.REVOKED) &&
+    user.hasPermission('notice:notice:delete')
+  ) {
+    secondaryActions.push({
+      key: 'delete',
+      icon: Trash2,
+      label: t('action.delete'),
+      onClick: () => setConfirmAction({ type: 'delete', id: notice.id ?? 0 }),
+      destructive: true,
+    });
+  }
+
+  return (
+    // biome-ignore lint/a11y/useKeyWithClickEvents: 操作列 stopPropagation 防止触发行点击
+    <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+      {/* 主操作:草稿→编辑,其他→详情 */}
+      {status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:update') ? (
+        <Button
+          variant="link"
+          size="sm"
+          className="h-auto p-0 text-primary"
+          onClick={() => handleEdit(notice.id ?? 0)}
+        >
+          {t('action.edit')}
+        </Button>
+      ) : (
+        <Button
+          variant="link"
+          size="sm"
+          className="h-auto p-0 text-primary"
+          onClick={() => navigate({ to: '/notices/$id', params: { id: String(notice.id) } })}
+        >
+          {t('detail.title')}
+        </Button>
+      )}
+
+      {/* ⋯ 下拉次要操作 */}
+      {secondaryActions.length > 0 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="icon" className="size-8">
+              <MoreHorizontal className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {secondaryActions.map((action) => {
+              const Icon = action.icon;
+              return (
+                <DropdownMenuItem
+                  key={action.key}
+                  className={action.destructive ? 'text-destructive' : undefined}
+                  onClick={action.onClick}
+                >
+                  <Icon className="mr-2 size-4" />
+                  {action.label}
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
+  );
+}
+
 // ─── 列表页组件 ─────────────────────────────────────────
 // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 列表页包含筛选/批量操作/权限条件渲染
 export function NoticeListPage() {
@@ -330,116 +454,17 @@ export function NoticeListPage() {
         header: () => (
           <span className="sr-only">{t('common:actions', { defaultValue: '操作' })}</span>
         ),
-        cell: ({ row }) => {
-          const notice = row.original;
-          const status = notice.status as NoticeStatusValue;
-
-          // 收集次要操作
-          const secondaryActions: Array<{
-            key: string;
-            icon: typeof Send;
-            label: string;
-            onClick: () => void;
-            destructive?: boolean;
-          }> = [];
-
-          if (status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:publish')) {
-            secondaryActions.push({
-              key: 'publish',
-              icon: Send,
-              label: t('action.publish'),
-              onClick: () => setConfirmAction({ type: 'publish', id: notice.id ?? 0 }),
-            });
-          }
-          if (
-            (status === NOTICE_STATUS.PUBLISHED || status === NOTICE_STATUS.REVOKED) &&
-            user.hasPermission('notice:notice:create')
-          ) {
-            secondaryActions.push({
-              key: 'duplicate',
-              icon: Copy,
-              label: t('action.duplicate'),
-              onClick: () => handleDuplicate(notice.id ?? 0),
-            });
-          }
-          if (status === NOTICE_STATUS.PUBLISHED && user.hasPermission('notice:notice:publish')) {
-            secondaryActions.push({
-              key: 'revoke',
-              icon: Undo2,
-              label: t('action.revoke'),
-              onClick: () => setConfirmAction({ type: 'revoke', id: notice.id ?? 0 }),
-            });
-          }
-          if (
-            (status === NOTICE_STATUS.DRAFT || status === NOTICE_STATUS.REVOKED) &&
-            user.hasPermission('notice:notice:delete')
-          ) {
-            secondaryActions.push({
-              key: 'delete',
-              icon: Trash2,
-              label: t('action.delete'),
-              onClick: () => setConfirmAction({ type: 'delete', id: notice.id ?? 0 }),
-              destructive: true,
-            });
-          }
-
-          return (
-            // biome-ignore lint/a11y/useKeyWithClickEvents: 操作列 stopPropagation 防止触发行点击
-            <div
-              className="flex items-center justify-end gap-1"
-              onClick={(e) => e.stopPropagation()}
-            >
-              {/* 主操作：草稿→编辑，其他→详情 */}
-              {status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:update') ? (
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="h-auto p-0 text-primary"
-                  onClick={() => handleEdit(notice.id ?? 0)}
-                >
-                  {t('action.edit')}
-                </Button>
-              ) : (
-                <Button
-                  variant="link"
-                  size="sm"
-                  className="h-auto p-0 text-primary"
-                  onClick={() =>
-                    navigate({ to: '/notices/$id', params: { id: String(notice.id) } })
-                  }
-                >
-                  {t('detail.title')}
-                </Button>
-              )}
-
-              {/* ⋯ 下拉次要操作 */}
-              {secondaryActions.length > 0 && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon" className="size-8">
-                      <MoreHorizontal className="size-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {secondaryActions.map((action) => {
-                      const Icon = action.icon;
-                      return (
-                        <DropdownMenuItem
-                          key={action.key}
-                          className={action.destructive ? 'text-destructive' : undefined}
-                          onClick={action.onClick}
-                        >
-                          <Icon className="mr-2 size-4" />
-                          {action.label}
-                        </DropdownMenuItem>
-                      );
-                    })}
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
-          );
-        },
+        cell: ({ row }) => (
+          <NoticeRowActions
+            notice={row.original}
+            t={t}
+            user={user}
+            navigate={navigate}
+            handleEdit={handleEdit}
+            handleDuplicate={handleDuplicate}
+            setConfirmAction={setConfirmAction}
+          />
+        ),
       },
     ],
     [t, user, navigate, handleEdit, handleDuplicate],

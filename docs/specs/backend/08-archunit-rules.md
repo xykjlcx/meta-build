@@ -16,7 +16,7 @@
 2. **自研模块边界规则**：跨模块访问、jOOQ 隔离、Sa-Token 隔离等（核心守护）
 3. **自研代码细节规则**：事务边界、时区、@CacheEvict 等
 
-M1 启动 3 条最基础的规则，M4 补全到 27 条（含 GeneralCodingRules 零成本规则 + 09-config-management.md 定义的 3 条配置管理规则）。
+M1 启动 3 条最基础的规则，M4 补全到 24 条（含 GeneralCodingRules 零成本规则 + 09-config-management.md 定义的 3 条配置管理规则），实际落到代码的 `ArchitectureTest` 共 24 个 `@Test` 方法。
 
 ## 2. M1 启动 3 条规则 [M1]
 

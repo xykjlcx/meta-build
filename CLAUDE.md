@@ -136,7 +136,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | 表格/表单 | TanStack Table v8 + React Hook Form + Zod（封装在 L3 `@mb/ui-patterns`） |
 | i18n | react-i18next + i18next（zh-CN 默认 + en-US，全量加载） |
 | HTTP 客户端 | `@mb/api-sdk`（原生 fetch + 4 拦截器，M5 切 OpenAPI 生成） |
-| 测试 | Vitest（271 tests）+ Storybook 8 + Playwright（M5 补用例） |
+| 测试 | Vitest（274 tests：L2 197 + L3 55 + api-sdk 22）+ Storybook 8 + Playwright 19 E2E |
 | 代码质量 | Biome + Stylelint + dependency-cruiser（7 条规则） |
 
 ---

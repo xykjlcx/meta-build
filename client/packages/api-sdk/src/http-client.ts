@@ -43,8 +43,8 @@ export function createHttpClient(
     typeof optionsOrBasePath === 'string'
       ? {
           basePath: optionsOrBasePath,
-          requestInterceptors: requestInterceptors!,
-          responseInterceptors: responseInterceptors!,
+          requestInterceptors: requestInterceptors ?? [],
+          responseInterceptors: responseInterceptors ?? [],
         }
       : optionsOrBasePath;
 
@@ -81,6 +81,7 @@ export function createHttpClient(
   }
 
   return {
+    // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 401 → refresh token 锁 → 重试 → onUnauthenticated 回调 的完整容错链路内聚在此,拆分反而降低可读性
     async request<T>(url: string, init: RequestOptions = {}): Promise<T> {
       try {
         return await executeRequest<T>(url, init);
