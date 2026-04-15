@@ -1,5 +1,5 @@
+import { type CurrentUserView, ProblemDetailError, authApi } from '@mb/api-sdk';
 import { useQuery } from '@tanstack/react-query';
-import { authApi, ProblemDetailError, type CurrentUserView } from '@mb/api-sdk';
 import { ANONYMOUS, type CurrentUser } from './types';
 
 export function toCurrentUser(dto: CurrentUserView): CurrentUser {

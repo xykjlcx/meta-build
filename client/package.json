@@ -13,16 +13,18 @@
     "check:i18n": "tsx scripts/check-i18n.ts",
     "check:business-words": "tsx scripts/check-business-words.ts",
     "test": "pnpm -F @mb/ui-primitives test && pnpm -F @mb/ui-patterns test && pnpm -F @mb/api-sdk test",
-    "storybook": "pnpm -F @mb/ui-primitives storybook"
+    "storybook": "pnpm -F @mb/ui-primitives storybook",
+    "generate:api-sdk": "orval --config orval.config.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.0",
     "dependency-cruiser": "^16.0.0",
+    "orval": "^7.5",
     "stylelint": "^16.0.0",
     "stylelint-config-standard": "^36.0.0",
     "stylelint-declaration-strict-value": "^1.10.0",
-    "typescript": "^5.6.0",
-    "tsx": "^4.19.0"
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
   },
   "packageManager": "pnpm@9.12.0"
 }

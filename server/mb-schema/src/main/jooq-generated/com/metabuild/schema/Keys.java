@@ -4,6 +4,10 @@
 package com.metabuild.schema;
 
 
+import com.metabuild.schema.tables.BizNotice;
+import com.metabuild.schema.tables.BizNoticeAttachment;
+import com.metabuild.schema.tables.BizNoticeRecipient;
+import com.metabuild.schema.tables.BizNoticeTarget;
 import com.metabuild.schema.tables.MbConfig;
 import com.metabuild.schema.tables.MbDictData;
 import com.metabuild.schema.tables.MbDictType;
@@ -21,7 +25,13 @@ import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
 import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.MbUserWechatBinding;
+import com.metabuild.schema.tables.records.BizNoticeAttachmentRecord;
+import com.metabuild.schema.tables.records.BizNoticeRecipientRecord;
+import com.metabuild.schema.tables.records.BizNoticeRecord;
+import com.metabuild.schema.tables.records.BizNoticeTargetRecord;
 import com.metabuild.schema.tables.records.MbConfigRecord;
 import com.metabuild.schema.tables.records.MbDictDataRecord;
 import com.metabuild.schema.tables.records.MbDictTypeRecord;
@@ -38,8 +48,10 @@ import com.metabuild.schema.tables.records.MbIamUserRecord;
 import com.metabuild.schema.tables.records.MbIamUserRoleRecord;
 import com.metabuild.schema.tables.records.MbJobLogRecord;
 import com.metabuild.schema.tables.records.MbLogOperationRecord;
+import com.metabuild.schema.tables.records.MbNotificationLogRecord;
 import com.metabuild.schema.tables.records.MbNotificationReadRecord;
 import com.metabuild.schema.tables.records.MbNotificationRecord;
+import com.metabuild.schema.tables.records.MbUserWechatBindingRecord;
 
 import org.jooq.ForeignKey;
 import org.jooq.TableField;
@@ -59,6 +71,10 @@ public class Keys {
     // UNIQUE and PRIMARY KEY definitions
     // -------------------------------------------------------------------------
 
+    public static final UniqueKey<BizNoticeRecord> BIZ_NOTICE_PKEY = Internal.createUniqueKey(BizNotice.BIZ_NOTICE, DSL.name("biz_notice_pkey"), new TableField[] { BizNotice.BIZ_NOTICE.ID }, true);
+    public static final UniqueKey<BizNoticeAttachmentRecord> BIZ_NOTICE_ATTACHMENT_PKEY = Internal.createUniqueKey(BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT, DSL.name("biz_notice_attachment_pkey"), new TableField[] { BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT.ID }, true);
+    public static final UniqueKey<BizNoticeRecipientRecord> BIZ_NOTICE_RECIPIENT_PKEY = Internal.createUniqueKey(BizNoticeRecipient.BIZ_NOTICE_RECIPIENT, DSL.name("biz_notice_recipient_pkey"), new TableField[] { BizNoticeRecipient.BIZ_NOTICE_RECIPIENT.ID }, true);
+    public static final UniqueKey<BizNoticeTargetRecord> BIZ_NOTICE_TARGET_PKEY = Internal.createUniqueKey(BizNoticeTarget.BIZ_NOTICE_TARGET, DSL.name("biz_notice_target_pkey"), new TableField[] { BizNoticeTarget.BIZ_NOTICE_TARGET.ID }, true);
     public static final UniqueKey<MbConfigRecord> MB_CONFIG_PKEY = Internal.createUniqueKey(MbConfig.MB_CONFIG, DSL.name("mb_config_pkey"), new TableField[] { MbConfig.MB_CONFIG.ID }, true);
     public static final UniqueKey<MbDictDataRecord> MB_DICT_DATA_PKEY = Internal.createUniqueKey(MbDictData.MB_DICT_DATA, DSL.name("mb_dict_data_pkey"), new TableField[] { MbDictData.MB_DICT_DATA.ID }, true);
     public static final UniqueKey<MbDictTypeRecord> MB_DICT_TYPE_PKEY = Internal.createUniqueKey(MbDictType.MB_DICT_TYPE, DSL.name("mb_dict_type_pkey"), new TableField[] { MbDictType.MB_DICT_TYPE.ID }, true);
@@ -76,7 +92,10 @@ public class Keys {
     public static final UniqueKey<MbJobLogRecord> MB_JOB_LOG_PKEY = Internal.createUniqueKey(MbJobLog.MB_JOB_LOG, DSL.name("mb_job_log_pkey"), new TableField[] { MbJobLog.MB_JOB_LOG.ID }, true);
     public static final UniqueKey<MbLogOperationRecord> MB_OPERATION_LOG_PKEY = Internal.createUniqueKey(MbLogOperation.MB_LOG_OPERATION, DSL.name("mb_operation_log_pkey"), new TableField[] { MbLogOperation.MB_LOG_OPERATION.ID }, true);
     public static final UniqueKey<MbNotificationRecord> MB_NOTIFICATION_PKEY = Internal.createUniqueKey(MbNotification.MB_NOTIFICATION, DSL.name("mb_notification_pkey"), new TableField[] { MbNotification.MB_NOTIFICATION.ID }, true);
+    public static final UniqueKey<MbNotificationLogRecord> MB_NOTIFICATION_LOG_PKEY = Internal.createUniqueKey(MbNotificationLog.MB_NOTIFICATION_LOG, DSL.name("mb_notification_log_pkey"), new TableField[] { MbNotificationLog.MB_NOTIFICATION_LOG.ID }, true);
     public static final UniqueKey<MbNotificationReadRecord> MB_NOTIFICATION_READ_PKEY = Internal.createUniqueKey(MbNotificationRead.MB_NOTIFICATION_READ, DSL.name("mb_notification_read_pkey"), new TableField[] { MbNotificationRead.MB_NOTIFICATION_READ.NOTIFICATION_ID, MbNotificationRead.MB_NOTIFICATION_READ.USER_ID }, true);
+    public static final UniqueKey<MbUserWechatBindingRecord> MB_USER_WECHAT_BINDING_PKEY = Internal.createUniqueKey(MbUserWechatBinding.MB_USER_WECHAT_BINDING, DSL.name("mb_user_wechat_binding_pkey"), new TableField[] { MbUserWechatBinding.MB_USER_WECHAT_BINDING.ID }, true);
+    public static final UniqueKey<MbUserWechatBindingRecord> MB_USER_WECHAT_BINDING_TENANT_ID_USER_ID_PLATFORM_APP_ID_KEY = Internal.createUniqueKey(MbUserWechatBinding.MB_USER_WECHAT_BINDING, DSL.name("mb_user_wechat_binding_tenant_id_user_id_platform_app_id_key"), new TableField[] { MbUserWechatBinding.MB_USER_WECHAT_BINDING.TENANT_ID, MbUserWechatBinding.MB_USER_WECHAT_BINDING.USER_ID, MbUserWechatBinding.MB_USER_WECHAT_BINDING.PLATFORM, MbUserWechatBinding.MB_USER_WECHAT_BINDING.APP_ID }, true);
 
     // -------------------------------------------------------------------------
     // FOREIGN KEY definitions

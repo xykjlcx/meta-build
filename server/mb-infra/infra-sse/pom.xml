@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.metabuild</groupId>
+        <artifactId>mb-infra</artifactId>
+        <version>${revision}</version>
+    </parent>
+    <artifactId>infra-sse</artifactId>
+    <name>infra-sse</name>
+    <description>SSE 实时推送基础设施（ADR-0014）</description>
+
+    <dependencies>
+        <!-- Spring MVC（SseEmitter） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- Redis（force-logout 兜底标记） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!-- Jackson（消息序列化） -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- Bucket4j（SSE 建连限流：5 次/分钟/用户） -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j-core</artifactId>
+        </dependency>
+
+        <!-- Caffeine（限流桶缓存，防止 ConcurrentHashMap 无限增长） -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+
+        <!-- mb-common（CurrentUser 接口） -->
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>mb-common</artifactId>
+        </dependency>
+
+        <!-- OpenAPI 注解（springdoc） -->
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
+
+        <!-- 配置元数据（IDE 提示） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
+    </dependencies>
+</project>

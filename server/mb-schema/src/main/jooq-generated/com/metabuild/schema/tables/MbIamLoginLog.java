@@ -168,7 +168,7 @@ public class MbIamLoginLog extends TableImpl<MbIamLoginLogRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.IDX_LOGIN_LOG_TIME, Indexes.IDX_LOGIN_LOG_USER);
+        return Arrays.asList(Indexes.IDX_IAM_LOGIN_LOG_USER_ID, Indexes.IDX_LOGIN_LOG_TIME, Indexes.IDX_LOGIN_LOG_USER);
     }
 
     @Override

@@ -55,7 +55,15 @@ export type AppPermission =
   // file
   | 'file:file:upload'
   | 'file:file:download'
-  | 'file:file:delete';
+  | 'file:file:delete'
+  // notice
+  | 'notice:notice:list'
+  | 'notice:notice:detail'
+  | 'notice:notice:create'
+  | 'notice:notice:update'
+  | 'notice:notice:delete'
+  | 'notice:notice:publish'
+  | 'notice:notice:export';
 
 export const ALL_APP_PERMISSIONS: readonly AppPermission[] = [
   // iam:user
@@ -111,4 +119,12 @@ export const ALL_APP_PERMISSIONS: readonly AppPermission[] = [
   'file:file:upload',
   'file:file:download',
   'file:file:delete',
+  // notice
+  'notice:notice:list',
+  'notice:notice:detail',
+  'notice:notice:create',
+  'notice:notice:update',
+  'notice:notice:delete',
+  'notice:notice:publish',
+  'notice:notice:export',
 ] as const;

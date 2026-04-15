@@ -7,7 +7,10 @@
   "types": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./auth": "./src/apis/auth-api.ts"
+    "./auth": "./src/apis/auth-api.ts",
+    "./types": "./src/types/index.ts",
+    "./mutator/*": "./src/mutator/*",
+    "./generated/*": "./src/generated/*"
   },
   "scripts": {
     "test": "vitest run",
@@ -15,5 +18,8 @@
   },
   "devDependencies": {
     "vitest": "^2.1.0"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.62.0"
   }
 }

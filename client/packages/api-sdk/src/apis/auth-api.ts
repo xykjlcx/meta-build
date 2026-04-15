@@ -1,5 +1,5 @@
 import { getClient } from '../config';
-import type { LoginCommand, LoginView, CurrentUserView } from '../types/auth';
+import type { CurrentUserView, LoginCommand, LoginView } from '../types/auth';
 
 export const authApi = {
   login(cmd: LoginCommand): Promise<LoginView> {

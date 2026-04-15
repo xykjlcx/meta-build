@@ -7,8 +7,14 @@ export type RequestInterceptor = (
 
 export type ResponseInterceptor = (response: Response) => Promise<Response> | Response;
 
+/** 请求选项，在 RequestInit 基础上扩展 responseType */
+export interface RequestOptions extends RequestInit {
+  /** 响应类型：'json'（默认）或 'blob'（文件下载） */
+  responseType?: 'json' | 'blob';
+}
+
 export interface HttpClient {
-  request<T>(url: string, init?: RequestInit): Promise<T>;
+  request<T>(url: string, init?: RequestOptions): Promise<T>;
 }
 
 export interface HttpClientOptions {
@@ -45,9 +51,11 @@ export function createHttpClient(
   // refresh 锁：防止并发请求同时触发多次 refresh
   let refreshPromise: Promise<string | null> | null = null;
 
-  async function executeRequest<T>(url: string, init: RequestInit): Promise<T> {
+  async function executeRequest<T>(url: string, init: RequestOptions): Promise<T> {
     let finalUrl = `${opts.basePath}${url}`;
-    let finalInit = { ...init };
+    // 提取 responseType，不传给 fetch（fetch 不认识这个字段）
+    const { responseType, ...fetchInit } = init;
+    let finalInit: RequestInit = { ...fetchInit };
 
     for (const interceptor of opts.requestInterceptors) {
       const result = await interceptor(finalUrl, finalInit);
@@ -63,11 +71,17 @@ export function createHttpClient(
 
     // 204 No Content — 调用方应声明 Promise<void>，此时 undefined as T 对 void 类型安全
     if (response.status === 204) return undefined as T;
+
+    // blob 响应（文件下载）
+    if (responseType === 'blob') {
+      return response.blob() as Promise<T>;
+    }
+
     return response.json() as Promise<T>;
   }
 
   return {
-    async request<T>(url: string, init: RequestInit = {}): Promise<T> {
+    async request<T>(url: string, init: RequestOptions = {}): Promise<T> {
       try {
         return await executeRequest<T>(url, init);
       } catch (err) {
@@ -109,4 +123,20 @@ export function createHttpClient(
       }
     },
   };
+}
+
+/**
+ * 触发浏览器下载。配合 HttpClient blob 响应使用。
+ * @param blob - 文件 Blob
+ * @param filename - 下载文件名
+ */
+export function triggerDownload(blob: Blob, filename: string): void {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }

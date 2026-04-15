@@ -33,6 +33,13 @@
     "formatter": { "quoteStyle": "single", "trailingCommas": "all" }
   },
   "files": {
-    "ignore": ["node_modules", "dist", "*.css", "**/routeTree.gen.ts"]
+    "ignore": [
+      "node_modules",
+      "dist",
+      "*.css",
+      "**/routeTree.gen.ts",
+      "**/generated/**",
+      "**/public/mockServiceWorker.js"
+    ]
   }
 }

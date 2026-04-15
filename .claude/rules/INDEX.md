@@ -50,8 +50,8 @@ scope: [后端/前端/全栈/构建/部署/流程]
 |------|----------|------|
 | [ADR 必须先于代码/文档变更](adr-before-code.md) | 翻转决策, 新架构概念, 改 specs | 0412 ADR-0009~0012 补写教训 |
 | [verify 块纪律](verify-block-discipline.md) | specs, verify, 新增约束 | 0413 verify-docs.sh 覆盖缺口 |
-| [交叉审查 + 残留扫描](cross-review-residual-scan.md) | 批量替换, 重命名, 多 agent 并行 | 0411 命名重构 + 0412 并行修改残留 + **0414 强化：文档残留扫描** |
-| [计划代码片段必须 grep 验证](plan-code-snippets-must-verify.md) | 计划, plan, 方法签名, 实施 | 0414 M4 修复计划 3 处方法名不匹配 |
+| [交叉审查 + 残留扫描（文档即上游代码）](cross-review-residual-scan.md) | 批量替换, 重命名, 多 agent 并行 | 0411 命名重构 + 0412 并行修改残留 + 0414 文档残留扫描 + 元模式：文档=AI的prompt |
+| [AI 跨文件引用必须 grep 验证（置信度陷阱）](plan-code-snippets-must-verify.md) | 计划, plan, 方法签名, 实施, 跨文件调用 | 0414 M4 计划 3 处不匹配 → 扩展为 AI 置信度通用规则 |
 
 ### 全栈
 | 规则 | triggers | 来源 |
@@ -63,7 +63,11 @@ scope: [后端/前端/全栈/构建/部署/流程]
 （M1 编码阶段积累）
 
 ### 前端
-（M2 编码阶段积累）
+| 规则 | triggers | 来源 |
+|------|----------|------|
+| [优先用 orval hooks，手写 API 必须交叉验证](orval-hooks-over-handwritten.md) | customInstance, api-sdk, fetch, 手写, API, endpoint | 0415 M5 微信绑定页 3 个 API 路径全错 |
+| [新增页面必须同步补全 MSW mock handler](msw-handler-sync.md) | MSW, mock, handler, 前端页面, dev server, 401 | 0415 M5 登录后 401 循环 |
+| [Radix 组件禁止空字符串 value](radix-no-empty-value.md) | Select, SelectItem, RadioGroup, Radix, value | 0415 M5 列表页白屏 |
 
 ### 构建与部署
 （M1 CI 搭建后积累）

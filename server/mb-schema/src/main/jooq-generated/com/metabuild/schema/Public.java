@@ -4,6 +4,10 @@
 package com.metabuild.schema;
 
 
+import com.metabuild.schema.tables.BizNotice;
+import com.metabuild.schema.tables.BizNoticeAttachment;
+import com.metabuild.schema.tables.BizNoticeRecipient;
+import com.metabuild.schema.tables.BizNoticeTarget;
 import com.metabuild.schema.tables.MbConfig;
 import com.metabuild.schema.tables.MbDictData;
 import com.metabuild.schema.tables.MbDictType;
@@ -21,7 +25,9 @@ import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
 import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.MbUserWechatBinding;
 
 import java.util.Arrays;
 import java.util.List;
@@ -43,6 +49,26 @@ public class Public extends SchemaImpl {
      * The reference instance of <code>public</code>
      */
     public static final Public PUBLIC = new Public();
+
+    /**
+     * 通知公告
+     */
+    public final BizNotice BIZ_NOTICE = BizNotice.BIZ_NOTICE;
+
+    /**
+     * 公告附件关联
+     */
+    public final BizNoticeAttachment BIZ_NOTICE_ATTACHMENT = BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT;
+
+    /**
+     * 通知接收人（发布时从 target 展开到具体用户）
+     */
+    public final BizNoticeRecipient BIZ_NOTICE_RECIPIENT = BizNoticeRecipient.BIZ_NOTICE_RECIPIENT;
+
+    /**
+     * 通知目标（多态关联：全员/部门/角色/用户）
+     */
+    public final BizNoticeTarget BIZ_NOTICE_TARGET = BizNoticeTarget.BIZ_NOTICE_TARGET;
 
     /**
      * 系统配置表
@@ -130,9 +156,19 @@ public class Public extends SchemaImpl {
     public final MbNotification MB_NOTIFICATION = MbNotification.MB_NOTIFICATION;
 
     /**
+     * 通知发送记录
+     */
+    public final MbNotificationLog MB_NOTIFICATION_LOG = MbNotificationLog.MB_NOTIFICATION_LOG;
+
+    /**
      * 通知已读记录（追加表）
      */
     public final MbNotificationRead MB_NOTIFICATION_READ = MbNotificationRead.MB_NOTIFICATION_READ;
+
+    /**
+     * 微信绑定关系
+     */
+    public final MbUserWechatBinding MB_USER_WECHAT_BINDING = MbUserWechatBinding.MB_USER_WECHAT_BINDING;
 
     /**
      * No further instances allowed
@@ -150,6 +186,10 @@ public class Public extends SchemaImpl {
     @Override
     public final List<Table<?>> getTables() {
         return Arrays.asList(
+            BizNotice.BIZ_NOTICE,
+            BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT,
+            BizNoticeRecipient.BIZ_NOTICE_RECIPIENT,
+            BizNoticeTarget.BIZ_NOTICE_TARGET,
             MbConfig.MB_CONFIG,
             MbDictData.MB_DICT_DATA,
             MbDictType.MB_DICT_TYPE,
@@ -167,7 +207,9 @@ public class Public extends SchemaImpl {
             MbJobLog.MB_JOB_LOG,
             MbLogOperation.MB_LOG_OPERATION,
             MbNotification.MB_NOTIFICATION,
-            MbNotificationRead.MB_NOTIFICATION_READ
+            MbNotificationLog.MB_NOTIFICATION_LOG,
+            MbNotificationRead.MB_NOTIFICATION_READ,
+            MbUserWechatBinding.MB_USER_WECHAT_BINDING
         );
     }
 }

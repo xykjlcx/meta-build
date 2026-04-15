@@ -28,6 +28,16 @@ spring:
     serialization:
       write-dates-as-timestamps: false
 
+  # 邮件（SMTP 未配置时邮件渠道自动跳过）
+  mail:
+    host: ${MB_MAIL_HOST:}
+    port: ${MB_MAIL_PORT:587}
+    username: ${MB_MAIL_USERNAME:}
+    password: ${MB_MAIL_PASSWORD:}
+    properties:
+      mail.smtp.auth: true
+      mail.smtp.starttls.enable: true
+
   # Redis
   data:
     redis:
@@ -56,6 +66,21 @@ sa-token:
 
 # Meta-Build 自定义配置
 mb:
+  app:
+    base-url: ${MB_APP_BASE_URL:http://localhost:5173}
+  email:
+    host: ${MB_MAIL_HOST:}
+    from: ${MB_MAIL_USERNAME:}
+    base-url: ${MB_APP_BASE_URL:http://localhost:5173}
+  wechat:
+    mp:
+      app-id: ${MB_WECHAT_MP_APP_ID:}
+      app-secret: ${MB_WECHAT_MP_APP_SECRET:}
+      template-notice: ${MB_WECHAT_MP_TEMPLATE_NOTICE:}
+    mini:
+      app-id: ${MB_WECHAT_MINI_APP_ID:}
+      app-secret: ${MB_WECHAT_MINI_APP_SECRET:}
+      template-notice: ${MB_WECHAT_MINI_TEMPLATE_NOTICE:}
   jooq:
     slow-query-threshold-ms: ${MB_JOOQ_SLOW_QUERY_THRESHOLD_MS:500}
   id:
@@ -83,6 +108,9 @@ mb:
     per-ip-qps: 100
     per-user-qps: 200
     burst-capacity: 50
+  sse:
+    max-connections: ${MB_SSE_MAX_CONNECTIONS:5000}
+    emitter-timeout-ms: ${MB_SSE_EMITTER_TIMEOUT_MS:1800000}
   captcha:
     enabled: true
     expire-seconds: 300

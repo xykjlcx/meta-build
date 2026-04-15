@@ -4,6 +4,10 @@
 package com.metabuild.schema;
 
 
+import com.metabuild.schema.tables.BizNotice;
+import com.metabuild.schema.tables.BizNoticeAttachment;
+import com.metabuild.schema.tables.BizNoticeRecipient;
+import com.metabuild.schema.tables.BizNoticeTarget;
 import com.metabuild.schema.tables.MbConfig;
 import com.metabuild.schema.tables.MbDictData;
 import com.metabuild.schema.tables.MbDictType;
@@ -21,7 +25,9 @@ import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
 import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.MbUserWechatBinding;
 
 import org.jooq.Index;
 import org.jooq.OrderField;
@@ -42,7 +48,9 @@ public class Indexes {
     public static final Index IDX_FILE_SHA256 = Internal.createIndex(DSL.name("idx_file_sha256"), MbFileMetadata.MB_FILE_METADATA, new OrderField[] { MbFileMetadata.MB_FILE_METADATA.SHA256 }, false);
     public static final Index IDX_FILE_UPLOADER = Internal.createIndex(DSL.name("idx_file_uploader"), MbFileMetadata.MB_FILE_METADATA, new OrderField[] { MbFileMetadata.MB_FILE_METADATA.TENANT_ID, MbFileMetadata.MB_FILE_METADATA.UPLOADER_ID }, false);
     public static final Index IDX_IAM_DEPT_PARENT = Internal.createIndex(DSL.name("idx_iam_dept_parent"), MbIamDept.MB_IAM_DEPT, new OrderField[] { MbIamDept.MB_IAM_DEPT.TENANT_ID, MbIamDept.MB_IAM_DEPT.PARENT_ID }, false);
+    public static final Index IDX_IAM_LOGIN_LOG_USER_ID = Internal.createIndex(DSL.name("idx_iam_login_log_user_id"), MbIamLoginLog.MB_IAM_LOGIN_LOG, new OrderField[] { MbIamLoginLog.MB_IAM_LOGIN_LOG.USER_ID }, false);
     public static final Index IDX_IAM_MENU_PARENT = Internal.createIndex(DSL.name("idx_iam_menu_parent"), MbIamMenu.MB_IAM_MENU, new OrderField[] { MbIamMenu.MB_IAM_MENU.TENANT_ID, MbIamMenu.MB_IAM_MENU.PARENT_ID }, false);
+    public static final Index IDX_IAM_PASSWORD_HISTORY_USER_ID = Internal.createIndex(DSL.name("idx_iam_password_history_user_id"), MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY, new OrderField[] { MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY.USER_ID }, false);
     public static final Index IDX_IAM_ROLE_DSD_DEPT_ID = Internal.createIndex(DSL.name("idx_iam_role_dsd_dept_id"), MbIamRoleDataScopeDept.MB_IAM_ROLE_DATA_SCOPE_DEPT, new OrderField[] { MbIamRoleDataScopeDept.MB_IAM_ROLE_DATA_SCOPE_DEPT.DEPT_ID }, false);
     public static final Index IDX_IAM_ROLE_MENU_MENU_ID = Internal.createIndex(DSL.name("idx_iam_role_menu_menu_id"), MbIamRoleMenu.MB_IAM_ROLE_MENU, new OrderField[] { MbIamRoleMenu.MB_IAM_ROLE_MENU.MENU_ID }, false);
     public static final Index IDX_IAM_USER_DEPT = Internal.createIndex(DSL.name("idx_iam_user_dept"), MbIamUser.MB_IAM_USER, new OrderField[] { MbIamUser.MB_IAM_USER.TENANT_ID, MbIamUser.MB_IAM_USER.DEPT_ID }, false);
@@ -54,14 +62,30 @@ public class Indexes {
     public static final Index IDX_LOG_OPERATION_USER = Internal.createIndex(DSL.name("idx_log_operation_user"), MbLogOperation.MB_LOG_OPERATION, new OrderField[] { MbLogOperation.MB_LOG_OPERATION.TENANT_ID, MbLogOperation.MB_LOG_OPERATION.USER_ID, MbLogOperation.MB_LOG_OPERATION.CREATED_AT.desc() }, false);
     public static final Index IDX_LOGIN_LOG_TIME = Internal.createIndex(DSL.name("idx_login_log_time"), MbIamLoginLog.MB_IAM_LOGIN_LOG, new OrderField[] { MbIamLoginLog.MB_IAM_LOGIN_LOG.CREATED_AT.desc() }, false);
     public static final Index IDX_LOGIN_LOG_USER = Internal.createIndex(DSL.name("idx_login_log_user"), MbIamLoginLog.MB_IAM_LOGIN_LOG, new OrderField[] { MbIamLoginLog.MB_IAM_LOGIN_LOG.USER_ID, MbIamLoginLog.MB_IAM_LOGIN_LOG.CREATED_AT.desc() }, false);
+    public static final Index IDX_NOTICE_ATT_FILE = Internal.createIndex(DSL.name("idx_notice_att_file"), BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT, new OrderField[] { BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT.FILE_ID }, false);
+    public static final Index IDX_NOTICE_ATT_NOTICE = Internal.createIndex(DSL.name("idx_notice_att_notice"), BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT, new OrderField[] { BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT.NOTICE_ID }, false);
+    public static final Index IDX_NOTICE_PINNED = Internal.createIndex(DSL.name("idx_notice_pinned"), BizNotice.BIZ_NOTICE, new OrderField[] { BizNotice.BIZ_NOTICE.TENANT_ID, BizNotice.BIZ_NOTICE.PINNED.desc(), BizNotice.BIZ_NOTICE.CREATED_AT.desc() }, false);
+    public static final Index IDX_NOTICE_RECIPIENT_NOTICE = Internal.createIndex(DSL.name("idx_notice_recipient_notice"), BizNoticeRecipient.BIZ_NOTICE_RECIPIENT, new OrderField[] { BizNoticeRecipient.BIZ_NOTICE_RECIPIENT.NOTICE_ID }, false);
+    public static final Index IDX_NOTICE_RECIPIENT_USER = Internal.createIndex(DSL.name("idx_notice_recipient_user"), BizNoticeRecipient.BIZ_NOTICE_RECIPIENT, new OrderField[] { BizNoticeRecipient.BIZ_NOTICE_RECIPIENT.USER_ID, BizNoticeRecipient.BIZ_NOTICE_RECIPIENT.READ_AT }, false);
+    public static final Index IDX_NOTICE_TARGET_NOTICE = Internal.createIndex(DSL.name("idx_notice_target_notice"), BizNoticeTarget.BIZ_NOTICE_TARGET, new OrderField[] { BizNoticeTarget.BIZ_NOTICE_TARGET.NOTICE_ID }, false);
+    public static final Index IDX_NOTICE_TENANT_CREATED = Internal.createIndex(DSL.name("idx_notice_tenant_created"), BizNotice.BIZ_NOTICE, new OrderField[] { BizNotice.BIZ_NOTICE.TENANT_ID, BizNotice.BIZ_NOTICE.CREATED_AT.desc() }, false);
+    public static final Index IDX_NOTICE_TENANT_DEPT = Internal.createIndex(DSL.name("idx_notice_tenant_dept"), BizNotice.BIZ_NOTICE, new OrderField[] { BizNotice.BIZ_NOTICE.TENANT_ID, BizNotice.BIZ_NOTICE.OWNER_DEPT_ID }, false);
+    public static final Index IDX_NOTICE_TENANT_STATUS = Internal.createIndex(DSL.name("idx_notice_tenant_status"), BizNotice.BIZ_NOTICE, new OrderField[] { BizNotice.BIZ_NOTICE.TENANT_ID, BizNotice.BIZ_NOTICE.STATUS }, false);
+    public static final Index IDX_NOTIF_LOG_MODULE_REF = Internal.createIndex(DSL.name("idx_notif_log_module_ref"), MbNotificationLog.MB_NOTIFICATION_LOG, new OrderField[] { MbNotificationLog.MB_NOTIFICATION_LOG.MODULE, MbNotificationLog.MB_NOTIFICATION_LOG.REFERENCE_ID }, false);
+    public static final Index IDX_NOTIF_LOG_RECIPIENT = Internal.createIndex(DSL.name("idx_notif_log_recipient"), MbNotificationLog.MB_NOTIFICATION_LOG, new OrderField[] { MbNotificationLog.MB_NOTIFICATION_LOG.TENANT_ID, MbNotificationLog.MB_NOTIFICATION_LOG.RECIPIENT_ID, MbNotificationLog.MB_NOTIFICATION_LOG.CREATED_AT.desc() }, false);
+    public static final Index IDX_NOTIF_LOG_STATUS = Internal.createIndex(DSL.name("idx_notif_log_status"), MbNotificationLog.MB_NOTIFICATION_LOG, new OrderField[] { MbNotificationLog.MB_NOTIFICATION_LOG.TENANT_ID, MbNotificationLog.MB_NOTIFICATION_LOG.STATUS }, false);
+    public static final Index IDX_NOTIFICATION_READ_NOTIFICATION_ID = Internal.createIndex(DSL.name("idx_notification_read_notification_id"), MbNotificationRead.MB_NOTIFICATION_READ, new OrderField[] { MbNotificationRead.MB_NOTIFICATION_READ.NOTIFICATION_ID }, false);
     public static final Index IDX_NOTIFICATION_READ_USER_ID = Internal.createIndex(DSL.name("idx_notification_read_user_id"), MbNotificationRead.MB_NOTIFICATION_READ, new OrderField[] { MbNotificationRead.MB_NOTIFICATION_READ.USER_ID, MbNotificationRead.MB_NOTIFICATION_READ.READ_AT.desc() }, false);
     public static final Index IDX_NOTIFICATION_STATUS = Internal.createIndex(DSL.name("idx_notification_status"), MbNotification.MB_NOTIFICATION, new OrderField[] { MbNotification.MB_NOTIFICATION.TENANT_ID, MbNotification.MB_NOTIFICATION.STATUS }, false);
     public static final Index IDX_NOTIFICATION_TIME = Internal.createIndex(DSL.name("idx_notification_time"), MbNotification.MB_NOTIFICATION, new OrderField[] { MbNotification.MB_NOTIFICATION.TENANT_ID, MbNotification.MB_NOTIFICATION.CREATED_AT.desc() }, false);
     public static final Index IDX_PASSWORD_HISTORY_USER = Internal.createIndex(DSL.name("idx_password_history_user"), MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY, new OrderField[] { MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY.USER_ID, MbIamPasswordHistory.MB_IAM_PASSWORD_HISTORY.CREATED_AT.desc() }, false);
     public static final Index IDX_ROUTE_TREE_PARENT = Internal.createIndex(DSL.name("idx_route_tree_parent"), MbIamRouteTree.MB_IAM_ROUTE_TREE, new OrderField[] { MbIamRouteTree.MB_IAM_ROUTE_TREE.TENANT_ID, MbIamRouteTree.MB_IAM_ROUTE_TREE.PARENT_ID }, false);
+    public static final Index IDX_WECHAT_BINDING_OPENID = Internal.createIndex(DSL.name("idx_wechat_binding_openid"), MbUserWechatBinding.MB_USER_WECHAT_BINDING, new OrderField[] { MbUserWechatBinding.MB_USER_WECHAT_BINDING.APP_ID, MbUserWechatBinding.MB_USER_WECHAT_BINDING.OPEN_ID }, false);
+    public static final Index IDX_WECHAT_BINDING_USER = Internal.createIndex(DSL.name("idx_wechat_binding_user"), MbUserWechatBinding.MB_USER_WECHAT_BINDING, new OrderField[] { MbUserWechatBinding.MB_USER_WECHAT_BINDING.TENANT_ID, MbUserWechatBinding.MB_USER_WECHAT_BINDING.USER_ID }, false);
     public static final Index UK_CONFIG_TENANT_KEY = Internal.createIndex(DSL.name("uk_config_tenant_key"), MbConfig.MB_CONFIG, new OrderField[] { MbConfig.MB_CONFIG.TENANT_ID, MbConfig.MB_CONFIG.CONFIG_KEY }, true);
     public static final Index UK_DICT_DATA_TYPE_VALUE = Internal.createIndex(DSL.name("uk_dict_data_type_value"), MbDictData.MB_DICT_DATA, new OrderField[] { MbDictData.MB_DICT_DATA.TENANT_ID, MbDictData.MB_DICT_DATA.DICT_TYPE_ID, MbDictData.MB_DICT_DATA.VALUE }, true);
     public static final Index UK_DICT_TYPE_TENANT_CODE = Internal.createIndex(DSL.name("uk_dict_type_tenant_code"), MbDictType.MB_DICT_TYPE, new OrderField[] { MbDictType.MB_DICT_TYPE.TENANT_ID, MbDictType.MB_DICT_TYPE.CODE }, true);
     public static final Index UK_IAM_ROLE_TENANT_CODE = Internal.createIndex(DSL.name("uk_iam_role_tenant_code"), MbIamRole.MB_IAM_ROLE, new OrderField[] { MbIamRole.MB_IAM_ROLE.TENANT_ID, MbIamRole.MB_IAM_ROLE.CODE }, true);
     public static final Index UK_IAM_USER_TENANT_USERNAME = Internal.createIndex(DSL.name("uk_iam_user_tenant_username"), MbIamUser.MB_IAM_USER, new OrderField[] { MbIamUser.MB_IAM_USER.TENANT_ID, MbIamUser.MB_IAM_USER.USERNAME }, true);
+    public static final Index UK_NOTICE_RECIPIENT = Internal.createIndex(DSL.name("uk_notice_recipient"), BizNoticeRecipient.BIZ_NOTICE_RECIPIENT, new OrderField[] { BizNoticeRecipient.BIZ_NOTICE_RECIPIENT.NOTICE_ID, BizNoticeRecipient.BIZ_NOTICE_RECIPIENT.USER_ID }, true);
 }

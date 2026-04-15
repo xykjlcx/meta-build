@@ -32,9 +32,39 @@ const menuTree = [
         visible: true,
         children: [
           // BUTTON 类型：页面内操作按钮权限
-          { id: 20, parentId: 2, name: '新增用户', permissionCode: 'iam:user:create', menuType: 'BUTTON' as const, icon: null, sortOrder: 1, visible: true, children: [] },
-          { id: 21, parentId: 2, name: '编辑用户', permissionCode: 'iam:user:update', menuType: 'BUTTON' as const, icon: null, sortOrder: 2, visible: true, children: [] },
-          { id: 22, parentId: 2, name: '删除用户', permissionCode: 'iam:user:delete', menuType: 'BUTTON' as const, icon: null, sortOrder: 3, visible: true, children: [] },
+          {
+            id: 20,
+            parentId: 2,
+            name: '新增用户',
+            permissionCode: 'iam:user:create',
+            menuType: 'BUTTON' as const,
+            icon: null,
+            sortOrder: 1,
+            visible: true,
+            children: [],
+          },
+          {
+            id: 21,
+            parentId: 2,
+            name: '编辑用户',
+            permissionCode: 'iam:user:update',
+            menuType: 'BUTTON' as const,
+            icon: null,
+            sortOrder: 2,
+            visible: true,
+            children: [],
+          },
+          {
+            id: 22,
+            parentId: 2,
+            name: '删除用户',
+            permissionCode: 'iam:user:delete',
+            menuType: 'BUTTON' as const,
+            icon: null,
+            sortOrder: 3,
+            visible: true,
+            children: [],
+          },
         ],
       },
       {
@@ -159,4 +189,81 @@ export const handlers = [
 
   // ── 菜单树（管理页面用）──
   http.get('/api/v1/menus', () => HttpResponse.json(menuTree)),
+
+  // ── 通知公告（mock 数据，防止 MSW 模式下穿透到后端 401） ──
+  http.get('/api/v1/notices/unread-count', () => HttpResponse.json({ count: 3 })),
+
+  http.get('/api/v1/notices', () =>
+    HttpResponse.json({
+      content: [
+        {
+          id: 1,
+          title: '系统维护通知',
+          status: 1, // PUBLISHED
+          pinned: true,
+          createdByName: 'admin',
+          createdAt: '2026-04-15T09:00:00+08:00',
+          updatedAt: '2026-04-15T10:00:00+08:00',
+          startTime: '2026-04-15T10:00:00+08:00',
+          readCount: 12,
+          recipientCount: 20,
+          read: false,
+        },
+        {
+          id: 2,
+          title: '新功能上线公告',
+          status: 1, // PUBLISHED
+          pinned: false,
+          createdByName: 'admin',
+          createdAt: '2026-04-14T14:00:00+08:00',
+          updatedAt: '2026-04-14T15:30:00+08:00',
+          startTime: '2026-04-14T15:30:00+08:00',
+          readCount: 18,
+          recipientCount: 20,
+          read: true,
+        },
+        {
+          id: 3,
+          title: '周末值班安排（草稿）',
+          status: 0, // DRAFT
+          pinned: false,
+          createdByName: 'admin',
+          createdAt: '2026-04-15T08:00:00+08:00',
+          updatedAt: '2026-04-15T08:00:00+08:00',
+          readCount: 0,
+          recipientCount: 0,
+          read: false,
+        },
+      ],
+      totalElements: 3,
+      totalPages: 1,
+      number: 0,
+      size: 10,
+    }),
+  ),
+
+  http.get('/api/v1/notices/:id', ({ params }) =>
+    HttpResponse.json({
+      id: Number(params.id),
+      title: '系统维护通知',
+      content:
+        '<p>定于 2026 年 4 月 16 日 02:00 - 06:00 进行系统维护。届时系统将暂停服务，请提前做好准备。</p><p>维护内容：数据库升级、安全补丁更新。</p>',
+      status: 1, // PUBLISHED
+      pinned: true,
+      startTime: '2026-04-15T10:00:00+08:00',
+      endTime: '2026-04-30T23:59:59+08:00',
+      createdByName: 'admin',
+      createdAt: '2026-04-15T09:00:00+08:00',
+      updatedAt: '2026-04-15T10:00:00+08:00',
+      version: 1,
+      readCount: 12,
+      recipientCount: 20,
+      read: true,
+      attachments: [
+        { fileId: 101, sortOrder: 1 },
+        { fileId: 102, sortOrder: 2 },
+      ],
+      targets: [{ targetType: 'ALL', targetId: null }],
+    }),
+  ),
 ];

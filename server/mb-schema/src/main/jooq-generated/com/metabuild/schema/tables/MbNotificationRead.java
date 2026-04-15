@@ -146,7 +146,7 @@ public class MbNotificationRead extends TableImpl<MbNotificationReadRecord> {
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.IDX_NOTIFICATION_READ_USER_ID);
+        return Arrays.asList(Indexes.IDX_NOTIFICATION_READ_NOTIFICATION_ID, Indexes.IDX_NOTIFICATION_READ_USER_ID);
     }
 
     @Override

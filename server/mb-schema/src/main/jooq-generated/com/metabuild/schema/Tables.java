@@ -4,6 +4,10 @@
 package com.metabuild.schema;
 
 
+import com.metabuild.schema.tables.BizNotice;
+import com.metabuild.schema.tables.BizNoticeAttachment;
+import com.metabuild.schema.tables.BizNoticeRecipient;
+import com.metabuild.schema.tables.BizNoticeTarget;
 import com.metabuild.schema.tables.MbConfig;
 import com.metabuild.schema.tables.MbDictData;
 import com.metabuild.schema.tables.MbDictType;
@@ -21,7 +25,9 @@ import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
 import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
+import com.metabuild.schema.tables.MbUserWechatBinding;
 
 
 /**
@@ -29,6 +35,26 @@ import com.metabuild.schema.tables.MbNotificationRead;
  */
 @SuppressWarnings({ "all", "unchecked", "rawtypes", "this-escape" })
 public class Tables {
+
+    /**
+     * 通知公告
+     */
+    public static final BizNotice BIZ_NOTICE = BizNotice.BIZ_NOTICE;
+
+    /**
+     * 公告附件关联
+     */
+    public static final BizNoticeAttachment BIZ_NOTICE_ATTACHMENT = BizNoticeAttachment.BIZ_NOTICE_ATTACHMENT;
+
+    /**
+     * 通知接收人（发布时从 target 展开到具体用户）
+     */
+    public static final BizNoticeRecipient BIZ_NOTICE_RECIPIENT = BizNoticeRecipient.BIZ_NOTICE_RECIPIENT;
+
+    /**
+     * 通知目标（多态关联：全员/部门/角色/用户）
+     */
+    public static final BizNoticeTarget BIZ_NOTICE_TARGET = BizNoticeTarget.BIZ_NOTICE_TARGET;
 
     /**
      * 系统配置表
@@ -116,7 +142,17 @@ public class Tables {
     public static final MbNotification MB_NOTIFICATION = MbNotification.MB_NOTIFICATION;
 
     /**
+     * 通知发送记录
+     */
+    public static final MbNotificationLog MB_NOTIFICATION_LOG = MbNotificationLog.MB_NOTIFICATION_LOG;
+
+    /**
      * 通知已读记录（追加表）
      */
     public static final MbNotificationRead MB_NOTIFICATION_READ = MbNotificationRead.MB_NOTIFICATION_READ;
+
+    /**
+     * 微信绑定关系
+     */
+    public static final MbUserWechatBinding MB_USER_WECHAT_BINDING = MbUserWechatBinding.MB_USER_WECHAT_BINDING;
 }

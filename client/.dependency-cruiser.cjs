@@ -44,6 +44,20 @@ module.exports = {
       to: { path: '@tanstack/react-query|@tanstack/react-router|i18next|react-i18next' },
     },
     {
+      name: 'l5-no-direct-sse-internals',
+      severity: 'error',
+      comment: 'L5 features 不能直接导入 @microsoft/fetch-event-source，必须通过 @mb/app-shell/sse',
+      from: { path: '^apps/web-admin/src/features' },
+      to: { path: '@microsoft/fetch-event-source' },
+    },
+    {
+      name: 'l5-no-direct-event-bus',
+      severity: 'error',
+      comment: 'L5 features 不能直接导入 sseEventBus，必须通过 useSseSubscription hook',
+      from: { path: '^apps/web-admin/src/features' },
+      to: { path: 'app-shell/src/sse/event-bus' },
+    },
+    {
       name: 'no-circular',
       severity: 'error',
       comment: '禁止循环依赖',

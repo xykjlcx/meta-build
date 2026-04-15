@@ -31,7 +31,13 @@ export const Default: Story = {
     const [filter, setFilter] = useState(defaultValue);
     return (
       <div className="space-y-4">
-        <NxFilter value={filter} defaultValue={defaultValue} onChange={setFilter} resetLabel="重置" applyLabel="查询">
+        <NxFilter
+          value={filter}
+          defaultValue={defaultValue}
+          onChange={setFilter}
+          resetLabel="重置"
+          applyLabel="查询"
+        >
           <NxFilterField name="keyword" label="关键词">
             <Input placeholder="请输入关键词" />
           </NxFilterField>
@@ -51,7 +57,13 @@ export const WithMultipleFields: Story = {
     const [filter, setFilter] = useState(defaultValue);
     return (
       <div className="space-y-4">
-        <NxFilter value={filter} defaultValue={defaultValue} onChange={setFilter} resetLabel="重置" applyLabel="查询">
+        <NxFilter
+          value={filter}
+          defaultValue={defaultValue}
+          onChange={setFilter}
+          resetLabel="重置"
+          applyLabel="查询"
+        >
           <NxFilterField name="name" label="姓名">
             <Input placeholder="请输入姓名" />
           </NxFilterField>
@@ -81,7 +93,13 @@ export const Reset: Story = {
     return (
       <div className="space-y-4">
         <p className="text-sm text-muted-foreground">点击重置按钮清空所有筛选条件</p>
-        <NxFilter value={filter} defaultValue={defaultValue} onChange={setFilter} resetLabel="重置" applyLabel="查询">
+        <NxFilter
+          value={filter}
+          defaultValue={defaultValue}
+          onChange={setFilter}
+          resetLabel="重置"
+          applyLabel="查询"
+        >
           <NxFilterField name="keyword" label="关键词">
             <Input placeholder="请输入关键词" />
           </NxFilterField>

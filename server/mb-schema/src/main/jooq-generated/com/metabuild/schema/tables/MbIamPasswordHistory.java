@@ -150,7 +150,7 @@ public class MbIamPasswordHistory extends TableImpl<MbIamPasswordHistoryRecord> 
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.IDX_PASSWORD_HISTORY_USER);
+        return Arrays.asList(Indexes.IDX_IAM_PASSWORD_HISTORY_USER_ID, Indexes.IDX_PASSWORD_HISTORY_USER);
     }
 
     @Override

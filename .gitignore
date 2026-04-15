@@ -45,8 +45,8 @@ logs/
 .env.test
 
 # ===== 生成物 =====
-# @mb/api-sdk（OpenAPI Generator 产物，不入 git，ADR-0004 后续补充）
-client/packages/api-sdk/src/gen/
+# @mb/api-sdk orval 生成物（不入 git，CI 从 openapi-v1.json 生成）
+client/packages/api-sdk/src/generated/
 # TanStack Router 路由树生成物（按主流做法入 git）
 !**/routeTree.gen.ts
 # jOOQ 生成代码入 git（ADR-0004 明确）
@@ -69,3 +69,4 @@ redis-data/
 # ===== 其他 OS =====
 Thumbs.db
 .flattened-pom.xml
+.superpowers/

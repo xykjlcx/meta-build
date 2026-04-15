@@ -1,0 +1,234 @@
+package com.metabuild.business.notice.domain;
+
+import com.metabuild.business.notice.api.RecipientView;
+import com.metabuild.common.dto.PageResult;
+import com.metabuild.common.id.SnowflakeIdGenerator;
+import com.metabuild.common.security.BypassDataScope;
+import lombok.RequiredArgsConstructor;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.InsertValuesStep4;
+import org.springframework.stereotype.Repository;
+
+import java.time.Clock;
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import static com.metabuild.schema.tables.BizNoticeRecipient.BIZ_NOTICE_RECIPIENT;
+import static com.metabuild.schema.tables.MbIamUser.MB_IAM_USER;
+import static com.metabuild.schema.tables.MbIamUserRole.MB_IAM_USER_ROLE;
+import static org.jooq.impl.DSL.trueCondition;
+
+/**
+ * 公告接收人数据访问层。
+ * <p>
+ * 接收人记录在发布时由 target 展开到具体用户后写入，每批 500 条分批插入。
+ */
+@Repository
+@RequiredArgsConstructor
+public class NoticeRecipientRepository {
+
+    private static final int BATCH_SIZE = 500;
+
+    private final DSLContext dsl;
+    private final SnowflakeIdGenerator idGenerator;
+    private final Clock clock;
+
+    /**
+     * 分批批量插入接收人记录（每批 500 条）。
+     *
+     * @param noticeId 公告 ID
+     * @param userIds  用户 ID 列表
+     */
+    @BypassDataScope
+    public void batchInsert(Long noticeId, List<Long> userIds) {
+        if (userIds == null || userIds.isEmpty()) {
+            return;
+        }
+
+        OffsetDateTime now = OffsetDateTime.now(clock);
+
+        for (int i = 0; i < userIds.size(); i += BATCH_SIZE) {
+            int end = Math.min(i + BATCH_SIZE, userIds.size());
+            List<Long> batch = userIds.subList(i, end);
+
+            InsertValuesStep4<?, Long, Long, Long, OffsetDateTime> insert = dsl
+                .insertInto(BIZ_NOTICE_RECIPIENT,
+                    BIZ_NOTICE_RECIPIENT.ID,
+                    BIZ_NOTICE_RECIPIENT.NOTICE_ID,
+                    BIZ_NOTICE_RECIPIENT.USER_ID,
+                    BIZ_NOTICE_RECIPIENT.CREATED_AT);
+
+            for (Long userId : batch) {
+                insert = insert.values(idGenerator.nextId(), noticeId, userId, now);
+            }
+
+            insert.execute();
+        }
+    }
+
+    /**
+     * 删除公告的全部接收人记录。
+     *
+     * @param noticeId 公告 ID
+     */
+    public void deleteByNoticeId(Long noticeId) {
+        dsl.deleteFrom(BIZ_NOTICE_RECIPIENT)
+            .where(BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(noticeId))
+            .execute();
+    }
+
+    /**
+     * 统计接收人总数。
+     *
+     * @param noticeId 公告 ID
+     * @return 接收人总数
+     */
+    public int countByNoticeId(Long noticeId) {
+        return dsl.selectCount()
+            .from(BIZ_NOTICE_RECIPIENT)
+            .where(BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(noticeId))
+            .fetchOne(0, int.class);
+    }
+
+    /**
+     * 统计已读接收人数（read_at IS NOT NULL）。
+     *
+     * @param noticeId 公告 ID
+     * @return 已读人数
+     */
+    public int countReadByNoticeId(Long noticeId) {
+        return dsl.selectCount()
+            .from(BIZ_NOTICE_RECIPIENT)
+            .where(BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(noticeId))
+            .and(BIZ_NOTICE_RECIPIENT.READ_AT.isNotNull())
+            .fetchOne(0, int.class);
+    }
+
+    // ------ 接收人展开查询（从 IAM 表获取用户 ID 列表） ------
+
+    /**
+     * 查询全部启用状态的用户 ID（用于 ALL 类型目标展开）。
+     */
+    @BypassDataScope
+    public List<Long> findAllActiveUserIds() {
+        return dsl.select(MB_IAM_USER.ID)
+            .from(MB_IAM_USER)
+            .where(MB_IAM_USER.STATUS.eq((short) 1))
+            .fetch(MB_IAM_USER.ID);
+    }
+
+    /**
+     * 查询指定部门下全部启用用户的 ID（用于 DEPT 类型目标展开）。
+     *
+     * @param deptId 部门 ID
+     */
+    @BypassDataScope
+    public List<Long> findUserIdsByDeptId(Long deptId) {
+        return dsl.select(MB_IAM_USER.ID)
+            .from(MB_IAM_USER)
+            .where(MB_IAM_USER.DEPT_ID.eq(deptId))
+            .and(MB_IAM_USER.STATUS.eq((short) 1))
+            .fetch(MB_IAM_USER.ID);
+    }
+
+    /**
+     * 查询拥有指定角色的全部启用用户的 ID（用于 ROLE 类型目标展开）。
+     *
+     * @param roleId 角色 ID
+     */
+    @BypassDataScope
+    public List<Long> findUserIdsByRoleId(Long roleId) {
+        return dsl.select(MB_IAM_USER.ID)
+            .from(MB_IAM_USER)
+            .join(MB_IAM_USER_ROLE).on(MB_IAM_USER.ID.eq(MB_IAM_USER_ROLE.USER_ID))
+            .where(MB_IAM_USER_ROLE.ROLE_ID.eq(roleId))
+            .and(MB_IAM_USER.STATUS.eq((short) 1))
+            .fetch(MB_IAM_USER.ID);
+    }
+
+    // ------ 已读/未读操作 ------
+
+    /**
+     * 标记已读（幂等：已读则跳过，仅对 read_at IS NULL 的行执行 UPDATE）。
+     *
+     * @param noticeId 公告 ID
+     * @param userId   用户 ID
+     * @param readAt   已读时间
+     * @return true=本次写入了已读，false=之前已读（幂等无操作）
+     */
+    public boolean markRead(Long noticeId, Long userId, OffsetDateTime readAt) {
+        int rows = dsl.update(BIZ_NOTICE_RECIPIENT)
+            .set(BIZ_NOTICE_RECIPIENT.READ_AT, readAt)
+            .where(BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(noticeId))
+            .and(BIZ_NOTICE_RECIPIENT.USER_ID.eq(userId))
+            .and(BIZ_NOTICE_RECIPIENT.READ_AT.isNull())
+            .execute();
+        return rows > 0;
+    }
+
+    /**
+     * 查询当前用户未读公告数量。
+     *
+     * @param userId 用户 ID
+     * @return 未读数量
+     */
+    public int unreadCount(Long userId) {
+        return dsl.selectCount()
+            .from(BIZ_NOTICE_RECIPIENT)
+            .where(BIZ_NOTICE_RECIPIENT.USER_ID.eq(userId))
+            .and(BIZ_NOTICE_RECIPIENT.READ_AT.isNull())
+            .fetchOne(0, int.class);
+    }
+
+    /**
+     * 分页查询公告接收人列表（支持 all/read/unread 筛选，JOIN 用户表获取用户名）。
+     *
+     * @param noticeId   公告 ID
+     * @param readStatus 已读状态筛选：all/read/unread
+     * @param page       页码（从 1 开始）
+     * @param size       每页条数
+     * @return 分页接收人视图
+     */
+    @BypassDataScope
+    public PageResult<RecipientView> findRecipients(Long noticeId, String readStatus, int page, int size) {
+        // 构造 readStatus 过滤条件
+        Condition readCondition = trueCondition();
+        if ("read".equalsIgnoreCase(readStatus)) {
+            readCondition = BIZ_NOTICE_RECIPIENT.READ_AT.isNotNull();
+        } else if ("unread".equalsIgnoreCase(readStatus)) {
+            readCondition = BIZ_NOTICE_RECIPIENT.READ_AT.isNull();
+        }
+
+        Condition baseCondition = BIZ_NOTICE_RECIPIENT.NOTICE_ID.eq(noticeId).and(readCondition);
+
+        // 查询总数
+        long total = dsl.selectCount()
+            .from(BIZ_NOTICE_RECIPIENT)
+            .join(MB_IAM_USER).on(BIZ_NOTICE_RECIPIENT.USER_ID.eq(MB_IAM_USER.ID))
+            .where(baseCondition)
+            .fetchOne(0, long.class);
+
+        int offset = (page - 1) * size;
+        List<RecipientView> content = dsl
+            .select(
+                BIZ_NOTICE_RECIPIENT.USER_ID,
+                MB_IAM_USER.USERNAME,
+                BIZ_NOTICE_RECIPIENT.READ_AT
+            )
+            .from(BIZ_NOTICE_RECIPIENT)
+            .join(MB_IAM_USER).on(BIZ_NOTICE_RECIPIENT.USER_ID.eq(MB_IAM_USER.ID))
+            .where(baseCondition)
+            .orderBy(BIZ_NOTICE_RECIPIENT.CREATED_AT.asc())
+            .limit(size)
+            .offset(offset)
+            .fetch(r -> new RecipientView(
+                r.get(BIZ_NOTICE_RECIPIENT.USER_ID),
+                r.get(MB_IAM_USER.USERNAME),
+                r.get(BIZ_NOTICE_RECIPIENT.READ_AT)
+            ));
+
+        int totalPages = total == 0 ? 0 : (int) Math.ceil((double) total / size);
+        return new PageResult<>(content, total, totalPages, page, size);
+    }
+}

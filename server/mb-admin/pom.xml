@@ -62,6 +62,10 @@
             <groupId>com.metabuild</groupId>
             <artifactId>infra-captcha</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-sse</artifactId>
+        </dependency>
 
         <!-- 内部模块 — platform 业务层 -->
         <dependency>
@@ -95,6 +99,12 @@
         <dependency>
             <groupId>com.metabuild</groupId>
             <artifactId>platform-monitor</artifactId>
+        </dependency>
+
+        <!-- 内部模块 — business 业务层 -->
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>business-notice</artifactId>
         </dependency>
 
         <!-- Spring Boot Starters -->
