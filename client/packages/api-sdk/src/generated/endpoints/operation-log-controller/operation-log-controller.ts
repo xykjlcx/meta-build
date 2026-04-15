@@ -32,11 +32,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `oplog:log:list`
  */
-export const getGetOplogUrl = (params: GetOplogParams,) => {
+export const getGetOplogUrl = (params?: GetOplogParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+    const explodeParameters = ["sort"];
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? 'null' : v.toString());
+      });
+      return;
+    }
+      
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -47,7 +55,7 @@ export const getGetOplogUrl = (params: GetOplogParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/oplog?${stringifiedParams}` : `/api/v1/oplog`
 }
 
-export const getOplog = async (params: GetOplogParams, options?: RequestInit): Promise<PageResultOperationLogView> => {
+export const getOplog = async (params?: GetOplogParams, options?: RequestInit): Promise<PageResultOperationLogView> => {
   
   return customInstance<PageResultOperationLogView>(getGetOplogUrl(params),
   {      
@@ -69,7 +77,7 @@ export const getGetOplogQueryKey = (params?: GetOplogParams,) => {
     }
 
     
-export const getGetOplogQueryOptions = <TData = Awaited<ReturnType<typeof getOplog>>, TError = unknown>(params: GetOplogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOplog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetOplogQueryOptions = <TData = Awaited<ReturnType<typeof getOplog>>, TError = unknown>(params?: GetOplogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOplog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -93,7 +101,7 @@ export type GetOplogQueryError = unknown
 
 
 export function useGetOplog<TData = Awaited<ReturnType<typeof getOplog>>, TError = unknown>(
- params: GetOplogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOplog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+ params?: GetOplogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOplog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

@@ -7,16 +7,8 @@
  */
 
 export type GetNoticeByIdRecipientParams = {
-/**
- * 已读状态：all/read/unread
- */
 readStatus?: string;
-/**
- * 页码（从 1 开始）
- */
 page?: number;
-/**
- * 每页条数
- */
 size?: number;
+sort?: string[];
 };

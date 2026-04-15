@@ -32,11 +32,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `job:log:list`
  */
-export const getGetJobLogUrl = (params: GetJobLogParams,) => {
+export const getGetJobLogUrl = (params?: GetJobLogParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+    const explodeParameters = ["sort"];
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? 'null' : v.toString());
+      });
+      return;
+    }
+      
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -47,7 +55,7 @@ export const getGetJobLogUrl = (params: GetJobLogParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/jobs/logs?${stringifiedParams}` : `/api/v1/jobs/logs`
 }
 
-export const getJobLog = async (params: GetJobLogParams, options?: RequestInit): Promise<PageResultJobLogView> => {
+export const getJobLog = async (params?: GetJobLogParams, options?: RequestInit): Promise<PageResultJobLogView> => {
   
   return customInstance<PageResultJobLogView>(getGetJobLogUrl(params),
   {      
@@ -69,7 +77,7 @@ export const getGetJobLogQueryKey = (params?: GetJobLogParams,) => {
     }
 
     
-export const getGetJobLogQueryOptions = <TData = Awaited<ReturnType<typeof getJobLog>>, TError = unknown>(params: GetJobLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJobLog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetJobLogQueryOptions = <TData = Awaited<ReturnType<typeof getJobLog>>, TError = unknown>(params?: GetJobLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJobLog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -93,7 +101,7 @@ export type GetJobLogQueryError = unknown
 
 
 export function useGetJobLog<TData = Awaited<ReturnType<typeof getJobLog>>, TError = unknown>(
- params: GetJobLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJobLog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+ params?: GetJobLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJobLog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

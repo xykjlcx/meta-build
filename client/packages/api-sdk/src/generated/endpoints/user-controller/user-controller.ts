@@ -393,11 +393,19 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:user:list`
  */
-export const getGetUserUrl = (params: GetUserParams,) => {
+export const getGetUserUrl = (params?: GetUserParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+    const explodeParameters = ["sort"];
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? 'null' : v.toString());
+      });
+      return;
+    }
+      
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -408,7 +416,7 @@ export const getGetUserUrl = (params: GetUserParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/users?${stringifiedParams}` : `/api/v1/users`
 }
 
-export const getUser = async (params: GetUserParams, options?: RequestInit): Promise<PageResultUserView> => {
+export const getUser = async (params?: GetUserParams, options?: RequestInit): Promise<PageResultUserView> => {
   
   return customInstance<PageResultUserView>(getGetUserUrl(params),
   {      
@@ -430,7 +438,7 @@ export const getGetUserQueryKey = (params?: GetUserParams,) => {
     }
 
     
-export const getGetUserQueryOptions = <TData = Awaited<ReturnType<typeof getUser>>, TError = unknown>(params: GetUserParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUser>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetUserQueryOptions = <TData = Awaited<ReturnType<typeof getUser>>, TError = unknown>(params?: GetUserParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUser>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -454,7 +462,7 @@ export type GetUserQueryError = unknown
 
 
 export function useGetUser<TData = Awaited<ReturnType<typeof getUser>>, TError = unknown>(
- params: GetUserParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUser>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+ params?: GetUserParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUser>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

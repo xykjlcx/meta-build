@@ -5,8 +5,9 @@
  * AI 时代的可定制全栈技术底座
  * OpenAPI spec version: v1
  */
-import type { PageQuery } from './pageQuery';
 
 export type GetUserParams = {
-query: PageQuery;
+page?: number;
+size?: number;
+sort?: string[];
 };

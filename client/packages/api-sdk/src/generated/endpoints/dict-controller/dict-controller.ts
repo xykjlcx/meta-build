@@ -40,11 +40,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `dict:type:list`
  */
-export const getGetDictTypeUrl = (params: GetDictTypeParams,) => {
+export const getGetDictTypeUrl = (params?: GetDictTypeParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+    const explodeParameters = ["sort"];
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? 'null' : v.toString());
+      });
+      return;
+    }
+      
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -55,7 +63,7 @@ export const getGetDictTypeUrl = (params: GetDictTypeParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/dict/types?${stringifiedParams}` : `/api/v1/dict/types`
 }
 
-export const getDictType = async (params: GetDictTypeParams, options?: RequestInit): Promise<PageResultDictTypeView> => {
+export const getDictType = async (params?: GetDictTypeParams, options?: RequestInit): Promise<PageResultDictTypeView> => {
   
   return customInstance<PageResultDictTypeView>(getGetDictTypeUrl(params),
   {      
@@ -77,7 +85,7 @@ export const getGetDictTypeQueryKey = (params?: GetDictTypeParams,) => {
     }
 
     
-export const getGetDictTypeQueryOptions = <TData = Awaited<ReturnType<typeof getDictType>>, TError = unknown>(params: GetDictTypeParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDictType>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetDictTypeQueryOptions = <TData = Awaited<ReturnType<typeof getDictType>>, TError = unknown>(params?: GetDictTypeParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDictType>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -101,7 +109,7 @@ export type GetDictTypeQueryError = unknown
 
 
 export function useGetDictType<TData = Awaited<ReturnType<typeof getDictType>>, TError = unknown>(
- params: GetDictTypeParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDictType>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+ params?: GetDictTypeParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDictType>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

@@ -325,11 +325,19 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:role:list`
  */
-export const getGetRoleUrl = (params: GetRoleParams,) => {
+export const getGetRoleUrl = (params?: GetRoleParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+    const explodeParameters = ["sort"];
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? 'null' : v.toString());
+      });
+      return;
+    }
+      
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -340,7 +348,7 @@ export const getGetRoleUrl = (params: GetRoleParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/roles?${stringifiedParams}` : `/api/v1/roles`
 }
 
-export const getRole = async (params: GetRoleParams, options?: RequestInit): Promise<PageResultRoleView> => {
+export const getRole = async (params?: GetRoleParams, options?: RequestInit): Promise<PageResultRoleView> => {
   
   return customInstance<PageResultRoleView>(getGetRoleUrl(params),
   {      
@@ -362,7 +370,7 @@ export const getGetRoleQueryKey = (params?: GetRoleParams,) => {
     }
 
     
-export const getGetRoleQueryOptions = <TData = Awaited<ReturnType<typeof getRole>>, TError = unknown>(params: GetRoleParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRole>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetRoleQueryOptions = <TData = Awaited<ReturnType<typeof getRole>>, TError = unknown>(params?: GetRoleParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRole>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -386,7 +394,7 @@ export type GetRoleQueryError = unknown
 
 
 export function useGetRole<TData = Awaited<ReturnType<typeof getRole>>, TError = unknown>(
- params: GetRoleParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRole>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+ params?: GetRoleParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getRole>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

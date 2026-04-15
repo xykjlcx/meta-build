@@ -30,7 +30,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 /**
  * 
 
-**权限:** `notice:notice:detail`
+**权限:** `notification:notification:list`
  * @summary 按模块和关联 ID 查询发送记录
  */
 export const getGetNotificationLogUrl = (params: GetNotificationLogParams,) => {

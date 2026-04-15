@@ -37,11 +37,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `notification:notification:list`
  */
-export const getGetNotificationUrl = (params: GetNotificationParams,) => {
+export const getGetNotificationUrl = (params?: GetNotificationParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+    const explodeParameters = ["sort"];
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? 'null' : v.toString());
+      });
+      return;
+    }
+      
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -52,7 +60,7 @@ export const getGetNotificationUrl = (params: GetNotificationParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/notifications?${stringifiedParams}` : `/api/v1/notifications`
 }
 
-export const getNotification = async (params: GetNotificationParams, options?: RequestInit): Promise<PageResultNotificationView> => {
+export const getNotification = async (params?: GetNotificationParams, options?: RequestInit): Promise<PageResultNotificationView> => {
   
   return customInstance<PageResultNotificationView>(getGetNotificationUrl(params),
   {      
@@ -74,7 +82,7 @@ export const getGetNotificationQueryKey = (params?: GetNotificationParams,) => {
     }
 
     
-export const getGetNotificationQueryOptions = <TData = Awaited<ReturnType<typeof getNotification>>, TError = unknown>(params: GetNotificationParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotification>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetNotificationQueryOptions = <TData = Awaited<ReturnType<typeof getNotification>>, TError = unknown>(params?: GetNotificationParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotification>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -98,7 +106,7 @@ export type GetNotificationQueryError = unknown
 
 
 export function useGetNotification<TData = Awaited<ReturnType<typeof getNotification>>, TError = unknown>(
- params: GetNotificationParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotification>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+ params?: GetNotificationParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotification>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

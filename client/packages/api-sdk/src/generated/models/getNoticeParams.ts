@@ -7,32 +7,11 @@
  */
 
 export type GetNoticeParams = {
-/**
- * 状态筛选：0=草稿 1=已发布 2=已撤回
- */
 status?: number;
-/**
- * 标题关键词
- */
 keyword?: string;
-/**
- * 生效开始时间起
- */
 startTimeFrom?: string;
-/**
- * 生效开始时间止
- */
 startTimeTo?: string;
-/**
- * 页码（从 1 开始）
- */
 page?: number;
-/**
- * 每页条数
- */
 size?: number;
-/**
- * 排序（如 createdAt,desc）
- */
 sort?: string[];
 };

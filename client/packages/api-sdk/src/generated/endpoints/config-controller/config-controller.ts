@@ -38,11 +38,19 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `config:config:list`
  */
-export const getGetConfigUrl = (params: GetConfigParams,) => {
+export const getGetConfigUrl = (params?: GetConfigParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
-    
+    const explodeParameters = ["sort"];
+
+    if (Array.isArray(value) && explodeParameters.includes(key)) {
+      value.forEach((v) => {
+        normalizedParams.append(key, v === null ? 'null' : v.toString());
+      });
+      return;
+    }
+      
     if (value !== undefined) {
       normalizedParams.append(key, value === null ? 'null' : value.toString())
     }
@@ -53,7 +61,7 @@ export const getGetConfigUrl = (params: GetConfigParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/configs?${stringifiedParams}` : `/api/v1/configs`
 }
 
-export const getConfig = async (params: GetConfigParams, options?: RequestInit): Promise<PageResultConfigView> => {
+export const getConfig = async (params?: GetConfigParams, options?: RequestInit): Promise<PageResultConfigView> => {
   
   return customInstance<PageResultConfigView>(getGetConfigUrl(params),
   {      
@@ -75,7 +83,7 @@ export const getGetConfigQueryKey = (params?: GetConfigParams,) => {
     }
 
     
-export const getGetConfigQueryOptions = <TData = Awaited<ReturnType<typeof getConfig>>, TError = unknown>(params: GetConfigParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetConfigQueryOptions = <TData = Awaited<ReturnType<typeof getConfig>>, TError = unknown>(params?: GetConfigParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
@@ -99,7 +107,7 @@ export type GetConfigQueryError = unknown
 
 
 export function useGetConfig<TData = Awaited<ReturnType<typeof getConfig>>, TError = unknown>(
- params: GetConfigParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+ params?: GetConfigParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
