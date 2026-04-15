@@ -102,7 +102,7 @@ export function NoticeListPage() {
 
   // ─── 数据查询 ───────────────────────────────────────
   const { data, isLoading } = useList4({
-    status: filter.status ? Number(filter.status) : undefined,
+    status: filter.status && filter.status !== 'ALL' ? Number(filter.status) : undefined,
     keyword: filter.keyword || undefined,
     startTimeFrom: filter.startTimeFrom || undefined,
     startTimeTo: filter.startTimeTo || undefined,
@@ -223,7 +223,7 @@ export function NoticeListPage() {
   // ─── 导出 ──────────────────────────────────────────
   const handleExport = useCallback(() => {
     const params = new URLSearchParams();
-    if (filter.status) params.set('status', filter.status);
+    if (filter.status && filter.status !== 'ALL') params.set('status', filter.status);
     if (filter.keyword) params.set('keyword', filter.keyword);
     if (filter.startTimeFrom) params.set('startTimeFrom', filter.startTimeFrom);
     if (filter.startTimeTo) params.set('startTimeTo', filter.startTimeTo);
@@ -425,7 +425,7 @@ export function NoticeListPage() {
               <SelectValue placeholder={t('filter.status')} />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">{t('common:all', { defaultValue: '全部' })}</SelectItem>
+              <SelectItem value="ALL">{t('common:all', { defaultValue: '全部' })}</SelectItem>
               <SelectItem value="0">{t('status.draft')}</SelectItem>
               <SelectItem value="1">{t('status.published')}</SelectItem>
               <SelectItem value="2">{t('status.revoked')}</SelectItem>
