@@ -39,5 +39,13 @@
             <groupId>com.metabuild</groupId>
             <artifactId>infra-jooq</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
+            <artifactId>infra-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springdoc</groupId>
+            <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+        </dependency>
     </dependencies>
 </project>

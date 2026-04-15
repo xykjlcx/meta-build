@@ -90,6 +90,11 @@
             </dependency>
             <dependency>
                 <groupId>com.metabuild</groupId>
+                <artifactId>infra-web</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.metabuild</groupId>
                 <artifactId>infra-i18n</artifactId>
                 <version>${revision}</version>
             </dependency>

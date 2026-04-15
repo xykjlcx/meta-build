@@ -1,13 +1,15 @@
 package com.metabuild.platform.config.web;
 
-import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
+import com.metabuild.infra.web.pagination.PageRequestDto;
+import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.config.api.dto.ConfigView;
 import com.metabuild.platform.config.api.dto.ConfigSetCommand;
 import com.metabuild.platform.config.domain.ConfigService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,11 +22,12 @@ import org.springframework.web.bind.annotation.*;
 public class ConfigController {
 
     private final ConfigService configService;
+    private final PaginationPolicy paginationPolicy;
 
     @GetMapping
     @RequirePermission("config:config:list")
-    public PageResult<ConfigView> list(PageQuery query) {
-        return configService.list(query);
+    public PageResult<ConfigView> list(@ParameterObject PageRequestDto request) {
+        return configService.list(paginationPolicy.normalize(request));
     }
 
     @GetMapping("/{key}")

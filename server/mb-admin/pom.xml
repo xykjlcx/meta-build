@@ -48,6 +48,10 @@
         </dependency>
         <dependency>
             <groupId>com.metabuild</groupId>
+            <artifactId>infra-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.metabuild</groupId>
             <artifactId>infra-security</artifactId>
         </dependency>
         <dependency>

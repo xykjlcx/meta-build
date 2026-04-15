@@ -1,4 +1,4 @@
-package com.metabuild.infra.exception.web;
+package com.metabuild.infra.web.pagination;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;

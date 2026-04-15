@@ -11,12 +11,15 @@ import com.metabuild.business.notice.api.NoticeView;
 import com.metabuild.business.notice.api.RecipientView;
 import com.metabuild.business.notice.domain.NoticeExportService;
 import com.metabuild.business.notice.domain.NoticeService;
+import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.log.OperationLog;
 import com.metabuild.common.security.CurrentUser;
+import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import org.springdoc.core.annotations.ParameterObject;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -27,7 +30,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,6 +47,7 @@ public class NoticeController {
     private final NoticeService noticeService;
     private final NoticeExportService noticeExportService;
     private final CurrentUser currentUser;
+    private final PaginationPolicy paginationPolicy;
 
     // ------ 导出限流（内存级，单实例适用）------
 
@@ -61,17 +64,14 @@ public class NoticeController {
     @Operation(summary = "分页查询公告列表")
     @GetMapping
     @RequirePermission("notice:notice:list")
-    public PageResult<NoticeView> list(
-        @Parameter(description = "状态筛选：0=草稿 1=已发布 2=已撤回") @RequestParam(required = false) Short status,
-        @Parameter(description = "标题关键词") @RequestParam(required = false) String keyword,
-        @Parameter(description = "生效开始时间起") @RequestParam(required = false) OffsetDateTime startTimeFrom,
-        @Parameter(description = "生效开始时间止") @RequestParam(required = false) OffsetDateTime startTimeTo,
-        @Parameter(description = "页码（从 1 开始）") @RequestParam(defaultValue = "1") int page,
-        @Parameter(description = "每页条数") @RequestParam(defaultValue = "20") int size,
-        @Parameter(description = "排序（如 createdAt,desc）") @RequestParam(required = false) List<String> sort
-    ) {
-        var query = new NoticeQuery(status, keyword, startTimeFrom, startTimeTo, page, size, sort);
-        return noticeService.list(query);
+    public PageResult<NoticeView> list(@ParameterObject NoticeListRequestDto request) {
+        var query = new NoticeQuery(
+            request.getStatus(),
+            request.getKeyword(),
+            request.getStartTimeFrom(),
+            request.getStartTimeTo()
+        );
+        return noticeService.list(query, paginationPolicy.normalize(request));
     }
 
     @Operation(summary = "查询公告详情")
@@ -172,11 +172,13 @@ public class NoticeController {
     @RequirePermission("notice:notice:detail")
     public PageResult<RecipientView> recipients(
         @Parameter(description = "公告 ID") @PathVariable Long id,
-        @Parameter(description = "已读状态：all/read/unread") @RequestParam(defaultValue = "all") String readStatus,
-        @Parameter(description = "页码（从 1 开始）") @RequestParam(defaultValue = "1") int page,
-        @Parameter(description = "每页条数") @RequestParam(defaultValue = "20") int size
+        @ParameterObject NoticeRecipientsRequestDto request
     ) {
-        return noticeService.recipients(id, readStatus, page, size);
+        return noticeService.recipients(
+            id,
+            normalizeReadStatus(request.getReadStatus()),
+            paginationPolicy.normalize(request)
+        );
     }
 
     @Operation(summary = "导出公告列表（Excel）")
@@ -232,10 +234,14 @@ public class NoticeController {
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             response.setHeader("Content-Disposition", "attachment;filename=notices.xlsx");
 
-            var query = new NoticeQuery(status, keyword, startTimeFrom, startTimeTo, 1, 1000, null);
+            var query = new NoticeQuery(status, keyword, startTimeFrom, startTimeTo);
             noticeExportService.export(query, response.getOutputStream());
         } finally {
             exportConcurrentCount.decrementAndGet();
         }
+    }
+
+    private String normalizeReadStatus(String readStatus) {
+        return readStatus == null || readStatus.isBlank() ? "all" : readStatus;
     }
 }

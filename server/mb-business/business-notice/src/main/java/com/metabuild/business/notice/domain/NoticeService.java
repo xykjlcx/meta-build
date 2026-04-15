@@ -10,6 +10,7 @@ import com.metabuild.business.notice.api.NoticeTarget;
 import com.metabuild.business.notice.api.NoticeUpdateCommand;
 import com.metabuild.business.notice.api.NoticeView;
 import com.metabuild.business.notice.api.RecipientView;
+import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.exception.BusinessException;
 import com.metabuild.common.exception.ConflictException;
@@ -52,8 +53,8 @@ public class NoticeService {
     /**
      * 分页查询公告列表。
      */
-    public PageResult<NoticeView> list(NoticeQuery query) {
-        return noticeRepository.findPage(query, currentUser.userId());
+    public PageResult<NoticeView> list(NoticeQuery query, PageQuery pageQuery) {
+        return noticeRepository.findPage(query, pageQuery, currentUser.userId());
     }
 
     /**
@@ -331,8 +332,8 @@ public class NoticeService {
      * @param size       每页条数
      * @return 分页接收人视图
      */
-    public PageResult<RecipientView> recipients(Long noticeId, String readStatus, int page, int size) {
-        return noticeRecipientRepository.findRecipients(noticeId, readStatus, page, size);
+    public PageResult<RecipientView> recipients(Long noticeId, String readStatus, PageQuery pageQuery) {
+        return noticeRecipientRepository.findRecipients(noticeId, readStatus, pageQuery);
     }
 
     // ------ 私有方法 ------

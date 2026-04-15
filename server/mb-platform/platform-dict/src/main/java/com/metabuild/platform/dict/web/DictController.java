@@ -1,7 +1,8 @@
 package com.metabuild.platform.dict.web;
 
-import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
+import com.metabuild.infra.web.pagination.PageRequestDto;
+import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.dict.api.dto.DictDataCreateCommand;
 import com.metabuild.platform.dict.api.dto.DictDataView;
@@ -10,6 +11,7 @@ import com.metabuild.platform.dict.api.dto.DictTypeView;
 import com.metabuild.platform.dict.domain.DictService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,13 +26,14 @@ import java.util.List;
 public class DictController {
 
     private final DictService dictService;
+    private final PaginationPolicy paginationPolicy;
 
     // ───────── DictType ─────────
 
     @GetMapping("/types")
     @RequirePermission("dict:type:list")
-    public PageResult<DictTypeView> listTypes(PageQuery query) {
-        return dictService.listTypes(query);
+    public PageResult<DictTypeView> listTypes(@ParameterObject PageRequestDto request) {
+        return dictService.listTypes(paginationPolicy.normalize(request));
     }
 
     @GetMapping("/types/{id}")

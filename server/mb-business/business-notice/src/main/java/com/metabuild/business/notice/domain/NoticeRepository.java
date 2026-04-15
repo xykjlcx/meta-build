@@ -4,6 +4,7 @@ import com.metabuild.business.notice.api.NoticeDetailView;
 import com.metabuild.business.notice.api.NoticeQuery;
 import com.metabuild.business.notice.api.NoticeTarget;
 import com.metabuild.business.notice.api.NoticeView;
+import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.infra.jooq.SortParser;
@@ -43,7 +44,7 @@ public class NoticeRepository {
      * <p>
      * LEFT JOIN recipient 获取当前用户已读状态，子查询获取已读数/接收人数。
      */
-    public PageResult<NoticeView> findPage(NoticeQuery query, Long currentUserId) {
+    public PageResult<NoticeView> findPage(NoticeQuery query, PageQuery pageQuery, Long currentUserId) {
         // 构建动态查询条件
         var conditions = buildConditions(query);
 
@@ -81,7 +82,7 @@ public class NoticeRepository {
             .allow("pinned", BIZ_NOTICE.PINNED)
             .allow("startTime", BIZ_NOTICE.START_TIME)
             .defaultSort(BIZ_NOTICE.CREATED_AT.desc())
-            .parse(query.sort());
+            .parse(pageQuery.sort());
 
         // 总数
         long total = dsl.selectCount()
@@ -108,8 +109,8 @@ public class NoticeRepository {
             .leftJoin(MB_IAM_USER).on(BIZ_NOTICE.CREATED_BY.eq(MB_IAM_USER.ID))
             .where(conditions)
             .orderBy(sortFields)
-            .limit(query.size())
-            .offset(query.offset())
+            .limit(pageQuery.size())
+            .offset(pageQuery.offset())
             .fetch();
 
         List<NoticeView> content = records.map(r -> new NoticeView(
@@ -127,8 +128,8 @@ public class NoticeRepository {
             r.get("recipient_count", Integer.class)
         ));
 
-        int totalPages = total == 0 ? 0 : (int) Math.ceil((double) total / query.size());
-        return new PageResult<>(content, total, totalPages, query.page(), query.size());
+        int totalPages = total == 0 ? 0 : (int) Math.ceil((double) total / pageQuery.size());
+        return new PageResult<>(content, total, totalPages, pageQuery.page(), pageQuery.size());
     }
 
     /**

@@ -134,7 +134,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
             ));
         }
 
-        PageQuery query = new PageQuery(1, 10, null);
+        PageQuery query = PageQuery.normalized(1, 10, null);
         PageResult<UserView> result = userService.list(query);
 
         assertThat(result).isNotNull();

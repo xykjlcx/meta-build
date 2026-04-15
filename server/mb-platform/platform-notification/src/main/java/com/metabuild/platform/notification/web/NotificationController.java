@@ -1,13 +1,15 @@
 package com.metabuild.platform.notification.web;
 
-import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
+import com.metabuild.infra.web.pagination.PageRequestDto;
+import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.notification.api.dto.NotificationCreateCommand;
 import com.metabuild.platform.notification.api.dto.NotificationView;
 import com.metabuild.platform.notification.domain.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,11 +22,12 @@ import org.springframework.web.bind.annotation.*;
 public class NotificationController {
 
     private final NotificationService notificationService;
+    private final PaginationPolicy paginationPolicy;
 
     @GetMapping
     @RequirePermission("notification:notification:list")
-    public PageResult<NotificationView> list(PageQuery query) {
-        return notificationService.list(query);
+    public PageResult<NotificationView> list(@ParameterObject PageRequestDto request) {
+        return notificationService.list(paginationPolicy.normalize(request));
     }
 
     @PostMapping

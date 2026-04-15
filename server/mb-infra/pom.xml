@@ -19,6 +19,7 @@
         <module>infra-security</module>
         <module>infra-cache</module>
         <module>infra-jooq</module>
+        <module>infra-web</module>
         <module>infra-exception</module>
         <module>infra-i18n</module>
         <module>infra-async</module>

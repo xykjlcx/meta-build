@@ -59,7 +59,7 @@ class DictServiceIntegrationTest extends BaseIntegrationTest {
         dictService.createType(new DictTypeCreateCommand("类型A", "type_a", null));
         dictService.createType(new DictTypeCreateCommand("类型B", "type_b", null));
 
-        PageResult<DictTypeView> result = dictService.listTypes(new PageQuery(1, 10, null));
+        PageResult<DictTypeView> result = dictService.listTypes(PageQuery.normalized(1, 10, null));
 
         assertThat(result.content()).isNotEmpty();
         assertThat(result.totalElements()).isPositive();

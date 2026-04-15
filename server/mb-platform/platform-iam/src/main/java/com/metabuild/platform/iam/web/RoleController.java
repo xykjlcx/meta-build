@@ -1,7 +1,8 @@
 package com.metabuild.platform.iam.web;
 
-import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
+import com.metabuild.infra.web.pagination.PageRequestDto;
+import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.iam.api.dto.RoleCreateCommand;
 import com.metabuild.platform.iam.api.dto.RoleView;
@@ -10,6 +11,7 @@ import com.metabuild.platform.iam.domain.menu.MenuService;
 import com.metabuild.platform.iam.domain.role.RoleService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,11 +27,12 @@ public class RoleController {
 
     private final RoleService roleService;
     private final MenuService menuService;
+    private final PaginationPolicy paginationPolicy;
 
     @GetMapping
     @RequirePermission("iam:role:list")
-    public PageResult<RoleView> list(PageQuery query) {
-        return roleService.listPage(query);
+    public PageResult<RoleView> list(@ParameterObject PageRequestDto request) {
+        return roleService.listPage(paginationPolicy.normalize(request));
     }
 
     @GetMapping("/{id}")

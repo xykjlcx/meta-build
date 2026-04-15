@@ -1,8 +1,9 @@
 package com.metabuild.platform.iam.web;
 
-import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.security.CurrentUser;
+import com.metabuild.infra.web.pagination.PageRequestDto;
+import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.iam.api.dto.AssignRolesCommand;
 import com.metabuild.platform.iam.api.dto.ChangePasswordCommand;
@@ -13,6 +14,7 @@ import com.metabuild.platform.iam.api.dto.UserUpdateCommand;
 import com.metabuild.platform.iam.domain.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import com.metabuild.platform.iam.domain.role.RoleService;
@@ -28,11 +30,12 @@ public class UserController {
     private final UserService userService;
     private final RoleService roleService;
     private final CurrentUser currentUser;
+    private final PaginationPolicy paginationPolicy;
 
     @GetMapping
     @RequirePermission("iam:user:list")
-    public PageResult<UserView> list(PageQuery query) {
-        return userService.list(query);
+    public PageResult<UserView> list(@ParameterObject PageRequestDto request) {
+        return userService.list(paginationPolicy.normalize(request));
     }
 
     @GetMapping("/{id}")

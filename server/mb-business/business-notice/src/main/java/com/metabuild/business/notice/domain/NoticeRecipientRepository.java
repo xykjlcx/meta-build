@@ -1,6 +1,7 @@
 package com.metabuild.business.notice.domain;
 
 import com.metabuild.business.notice.api.RecipientView;
+import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.BypassDataScope;
@@ -186,12 +187,11 @@ public class NoticeRecipientRepository {
      *
      * @param noticeId   公告 ID
      * @param readStatus 已读状态筛选：all/read/unread
-     * @param page       页码（从 1 开始）
-     * @param size       每页条数
+     * @param pageQuery  已归一化的分页参数
      * @return 分页接收人视图
      */
     @BypassDataScope
-    public PageResult<RecipientView> findRecipients(Long noticeId, String readStatus, int page, int size) {
+    public PageResult<RecipientView> findRecipients(Long noticeId, String readStatus, PageQuery pageQuery) {
         // 构造 readStatus 过滤条件
         Condition readCondition = trueCondition();
         if ("read".equalsIgnoreCase(readStatus)) {
@@ -209,7 +209,7 @@ public class NoticeRecipientRepository {
             .where(baseCondition)
             .fetchOne(0, long.class);
 
-        int offset = (page - 1) * size;
+        int offset = pageQuery.offset();
         List<RecipientView> content = dsl
             .select(
                 BIZ_NOTICE_RECIPIENT.USER_ID,
@@ -220,7 +220,7 @@ public class NoticeRecipientRepository {
             .join(MB_IAM_USER).on(BIZ_NOTICE_RECIPIENT.USER_ID.eq(MB_IAM_USER.ID))
             .where(baseCondition)
             .orderBy(BIZ_NOTICE_RECIPIENT.CREATED_AT.asc())
-            .limit(size)
+            .limit(pageQuery.size())
             .offset(offset)
             .fetch(r -> new RecipientView(
                 r.get(BIZ_NOTICE_RECIPIENT.USER_ID),
@@ -228,7 +228,7 @@ public class NoticeRecipientRepository {
                 r.get(BIZ_NOTICE_RECIPIENT.READ_AT)
             ));
 
-        int totalPages = total == 0 ? 0 : (int) Math.ceil((double) total / size);
-        return new PageResult<>(content, total, totalPages, page, size);
+        int totalPages = total == 0 ? 0 : (int) Math.ceil((double) total / pageQuery.size());
+        return new PageResult<>(content, total, totalPages, pageQuery.page(), pageQuery.size());
     }
 }

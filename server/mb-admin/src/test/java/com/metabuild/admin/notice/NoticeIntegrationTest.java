@@ -12,6 +12,7 @@ import com.metabuild.business.notice.api.NoticeTarget;
 import com.metabuild.business.notice.api.NoticeUpdateCommand;
 import com.metabuild.business.notice.api.RecipientView;
 import com.metabuild.business.notice.domain.NoticeService;
+import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.exception.BusinessException;
 import com.metabuild.common.exception.ConflictException;
@@ -345,8 +346,8 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
                 ));
             }
 
-            var query = new NoticeQuery(null, null, null, null, 1, 2, null);
-            PageResult<?> result = noticeService.list(query);
+            var query = new NoticeQuery(null, null, null, null);
+            PageResult<?> result = noticeService.list(query, PageQuery.normalized(1, 2, null));
 
             assertThat(result.content()).hasSize(2);
             assertThat(result.totalElements()).isGreaterThanOrEqualTo(3);
@@ -363,8 +364,8 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
                 "普通标题", "<p>UNIQUE_KEYWORD_TITLE在内容里</p>", false, null, null, null
             ));
 
-            var query = new NoticeQuery(null, "UNIQUE_KEYWORD_TITLE", null, null, 1, 20, null);
-            PageResult<?> result = noticeService.list(query);
+            var query = new NoticeQuery(null, "UNIQUE_KEYWORD_TITLE", null, null);
+            PageResult<?> result = noticeService.list(query, PageQuery.normalized(1, 20, null));
 
             // keyword 搜索仅匹配 title（见 NoticeRepository.buildConditions）
             assertThat(result.totalElements()).isEqualTo(1);
@@ -539,19 +540,19 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
 
             // 查全部接收人
             PageResult<RecipientView> allRecipients = noticeService.recipients(
-                created.id(), "all", 1, 20
+                created.id(), "all", PageQuery.normalized(1, 20, null)
             );
             assertThat(allRecipients.totalElements()).isEqualTo(2);
 
             // 筛选已读
             PageResult<RecipientView> readOnly = noticeService.recipients(
-                created.id(), "read", 1, 20
+                created.id(), "read", PageQuery.normalized(1, 20, null)
             );
             assertThat(readOnly.totalElements()).isEqualTo(1);
 
             // 筛选未读
             PageResult<RecipientView> unreadOnly = noticeService.recipients(
-                created.id(), "unread", 1, 20
+                created.id(), "unread", PageQuery.normalized(1, 20, null)
             );
             assertThat(unreadOnly.totalElements()).isEqualTo(1);
         }
@@ -574,7 +575,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
                 "导出测试公告", "<p>内容</p>", false, null, null, null
             ));
 
-            var query = new NoticeQuery(null, null, null, null, 1, 1000, null);
+            var query = new NoticeQuery(null, null, null, null);
             var out = new java.io.ByteArrayOutputStream();
 
             // FastExcel + POI 在测试类路径下存在 commons-compress 版本冲突
@@ -603,7 +604,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
                 "限流测试公告", null, false, null, null, null
             ));
 
-            var query = new NoticeQuery(null, null, null, null, 1, 100, null);
+            var query = new NoticeQuery(null, null, null, null);
             var out1 = new java.io.ByteArrayOutputStream();
             var out2 = new java.io.ByteArrayOutputStream();
 

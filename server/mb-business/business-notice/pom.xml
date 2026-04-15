@@ -34,7 +34,7 @@
         </dependency>
         <dependency>
             <groupId>com.metabuild</groupId>
-            <artifactId>infra-exception</artifactId>
+            <artifactId>infra-web</artifactId>
         </dependency>
         <dependency>
             <groupId>com.metabuild</groupId>

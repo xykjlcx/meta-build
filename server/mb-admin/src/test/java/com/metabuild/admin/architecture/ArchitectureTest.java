@@ -9,6 +9,7 @@ import com.metabuild.infra.archunit.GeneralCodingRulesBundle;
 import com.metabuild.infra.archunit.JdbcIsolationRule;
 import com.metabuild.infra.archunit.JooqIsolationRule;
 import com.metabuild.infra.archunit.ModuleBoundaryRule;
+import com.metabuild.infra.archunit.PaginationRule;
 import com.metabuild.infra.archunit.SaTokenIsolationRule;
 import com.metabuild.infra.archunit.TimezoneRule;
 import com.metabuild.infra.archunit.TransactionRule;
@@ -161,6 +162,16 @@ class ArchitectureTest {
     @Test
     void no_localdatetime_in_api() {
         TimezoneRule.NO_LOCALDATETIME_IN_API.check(classes);
+    }
+
+    @Test
+    void only_pagination_policy_creates_page_query() {
+        PaginationRule.ONLY_PAGINATION_POLICY_CREATES_PAGE_QUERY.check(classes);
+    }
+
+    @Test
+    void page_request_dto_stays_in_web_layer() {
+        PaginationRule.PAGE_REQUEST_DTO_STAYS_IN_WEB_LAYER.check(classes);
     }
 
     // ========== 通用编码规则 ==========
