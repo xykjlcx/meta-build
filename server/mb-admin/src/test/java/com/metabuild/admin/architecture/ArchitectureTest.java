@@ -1,6 +1,7 @@
 package com.metabuild.admin.architecture;
 
 import com.metabuild.infra.archunit.BusinessBoundaryRule;
+import com.metabuild.infra.archunit.AdminUsecaseRule;
 import com.metabuild.infra.archunit.CodingStyleRule;
 import com.metabuild.infra.archunit.ConfigManagementRule;
 import com.metabuild.infra.archunit.ControllerRule;
@@ -172,6 +173,16 @@ class ArchitectureTest {
     @Test
     void page_request_dto_stays_in_web_layer() {
         PaginationRule.PAGE_REQUEST_DTO_STAYS_IN_WEB_LAYER.check(classes);
+    }
+
+    @Test
+    void admin_usecase_only_depends_on_module_api_or_shared() {
+        AdminUsecaseRule.ADMIN_USECASE_ONLY_DEPENDS_ON_MODULE_API_OR_SHARED.check(classes);
+    }
+
+    @Test
+    void admin_web_must_not_depend_on_modules_directly() {
+        AdminUsecaseRule.ADMIN_WEB_MUST_NOT_DEPEND_ON_MODULES_DIRECTLY.check(classes);
     }
 
     // ========== 通用编码规则 ==========

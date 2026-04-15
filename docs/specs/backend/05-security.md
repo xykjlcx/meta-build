@@ -435,7 +435,7 @@ public class CorsConfig {
 
 v1 所有 API 返回 `application/json`，浏览器不会将 JSON 渲染为 HTML，这是天然的 XSS 防线。
 
-补充防御（`infra-web` 的 `SecurityHeaderFilter`）：
+补充防御（`infra-exception` 的 `SecurityHeaderFilter`）：
 - `X-Content-Type-Options: nosniff` — 禁止浏览器嗅探 MIME 类型
 - `Content-Security-Policy: default-src 'self'` — 限制资源加载来源
 - `X-Frame-Options: DENY` — 禁止 iframe 嵌入（防 clickjacking）

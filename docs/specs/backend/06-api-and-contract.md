@@ -292,7 +292,7 @@ springdoc:
 此插件在构建阶段启动应用并调用 `/v3/api-docs` 生成 JSON。
 
 ```java
-// mb-infra/infra-exception/src/main/java/com/metabuild/infra/openapi/OpenApiConfig.java
+// mb-admin/src/main/java/com/metabuild/admin/config/OpenApiConfig.java
 @Configuration
 public class OpenApiConfig {
     @Bean
@@ -424,16 +424,16 @@ public List<UserView> listLegacy(HttpServletResponse res) {
 
 ## 12. 分页契约 [M4]
 
-> **关注点**：`PageQuery` / `PageResult` / `SortParser` 数据契约、Spring MVC 自动解析、URL query 参数规范、sort 白名单机制。
+> **关注点**：`PageRequestDto` / `PaginationPolicy` / `PageQuery` / `PageResult` / `SortParser` 的职责分工、URL query 参数规范、sort 白名单机制。
 >
-> **定位**：分页是所有列表 API 的统一契约，业务 Controller 零样板地接收 `PageQuery`，返回 `PageResult`。sort 字段由业务 Repository 通过 `SortParser` 的 Builder API 声明白名单。
+> **定位**：分页契约拆成三段式。Controller 接收 HTTP 边界输入对象 `PageRequestDto`，统一交给 `PaginationPolicy` 归一化，再把内部可信对象 `PageQuery` 传给 Service / Repository。sort 字段由业务 Repository 通过 `SortParser` 的 Builder API 声明白名单。
 
 ### 12.1 URL query 参数规范
 
 | 参数 | 类型 | 默认 | 说明 |
 |---|---|---|---|
-| `page` | int | 1 | 页号，从 1 开始，必须 ≥ 1 |
-| `size` | int | `mb.api.pagination.default-size`（默认 20） | 每页大小，上限 `mb.api.pagination.max-size`（默认 200） |
+| `page` | int | 1 | 页号，从 1 开始。未传时默认 1，传入 `< 1` 直接 400 |
+| `size` | int | `mb.api.pagination.default-size`（默认 20） | 每页大小。未传时取默认值，传入 `< 1` 或 `> max-size` 直接 400 |
 | `sort` | 多值参数 | 由业务 Repository 的 `defaultSort` 决定（推荐 `createdAt:desc`） | 格式 `field:asc` 或 `field:desc`，可多次传参 |
 
 **示例**：
@@ -442,21 +442,28 @@ public List<UserView> listLegacy(HttpServletResponse res) {
 GET /api/v1/admin/iam/users?page=1&size=20&sort=createdAt:desc&sort=username:asc
 ```
 
-### 12.2 `PageQuery` 和 `PageResult`
+### 12.2 `PageRequestDto`、`PageQuery` 和 `PageResult`
 
-两个 record 定义在 `mb-common.pagination` 包（零 Spring 依赖，跨所有 infra/platform/business 模块共享）：
+分页对象分为“边界输入”和“内部语义”两层：
 
 ```java
-// mb-common/pagination/PageQuery.java
-public record PageQuery(
-    int page,
-    int size,
-    @Nullable List<String> sort
-) {
+// infra-web/pagination/PageRequestDto.java
+public class PageRequestDto {
+    private Integer page;
+    private Integer size;
+    private List<String> sort;
+}
+
+// mb-common/dto/PageQuery.java
+public final class PageQuery {
+    public static PageQuery normalized(int page, int size, List<String> sort) { ... }
+    public int page() { ... }
+    public int size() { ... }
+    public List<String> sort() { ... }
     public int offset() { return (page - 1) * size; }
 }
 
-// mb-common/pagination/PageResult.java
+// mb-common/dto/PageResult.java
 public record PageResult<T>(
     List<T> content,
     long totalElements,
@@ -474,6 +481,13 @@ public record PageResult<T>(
 }
 ```
 
+职责边界：
+
+- `PageRequestDto`：只表达 HTTP query string 的原始输入，允许 `page` / `size` 为 `null`
+- `PageQuery`：只表达已归一化后的可信分页语义，不承载 HTTP 绑定职责
+- `PageResult<T>`：统一分页响应 DTO
+- 模块归属：`infra-web.pagination` 负责 `PageRequestDto` / `PaginationPolicy` / `MbPaginationProperties`，`mb-common.dto` 负责 `PageQuery` / `PageResult`
+
 **JSON 响应示例**：
 
 ```json
@@ -489,19 +503,43 @@ public record PageResult<T>(
 }
 ```
 
-### 12.3 Spring MVC 自动解析
+### 12.3 `PaginationPolicy` 统一归一化
 
-通过 `PageQueryArgumentResolver`（注册在 `infra-exception.web.WebMvcConfig`）让 Controller 参数自动解析：
+分页统一策略收敛到 `PaginationPolicy`：
 
 ```java
-@GetMapping("/api/v1/admin/iam/users")
-public PageResult<UserView> list(PageQuery query) {
-    // query 已经过 Resolver 校验（page/size 有效，已应用默认值和上限）
-    return userService.page(query);
+// infra-web/pagination/PaginationPolicy.java
+public PageQuery normalize(PageRequestDto request) {
+    int page = request.getPage() == null ? 1 : request.getPage();
+    int size = request.getSize() == null ? props.defaultSize() : request.getSize();
+
+    if (page < 1) throw new BusinessException("errors.common.pagination.invalidPage", 400);
+    if (size < 1 || size > props.maxSize()) {
+        throw new BusinessException("errors.common.pagination.invalidSize", 400, props.maxSize());
+    }
+
+    return PageQuery.normalized(page, size, normalizeSort(request.getSort()));
 }
 ```
 
-**业务 Controller 零样板**：不需要 `@RequestParam` / `@ModelAttribute` / `@PageableDefault`，Spring 自动识别 `PageQuery` 参数类型并解析。
+Controller 写法：
+
+```java
+@GetMapping("/api/v1/admin/iam/users")
+public PageResult<UserView> list(@ParameterObject PageRequestDto request) {
+    return userService.page(paginationPolicy.normalize(request));
+}
+```
+
+统一规则：
+
+- `page == null`：默认 1
+- `size == null`：默认 `mb.api.pagination.default-size`
+- `page < 1`：400
+- `size < 1 || size > max-size`：400
+- 空白 `sort` 项清洗后丢弃
+
+**约束**：生产代码中，只有 `PaginationPolicy` 允许调用 `PageQuery.normalized(...)`；`PageRequestDto` 不允许泄漏到 `..web..` 之外，由 ArchUnit 守护。
 
 ### 12.4 配置项
 
@@ -594,8 +632,7 @@ List<SortField<?>> orderBy = SortParser.builder()
 ### 13.2 OperationCustomizer 代码骨架
 
 ```java
-// mb-infra/infra-openapi（或 infra-exception）模块
-// src/main/java/com/metabuild/infra/openapi/PermissionOperationCustomizer.java
+// mb-admin/src/main/java/com/metabuild/admin/config/PermissionOperationCustomizer.java
 
 @Component
 public class PermissionOperationCustomizer implements OperationCustomizer {

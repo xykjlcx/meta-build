@@ -165,7 +165,8 @@
 | `infra-security` | （占位 pom） | `SaTokenCurrentUser`（实现 `com.metabuild.common.security.CurrentUser`）+ `AuthFacade` 接口 + `SaTokenAuthFacade` 实现 + `@RequirePermission` + `RequirePermissionAspect` + `CorsConfig` + Sa-Token 配置 |
 | `infra-cache` | （占位 pom） | `CacheEvictSupport`, `RedisCacheConfig`, TTL 抖动工具 |
 | `infra-jooq` | `JooqHelper`（基础 5 方法）, `SlowQueryListener`, `SnowflakeIdGenerator` Bean | `JooqHelper`（完整 14 方法）, **方案 E 数据权限三件套**：`DataScopeRegistry` + `DataScopeVisitListener` + `BypassDataScopeAspect` |
-| `infra-exception` | （占位 pom） | `GlobalExceptionHandler`（ProblemDetail 输出）, `MetaBuildException` 基类层次, `OpenApiConfig` |
+| `infra-web` | （占位 pom） | `PageRequestDto`, `PaginationPolicy`, `MbPaginationProperties`, `WebAutoConfiguration` |
+| `infra-exception` | （占位 pom） | `GlobalExceptionHandler`（ProblemDetail 输出）, `SecurityHeaderFilter` |
 | `infra-i18n` | （占位 pom） | `MessageSourceAutoConfiguration`, `AcceptHeaderLocaleResolver`, `I18nHelper` |
 | `infra-async` | `AsyncConfig`（基础线程池 4/8/200 + `CallerRunsPolicy`） | + `RequestContextHolder` 传递 + Sa-Token 上下文跨线程传递（方案 E 后只剩这一个 ThreadLocal 需要传递） |
 | `infra-rate-limit` | （占位 pom） | `RateLimitInterceptor`（内存版 Bucket4j）, `RateLimitProperties` |
@@ -236,12 +237,15 @@
 | **Query** | 查询参数 DTO 的命名后缀，如 `UserQuery` / `OrderQuery`，必须是 record |
 | **Event** | 领域事件 DTO 的命名后缀，如 `UserCreatedEvent`，必须是 record，通过 `ApplicationEventPublisher` 发布 |
 | **&lt;Module&gt;Api** | 跨模块调用接口的命名，如 `UserApi` / `OrderApi`。模块内的 `Service` class `implements <Module>Api`。跨模块调用必须走 Api 接口（`CROSS_PLATFORM_ONLY_VIA_API` ArchUnit 规则强制）|
-| **Application Service / Use Case / 编排 Service** | meta-build v1 不强制区分 "Application Service vs Domain Service"（DDD 纯粹派分法）。复杂业务（跨多个聚合根/模块）拆独立的 `<Process>Service`（如 `UserRegistrationService` / `OrderSubmitService`）。详见 [01-module-structure.md §4.7](./01-module-structure.md) |
+| **Use Case / 编排 Service** | meta-build 不把它当“第二套领域层”。模块内复杂编排仍放本模块 `domain/`；管理端特有的跨模块聚合流程放 `mb-admin/usecase/`。详见 [01-module-structure.md §4.7](./01-module-structure.md) |
 | **MockCurrentUser** | 测试用的 `CurrentUser` 实现，通过 `@Primary` Bean 替换生产实现，测试代码零 Sa-Token 引用 |
 | **ProblemDetail** | RFC 9457 定义的 HTTP 错误响应标准格式（Spring Boot 3.x 内置 `org.springframework.http.ProblemDetail`） |
-| **PageQuery** | 分页查询参数 record（`mb-common.pagination`），包含 `page` / `size` / `sort`。由 `PageQueryArgumentResolver` 自动从 HTTP query string 解析 |
-| **PageResult&lt;T&gt;** | 分页结果 record（`mb-common.pagination`），包含 `content` / `totalElements` / `totalPages` / `page` / `size`。通过 `PageResult.of(content, total, query)` 构造。详见 [06-api-and-contract.md §12](./06-api-and-contract.md) |
-| **SortParser** | Sort 字段解析器（`mb-common.pagination`），Builder 风格 API，`.forTable()` 自动注册通用字段，`.allow()` 显式列举业务字段，`.defaultSort()` 指定默认排序。详见 [06-api-and-contract.md §12.5](./06-api-and-contract.md) |
+| **PageRequestDto** | HTTP 边界层分页请求 DTO（`infra-web.pagination`），只表达原始 query string 输入，由 Controller 通过 `@ParameterObject` 接收 |
+| **PaginationPolicy** | 分页归一化策略（`infra-web.pagination`），统一处理默认值、上限和非法值，把 `PageRequestDto` 转为可信的 `PageQuery` |
+| **MbPaginationProperties** | 分页配置载体（`infra-web.pagination`），声明 `mb.api.pagination.default-size` / `mb.api.pagination.max-size`，由 `infra-web` 自动配置注册 |
+| **PageQuery** | 内部可信分页对象（`mb-common.dto`），包含 `page` / `size` / `sort`。只表示归一化后的分页语义，不再承载 HTTP 绑定职责 |
+| **PageResult&lt;T&gt;** | 分页结果 record（`mb-common.dto`），包含 `content` / `totalElements` / `totalPages` / `page` / `size`。通过 `PageResult.of(content, total, query)` 构造。详见 [06-api-and-contract.md §12](./06-api-and-contract.md) |
+| **SortParser** | Sort 字段解析器（`infra-jooq`），Builder 风格 API，`.forTable()` 自动注册通用字段，`.allow()` 显式列举业务字段，`.defaultSort()` 指定默认排序。详见 [06-api-and-contract.md §12.5](./06-api-and-contract.md) |
 | **ArchUnit** | Java 架构测试库，把架构规则写成 JUnit 测试。meta-build 用它做模块边界 + 代码细节守护（ADR-0003） |
 | **DataScope** | 数据范围值对象（`DataScopeType + Set<Long> deptIds`）。5 种类型：`ALL / CUSTOM_DEPT / OWN_DEPT / OWN_DEPT_AND_CHILD / SELF`。类型定义在 `mb-common.security`，登录时由 `DataScopeLoader` 展开并存入 Sa-Token session |
 | **DataScopeRegistry**（方案 E） | 数据权限受保护表的**集中注册中心**（`infra-jooq`）。使用者在 `@Configuration` 里声明"表名 → 部门字段名"映射，`DataScopeVisitListener` 读取此映射决定哪些查询要注入 where 条件 |

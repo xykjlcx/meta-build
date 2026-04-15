@@ -574,7 +574,7 @@ mkdir -p server/mb-business/business-order/src/test/java/com/metabuild/business/
         <dependency><groupId>com.metabuild</groupId><artifactId>infra-security</artifactId></dependency>
         <dependency><groupId>com.metabuild</groupId><artifactId>infra-jooq</artifactId></dependency>
         <dependency><groupId>com.metabuild</groupId><artifactId>infra-cache</artifactId></dependency>
-        <dependency><groupId>com.metabuild</groupId><artifactId>infra-exception</artifactId></dependency>
+        <dependency><groupId>com.metabuild</groupId><artifactId>infra-web</artifactId></dependency>
         <!-- 跨模块依赖：需要 iam 的 UserApi 和 file 的 FileApi -->
         <dependency><groupId>com.metabuild</groupId><artifactId>platform-iam</artifactId></dependency>
         <dependency><groupId>com.metabuild</groupId><artifactId>platform-file</artifactId></dependency>

@@ -16,7 +16,7 @@
 2. **自研模块边界规则**：跨模块访问、jOOQ 隔离、Sa-Token 隔离等（核心守护）
 3. **自研代码细节规则**：事务边界、时区、@CacheEvict 等
 
-M1 启动 3 条最基础的规则，M4 补全到 24 条（含 GeneralCodingRules 零成本规则 + 09-config-management.md 定义的 3 条配置管理规则），实际落到代码的 `ArchitectureTest` 共 24 个 `@Test` 方法。
+M1 启动 3 条最基础的规则，M4 补全到 24 条；后续在分页契约重构中新增 2 条分页守护规则、在 Admin usecase 边界中新增 2 条编排守护规则，当前实际落到代码的 `ArchitectureTest` 共 28 个 `@Test` 方法。
 
 ## 2. M1 启动 3 条规则 [M1]
 
@@ -54,12 +54,38 @@ M1 启动 3 条最基础的规则，M4 补全到 24 条（含 GeneralCodingRules
 | 25 | `PROPERTIES_MUST_BE_VALIDATED` | `@ConfigurationProperties` 类必须加 `@Validated` | [09-config-management.md §9.5](./09-config-management.md) |
 | 26 | `NO_CONFIG_HARDCODED` | 禁止硬编码配置值（评估替代方案：Checkstyle/PMD） [M4 评估] | [09-config-management.md §9.1](./09-config-management.md) |
 | 27 | `NO_JDBC_TEMPLATE_IN_BUSINESS` | 业务层（platform/business）禁止使用 JdbcTemplate / NamedParameterJdbcTemplate / DataSource.getConnection()（会绕过 DataScopeVisitListener 数据权限拦截） | [05-security.md §7](./05-security.md) |
+| 28 | `ADMIN_USECASE_ONLY_DEPENDS_ON_MODULE_API_OR_SHARED` | `mb-admin/usecase` 只允许依赖模块公开 API 和共享层，不得依赖模块内部实现 | [01-module-structure.md §4.2](./01-module-structure.md#42-层次职责严格划分) |
+| 29 | `ADMIN_WEB_MUST_NOT_DEPEND_ON_MODULES_DIRECTLY` | `mb-admin/web` 不得直接依赖 `platform` / `business` 模块，必须经 `mb-admin/usecase` | [01-module-structure.md §4.2](./01-module-structure.md#42-层次职责严格划分) |
 
 > **注意**：原规则 `REPOSITORIES_MUST_EXTEND_DATA_SCOPED` 已被方案 E 移除（详见 ADR-0007）。数据权限改由 `DataScopeVisitListener` 单点拦截，不再需要 Repository 继承基类。等价的守护规则是新的 `NO_RAW_SQL_FETCH`——只要业务层不走 `@PlainSQL` 字符串 SQL，VisitListener 就不会被绕过。
 >
 > **N3 精化**：原规则 `DOMAIN_MUST_NOT_USE_JOOQ` 在 M1 阶段仍然保留，M4 阶段用更精确的 `DSLCONTEXT_ONLY_IN_REPOSITORY`（字段级）+ `SERVICE_JOOQ_WHITELIST`（白名单级）替代，完整表达"jOOQ DSL 查询只在 Repository 里写"的意图（详见本章 §7 N3 精化规则）。
 >
 > **Clock Bean**：`Clock` Bean 统一时间获取为编码建议（非 ArchUnit 硬规则），通过 canonical reference 模板代码示范引导，详见本章 §8.8。
+
+### 3.1 Admin usecase 边界规则 [M5+]
+
+围绕 `mb-admin/usecase` 的定位，新增两条规则：
+
+1. **`ADMIN_USECASE_ONLY_DEPENDS_ON_MODULE_API_OR_SHARED`**  
+   `mb-admin/usecase` 只允许依赖：
+   - `platform..api..`
+   - `business..api..`
+   - `common..`
+   - `infra..`
+   - 以及 Java / Jakarta / Spring / SLF4J 等基础技术包
+
+   明确禁止它直接碰：
+   - `platform..domain..`
+   - `platform..web..`
+   - `business..domain..`
+   - `business..web..`
+   - 以及由此引申出的 Repository / jOOQ 细节
+
+2. **`ADMIN_WEB_MUST_NOT_DEPEND_ON_MODULES_DIRECTLY`**  
+   `mb-admin/web` 只做管理端 HTTP 适配，不允许直接依赖 `platform` / `business` 模块。跨模块组合必须先下沉到 `mb-admin/usecase`。
+
+这两条规则当前都带 `allowEmptyShould(true)`，因为仓库中 `mb-admin/usecase` / `mb-admin/web` 还未正式落地代码，先固化边界意图，后续落代码时自动受约束。
 
 ## 4. Controller + 依赖注入 + 编码规范规则 [M4]
 

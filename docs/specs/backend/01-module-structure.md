@@ -16,10 +16,10 @@ server 端采用 **6 层 Maven multi-module** 结构，依赖严格单向（ADR-
 server/
 ├── mb-common/          # 零 Spring 依赖，纯工具层
 ├── mb-schema/          # 数据库契约层（Flyway SQL + jOOQ 生成代码）★ ADR-0004 新增
-├── mb-infra/           # 基础设施层 (11 个子模块 pom parent)
+├── mb-infra/           # 基础设施层 (12 个子模块 pom parent)
 ├── mb-platform/        # 平台业务层 (8 个平台模块 pom parent)
 ├── mb-business/        # 使用者扩展位 + M5 canonical reference ★ ADR-0004 新增
-├── mb-admin/           # Spring Boot 启动入口 + Flyway runtime + 集成测试 + ArchUnit 测试
+├── mb-admin/           # Spring Boot 启动入口 + 管理端 HTTP 交付层 + usecase 编排层 + 集成测试 + ArchUnit 测试
 └── pom.xml             # 顶层 parent pom，BOM 版本管理
 ```
 
@@ -35,7 +35,7 @@ server/
 | `mb-infra` | 基础设施能力（security/cache/jooq/i18n/async/rate-limit/observability 等） | 每个业务模块都要自己搞基础设施，代码重复爆炸 |
 | `mb-platform` | meta-build 官方提供的稳定平台能力（iam/audit/file 等） | 使用者要自己从零实现用户、权限、审计等基础后台功能 |
 | `mb-business` | 使用者自己的业务扩展（兼 M5 canonical reference 示例） | 使用者没有"合法"的业务扩展位置，只能污染 platform |
-| `mb-admin` | Spring Boot 启动入口，聚合所有模块，承载 ArchUnit 测试 | 应用无法启动，架构测试没地方放 |
+| `mb-admin` | Spring Boot 启动入口，承载管理端 HTTP 入口、管理端特有流程编排（`usecase`）、ArchUnit 测试 | 应用无法启动，管理端特有聚合流程无处安放，架构测试没地方放 |
 
 **依赖方向（单向，不可反转）**：
 
@@ -110,13 +110,15 @@ server/
 │   ├── infra-security/                       # Sa-Token 实现：SaTokenCurrentUser + AuthFacade/SaTokenAuthFacade + @RequirePermission + CorsConfig
 │   ├── infra-cache/                          # Redis + CacheEvictSupport
 │   ├── infra-jooq/                           # JooqHelper + SlowQueryListener + DataScopeRegistry + DataScopeVisitListener + BypassDataScopeAspect（方案 E：数据权限的唯一归属，不含 jOOQ 生成代码）
-│   ├── infra-exception/                      # GlobalExceptionHandler + ProblemDetail
+│   ├── infra-web/                            # 共享 Web 边界（PageRequestDto / PaginationPolicy / MbPaginationProperties）
+│   ├── infra-exception/                      # GlobalExceptionHandler + ProblemDetail + SecurityHeaderFilter
 │   ├── infra-i18n/                           # MessageSource + LocaleResolver
 │   ├── infra-async/                          # AsyncConfig + 线程池 + 上下文传递
 │   ├── infra-rate-limit/                     # Bucket4j
 │   ├── infra-websocket/                      # v1 留空，v1.5 实施
 │   ├── infra-observability/                  # Actuator + Micrometer + Logback JSON
-│   └── infra-archunit/                       # ArchUnit 规则库（规则代码）
+│   ├── infra-archunit/                       # ArchUnit 规则库（规则代码）
+│   └── infra-captcha/                        # 滑块验证码
 │
 ├── mb-platform/
 │   ├── pom.xml                               # parent pom
@@ -137,9 +139,11 @@ server/
 │       └── business-approval/                # M5 示例: 跨模块编排
 │
 └── mb-admin/
-    ├── pom.xml                               # 依赖所有上层模块（聚合启动）
+    ├── pom.xml                               # 依赖所有上层模块（聚合启动 + 管理端交付）
     ├── src/main/java/com/metabuild/admin/
-    │   └── MetaBuildApplication.java         # @SpringBootApplication
+    │   ├── MetaBuildApplication.java         # @SpringBootApplication
+    │   ├── web/                              # 管理端 HTTP 入口（适配管理端请求/响应）
+    │   └── usecase/                          # 管理端特有流程编排（跨模块组合 / 聚合视图）
     ├── src/main/resources/
     │   ├── application.yml                   # 基础配置（含 Sa-Token / HikariCP / Flyway 等）
     │   ├── application-dev.yml
@@ -166,7 +170,7 @@ server/
 - `mb-common` **零 mb-\* 依赖**，且不依赖 Spring / jOOQ / JJWT / Sa-Token
 - `mb-schema` **零 mb-\* 依赖**，只依赖 `org.jooq` runtime + PostgreSQL 驱动
 - `mb-infra` 依赖 `mb-common`，**不依赖** `mb-schema` / `mb-platform` / `mb-business` / `mb-admin`
-- `mb-infra` 的 11 个子模块之间**默认互不依赖**（保持职责正交）。所有跨子模块的共享概念（`CurrentUser` / `DataScope` / `LoginResult` 等）**必须放 `mb-common.security` 或 `mb-common.dto`**。方案 E 验证了这一点——原本"需要 infra-jooq 依赖 infra-security"的直觉，靠把公共抽象下沉到 `mb-common` 就能消除
+- `mb-infra` 的 12 个子模块之间**默认互不依赖**（保持职责正交）。所有跨子模块的共享概念（`CurrentUser` / `DataScope` / `LoginResult` 等）**必须放 `mb-common.security` 或 `mb-common.dto`**。方案 E 验证了这一点——原本"需要 infra-jooq 依赖 infra-security"的直觉，靠把公共抽象下沉到 `mb-common` 就能消除
 - `mb-platform` 依赖 `mb-common + mb-infra + mb-schema`
 - `mb-platform` 子模块之间**禁止直接 Maven 依赖**，跨模块只能通过对方的 `api` 子包（由 Maven pom 白名单 + ArchUnit 规则双保险）
 - `mb-business` 依赖 `mb-common + mb-infra + mb-schema + mb-platform::api`（只允许 api 包）
@@ -489,9 +493,11 @@ public class ModuleBoundaryRule {
 
 #### Controller 层
 
+> **本质定位**：Controller 是边界适配层（Adapter / Media），不是业务规则归属层。HTTP 只是当前交付协议，将来同样可以有 ws / mqtt / applet 等其他 adapter。
+
 | 职责 | 说明 |
 |---|---|
-| ✅ 接收 HTTP 请求 | `@RequestBody` / `@PathVariable` / `@RequestParam` / `PageQuery` |
+| ✅ 接收 HTTP 请求 | `@RequestBody` / `@PathVariable` / `@RequestParam` / `PageRequestDto`（来自 `infra-web.pagination`） |
 | ✅ 参数 bean validation | `@Valid`（Jakarta Bean Validation）|
 | ✅ **静态权限检查** | `@RequirePermission("iam.user.create")` 标注方法 |
 | ✅ `@OperationLog` 操作日志注解标注 | 推荐放 Controller 层（离 HTTP 入口近）|
@@ -499,6 +505,11 @@ public class ModuleBoundaryRule {
 | ❌ 业务逻辑 | 在 Service 层 |
 | ❌ 事务 | 在 Service 层 |
 | ❌ 直接 import `DSLContext` / `MbIamUserRecord` | 通过 Service 间接用 |
+
+**补充判断**：
+
+- 模块自身的 `web/`：承载该模块天然拥有的**原子能力接口**（如 CRUD / publish / revoke / enable / disable）
+- `mb-admin/web/`：承载**管理端特有接口**，这些接口通常对应 `mb-admin/usecase/` 中的聚合流程
 
 #### Service 层
 
@@ -514,6 +525,28 @@ public class ModuleBoundaryRule {
 | ❌ 写 jOOQ DSL 查询 | 查询必须在 Repository 里 |
 | ❌ 直接调 `record.store()` / `record.insert()` | 通过 `repository.save(record)` 包装 |
 | ❌ `@RequirePermission` 静态权限注解 | 权限在 Controller 层 |
+
+#### `mb-admin/usecase` 层
+
+> **定位**：只存在于 `mb-admin`，用于管理端特有的流程编排和聚合能力。它不是第二套领域层，不拥有原子业务规则。
+
+| 职责 | 说明 |
+|---|---|
+| ✅ 编排多个模块的原子能力 | 组合 `platform-*` / `business-*` 的 Service / Api |
+| ✅ 组织管理端特有流程 | 管理工作台 / 初始化聚合接口 / 批量导入等 |
+| ✅ 输出管理端专属聚合视图 | 一个接口返回多个模块拼装结果 |
+| ❌ 重新实现模块原子规则 | 不能在这里重写“发布公告”“禁用用户”这类规则 |
+| ❌ 变成第二套业务层 | `usecase` 只做 orchestration，不拥有领域归属 |
+
+**命名约束**：
+
+- `mb-admin` 中这一层统一命名为 `usecase`
+- 不用 `business`，避免和顶层 `mb-business` 语义冲突
+
+**判断标准**：
+
+- 单模块即可闭环、未来多端可能复用的能力 → 放模块自身 `web/ + domain/`
+- 管理端专属、需要跨模块组合、返回聚合视图的能力 → 放 `mb-admin/usecase/ + web/`
 
 #### Repository 层
 
@@ -558,12 +591,21 @@ platform-iam/
 └── web/                              # HTTP 入口
     ├── UserController.java
     └── RoleController.java
+
+mb-admin/
+├── web/                              # 管理端 HTTP 入口（适配管理端请求/响应）
+│   ├── DashboardController.java
+│   └── UserWorkspaceController.java
+└── usecase/                          # 管理端特有流程编排
+    ├── DashboardUseCase.java
+    └── UserWorkspaceUseCase.java
 ```
 
 **关键约定**：
 - **不拆 `domain / infrastructure` 两层**（不过度分层）
 - `Repository` 作为普通 class 放在 `domain/<aggregate>/` 下
 - 跨模块调用通过 `api/<Module>Api.java` 接口（`CROSS_PLATFORM_ONLY_VIA_API` ArchUnit 规则强制）
+- `mb-admin/usecase/` 只做管理端特有流程编排，不拥有原子业务规则
 
 ### 4.4 典型 Repository 代码
 
@@ -804,9 +846,17 @@ public class UserController {
 - 单一聚合 → `<Aggregate>Service`（如 `UserService`）
 - 流程编排 → `<Process>Service`（如 `UserRegistrationService`）
 
-**位置**：**同 `domain/` 包**（不单独拆 `application/` 子包，避免过度分层）。
+**位置**：
 
-**不强制区分 DDD 经典的 "Application Service vs Domain Service"**——v1 只定"复杂编排拆独立 Service"的通用原则。M5 canonical reference `business-approval` 模块作为编排 Service 的示范样本。
+- **模块内复杂编排**：仍放同模块 `domain/` 包（不强制再拆 `application/`）
+- **管理端特有跨模块编排**：放 `mb-admin/usecase/`
+
+**不强制区分 DDD 经典的 "Application Service vs Domain Service"**——meta-build 只区分“能力归属在哪一层”：
+
+- 原子能力归模块自身
+- 管理端特有聚合流程归 `mb-admin/usecase`
+
+M5 canonical reference `business-approval` 仍是模块内编排 Service 的示范样本；未来 dashboard / workspace 等管理端聚合能力则归 `mb-admin/usecase`。
 
 ### 4.8 DTO 命名后缀约定
 
