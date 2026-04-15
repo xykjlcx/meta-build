@@ -42,12 +42,7 @@ test.describe('Notice Module E2E', () => {
   test('编辑草稿公告', async ({ page }) => {
     await navigateToNotices(page);
     // 点击第一条草稿的编辑按钮
-    const editBtn = page
-      .locator('tr')
-      .filter({ hasText: '草稿' })
-      .first()
-      .locator('button')
-      .nth(1);
+    const editBtn = page.locator('tr').filter({ hasText: '草稿' }).first().locator('button').nth(1);
     await editBtn.click();
     await page.waitForSelector('[data-slot="form-field"]');
     await page.fill('input[name="title"]', 'E2E 测试公告（已编辑）');
@@ -189,11 +184,7 @@ test.describe('Notice Module E2E', () => {
   test('查看公告详情', async ({ page }) => {
     await navigateToNotices(page);
     // 点击第一条公告标题
-    await page
-      .locator('a')
-      .filter({ hasText: /.+/ })
-      .first()
-      .click();
+    await page.locator('a').filter({ hasText: /.+/ }).first().click();
     await page.waitForURL('**/notices/*');
     // 确认详情页内容
     await expect(page.locator('text=基本信息')).toBeVisible();

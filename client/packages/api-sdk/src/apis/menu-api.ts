@@ -1,5 +1,5 @@
 import { getClient } from '../config';
-import type { MenuNodeDto, CurrentUserMenuView } from '../types/menu';
+import type { CurrentUserMenuView, MenuNodeDto } from '../types/menu';
 
 export const menuApi = {
   /** 获取当前用户菜单树+权限列表（GET /menus/current-user，需认证） */

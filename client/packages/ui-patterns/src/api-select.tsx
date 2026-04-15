@@ -104,7 +104,8 @@ function ApiSelect<TValue = string>({
     const currentId = ++fetchIdRef.current;
     setLoading(true);
 
-    fetcherRef.current({ keyword: debouncedKeyword, page: 1, size })
+    fetcherRef
+      .current({ keyword: debouncedKeyword, page: 1, size })
       .then((result) => {
         // 丢弃过期响应
         if (currentId !== fetchIdRef.current) return;

@@ -1,4 +1,4 @@
-import { type MenuNodeDto, type AppPermission, menuApi } from '@mb/api-sdk';
+import { type AppPermission, type MenuNodeDto, menuApi } from '@mb/api-sdk';
 import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 import type { MenuNode, UserMenuPayload } from './types';
 

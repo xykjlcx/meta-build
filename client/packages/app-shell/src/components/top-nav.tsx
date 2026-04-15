@@ -1,5 +1,5 @@
 import { Button } from '@mb/ui-primitives';
-import { useMenu, type MenuNode } from '../menu';
+import { type MenuNode, useMenu } from '../menu';
 import { LanguageSwitcher } from './language-switcher';
 import { ThemeSwitcher } from './theme-switcher';
 

@@ -295,10 +295,10 @@ describe('createHttpClient — 401 refresh token', () => {
 
   it('401 → refresh 失败（返回 null）→ 调 onUnauthenticated + throw', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(
-        JSON.stringify({ type: 'about:blank', status: 401, title: 'Unauthorized' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } },
-      ),
+      new Response(JSON.stringify({ type: 'about:blank', status: 401, title: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      }),
     );
 
     const tryRefreshToken = vi.fn().mockResolvedValue(null);
@@ -323,10 +323,10 @@ describe('createHttpClient — 401 refresh token', () => {
 
   it('401 但未配置 tryRefreshToken → 直接调 onUnauthenticated + throw', async () => {
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(
-        JSON.stringify({ type: 'about:blank', status: 401, title: 'Unauthorized' }),
-        { status: 401, headers: { 'Content-Type': 'application/json' } },
-      ),
+      new Response(JSON.stringify({ type: 'about:blank', status: 401, title: 'Unauthorized' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      }),
     );
 
     const errorInterceptor = createErrorInterceptor({

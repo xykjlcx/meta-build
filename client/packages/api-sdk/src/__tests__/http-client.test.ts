@@ -48,9 +48,7 @@ describe('createHttpClient — blob 响应', () => {
   });
 
   it('responseType=blob 时 204 No Content 仍返回 undefined', async () => {
-    vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-      new Response(null, { status: 204 }),
-    );
+    vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(null, { status: 204 }));
 
     const client = createHttpClient({
       basePath: '',

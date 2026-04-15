@@ -82,7 +82,7 @@ function App() {
 async function enableMocking() {
   if (import.meta.env.PROD) return;
   const { worker } = await import('./mock/browser');
-  (window as Record<string, unknown>).__msw_enabled__ = true;
+  (window as unknown as Record<string, unknown>).__msw_enabled__ = true;
   return worker.start({ onUnhandledRequest: 'bypass' });
 }
 

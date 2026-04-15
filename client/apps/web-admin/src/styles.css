@@ -3,6 +3,12 @@
 @import "@mb/ui-tokens/tailwind-theme.css";
 @import "@mb/ui-tokens/themes/index.css";
 
+/* Tailwind v4 默认只扫描当前项目目录，monorepo 的 workspace 包需要显式声明 */
+@source "../../../packages/ui-primitives/src";
+@source "../../../packages/ui-patterns/src";
+@source "../../../packages/app-shell/src";
+@source "../../../packages/api-sdk/src";
+
 body {
   margin: 0;
   font-family: var(--font-sans);
