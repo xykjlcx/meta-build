@@ -327,7 +327,9 @@ export function NoticeListPage() {
       },
       {
         id: 'actions',
-        header: () => <span className="sr-only">{t('common:actions', { defaultValue: '操作' })}</span>,
+        header: () => (
+          <span className="sr-only">{t('common:actions', { defaultValue: '操作' })}</span>
+        ),
         cell: ({ row }) => {
           const notice = row.original;
           const status = notice.status as NoticeStatusValue;
@@ -382,7 +384,11 @@ export function NoticeListPage() {
           }
 
           return (
-            <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
+            // biome-ignore lint/a11y/useKeyWithClickEvents: 操作列 stopPropagation 防止触发行点击
+            <div
+              className="flex items-center justify-end gap-1"
+              onClick={(e) => e.stopPropagation()}
+            >
               {/* 主操作：草稿→编辑，其他→详情 */}
               {status === NOTICE_STATUS.DRAFT && user.hasPermission('notice:notice:update') ? (
                 <Button
@@ -529,9 +535,7 @@ export function NoticeListPage() {
             emptyText={t('list.empty')}
             rowSelection={rowSelection}
             onRowSelectionChange={setRowSelection}
-            onRowClick={(row) =>
-              navigate({ to: '/notices/$id', params: { id: String(row.id) } })
-            }
+            onRowClick={(row) => navigate({ to: '/notices/$id', params: { id: String(row.id) } })}
             className="[&_thead_tr]:bg-muted/50"
           />
 
@@ -546,9 +550,7 @@ export function NoticeListPage() {
               <span className="text-muted-foreground">{t('pagination.perPage')}</span>
               <Select
                 value={String(pagination.size)}
-                onValueChange={(v) =>
-                  setPagination({ size: Number(v), page: 1 })
-                }
+                onValueChange={(v) => setPagination({ size: Number(v), page: 1 })}
               >
                 <SelectTrigger className="h-8 w-16">
                   <SelectValue />

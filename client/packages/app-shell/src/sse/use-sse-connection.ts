@@ -17,7 +17,11 @@ export function useSseConnection(): void {
     if (!user.isAuthenticated) return;
 
     // MSW 模式下跳过 SSE 连接（fetchEventSource 不经过 service worker，会穿透到真实后端）
-    if (typeof window !== 'undefined' && (window as unknown as Record<string, unknown>).__msw_enabled__) return;
+    if (
+      typeof window !== 'undefined' &&
+      (window as unknown as Record<string, unknown>).__msw_enabled__
+    )
+      return;
 
     const ctrl = new AbortController();
     const token = getAccessToken();

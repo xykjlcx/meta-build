@@ -1,3 +1,4 @@
+import { zodResolver } from '@hookform/resolvers/zod';
 import {
   getDetailQueryKey,
   getList4QueryKey,
@@ -26,7 +27,7 @@ import {
   Label,
   Separator,
 } from '@mb/ui-primitives';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm, useFormContext } from 'react-hook-form';
@@ -36,7 +37,6 @@ import { type NoticeFormValues, noticeFormSchema } from '../schemas';
 import { FileUploadField } from './file-upload-field';
 import { TargetSelector } from './target-selector';
 import { TipTapField } from './tiptap-field';
-import { useQueryClient } from '@tanstack/react-query';
 
 interface NoticeDialogProps {
   open: boolean;
@@ -194,7 +194,12 @@ export function NoticeDialog({ open, onOpenChange, noticeId, onSuccess }: Notice
 
   return (
     <>
-      <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
+      <Dialog
+        open={open}
+        onOpenChange={(v) => {
+          if (!v) handleClose();
+        }}
+      >
         <DialogContent
           className="max-w-5xl h-[90vh] flex flex-col gap-0 p-0"
           showCloseButton={false}
@@ -217,10 +222,7 @@ export function NoticeDialog({ open, onOpenChange, noticeId, onSuccess }: Notice
               >
                 {t('dialog.saveDraft')}
               </Button>
-              <Button
-                disabled={isSaving}
-                onClick={methods.handleSubmit(handleSubmit)}
-              >
+              <Button disabled={isSaving} onClick={methods.handleSubmit(handleSubmit)}>
                 {t('action.save')}
               </Button>
             </div>
@@ -326,11 +328,7 @@ function NoticeSideFields() {
         control={control}
         render={({ field }) => (
           <div className="flex items-center gap-2">
-            <Checkbox
-              id="notice-pinned"
-              checked={field.value}
-              onCheckedChange={field.onChange}
-            />
+            <Checkbox id="notice-pinned" checked={field.value} onCheckedChange={field.onChange} />
             <Label htmlFor="notice-pinned" className="text-sm">
               {t('form.pinned')}
             </Label>
