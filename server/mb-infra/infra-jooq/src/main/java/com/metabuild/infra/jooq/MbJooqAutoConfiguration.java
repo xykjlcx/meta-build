@@ -1,6 +1,12 @@
 package com.metabuild.infra.jooq;
 
 import com.metabuild.common.security.CurrentUser;
+import com.metabuild.infra.jooq.audit.AuditFieldsRecordListener;
+import com.metabuild.infra.jooq.datascope.BypassDataScopeAspect;
+import com.metabuild.infra.jooq.datascope.DataScopeRegistry;
+import com.metabuild.infra.jooq.datascope.DataScopeVisitListener;
+import com.metabuild.infra.jooq.id.MbIdProperties;
+import com.metabuild.infra.jooq.query.SlowQueryListener;
 import org.jooq.ExecuteListenerProvider;
 import org.jooq.impl.DefaultConfiguration;
 import org.jooq.impl.DefaultExecuteListenerProvider;

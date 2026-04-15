@@ -3,7 +3,7 @@ package com.metabuild.admin.iam;
 import com.metabuild.admin.BaseIntegrationTest;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.common.security.DataScopeType;
-import com.metabuild.infra.jooq.BypassDataScopeAspect;
+import com.metabuild.infra.jooq.datascope.BypassDataScopeAspect;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

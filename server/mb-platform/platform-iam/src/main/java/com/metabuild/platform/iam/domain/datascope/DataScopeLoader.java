@@ -1,6 +1,6 @@
 package com.metabuild.platform.iam.domain.datascope;
 
-import com.metabuild.infra.jooq.DataScopeRegistry;
+import com.metabuild.infra.jooq.datascope.DataScopeRegistry;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

@@ -1,8 +1,8 @@
 package com.metabuild.admin.infra;
 
 import com.metabuild.admin.BaseIntegrationTest;
-import com.metabuild.infra.jooq.DataScopeVisitListener;
-import com.metabuild.infra.jooq.SlowQueryListener;
+import com.metabuild.infra.jooq.datascope.DataScopeVisitListener;
+import com.metabuild.infra.jooq.query.SlowQueryListener;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

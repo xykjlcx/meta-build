@@ -1,6 +1,6 @@
 package com.metabuild.business.notice.config;
 
-import com.metabuild.infra.jooq.DataScopeRegistry;
+import com.metabuild.infra.jooq.datascope.DataScopeRegistry;
 import org.springframework.context.annotation.Configuration;
 
 /**

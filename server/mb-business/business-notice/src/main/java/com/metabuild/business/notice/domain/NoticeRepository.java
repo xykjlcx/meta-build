@@ -7,7 +7,7 @@ import com.metabuild.business.notice.api.NoticeView;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
-import com.metabuild.infra.jooq.SortParser;
+import com.metabuild.infra.jooq.query.SortParser;
 import lombok.RequiredArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;

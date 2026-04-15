@@ -2,7 +2,7 @@ package com.metabuild.platform.iam.domain.role;
 
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
-import com.metabuild.infra.jooq.SortParser;
+import com.metabuild.infra.jooq.query.SortParser;
 import com.metabuild.schema.tables.records.MbIamRoleRecord;
 import com.metabuild.schema.tables.records.MbIamUserRoleRecord;
 import lombok.RequiredArgsConstructor;
