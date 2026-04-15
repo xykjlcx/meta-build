@@ -16,7 +16,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  List5Params,
+  GetOplogParams,
   PageResultOperationLogView
 } from '../../models';
 
@@ -32,7 +32,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `oplog:log:list`
  */
-export const getList5Url = (params: List5Params,) => {
+export const getGetOplogUrl = (params: GetOplogParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -47,9 +47,9 @@ export const getList5Url = (params: List5Params,) => {
   return stringifiedParams.length > 0 ? `/api/v1/oplog?${stringifiedParams}` : `/api/v1/oplog`
 }
 
-export const list5 = async (params: List5Params, options?: RequestInit): Promise<PageResultOperationLogView> => {
+export const getOplog = async (params: GetOplogParams, options?: RequestInit): Promise<PageResultOperationLogView> => {
   
-  return customInstance<PageResultOperationLogView>(getList5Url(params),
+  return customInstance<PageResultOperationLogView>(getGetOplogUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -62,42 +62,42 @@ export const list5 = async (params: List5Params, options?: RequestInit): Promise
 
 
 
-export const getList5QueryKey = (params?: List5Params,) => {
+export const getGetOplogQueryKey = (params?: GetOplogParams,) => {
     return [
     `/api/v1/oplog`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getList5QueryOptions = <TData = Awaited<ReturnType<typeof list5>>, TError = unknown>(params: List5Params, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list5>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetOplogQueryOptions = <TData = Awaited<ReturnType<typeof getOplog>>, TError = unknown>(params: GetOplogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOplog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getList5QueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetOplogQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof list5>>> = ({ signal }) => list5(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getOplog>>> = ({ signal }) => getOplog(params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list5>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getOplog>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type List5QueryResult = NonNullable<Awaited<ReturnType<typeof list5>>>
-export type List5QueryError = unknown
+export type GetOplogQueryResult = NonNullable<Awaited<ReturnType<typeof getOplog>>>
+export type GetOplogQueryError = unknown
 
 
 
-export function useList5<TData = Awaited<ReturnType<typeof list5>>, TError = unknown>(
- params: List5Params, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list5>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetOplog<TData = Awaited<ReturnType<typeof getOplog>>, TError = unknown>(
+ params: GetOplogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getOplog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getList5QueryOptions(params,options)
+  const queryOptions = getGetOplogQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

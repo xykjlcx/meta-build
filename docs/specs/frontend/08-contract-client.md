@@ -17,6 +17,7 @@
 | **后端是契约的权威** | Controller `@Operation` + DTO 注解驱动 OpenAPI 3.1 → orval → 前端 `@mb/api-sdk/generated`；前端**不能**手写 DTO 类型，全部从契约生成 |
 | **所有 API 调用必须通过 `@mb/api-sdk`** | L5 业务代码禁止手写 `fetch` / `axios`；编译期通过 dependency-cruiser + `no-restricted-imports` 强制 |
 | **拦截器是单点** | `Authorization` / `Accept-Language` / `X-Request-ID` 三个 header 的注入在 SDK 工厂层统一完成，业务代码零感知 |
+| **L5 优先走稳定 façade** | L5 业务代码优先使用 `@mb/api-sdk` 导出的手写 façade（如 `noticeApi` / `useNoticeList`）；`generated/*` 只作为契约底层实现 |
 
 ### 1.2 最小集 MVP
 
@@ -93,15 +94,15 @@ v1 只做"契约生成 + 客户端消费 + 拦截器 + 错误处理"的最小闭
 | `client/packages/api-sdk/src/index.ts` | ✅ 入 git | 手写的包装层（导出 + 拦截器 + 错误类型） |
 | `client/packages/api-sdk/src/interceptors.ts` | ✅ 入 git | 拦截器实现 |
 | `client/packages/api-sdk/src/errors.ts` | ✅ 入 git | `ProblemDetailError` 定义 |
-| `client/packages/api-sdk/src/generated/` | ❌ **不入 git** | CI 重新生成，`.gitignore` 排除 |
+| `client/packages/api-sdk/src/generated/` | ✅ 入 git | orval 生成产物，作为契约快照提交，CI 校验 drift |
 | `client/packages/api-sdk/package.json` | ✅ 入 git | 包元信息 |
 | `server/api-contract/openapi-v1.json` | ✅ 入 git | 契约基线（后端 commit 时一起更新） |
 
-**为什么 generated 不入 git**：
+**为什么 generated 入 git**：
 
-1. 避免 PR diff 噪音（DTO 改一个字段，generated 会变成百行 diff）
-2. 强制 CI 重新生成，保证"契约和代码一致"是构建行为而非人工维护
-3. 后端改 DTO → CI fail（因为 generated 变化和 openapi-v1.json 不匹配）
+1. 新 worktree / 新人 clone 后，`pnpm check:types` / `pnpm build` 可直接运行，不依赖先手动生成
+2. CI 的 drift 检测才有意义：后端契约变了但 generated 未提交，能立即红
+3. `git diff` 能直接看到契约层变化，便于 code review 判断影响面
 
 ### 2.3 构建时 vs 启动时生成
 

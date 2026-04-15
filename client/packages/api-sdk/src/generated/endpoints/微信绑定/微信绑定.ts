@@ -20,7 +20,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  GenerateMpOAuthState200,
+  GetWechatMpOauthState200,
   WeChatBindingView,
   WeChatMiniBindCommand,
   WeChatMpBindCommand
@@ -37,7 +37,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * 微信 OAuth 授权回调后，用 code + state 完成绑定
  * @summary 公众号绑定
  */
-export const getBindMpUrl = () => {
+export const getPostWechatBindMpUrl = () => {
 
 
   
@@ -45,9 +45,9 @@ export const getBindMpUrl = () => {
   return `/api/v1/wechat/bind-mp`
 }
 
-export const bindMp = async (weChatMpBindCommand: WeChatMpBindCommand, options?: RequestInit): Promise<WeChatBindingView> => {
+export const postWechatBindMp = async (weChatMpBindCommand: WeChatMpBindCommand, options?: RequestInit): Promise<WeChatBindingView> => {
   
-  return customInstance<WeChatBindingView>(getBindMpUrl(),
+  return customInstance<WeChatBindingView>(getPostWechatBindMpUrl(),
   {      
     ...options,
     method: 'POST',
@@ -60,11 +60,11 @@ export const bindMp = async (weChatMpBindCommand: WeChatMpBindCommand, options?:
 
 
 
-export const getBindMpMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bindMp>>, TError,{data: WeChatMpBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof bindMp>>, TError,{data: WeChatMpBindCommand}, TContext> => {
+export const getPostWechatBindMpMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMp>>, TError,{data: WeChatMpBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMp>>, TError,{data: WeChatMpBindCommand}, TContext> => {
 
-const mutationKey = ['bindMp'];
+const mutationKey = ['postWechatBindMp'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -74,10 +74,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof bindMp>>, {data: WeChatMpBindCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWechatBindMp>>, {data: WeChatMpBindCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  bindMp(data,requestOptions)
+          return  postWechatBindMp(data,requestOptions)
         }
 
         
@@ -85,23 +85,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type BindMpMutationResult = NonNullable<Awaited<ReturnType<typeof bindMp>>>
-    export type BindMpMutationBody = WeChatMpBindCommand
-    export type BindMpMutationError = unknown
+    export type PostWechatBindMpMutationResult = NonNullable<Awaited<ReturnType<typeof postWechatBindMp>>>
+    export type PostWechatBindMpMutationBody = WeChatMpBindCommand
+    export type PostWechatBindMpMutationError = unknown
 
     /**
  * @summary 公众号绑定
  */
-export const useBindMp = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bindMp>>, TError,{data: WeChatMpBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostWechatBindMp = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMp>>, TError,{data: WeChatMpBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof bindMp>>,
+        Awaited<ReturnType<typeof postWechatBindMp>>,
         TError,
         {data: WeChatMpBindCommand},
         TContext
       > => {
 
-      const mutationOptions = getBindMpMutationOptions(options);
+      const mutationOptions = getPostWechatBindMpMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -109,7 +109,7 @@ export const useBindMp = <TError = unknown,
  * wx.login() 获取 code 后完成绑定
  * @summary 小程序绑定
  */
-export const getBindMiniUrl = () => {
+export const getPostWechatBindMiniUrl = () => {
 
 
   
@@ -117,9 +117,9 @@ export const getBindMiniUrl = () => {
   return `/api/v1/wechat/bind-mini`
 }
 
-export const bindMini = async (weChatMiniBindCommand: WeChatMiniBindCommand, options?: RequestInit): Promise<WeChatBindingView> => {
+export const postWechatBindMini = async (weChatMiniBindCommand: WeChatMiniBindCommand, options?: RequestInit): Promise<WeChatBindingView> => {
   
-  return customInstance<WeChatBindingView>(getBindMiniUrl(),
+  return customInstance<WeChatBindingView>(getPostWechatBindMiniUrl(),
   {      
     ...options,
     method: 'POST',
@@ -132,11 +132,11 @@ export const bindMini = async (weChatMiniBindCommand: WeChatMiniBindCommand, opt
 
 
 
-export const getBindMiniMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bindMini>>, TError,{data: WeChatMiniBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof bindMini>>, TError,{data: WeChatMiniBindCommand}, TContext> => {
+export const getPostWechatBindMiniMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMini>>, TError,{data: WeChatMiniBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMini>>, TError,{data: WeChatMiniBindCommand}, TContext> => {
 
-const mutationKey = ['bindMini'];
+const mutationKey = ['postWechatBindMini'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -146,10 +146,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof bindMini>>, {data: WeChatMiniBindCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWechatBindMini>>, {data: WeChatMiniBindCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  bindMini(data,requestOptions)
+          return  postWechatBindMini(data,requestOptions)
         }
 
         
@@ -157,23 +157,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type BindMiniMutationResult = NonNullable<Awaited<ReturnType<typeof bindMini>>>
-    export type BindMiniMutationBody = WeChatMiniBindCommand
-    export type BindMiniMutationError = unknown
+    export type PostWechatBindMiniMutationResult = NonNullable<Awaited<ReturnType<typeof postWechatBindMini>>>
+    export type PostWechatBindMiniMutationBody = WeChatMiniBindCommand
+    export type PostWechatBindMiniMutationError = unknown
 
     /**
  * @summary 小程序绑定
  */
-export const useBindMini = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof bindMini>>, TError,{data: WeChatMiniBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostWechatBindMini = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMini>>, TError,{data: WeChatMiniBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof bindMini>>,
+        Awaited<ReturnType<typeof postWechatBindMini>>,
         TError,
         {data: WeChatMiniBindCommand},
         TContext
       > => {
 
-      const mutationOptions = getBindMiniMutationOptions(options);
+      const mutationOptions = getPostWechatBindMiniMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -181,7 +181,7 @@ export const useBindMini = <TError = unknown,
  * 返回 state 值，前端拼接微信授权 URL
  * @summary 生成公众号 OAuth state
  */
-export const getGenerateMpOAuthStateUrl = () => {
+export const getGetWechatMpOauthStateUrl = () => {
 
 
   
@@ -189,9 +189,9 @@ export const getGenerateMpOAuthStateUrl = () => {
   return `/api/v1/wechat/mp/oauth-state`
 }
 
-export const generateMpOAuthState = async ( options?: RequestInit): Promise<GenerateMpOAuthState200> => {
+export const getWechatMpOauthState = async ( options?: RequestInit): Promise<GetWechatMpOauthState200> => {
   
-  return customInstance<GenerateMpOAuthState200>(getGenerateMpOAuthStateUrl(),
+  return customInstance<GetWechatMpOauthState200>(getGetWechatMpOauthStateUrl(),
   {      
     ...options,
     method: 'GET'
@@ -204,45 +204,45 @@ export const generateMpOAuthState = async ( options?: RequestInit): Promise<Gene
 
 
 
-export const getGenerateMpOAuthStateQueryKey = () => {
+export const getGetWechatMpOauthStateQueryKey = () => {
     return [
     `/api/v1/wechat/mp/oauth-state`
     ] as const;
     }
 
     
-export const getGenerateMpOAuthStateQueryOptions = <TData = Awaited<ReturnType<typeof generateMpOAuthState>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof generateMpOAuthState>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetWechatMpOauthStateQueryOptions = <TData = Awaited<ReturnType<typeof getWechatMpOauthState>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWechatMpOauthState>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGenerateMpOAuthStateQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetWechatMpOauthStateQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof generateMpOAuthState>>> = ({ signal }) => generateMpOAuthState({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWechatMpOauthState>>> = ({ signal }) => getWechatMpOauthState({ signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof generateMpOAuthState>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getWechatMpOauthState>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GenerateMpOAuthStateQueryResult = NonNullable<Awaited<ReturnType<typeof generateMpOAuthState>>>
-export type GenerateMpOAuthStateQueryError = unknown
+export type GetWechatMpOauthStateQueryResult = NonNullable<Awaited<ReturnType<typeof getWechatMpOauthState>>>
+export type GetWechatMpOauthStateQueryError = unknown
 
 
 /**
  * @summary 生成公众号 OAuth state
  */
 
-export function useGenerateMpOAuthState<TData = Awaited<ReturnType<typeof generateMpOAuthState>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof generateMpOAuthState>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetWechatMpOauthState<TData = Awaited<ReturnType<typeof getWechatMpOauthState>>, TError = unknown>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWechatMpOauthState>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGenerateMpOAuthStateQueryOptions(options)
+  const queryOptions = getGetWechatMpOauthStateQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -258,7 +258,7 @@ export function useGenerateMpOAuthState<TData = Awaited<ReturnType<typeof genera
  * 返回当前用户的全部微信绑定关系
  * @summary 查询我的微信绑定
  */
-export const getMyBindingsUrl = () => {
+export const getGetWechatBindingUrl = () => {
 
 
   
@@ -266,9 +266,9 @@ export const getMyBindingsUrl = () => {
   return `/api/v1/wechat/bindings`
 }
 
-export const myBindings = async ( options?: RequestInit): Promise<WeChatBindingView[]> => {
+export const getWechatBinding = async ( options?: RequestInit): Promise<WeChatBindingView[]> => {
   
-  return customInstance<WeChatBindingView[]>(getMyBindingsUrl(),
+  return customInstance<WeChatBindingView[]>(getGetWechatBindingUrl(),
   {      
     ...options,
     method: 'GET'
@@ -281,45 +281,45 @@ export const myBindings = async ( options?: RequestInit): Promise<WeChatBindingV
 
 
 
-export const getMyBindingsQueryKey = () => {
+export const getGetWechatBindingQueryKey = () => {
     return [
     `/api/v1/wechat/bindings`
     ] as const;
     }
 
     
-export const getMyBindingsQueryOptions = <TData = Awaited<ReturnType<typeof myBindings>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof myBindings>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetWechatBindingQueryOptions = <TData = Awaited<ReturnType<typeof getWechatBinding>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWechatBinding>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getMyBindingsQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetWechatBindingQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof myBindings>>> = ({ signal }) => myBindings({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getWechatBinding>>> = ({ signal }) => getWechatBinding({ signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof myBindings>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getWechatBinding>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type MyBindingsQueryResult = NonNullable<Awaited<ReturnType<typeof myBindings>>>
-export type MyBindingsQueryError = unknown
+export type GetWechatBindingQueryResult = NonNullable<Awaited<ReturnType<typeof getWechatBinding>>>
+export type GetWechatBindingQueryError = unknown
 
 
 /**
  * @summary 查询我的微信绑定
  */
 
-export function useMyBindings<TData = Awaited<ReturnType<typeof myBindings>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof myBindings>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetWechatBinding<TData = Awaited<ReturnType<typeof getWechatBinding>>, TError = unknown>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getWechatBinding>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getMyBindingsQueryOptions(options)
+  const queryOptions = getGetWechatBindingQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -335,7 +335,7 @@ export function useMyBindings<TData = Awaited<ReturnType<typeof myBindings>>, TE
  * 解绑指定平台（MP/MINI）的微信绑定关系
  * @summary 解绑微信
  */
-export const getUnbindUrl = (platform: string,) => {
+export const getDeleteWechatUnbindByPlatformUrl = (platform: string,) => {
 
 
   
@@ -343,9 +343,9 @@ export const getUnbindUrl = (platform: string,) => {
   return `/api/v1/wechat/unbind/${platform}`
 }
 
-export const unbind = async (platform: string, options?: RequestInit): Promise<void> => {
+export const deleteWechatUnbindByPlatform = async (platform: string, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getUnbindUrl(platform),
+  return customInstance<void>(getDeleteWechatUnbindByPlatformUrl(platform),
   {      
     ...options,
     method: 'DELETE'
@@ -357,11 +357,11 @@ export const unbind = async (platform: string, options?: RequestInit): Promise<v
 
 
 
-export const getUnbindMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unbind>>, TError,{platform: string}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof unbind>>, TError,{platform: string}, TContext> => {
+export const getDeleteWechatUnbindByPlatformMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWechatUnbindByPlatform>>, TError,{platform: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteWechatUnbindByPlatform>>, TError,{platform: string}, TContext> => {
 
-const mutationKey = ['unbind'];
+const mutationKey = ['deleteWechatUnbindByPlatform'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -371,10 +371,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unbind>>, {platform: string}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteWechatUnbindByPlatform>>, {platform: string}> = (props) => {
           const {platform} = props ?? {};
 
-          return  unbind(platform,requestOptions)
+          return  deleteWechatUnbindByPlatform(platform,requestOptions)
         }
 
         
@@ -382,23 +382,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UnbindMutationResult = NonNullable<Awaited<ReturnType<typeof unbind>>>
+    export type DeleteWechatUnbindByPlatformMutationResult = NonNullable<Awaited<ReturnType<typeof deleteWechatUnbindByPlatform>>>
     
-    export type UnbindMutationError = unknown
+    export type DeleteWechatUnbindByPlatformMutationError = unknown
 
     /**
  * @summary 解绑微信
  */
-export const useUnbind = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unbind>>, TError,{platform: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const useDeleteWechatUnbindByPlatform = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteWechatUnbindByPlatform>>, TError,{platform: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof unbind>>,
+        Awaited<ReturnType<typeof deleteWechatUnbindByPlatform>>,
         TError,
         {platform: string},
         TContext
       > => {
 
-      const mutationOptions = getUnbindMutationOptions(options);
+      const mutationOptions = getDeleteWechatUnbindByPlatformMutationOptions(options);
 
       return useMutation(mutationOptions);
     }

@@ -22,16 +22,16 @@ import type {
 import type {
   BatchIdsCommand,
   BatchResultView,
-  List4Params,
+  GetNoticeByIdRecipientParams,
+  GetNoticeExportParams,
+  GetNoticeParams,
+  GetNoticeUnreadCount200,
   NoticeCreateCommand,
   NoticeDetailView,
   NoticePublishCommand,
   NoticeUpdateCommand,
   PageResultNoticeView,
-  PageResultRecipientView,
-  RecipientsParams,
-  UnreadCount200,
-  _ExportParams
+  PageResultRecipientView
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -47,7 +47,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 **权限:** `notice:notice:detail`
  * @summary 查询公告详情
  */
-export const getDetailUrl = (id: number,) => {
+export const getGetNoticeByIdUrl = (id: number,) => {
 
 
   
@@ -55,9 +55,9 @@ export const getDetailUrl = (id: number,) => {
   return `/api/v1/notices/${id}`
 }
 
-export const detail = async (id: number, options?: RequestInit): Promise<NoticeDetailView> => {
+export const getNoticeById = async (id: number, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<NoticeDetailView>(getDetailUrl(id),
+  return customInstance<NoticeDetailView>(getGetNoticeByIdUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -70,45 +70,45 @@ export const detail = async (id: number, options?: RequestInit): Promise<NoticeD
 
 
 
-export const getDetailQueryKey = (id?: number,) => {
+export const getGetNoticeByIdQueryKey = (id?: number,) => {
     return [
     `/api/v1/notices/${id}`
     ] as const;
     }
 
     
-export const getDetailQueryOptions = <TData = Awaited<ReturnType<typeof detail>>, TError = unknown>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof detail>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetNoticeByIdQueryOptions = <TData = Awaited<ReturnType<typeof getNoticeById>>, TError = unknown>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNoticeById>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getDetailQueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetNoticeByIdQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof detail>>> = ({ signal }) => detail(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNoticeById>>> = ({ signal }) => getNoticeById(id, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof detail>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNoticeById>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type DetailQueryResult = NonNullable<Awaited<ReturnType<typeof detail>>>
-export type DetailQueryError = unknown
+export type GetNoticeByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getNoticeById>>>
+export type GetNoticeByIdQueryError = unknown
 
 
 /**
  * @summary 查询公告详情
  */
 
-export function useDetail<TData = Awaited<ReturnType<typeof detail>>, TError = unknown>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof detail>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetNoticeById<TData = Awaited<ReturnType<typeof getNoticeById>>, TError = unknown>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNoticeById>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getDetailQueryOptions(id,options)
+  const queryOptions = getGetNoticeByIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -126,7 +126,7 @@ export function useDetail<TData = Awaited<ReturnType<typeof detail>>, TError = u
 **权限:** `notice:notice:update`
  * @summary 更新公告
  */
-export const getUpdate2Url = (id: number,) => {
+export const getPutNoticeByIdUrl = (id: number,) => {
 
 
   
@@ -134,10 +134,10 @@ export const getUpdate2Url = (id: number,) => {
   return `/api/v1/notices/${id}`
 }
 
-export const update2 = async (id: number,
+export const putNoticeById = async (id: number,
     noticeUpdateCommand: NoticeUpdateCommand, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<NoticeDetailView>(getUpdate2Url(id),
+  return customInstance<NoticeDetailView>(getPutNoticeByIdUrl(id),
   {      
     ...options,
     method: 'PUT',
@@ -150,11 +150,11 @@ export const update2 = async (id: number,
 
 
 
-export const getUpdate2MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update2>>, TError,{id: number;data: NoticeUpdateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof update2>>, TError,{id: number;data: NoticeUpdateCommand}, TContext> => {
+export const getPutNoticeByIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putNoticeById>>, TError,{id: number;data: NoticeUpdateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putNoticeById>>, TError,{id: number;data: NoticeUpdateCommand}, TContext> => {
 
-const mutationKey = ['update2'];
+const mutationKey = ['putNoticeById'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -164,10 +164,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof update2>>, {id: number;data: NoticeUpdateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putNoticeById>>, {id: number;data: NoticeUpdateCommand}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  update2(id,data,requestOptions)
+          return  putNoticeById(id,data,requestOptions)
         }
 
         
@@ -175,23 +175,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Update2MutationResult = NonNullable<Awaited<ReturnType<typeof update2>>>
-    export type Update2MutationBody = NoticeUpdateCommand
-    export type Update2MutationError = unknown
+    export type PutNoticeByIdMutationResult = NonNullable<Awaited<ReturnType<typeof putNoticeById>>>
+    export type PutNoticeByIdMutationBody = NoticeUpdateCommand
+    export type PutNoticeByIdMutationError = unknown
 
     /**
  * @summary 更新公告
  */
-export const useUpdate2 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof update2>>, TError,{id: number;data: NoticeUpdateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePutNoticeById = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putNoticeById>>, TError,{id: number;data: NoticeUpdateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof update2>>,
+        Awaited<ReturnType<typeof putNoticeById>>,
         TError,
         {id: number;data: NoticeUpdateCommand},
         TContext
       > => {
 
-      const mutationOptions = getUpdate2MutationOptions(options);
+      const mutationOptions = getPutNoticeByIdMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -201,7 +201,7 @@ export const useUpdate2 = <TError = unknown,
 **权限:** `notice:notice:delete`
  * @summary 删除公告
  */
-export const getDelete2Url = (id: number,) => {
+export const getDeleteNoticeByIdUrl = (id: number,) => {
 
 
   
@@ -209,9 +209,9 @@ export const getDelete2Url = (id: number,) => {
   return `/api/v1/notices/${id}`
 }
 
-export const delete2 = async (id: number, options?: RequestInit): Promise<void> => {
+export const deleteNoticeById = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getDelete2Url(id),
+  return customInstance<void>(getDeleteNoticeByIdUrl(id),
   {      
     ...options,
     method: 'DELETE'
@@ -223,11 +223,11 @@ export const delete2 = async (id: number, options?: RequestInit): Promise<void> 
 
 
 
-export const getDelete2MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete2>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof delete2>>, TError,{id: number}, TContext> => {
+export const getDeleteNoticeByIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteNoticeById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteNoticeById>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['delete2'];
+const mutationKey = ['deleteNoticeById'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -237,10 +237,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof delete2>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteNoticeById>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  delete2(id,requestOptions)
+          return  deleteNoticeById(id,requestOptions)
         }
 
         
@@ -248,30 +248,30 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Delete2MutationResult = NonNullable<Awaited<ReturnType<typeof delete2>>>
+    export type DeleteNoticeByIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteNoticeById>>>
     
-    export type Delete2MutationError = unknown
+    export type DeleteNoticeByIdMutationError = unknown
 
     /**
  * @summary 删除公告
  */
-export const useDelete2 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete2>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const useDeleteNoticeById = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteNoticeById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof delete2>>,
+        Awaited<ReturnType<typeof deleteNoticeById>>,
         TError,
         {id: number},
         TContext
       > => {
 
-      const mutationOptions = getDelete2MutationOptions(options);
+      const mutationOptions = getDeleteNoticeByIdMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
     /**
  * @summary 标记已读（登录用户均可调用，幂等）
  */
-export const getMarkReadUrl = (id: number,) => {
+export const getPutNoticeByIdReadUrl = (id: number,) => {
 
 
   
@@ -279,9 +279,9 @@ export const getMarkReadUrl = (id: number,) => {
   return `/api/v1/notices/${id}/read`
 }
 
-export const markRead = async (id: number, options?: RequestInit): Promise<void> => {
+export const putNoticeByIdRead = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getMarkReadUrl(id),
+  return customInstance<void>(getPutNoticeByIdReadUrl(id),
   {      
     ...options,
     method: 'PUT'
@@ -293,11 +293,11 @@ export const markRead = async (id: number, options?: RequestInit): Promise<void>
 
 
 
-export const getMarkReadMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markRead>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof markRead>>, TError,{id: number}, TContext> => {
+export const getPutNoticeByIdReadMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putNoticeByIdRead>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putNoticeByIdRead>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['markRead'];
+const mutationKey = ['putNoticeByIdRead'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -307,10 +307,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof markRead>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putNoticeByIdRead>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  markRead(id,requestOptions)
+          return  putNoticeByIdRead(id,requestOptions)
         }
 
         
@@ -318,23 +318,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type MarkReadMutationResult = NonNullable<Awaited<ReturnType<typeof markRead>>>
+    export type PutNoticeByIdReadMutationResult = NonNullable<Awaited<ReturnType<typeof putNoticeByIdRead>>>
     
-    export type MarkReadMutationError = unknown
+    export type PutNoticeByIdReadMutationError = unknown
 
     /**
  * @summary 标记已读（登录用户均可调用，幂等）
  */
-export const useMarkRead = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof markRead>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePutNoticeByIdRead = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putNoticeByIdRead>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof markRead>>,
+        Awaited<ReturnType<typeof putNoticeByIdRead>>,
         TError,
         {id: number},
         TContext
       > => {
 
-      const mutationOptions = getMarkReadMutationOptions(options);
+      const mutationOptions = getPutNoticeByIdReadMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -344,7 +344,7 @@ export const useMarkRead = <TError = unknown,
 **权限:** `notice:notice:list`
  * @summary 分页查询公告列表
  */
-export const getList4Url = (params?: List4Params,) => {
+export const getGetNoticeUrl = (params?: GetNoticeParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -367,9 +367,9 @@ export const getList4Url = (params?: List4Params,) => {
   return stringifiedParams.length > 0 ? `/api/v1/notices?${stringifiedParams}` : `/api/v1/notices`
 }
 
-export const list4 = async (params?: List4Params, options?: RequestInit): Promise<PageResultNoticeView> => {
+export const getNotice = async (params?: GetNoticeParams, options?: RequestInit): Promise<PageResultNoticeView> => {
   
-  return customInstance<PageResultNoticeView>(getList4Url(params),
+  return customInstance<PageResultNoticeView>(getGetNoticeUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -382,45 +382,45 @@ export const list4 = async (params?: List4Params, options?: RequestInit): Promis
 
 
 
-export const getList4QueryKey = (params?: List4Params,) => {
+export const getGetNoticeQueryKey = (params?: GetNoticeParams,) => {
     return [
     `/api/v1/notices`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getList4QueryOptions = <TData = Awaited<ReturnType<typeof list4>>, TError = unknown>(params?: List4Params, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list4>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetNoticeQueryOptions = <TData = Awaited<ReturnType<typeof getNotice>>, TError = unknown>(params?: GetNoticeParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotice>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getList4QueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetNoticeQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof list4>>> = ({ signal }) => list4(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNotice>>> = ({ signal }) => getNotice(params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list4>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNotice>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type List4QueryResult = NonNullable<Awaited<ReturnType<typeof list4>>>
-export type List4QueryError = unknown
+export type GetNoticeQueryResult = NonNullable<Awaited<ReturnType<typeof getNotice>>>
+export type GetNoticeQueryError = unknown
 
 
 /**
  * @summary 分页查询公告列表
  */
 
-export function useList4<TData = Awaited<ReturnType<typeof list4>>, TError = unknown>(
- params?: List4Params, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list4>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetNotice<TData = Awaited<ReturnType<typeof getNotice>>, TError = unknown>(
+ params?: GetNoticeParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotice>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getList4QueryOptions(params,options)
+  const queryOptions = getGetNoticeQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -438,7 +438,7 @@ export function useList4<TData = Awaited<ReturnType<typeof list4>>, TError = unk
 **权限:** `notice:notice:create`
  * @summary 创建公告
  */
-export const getCreate3Url = () => {
+export const getPostNoticeUrl = () => {
 
 
   
@@ -446,9 +446,9 @@ export const getCreate3Url = () => {
   return `/api/v1/notices`
 }
 
-export const create3 = async (noticeCreateCommand: NoticeCreateCommand, options?: RequestInit): Promise<NoticeDetailView> => {
+export const postNotice = async (noticeCreateCommand: NoticeCreateCommand, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<NoticeDetailView>(getCreate3Url(),
+  return customInstance<NoticeDetailView>(getPostNoticeUrl(),
   {      
     ...options,
     method: 'POST',
@@ -461,11 +461,11 @@ export const create3 = async (noticeCreateCommand: NoticeCreateCommand, options?
 
 
 
-export const getCreate3MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create3>>, TError,{data: NoticeCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof create3>>, TError,{data: NoticeCreateCommand}, TContext> => {
+export const getPostNoticeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNotice>>, TError,{data: NoticeCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postNotice>>, TError,{data: NoticeCreateCommand}, TContext> => {
 
-const mutationKey = ['create3'];
+const mutationKey = ['postNotice'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -475,10 +475,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create3>>, {data: NoticeCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postNotice>>, {data: NoticeCreateCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  create3(data,requestOptions)
+          return  postNotice(data,requestOptions)
         }
 
         
@@ -486,23 +486,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Create3MutationResult = NonNullable<Awaited<ReturnType<typeof create3>>>
-    export type Create3MutationBody = NoticeCreateCommand
-    export type Create3MutationError = unknown
+    export type PostNoticeMutationResult = NonNullable<Awaited<ReturnType<typeof postNotice>>>
+    export type PostNoticeMutationBody = NoticeCreateCommand
+    export type PostNoticeMutationError = unknown
 
     /**
  * @summary 创建公告
  */
-export const useCreate3 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create3>>, TError,{data: NoticeCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostNotice = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNotice>>, TError,{data: NoticeCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof create3>>,
+        Awaited<ReturnType<typeof postNotice>>,
         TError,
         {data: NoticeCreateCommand},
         TContext
       > => {
 
-      const mutationOptions = getCreate3MutationOptions(options);
+      const mutationOptions = getPostNoticeMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -512,7 +512,7 @@ export const useCreate3 = <TError = unknown,
 **权限:** `notice:notice:publish`
  * @summary 撤回公告
  */
-export const getRevokeUrl = (id: number,) => {
+export const getPostNoticeByIdRevokeUrl = (id: number,) => {
 
 
   
@@ -520,9 +520,9 @@ export const getRevokeUrl = (id: number,) => {
   return `/api/v1/notices/${id}/revoke`
 }
 
-export const revoke = async (id: number, options?: RequestInit): Promise<NoticeDetailView> => {
+export const postNoticeByIdRevoke = async (id: number, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<NoticeDetailView>(getRevokeUrl(id),
+  return customInstance<NoticeDetailView>(getPostNoticeByIdRevokeUrl(id),
   {      
     ...options,
     method: 'POST'
@@ -534,11 +534,11 @@ export const revoke = async (id: number, options?: RequestInit): Promise<NoticeD
 
 
 
-export const getRevokeMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revoke>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof revoke>>, TError,{id: number}, TContext> => {
+export const getPostNoticeByIdRevokeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNoticeByIdRevoke>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postNoticeByIdRevoke>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['revoke'];
+const mutationKey = ['postNoticeByIdRevoke'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -548,10 +548,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof revoke>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postNoticeByIdRevoke>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  revoke(id,requestOptions)
+          return  postNoticeByIdRevoke(id,requestOptions)
         }
 
         
@@ -559,23 +559,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type RevokeMutationResult = NonNullable<Awaited<ReturnType<typeof revoke>>>
+    export type PostNoticeByIdRevokeMutationResult = NonNullable<Awaited<ReturnType<typeof postNoticeByIdRevoke>>>
     
-    export type RevokeMutationError = unknown
+    export type PostNoticeByIdRevokeMutationError = unknown
 
     /**
  * @summary 撤回公告
  */
-export const useRevoke = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof revoke>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostNoticeByIdRevoke = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNoticeByIdRevoke>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof revoke>>,
+        Awaited<ReturnType<typeof postNoticeByIdRevoke>>,
         TError,
         {id: number},
         TContext
       > => {
 
-      const mutationOptions = getRevokeMutationOptions(options);
+      const mutationOptions = getPostNoticeByIdRevokeMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -585,7 +585,7 @@ export const useRevoke = <TError = unknown,
 **权限:** `notice:notice:publish`
  * @summary 发布公告
  */
-export const getPublishUrl = (id: number,) => {
+export const getPostNoticeByIdPublishUrl = (id: number,) => {
 
 
   
@@ -593,10 +593,10 @@ export const getPublishUrl = (id: number,) => {
   return `/api/v1/notices/${id}/publish`
 }
 
-export const publish = async (id: number,
+export const postNoticeByIdPublish = async (id: number,
     noticePublishCommand: NoticePublishCommand, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<NoticeDetailView>(getPublishUrl(id),
+  return customInstance<NoticeDetailView>(getPostNoticeByIdPublishUrl(id),
   {      
     ...options,
     method: 'POST',
@@ -609,11 +609,11 @@ export const publish = async (id: number,
 
 
 
-export const getPublishMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publish>>, TError,{id: number;data: NoticePublishCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof publish>>, TError,{id: number;data: NoticePublishCommand}, TContext> => {
+export const getPostNoticeByIdPublishMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNoticeByIdPublish>>, TError,{id: number;data: NoticePublishCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postNoticeByIdPublish>>, TError,{id: number;data: NoticePublishCommand}, TContext> => {
 
-const mutationKey = ['publish'];
+const mutationKey = ['postNoticeByIdPublish'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -623,10 +623,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof publish>>, {id: number;data: NoticePublishCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postNoticeByIdPublish>>, {id: number;data: NoticePublishCommand}> = (props) => {
           const {id,data} = props ?? {};
 
-          return  publish(id,data,requestOptions)
+          return  postNoticeByIdPublish(id,data,requestOptions)
         }
 
         
@@ -634,23 +634,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type PublishMutationResult = NonNullable<Awaited<ReturnType<typeof publish>>>
-    export type PublishMutationBody = NoticePublishCommand
-    export type PublishMutationError = unknown
+    export type PostNoticeByIdPublishMutationResult = NonNullable<Awaited<ReturnType<typeof postNoticeByIdPublish>>>
+    export type PostNoticeByIdPublishMutationBody = NoticePublishCommand
+    export type PostNoticeByIdPublishMutationError = unknown
 
     /**
  * @summary 发布公告
  */
-export const usePublish = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof publish>>, TError,{id: number;data: NoticePublishCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostNoticeByIdPublish = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNoticeByIdPublish>>, TError,{id: number;data: NoticePublishCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof publish>>,
+        Awaited<ReturnType<typeof postNoticeByIdPublish>>,
         TError,
         {id: number;data: NoticePublishCommand},
         TContext
       > => {
 
-      const mutationOptions = getPublishMutationOptions(options);
+      const mutationOptions = getPostNoticeByIdPublishMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -660,7 +660,7 @@ export const usePublish = <TError = unknown,
 **权限:** `notice:notice:create`
  * @summary 复制公告
  */
-export const getDuplicateUrl = (id: number,) => {
+export const getPostNoticeByIdDuplicateUrl = (id: number,) => {
 
 
   
@@ -668,9 +668,9 @@ export const getDuplicateUrl = (id: number,) => {
   return `/api/v1/notices/${id}/duplicate`
 }
 
-export const duplicate = async (id: number, options?: RequestInit): Promise<NoticeDetailView> => {
+export const postNoticeByIdDuplicate = async (id: number, options?: RequestInit): Promise<NoticeDetailView> => {
   
-  return customInstance<NoticeDetailView>(getDuplicateUrl(id),
+  return customInstance<NoticeDetailView>(getPostNoticeByIdDuplicateUrl(id),
   {      
     ...options,
     method: 'POST'
@@ -682,11 +682,11 @@ export const duplicate = async (id: number, options?: RequestInit): Promise<Noti
 
 
 
-export const getDuplicateMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof duplicate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof duplicate>>, TError,{id: number}, TContext> => {
+export const getPostNoticeByIdDuplicateMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNoticeByIdDuplicate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postNoticeByIdDuplicate>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['duplicate'];
+const mutationKey = ['postNoticeByIdDuplicate'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -696,10 +696,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof duplicate>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postNoticeByIdDuplicate>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  duplicate(id,requestOptions)
+          return  postNoticeByIdDuplicate(id,requestOptions)
         }
 
         
@@ -707,23 +707,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type DuplicateMutationResult = NonNullable<Awaited<ReturnType<typeof duplicate>>>
+    export type PostNoticeByIdDuplicateMutationResult = NonNullable<Awaited<ReturnType<typeof postNoticeByIdDuplicate>>>
     
-    export type DuplicateMutationError = unknown
+    export type PostNoticeByIdDuplicateMutationError = unknown
 
     /**
  * @summary 复制公告
  */
-export const useDuplicate = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof duplicate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostNoticeByIdDuplicate = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNoticeByIdDuplicate>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof duplicate>>,
+        Awaited<ReturnType<typeof postNoticeByIdDuplicate>>,
         TError,
         {id: number},
         TContext
       > => {
 
-      const mutationOptions = getDuplicateMutationOptions(options);
+      const mutationOptions = getPostNoticeByIdDuplicateMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -733,7 +733,7 @@ export const useDuplicate = <TError = unknown,
 **权限:** `notice:notice:publish`
  * @summary 批量发布公告
  */
-export const getBatchPublishUrl = () => {
+export const getPostNoticeBatchPublishUrl = () => {
 
 
   
@@ -741,9 +741,9 @@ export const getBatchPublishUrl = () => {
   return `/api/v1/notices/batch-publish`
 }
 
-export const batchPublish = async (batchIdsCommand: BatchIdsCommand, options?: RequestInit): Promise<BatchResultView> => {
+export const postNoticeBatchPublish = async (batchIdsCommand: BatchIdsCommand, options?: RequestInit): Promise<BatchResultView> => {
   
-  return customInstance<BatchResultView>(getBatchPublishUrl(),
+  return customInstance<BatchResultView>(getPostNoticeBatchPublishUrl(),
   {      
     ...options,
     method: 'POST',
@@ -756,11 +756,11 @@ export const batchPublish = async (batchIdsCommand: BatchIdsCommand, options?: R
 
 
 
-export const getBatchPublishMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof batchPublish>>, TError,{data: BatchIdsCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof batchPublish>>, TError,{data: BatchIdsCommand}, TContext> => {
+export const getPostNoticeBatchPublishMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNoticeBatchPublish>>, TError,{data: BatchIdsCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postNoticeBatchPublish>>, TError,{data: BatchIdsCommand}, TContext> => {
 
-const mutationKey = ['batchPublish'];
+const mutationKey = ['postNoticeBatchPublish'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -770,10 +770,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof batchPublish>>, {data: BatchIdsCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postNoticeBatchPublish>>, {data: BatchIdsCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  batchPublish(data,requestOptions)
+          return  postNoticeBatchPublish(data,requestOptions)
         }
 
         
@@ -781,23 +781,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type BatchPublishMutationResult = NonNullable<Awaited<ReturnType<typeof batchPublish>>>
-    export type BatchPublishMutationBody = BatchIdsCommand
-    export type BatchPublishMutationError = unknown
+    export type PostNoticeBatchPublishMutationResult = NonNullable<Awaited<ReturnType<typeof postNoticeBatchPublish>>>
+    export type PostNoticeBatchPublishMutationBody = BatchIdsCommand
+    export type PostNoticeBatchPublishMutationError = unknown
 
     /**
  * @summary 批量发布公告
  */
-export const useBatchPublish = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof batchPublish>>, TError,{data: BatchIdsCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const usePostNoticeBatchPublish = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNoticeBatchPublish>>, TError,{data: BatchIdsCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof batchPublish>>,
+        Awaited<ReturnType<typeof postNoticeBatchPublish>>,
         TError,
         {data: BatchIdsCommand},
         TContext
       > => {
 
-      const mutationOptions = getBatchPublishMutationOptions(options);
+      const mutationOptions = getPostNoticeBatchPublishMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -807,8 +807,8 @@ export const useBatchPublish = <TError = unknown,
 **权限:** `notice:notice:detail`
  * @summary 查询公告接收人列表（分页）
  */
-export const getRecipientsUrl = (id: number,
-    params?: RecipientsParams,) => {
+export const getGetNoticeByIdRecipientUrl = (id: number,
+    params?: GetNoticeByIdRecipientParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -823,10 +823,10 @@ export const getRecipientsUrl = (id: number,
   return stringifiedParams.length > 0 ? `/api/v1/notices/${id}/recipients?${stringifiedParams}` : `/api/v1/notices/${id}/recipients`
 }
 
-export const recipients = async (id: number,
-    params?: RecipientsParams, options?: RequestInit): Promise<PageResultRecipientView> => {
+export const getNoticeByIdRecipient = async (id: number,
+    params?: GetNoticeByIdRecipientParams, options?: RequestInit): Promise<PageResultRecipientView> => {
   
-  return customInstance<PageResultRecipientView>(getRecipientsUrl(id,params),
+  return customInstance<PageResultRecipientView>(getGetNoticeByIdRecipientUrl(id,params),
   {      
     ...options,
     method: 'GET'
@@ -839,48 +839,48 @@ export const recipients = async (id: number,
 
 
 
-export const getRecipientsQueryKey = (id?: number,
-    params?: RecipientsParams,) => {
+export const getGetNoticeByIdRecipientQueryKey = (id?: number,
+    params?: GetNoticeByIdRecipientParams,) => {
     return [
     `/api/v1/notices/${id}/recipients`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getRecipientsQueryOptions = <TData = Awaited<ReturnType<typeof recipients>>, TError = unknown>(id: number,
-    params?: RecipientsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof recipients>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetNoticeByIdRecipientQueryOptions = <TData = Awaited<ReturnType<typeof getNoticeByIdRecipient>>, TError = unknown>(id: number,
+    params?: GetNoticeByIdRecipientParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNoticeByIdRecipient>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getRecipientsQueryKey(id,params);
+  const queryKey =  queryOptions?.queryKey ?? getGetNoticeByIdRecipientQueryKey(id,params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof recipients>>> = ({ signal }) => recipients(id,params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNoticeByIdRecipient>>> = ({ signal }) => getNoticeByIdRecipient(id,params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof recipients>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNoticeByIdRecipient>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type RecipientsQueryResult = NonNullable<Awaited<ReturnType<typeof recipients>>>
-export type RecipientsQueryError = unknown
+export type GetNoticeByIdRecipientQueryResult = NonNullable<Awaited<ReturnType<typeof getNoticeByIdRecipient>>>
+export type GetNoticeByIdRecipientQueryError = unknown
 
 
 /**
  * @summary 查询公告接收人列表（分页）
  */
 
-export function useRecipients<TData = Awaited<ReturnType<typeof recipients>>, TError = unknown>(
+export function useGetNoticeByIdRecipient<TData = Awaited<ReturnType<typeof getNoticeByIdRecipient>>, TError = unknown>(
  id: number,
-    params?: RecipientsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof recipients>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+    params?: GetNoticeByIdRecipientParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNoticeByIdRecipient>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getRecipientsQueryOptions(id,params,options)
+  const queryOptions = getGetNoticeByIdRecipientQueryOptions(id,params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -895,7 +895,7 @@ export function useRecipients<TData = Awaited<ReturnType<typeof recipients>>, TE
 /**
  * @summary 查询当前用户未读公告数量（登录用户均可调用）
  */
-export const getUnreadCountUrl = () => {
+export const getGetNoticeUnreadCountUrl = () => {
 
 
   
@@ -903,9 +903,9 @@ export const getUnreadCountUrl = () => {
   return `/api/v1/notices/unread-count`
 }
 
-export const unreadCount = async ( options?: RequestInit): Promise<UnreadCount200> => {
+export const getNoticeUnreadCount = async ( options?: RequestInit): Promise<GetNoticeUnreadCount200> => {
   
-  return customInstance<UnreadCount200>(getUnreadCountUrl(),
+  return customInstance<GetNoticeUnreadCount200>(getGetNoticeUnreadCountUrl(),
   {      
     ...options,
     method: 'GET'
@@ -918,45 +918,45 @@ export const unreadCount = async ( options?: RequestInit): Promise<UnreadCount20
 
 
 
-export const getUnreadCountQueryKey = () => {
+export const getGetNoticeUnreadCountQueryKey = () => {
     return [
     `/api/v1/notices/unread-count`
     ] as const;
     }
 
     
-export const getUnreadCountQueryOptions = <TData = Awaited<ReturnType<typeof unreadCount>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof unreadCount>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetNoticeUnreadCountQueryOptions = <TData = Awaited<ReturnType<typeof getNoticeUnreadCount>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNoticeUnreadCount>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getUnreadCountQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetNoticeUnreadCountQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof unreadCount>>> = ({ signal }) => unreadCount({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNoticeUnreadCount>>> = ({ signal }) => getNoticeUnreadCount({ signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof unreadCount>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNoticeUnreadCount>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type UnreadCountQueryResult = NonNullable<Awaited<ReturnType<typeof unreadCount>>>
-export type UnreadCountQueryError = unknown
+export type GetNoticeUnreadCountQueryResult = NonNullable<Awaited<ReturnType<typeof getNoticeUnreadCount>>>
+export type GetNoticeUnreadCountQueryError = unknown
 
 
 /**
  * @summary 查询当前用户未读公告数量（登录用户均可调用）
  */
 
-export function useUnreadCount<TData = Awaited<ReturnType<typeof unreadCount>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof unreadCount>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetNoticeUnreadCount<TData = Awaited<ReturnType<typeof getNoticeUnreadCount>>, TError = unknown>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNoticeUnreadCount>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getUnreadCountQueryOptions(options)
+  const queryOptions = getGetNoticeUnreadCountQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -974,7 +974,7 @@ export function useUnreadCount<TData = Awaited<ReturnType<typeof unreadCount>>, 
 **权限:** `notice:notice:export`
  * @summary 导出公告列表（Excel）
  */
-export const getExportUrl = (params?: _ExportParams,) => {
+export const getGetNoticeExportUrl = (params?: GetNoticeExportParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -989,9 +989,9 @@ export const getExportUrl = (params?: _ExportParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/notices/export?${stringifiedParams}` : `/api/v1/notices/export`
 }
 
-export const _export = async (params?: _ExportParams, options?: RequestInit): Promise<void> => {
+export const getNoticeExport = async (params?: GetNoticeExportParams, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getExportUrl(params),
+  return customInstance<void>(getGetNoticeExportUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -1004,45 +1004,45 @@ export const _export = async (params?: _ExportParams, options?: RequestInit): Pr
 
 
 
-export const getExportQueryKey = (params?: _ExportParams,) => {
+export const getGetNoticeExportQueryKey = (params?: GetNoticeExportParams,) => {
     return [
     `/api/v1/notices/export`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getExportQueryOptions = <TData = Awaited<ReturnType<typeof _export>>, TError = unknown>(params?: _ExportParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof _export>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetNoticeExportQueryOptions = <TData = Awaited<ReturnType<typeof getNoticeExport>>, TError = unknown>(params?: GetNoticeExportParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNoticeExport>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getExportQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetNoticeExportQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof _export>>> = ({ signal }) => _export(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNoticeExport>>> = ({ signal }) => getNoticeExport(params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof _export>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNoticeExport>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type _ExportQueryResult = NonNullable<Awaited<ReturnType<typeof _export>>>
-export type _ExportQueryError = unknown
+export type GetNoticeExportQueryResult = NonNullable<Awaited<ReturnType<typeof getNoticeExport>>>
+export type GetNoticeExportQueryError = unknown
 
 
 /**
  * @summary 导出公告列表（Excel）
  */
 
-export function useExport<TData = Awaited<ReturnType<typeof _export>>, TError = unknown>(
- params?: _ExportParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof _export>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetNoticeExport<TData = Awaited<ReturnType<typeof getNoticeExport>>, TError = unknown>(
+ params?: GetNoticeExportParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNoticeExport>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getExportQueryOptions(params,options)
+  const queryOptions = getGetNoticeExportQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -1060,7 +1060,7 @@ export function useExport<TData = Awaited<ReturnType<typeof _export>>, TError = 
 **权限:** `notice:notice:delete`
  * @summary 批量删除公告
  */
-export const getBatchDeleteUrl = () => {
+export const getDeleteNoticeBatchUrl = () => {
 
 
   
@@ -1068,9 +1068,9 @@ export const getBatchDeleteUrl = () => {
   return `/api/v1/notices/batch`
 }
 
-export const batchDelete = async (batchIdsCommand: BatchIdsCommand, options?: RequestInit): Promise<BatchResultView> => {
+export const deleteNoticeBatch = async (batchIdsCommand: BatchIdsCommand, options?: RequestInit): Promise<BatchResultView> => {
   
-  return customInstance<BatchResultView>(getBatchDeleteUrl(),
+  return customInstance<BatchResultView>(getDeleteNoticeBatchUrl(),
   {      
     ...options,
     method: 'DELETE',
@@ -1083,11 +1083,11 @@ export const batchDelete = async (batchIdsCommand: BatchIdsCommand, options?: Re
 
 
 
-export const getBatchDeleteMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof batchDelete>>, TError,{data: BatchIdsCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof batchDelete>>, TError,{data: BatchIdsCommand}, TContext> => {
+export const getDeleteNoticeBatchMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteNoticeBatch>>, TError,{data: BatchIdsCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteNoticeBatch>>, TError,{data: BatchIdsCommand}, TContext> => {
 
-const mutationKey = ['batchDelete'];
+const mutationKey = ['deleteNoticeBatch'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1097,10 +1097,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof batchDelete>>, {data: BatchIdsCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteNoticeBatch>>, {data: BatchIdsCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  batchDelete(data,requestOptions)
+          return  deleteNoticeBatch(data,requestOptions)
         }
 
         
@@ -1108,23 +1108,23 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type BatchDeleteMutationResult = NonNullable<Awaited<ReturnType<typeof batchDelete>>>
-    export type BatchDeleteMutationBody = BatchIdsCommand
-    export type BatchDeleteMutationError = unknown
+    export type DeleteNoticeBatchMutationResult = NonNullable<Awaited<ReturnType<typeof deleteNoticeBatch>>>
+    export type DeleteNoticeBatchMutationBody = BatchIdsCommand
+    export type DeleteNoticeBatchMutationError = unknown
 
     /**
  * @summary 批量删除公告
  */
-export const useBatchDelete = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof batchDelete>>, TError,{data: BatchIdsCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+export const useDeleteNoticeBatch = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteNoticeBatch>>, TError,{data: BatchIdsCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof batchDelete>>,
+        Awaited<ReturnType<typeof deleteNoticeBatch>>,
         TError,
         {data: BatchIdsCommand},
         TContext
       > => {
 
-      const mutationOptions = getBatchDeleteMutationOptions(options);
+      const mutationOptions = getDeleteNoticeBatchMutationOptions(options);
 
       return useMutation(mutationOptions);
     }

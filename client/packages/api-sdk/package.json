@@ -8,6 +8,9 @@
   "exports": {
     ".": "./src/index.ts",
     "./auth": "./src/apis/auth-api.ts",
+    "./file": "./src/apis/file-api.ts",
+    "./notice": "./src/apis/notice-api.ts",
+    "./wechat-binding": "./src/apis/wechat-binding-api.ts",
     "./types": "./src/types/index.ts",
     "./mutator/*": "./src/mutator/*",
     "./generated/*": "./src/generated/*"

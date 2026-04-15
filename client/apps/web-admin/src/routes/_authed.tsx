@@ -1,5 +1,4 @@
-import { authApi } from '@mb/api-sdk';
-import { customInstance } from '@mb/api-sdk/mutator/custom-instance';
+import { authApi, noticeApi } from '@mb/api-sdk';
 import { NotificationBadge, SidebarLayout, toCurrentUser, useSseConnection } from '@mb/app-shell';
 import { Outlet, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useCallback } from 'react';
@@ -33,9 +32,7 @@ function AuthedLayout() {
 
   // L5 注入未读计数查询函数给 L4 的 NotificationBadge
   const unreadQueryFn = useCallback(async () => {
-    const result = await customInstance<{ count: number }>('/api/v1/notices/unread-count', {
-      method: 'GET',
-    });
+    const result = await noticeApi.getUnreadCount();
     return result.count ?? 0;
   }, []);
 

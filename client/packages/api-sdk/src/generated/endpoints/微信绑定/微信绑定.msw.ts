@@ -19,71 +19,71 @@ import type {
 } from 'msw';
 
 import type {
-  GenerateMpOAuthState200,
+  GetWechatMpOauthState200,
   WeChatBindingView
 } from '../../models';
 
 
-export const getBindMpResponseMock = (overrideResponse: Partial< WeChatBindingView > = {}): WeChatBindingView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), platform: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), appId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), openId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatarUrl: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), boundAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getPostWechatBindMpResponseMock = (overrideResponse: Partial< WeChatBindingView > = {}): WeChatBindingView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), platform: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), appId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), openId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatarUrl: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), boundAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
-export const getBindMiniResponseMock = (overrideResponse: Partial< WeChatBindingView > = {}): WeChatBindingView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), platform: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), appId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), openId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatarUrl: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), boundAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getPostWechatBindMiniResponseMock = (overrideResponse: Partial< WeChatBindingView > = {}): WeChatBindingView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), platform: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), appId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), openId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatarUrl: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), boundAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
-export const getGenerateMpOAuthStateResponseMock = (): GenerateMpOAuthState200 => ({
+export const getGetWechatMpOauthStateResponseMock = (): GetWechatMpOauthState200 => ({
         [faker.string.alphanumeric(5)]: faker.string.alpha({length: {min: 10, max: 20}})
       })
 
-export const getMyBindingsResponseMock = (): WeChatBindingView[] => (Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), platform: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), appId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), openId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatarUrl: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), boundAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})))
+export const getGetWechatBindingResponseMock = (): WeChatBindingView[] => (Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), platform: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), appId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), openId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatarUrl: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), boundAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})))
 
 
-export const getBindMpMockHandler = (overrideResponse?: WeChatBindingView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<WeChatBindingView> | WeChatBindingView), options?: RequestHandlerOptions) => {
+export const getPostWechatBindMpMockHandler = (overrideResponse?: WeChatBindingView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<WeChatBindingView> | WeChatBindingView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/wechat/bind-mp', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getBindMpResponseMock()),
+    : getPostWechatBindMpResponseMock()),
       { status: 201,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getBindMiniMockHandler = (overrideResponse?: WeChatBindingView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<WeChatBindingView> | WeChatBindingView), options?: RequestHandlerOptions) => {
+export const getPostWechatBindMiniMockHandler = (overrideResponse?: WeChatBindingView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<WeChatBindingView> | WeChatBindingView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/wechat/bind-mini', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getBindMiniResponseMock()),
+    : getPostWechatBindMiniResponseMock()),
       { status: 201,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getGenerateMpOAuthStateMockHandler = (overrideResponse?: GenerateMpOAuthState200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<GenerateMpOAuthState200> | GenerateMpOAuthState200), options?: RequestHandlerOptions) => {
+export const getGetWechatMpOauthStateMockHandler = (overrideResponse?: GetWechatMpOauthState200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<GetWechatMpOauthState200> | GetWechatMpOauthState200), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/wechat/mp/oauth-state', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getGenerateMpOAuthStateResponseMock()),
+    : getGetWechatMpOauthStateResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getMyBindingsMockHandler = (overrideResponse?: WeChatBindingView[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<WeChatBindingView[]> | WeChatBindingView[]), options?: RequestHandlerOptions) => {
+export const getGetWechatBindingMockHandler = (overrideResponse?: WeChatBindingView[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<WeChatBindingView[]> | WeChatBindingView[]), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/wechat/bindings', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getMyBindingsResponseMock()),
+    : getGetWechatBindingResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getUnbindMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getDeleteWechatUnbindByPlatformMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.delete('*/api/v1/wechat/unbind/:platform', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -93,9 +93,9 @@ export const getUnbindMockHandler = (overrideResponse?: void | ((info: Parameter
   }, options)
 }
 export const getMock = () => [
-  getBindMpMockHandler(),
-  getBindMiniMockHandler(),
-  getGenerateMpOAuthStateMockHandler(),
-  getMyBindingsMockHandler(),
-  getUnbindMockHandler()
+  getPostWechatBindMpMockHandler(),
+  getPostWechatBindMiniMockHandler(),
+  getGetWechatMpOauthStateMockHandler(),
+  getGetWechatBindingMockHandler(),
+  getDeleteWechatUnbindByPlatformMockHandler()
 ]

@@ -23,20 +23,20 @@ import type {
 } from '../../models';
 
 
-export const getListLogsResponseMock = (overrideResponse: Partial< PageResultJobLogView > = {}): PageResultJobLogView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), jobName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), durationMs: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), errorMessage: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getGetJobLogResponseMock = (overrideResponse: Partial< PageResultJobLogView > = {}): PageResultJobLogView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), jobName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), durationMs: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), errorMessage: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
 
-export const getListLogsMockHandler = (overrideResponse?: PageResultJobLogView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultJobLogView> | PageResultJobLogView), options?: RequestHandlerOptions) => {
+export const getGetJobLogMockHandler = (overrideResponse?: PageResultJobLogView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultJobLogView> | PageResultJobLogView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/jobs/logs', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getListLogsResponseMock()),
+    : getGetJobLogResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 export const getJobControllerMock = () => [
-  getListLogsMockHandler()
+  getGetJobLogMockHandler()
 ]

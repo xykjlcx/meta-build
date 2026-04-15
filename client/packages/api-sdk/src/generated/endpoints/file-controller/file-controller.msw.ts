@@ -23,22 +23,22 @@ import type {
 } from '../../models';
 
 
-export const getUploadResponseMock = (overrideResponse: Partial< FileUploadView > = {}): FileUploadView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), originalName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), filePath: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), fileSize: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), contentType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sha256: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getPostFileResponseMock = (overrideResponse: Partial< FileUploadView > = {}): FileUploadView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), originalName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), filePath: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), fileSize: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), contentType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sha256: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
 
-export const getUploadMockHandler = (overrideResponse?: FileUploadView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<FileUploadView> | FileUploadView), options?: RequestHandlerOptions) => {
+export const getPostFileMockHandler = (overrideResponse?: FileUploadView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<FileUploadView> | FileUploadView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/files', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getUploadResponseMock()),
+    : getPostFileResponseMock()),
       { status: 201,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getDownloadMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getGetFileByIdDownloadMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/files/:id/download', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -48,7 +48,7 @@ export const getDownloadMockHandler = (overrideResponse?: void | ((info: Paramet
   }, options)
 }
 
-export const getDelete7MockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getDeleteFileByIdMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.delete('*/api/v1/files/:id', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -58,7 +58,7 @@ export const getDelete7MockHandler = (overrideResponse?: void | ((info: Paramete
   }, options)
 }
 export const getFileControllerMock = () => [
-  getUploadMockHandler(),
-  getDownloadMockHandler(),
-  getDelete7MockHandler()
+  getPostFileMockHandler(),
+  getGetFileByIdDownloadMockHandler(),
+  getDeleteFileByIdMockHandler()
 ]

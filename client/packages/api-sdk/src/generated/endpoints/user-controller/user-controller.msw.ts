@@ -24,40 +24,40 @@ import type {
 } from '../../models';
 
 
-export const getGetByIdResponseMock = (overrideResponse: Partial< UserView > = {}): UserView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), phone: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatar: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), mustChangePassword: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), passwordUpdatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getGetUserByIdResponseMock = (overrideResponse: Partial< UserView > = {}): UserView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), phone: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatar: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), mustChangePassword: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), passwordUpdatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
-export const getUpdateResponseMock = (overrideResponse: Partial< UserView > = {}): UserView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), phone: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatar: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), mustChangePassword: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), passwordUpdatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getPutUserByIdResponseMock = (overrideResponse: Partial< UserView > = {}): UserView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), phone: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatar: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), mustChangePassword: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), passwordUpdatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
-export const getList1ResponseMock = (overrideResponse: Partial< PageResultUserView > = {}): PageResultUserView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), phone: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatar: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), mustChangePassword: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), passwordUpdatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getGetUserResponseMock = (overrideResponse: Partial< PageResultUserView > = {}): PageResultUserView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), phone: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatar: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), mustChangePassword: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), passwordUpdatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
-export const getCreateResponseMock = (overrideResponse: Partial< UserView > = {}): UserView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), phone: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatar: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), mustChangePassword: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), passwordUpdatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getPostUserResponseMock = (overrideResponse: Partial< UserView > = {}): UserView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), email: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), phone: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), nickname: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), avatar: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), mustChangePassword: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), passwordUpdatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
 
-export const getGetByIdMockHandler = (overrideResponse?: UserView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<UserView> | UserView), options?: RequestHandlerOptions) => {
+export const getGetUserByIdMockHandler = (overrideResponse?: UserView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<UserView> | UserView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/users/:id', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getGetByIdResponseMock()),
+    : getGetUserByIdResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getUpdateMockHandler = (overrideResponse?: UserView | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<UserView> | UserView), options?: RequestHandlerOptions) => {
+export const getPutUserByIdMockHandler = (overrideResponse?: UserView | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<UserView> | UserView), options?: RequestHandlerOptions) => {
   return http.put('*/api/v1/users/:id', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getUpdateResponseMock()),
+    : getPutUserByIdResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getDeleteMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getDeleteUserByIdMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.delete('*/api/v1/users/:id', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -67,7 +67,7 @@ export const getDeleteMockHandler = (overrideResponse?: void | ((info: Parameter
   }, options)
 }
 
-export const getAssignRolesMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getPutUserByIdRoleMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.put('*/api/v1/users/:id/roles', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -77,7 +77,7 @@ export const getAssignRolesMockHandler = (overrideResponse?: void | ((info: Para
   }, options)
 }
 
-export const getChangeMyPasswordMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getPutUserMePasswordMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.put('*/api/v1/users/me/password', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -87,31 +87,31 @@ export const getChangeMyPasswordMockHandler = (overrideResponse?: void | ((info:
   }, options)
 }
 
-export const getList1MockHandler = (overrideResponse?: PageResultUserView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultUserView> | PageResultUserView), options?: RequestHandlerOptions) => {
+export const getGetUserMockHandler = (overrideResponse?: PageResultUserView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultUserView> | PageResultUserView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/users', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getList1ResponseMock()),
+    : getGetUserResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getCreateMockHandler = (overrideResponse?: UserView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UserView> | UserView), options?: RequestHandlerOptions) => {
+export const getPostUserMockHandler = (overrideResponse?: UserView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<UserView> | UserView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/users', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateResponseMock()),
+    : getPostUserResponseMock()),
       { status: 201,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getResetPasswordMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getPostUserByIdResetPasswordMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/users/:id/reset-password', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -121,12 +121,12 @@ export const getResetPasswordMockHandler = (overrideResponse?: void | ((info: Pa
   }, options)
 }
 export const getUserControllerMock = () => [
-  getGetByIdMockHandler(),
-  getUpdateMockHandler(),
-  getDeleteMockHandler(),
-  getAssignRolesMockHandler(),
-  getChangeMyPasswordMockHandler(),
-  getList1MockHandler(),
-  getCreateMockHandler(),
-  getResetPasswordMockHandler()
+  getGetUserByIdMockHandler(),
+  getPutUserByIdMockHandler(),
+  getDeleteUserByIdMockHandler(),
+  getPutUserByIdRoleMockHandler(),
+  getPutUserMePasswordMockHandler(),
+  getGetUserMockHandler(),
+  getPostUserMockHandler(),
+  getPostUserByIdResetPasswordMockHandler()
 ]

@@ -1,4 +1,4 @@
-import { customInstance } from '@mb/api-sdk/mutator/custom-instance';
+import { fileApi } from '@mb/api-sdk';
 import { Button } from '@mb/ui-primitives';
 import { Trash2, Upload } from 'lucide-react';
 import { type ChangeEvent, useCallback, useRef, useState } from 'react';
@@ -74,13 +74,11 @@ export function FileUploadField({ name, control }: FileUploadFieldProps) {
 
         try {
           // 上传到 platform-file API
-          const formData = new FormData();
-          formData.append('file', file);
-          const result = await customInstance<{ id: number; originalName: string }>(
-            '/api/v1/files/upload',
-            { method: 'POST', body: formData },
-          );
-          const uploaded = result;
+          const uploaded = await fileApi.upload(file);
+          if (!uploaded.id) {
+            toast.error(`${file.name}: ${t('upload.uploadFailed')}`);
+            continue;
+          }
           newFiles.push({ fileId: uploaded.id, fileName: uploaded.originalName ?? file.name });
           newFileIds.push(uploaded.id);
         } catch {

@@ -1,16 +1,16 @@
-import { triggerDownload } from '@mb/api-sdk';
 import {
-  getDetailQueryKey,
-  getList4QueryKey,
-  getUnreadCountQueryKey,
-  useDelete2,
-  useDetail,
-  useDuplicate,
-  useMarkRead,
-  usePublish,
-  useRevoke,
-} from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
-import type { NoticeDetailView, NoticeTarget } from '@mb/api-sdk/generated/models';
+  type NoticeDetailView,
+  type NoticeTarget,
+  fileApi,
+  noticeQueryKeys,
+  triggerDownload,
+  useDeleteNotice,
+  useDuplicateNotice,
+  useMarkNoticeRead,
+  useNoticeDetail,
+  usePublishNotice,
+  useRevokeNotice,
+} from '@mb/api-sdk';
 import { useCurrentUser } from '@mb/app-shell';
 import {
   AlertDialog,
@@ -53,15 +53,14 @@ export function NoticeDetailPage() {
   const noticeId = Number(id);
 
   // 查询详情
-  const { data: detailResponse, isLoading } = useDetail(noticeId, {
-    query: { queryKey: getDetailQueryKey(noticeId) },
+  const { data: detailResponse, isLoading } = useNoticeDetail(noticeId, {
+    query: { queryKey: noticeQueryKeys.detail(noticeId) },
   });
 
-  // orval 响应结构：{ data: NoticeDetailView, status, headers }
   const notice: NoticeDetailView | undefined = detailResponse;
 
   // 标记已读 — 使用 ref 避免 exhaustive-deps 重复触发
-  const markReadMutation = useMarkRead();
+  const markReadMutation = useMarkNoticeRead();
   const markedRef = useRef(false);
   // biome-ignore lint/correctness/useExhaustiveDependencies: 当 noticeId 变化时重置标记
   useEffect(() => {
@@ -74,9 +73,9 @@ export function NoticeDetailPage() {
         { id: noticeId },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: getUnreadCountQueryKey() });
-            queryClient.invalidateQueries({ queryKey: getDetailQueryKey(noticeId) });
-            queryClient.invalidateQueries({ queryKey: getList4QueryKey() });
+            queryClient.invalidateQueries({ queryKey: noticeQueryKeys.unreadCount() });
+            queryClient.invalidateQueries({ queryKey: noticeQueryKeys.detail(noticeId) });
+            queryClient.invalidateQueries({ queryKey: noticeQueryKeys.list() });
           },
         },
       );
@@ -84,19 +83,19 @@ export function NoticeDetailPage() {
   }, [noticeId, notice, markReadMutation, queryClient]);
 
   // Mutations
-  const deleteMutation = useDelete2();
-  const publishMutation = usePublish();
-  const revokeMutation = useRevoke();
-  const duplicateMutation = useDuplicate();
+  const deleteMutation = useDeleteNotice();
+  const publishMutation = usePublishNotice();
+  const revokeMutation = useRevokeNotice();
+  const duplicateMutation = useDuplicateNotice();
 
   // 确认框
   const [confirmAction, setConfirmAction] = useState<'delete' | 'revoke' | null>(null);
   const [targetSelectorOpen, setTargetSelectorOpen] = useState(false);
 
   const invalidateAll = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: getList4QueryKey() });
-    queryClient.invalidateQueries({ queryKey: getUnreadCountQueryKey() });
-    queryClient.invalidateQueries({ queryKey: getDetailQueryKey(noticeId) });
+    queryClient.invalidateQueries({ queryKey: noticeQueryKeys.list() });
+    queryClient.invalidateQueries({ queryKey: noticeQueryKeys.unreadCount() });
+    queryClient.invalidateQueries({ queryKey: noticeQueryKeys.detail(noticeId) });
   }, [queryClient, noticeId]);
 
   // 操作处理
@@ -153,8 +152,7 @@ export function NoticeDetailPage() {
   const handleDownloadAttachment = useCallback(
     async (fileId: number, fileName: string) => {
       try {
-        const response = await fetch(`/api/v1/files/${fileId}/download`);
-        const blob = await response.blob();
+        const blob = await fileApi.download(fileId);
         triggerDownload(blob, fileName);
       } catch {
         toast.error(t('upload.downloadFailed'));

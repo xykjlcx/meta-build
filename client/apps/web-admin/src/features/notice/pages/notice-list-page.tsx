@@ -1,18 +1,15 @@
-import { triggerDownload } from '@mb/api-sdk';
 import {
-  getExportUrl,
-  getList4QueryKey,
-  getUnreadCountQueryKey,
-  useBatchDelete,
-  useBatchPublish,
-  useDelete2,
-  useDuplicate,
-  useList4,
-  usePublish,
-  useRevoke,
-} from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
-import type { NoticeView } from '@mb/api-sdk/generated/models';
-import { customInstance } from '@mb/api-sdk/mutator/custom-instance';
+  type NoticeView,
+  noticeApi,
+  noticeQueryKeys,
+  useBatchDeleteNotices,
+  useBatchPublishNotices,
+  useDeleteNotice,
+  useDuplicateNotice,
+  useNoticeList,
+  usePublishNotice,
+  useRevokeNotice,
+} from '@mb/api-sdk';
 import { useCurrentUser } from '@mb/app-shell';
 import { NxBar, NxTable } from '@mb/ui-patterns';
 import {
@@ -116,7 +113,7 @@ export function NoticeListPage() {
   } | null>(null);
 
   // ─── 数据查询 ───────────────────────────────────────
-  const { data, isLoading } = useList4({
+  const { data, isLoading } = useNoticeList({
     status: statusFilter !== 'ALL' ? Number(statusFilter) : undefined,
     keyword: debouncedKeyword || undefined,
     page: pagination.page,
@@ -129,17 +126,17 @@ export function NoticeListPage() {
   const totalPages = data?.totalPages ?? 0;
 
   // ─── Mutations ──────────────────────────────────────
-  const deleteMutation = useDelete2();
-  const publishMutation = usePublish();
-  const revokeMutation = useRevoke();
-  const duplicateMutation = useDuplicate();
-  const batchPublishMutation = useBatchPublish();
-  const batchDeleteMutation = useBatchDelete();
+  const deleteMutation = useDeleteNotice();
+  const publishMutation = usePublishNotice();
+  const revokeMutation = useRevokeNotice();
+  const duplicateMutation = useDuplicateNotice();
+  const batchPublishMutation = useBatchPublishNotices();
+  const batchDeleteMutation = useBatchDeleteNotices();
 
   // 刷新列表和未读计数
   const invalidateNotices = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: getList4QueryKey() });
-    queryClient.invalidateQueries({ queryKey: getUnreadCountQueryKey() });
+    queryClient.invalidateQueries({ queryKey: noticeQueryKeys.list() });
+    queryClient.invalidateQueries({ queryKey: noticeQueryKeys.unreadCount() });
   }, [queryClient]);
 
   // ─── 单条操作 ───────────────────────────────────────
@@ -228,12 +225,7 @@ export function NoticeListPage() {
       status: statusFilter !== 'ALL' ? Number(statusFilter) : undefined,
       keyword: debouncedKeyword || undefined,
     };
-    void customInstance<Blob>(getExportUrl(exportParams), {
-      method: 'GET',
-      responseType: 'blob',
-    }).then((blob) => {
-      triggerDownload(blob, 'notices.xlsx');
-    });
+    void noticeApi.downloadExport(exportParams);
   }, [statusFilter, debouncedKeyword]);
 
   // ─── 新增/编辑 ─────────────────────────────────────

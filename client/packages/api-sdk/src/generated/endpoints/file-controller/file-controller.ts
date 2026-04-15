@@ -21,7 +21,7 @@ import type {
 
 import type {
   FileUploadView,
-  UploadBody
+  PostFileBody
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -36,7 +36,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `file:file:upload`
  */
-export const getUploadUrl = () => {
+export const getPostFileUrl = () => {
 
 
   
@@ -44,11 +44,11 @@ export const getUploadUrl = () => {
   return `/api/v1/files`
 }
 
-export const upload = async (uploadBody: UploadBody, options?: RequestInit): Promise<FileUploadView> => {
+export const postFile = async (postFileBody: PostFileBody, options?: RequestInit): Promise<FileUploadView> => {
     const formData = new FormData();
-formData.append(`file`, uploadBody.file)
+formData.append(`file`, postFileBody.file)
 
-  return customInstance<FileUploadView>(getUploadUrl(),
+  return customInstance<FileUploadView>(getPostFileUrl(),
   {      
     ...options,
     method: 'POST'
@@ -61,11 +61,11 @@ formData.append(`file`, uploadBody.file)
 
 
 
-export const getUploadMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upload>>, TError,{data: UploadBody}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof upload>>, TError,{data: UploadBody}, TContext> => {
+export const getPostFileMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postFile>>, TError,{data: PostFileBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postFile>>, TError,{data: PostFileBody}, TContext> => {
 
-const mutationKey = ['upload'];
+const mutationKey = ['postFile'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -75,10 +75,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof upload>>, {data: UploadBody}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postFile>>, {data: PostFileBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  upload(data,requestOptions)
+          return  postFile(data,requestOptions)
         }
 
         
@@ -86,20 +86,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UploadMutationResult = NonNullable<Awaited<ReturnType<typeof upload>>>
-    export type UploadMutationBody = UploadBody
-    export type UploadMutationError = unknown
+    export type PostFileMutationResult = NonNullable<Awaited<ReturnType<typeof postFile>>>
+    export type PostFileMutationBody = PostFileBody
+    export type PostFileMutationError = unknown
 
-    export const useUpload = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof upload>>, TError,{data: UploadBody}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const usePostFile = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postFile>>, TError,{data: PostFileBody}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof upload>>,
+        Awaited<ReturnType<typeof postFile>>,
         TError,
-        {data: UploadBody},
+        {data: PostFileBody},
         TContext
       > => {
 
-      const mutationOptions = getUploadMutationOptions(options);
+      const mutationOptions = getPostFileMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -108,7 +108,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `file:file:download`
  */
-export const getDownloadUrl = (id: number,) => {
+export const getGetFileByIdDownloadUrl = (id: number,) => {
 
 
   
@@ -116,9 +116,9 @@ export const getDownloadUrl = (id: number,) => {
   return `/api/v1/files/${id}/download`
 }
 
-export const download = async (id: number, options?: RequestInit): Promise<void> => {
+export const getFileByIdDownload = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getDownloadUrl(id),
+  return customInstance<void>(getGetFileByIdDownloadUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -131,42 +131,42 @@ export const download = async (id: number, options?: RequestInit): Promise<void>
 
 
 
-export const getDownloadQueryKey = (id?: number,) => {
+export const getGetFileByIdDownloadQueryKey = (id?: number,) => {
     return [
     `/api/v1/files/${id}/download`
     ] as const;
     }
 
     
-export const getDownloadQueryOptions = <TData = Awaited<ReturnType<typeof download>>, TError = unknown>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof download>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetFileByIdDownloadQueryOptions = <TData = Awaited<ReturnType<typeof getFileByIdDownload>>, TError = unknown>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFileByIdDownload>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getDownloadQueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetFileByIdDownloadQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof download>>> = ({ signal }) => download(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFileByIdDownload>>> = ({ signal }) => getFileByIdDownload(id, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof download>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFileByIdDownload>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type DownloadQueryResult = NonNullable<Awaited<ReturnType<typeof download>>>
-export type DownloadQueryError = unknown
+export type GetFileByIdDownloadQueryResult = NonNullable<Awaited<ReturnType<typeof getFileByIdDownload>>>
+export type GetFileByIdDownloadQueryError = unknown
 
 
 
-export function useDownload<TData = Awaited<ReturnType<typeof download>>, TError = unknown>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof download>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetFileByIdDownload<TData = Awaited<ReturnType<typeof getFileByIdDownload>>, TError = unknown>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getFileByIdDownload>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getDownloadQueryOptions(id,options)
+  const queryOptions = getGetFileByIdDownloadQueryOptions(id,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -183,7 +183,7 @@ export function useDownload<TData = Awaited<ReturnType<typeof download>>, TError
 
 **权限:** `file:file:delete`
  */
-export const getDelete7Url = (id: number,) => {
+export const getDeleteFileByIdUrl = (id: number,) => {
 
 
   
@@ -191,9 +191,9 @@ export const getDelete7Url = (id: number,) => {
   return `/api/v1/files/${id}`
 }
 
-export const delete7 = async (id: number, options?: RequestInit): Promise<void> => {
+export const deleteFileById = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getDelete7Url(id),
+  return customInstance<void>(getDeleteFileByIdUrl(id),
   {      
     ...options,
     method: 'DELETE'
@@ -205,11 +205,11 @@ export const delete7 = async (id: number, options?: RequestInit): Promise<void> 
 
 
 
-export const getDelete7MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete7>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof delete7>>, TError,{id: number}, TContext> => {
+export const getDeleteFileByIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFileById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteFileById>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['delete7'];
+const mutationKey = ['deleteFileById'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -219,10 +219,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof delete7>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteFileById>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  delete7(id,requestOptions)
+          return  deleteFileById(id,requestOptions)
         }
 
         
@@ -230,20 +230,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Delete7MutationResult = NonNullable<Awaited<ReturnType<typeof delete7>>>
+    export type DeleteFileByIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteFileById>>>
     
-    export type Delete7MutationError = unknown
+    export type DeleteFileByIdMutationError = unknown
 
-    export const useDelete7 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete7>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useDeleteFileById = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFileById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof delete7>>,
+        Awaited<ReturnType<typeof deleteFileById>>,
         TError,
         {id: number},
         TContext
       > => {
 
-      const mutationOptions = getDelete7MutationOptions(options);
+      const mutationOptions = getDeleteFileByIdMutationOptions(options);
 
       return useMutation(mutationOptions);
     }

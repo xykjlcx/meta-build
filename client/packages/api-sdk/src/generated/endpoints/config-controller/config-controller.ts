@@ -22,7 +22,7 @@ import type {
 import type {
   ConfigSetCommand,
   ConfigView,
-  ListParams,
+  GetConfigParams,
   PageResultConfigView
 } from '../../models';
 
@@ -38,7 +38,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `config:config:list`
  */
-export const getListUrl = (params: ListParams,) => {
+export const getGetConfigUrl = (params: GetConfigParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -53,9 +53,9 @@ export const getListUrl = (params: ListParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/configs?${stringifiedParams}` : `/api/v1/configs`
 }
 
-export const list = async (params: ListParams, options?: RequestInit): Promise<PageResultConfigView> => {
+export const getConfig = async (params: GetConfigParams, options?: RequestInit): Promise<PageResultConfigView> => {
   
-  return customInstance<PageResultConfigView>(getListUrl(params),
+  return customInstance<PageResultConfigView>(getGetConfigUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -68,42 +68,42 @@ export const list = async (params: ListParams, options?: RequestInit): Promise<P
 
 
 
-export const getListQueryKey = (params?: ListParams,) => {
+export const getGetConfigQueryKey = (params?: GetConfigParams,) => {
     return [
     `/api/v1/configs`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getListQueryOptions = <TData = Awaited<ReturnType<typeof list>>, TError = unknown>(params: ListParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetConfigQueryOptions = <TData = Awaited<ReturnType<typeof getConfig>>, TError = unknown>(params: GetConfigParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetConfigQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof list>>> = ({ signal }) => list(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getConfig>>> = ({ signal }) => getConfig(params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type ListQueryResult = NonNullable<Awaited<ReturnType<typeof list>>>
-export type ListQueryError = unknown
+export type GetConfigQueryResult = NonNullable<Awaited<ReturnType<typeof getConfig>>>
+export type GetConfigQueryError = unknown
 
 
 
-export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unknown>(
- params: ListParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof list>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetConfig<TData = Awaited<ReturnType<typeof getConfig>>, TError = unknown>(
+ params: GetConfigParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConfig>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListQueryOptions(params,options)
+  const queryOptions = getGetConfigQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -120,7 +120,7 @@ export function useList<TData = Awaited<ReturnType<typeof list>>, TError = unkno
 
 **权限:** `config:config:set`
  */
-export const getSetUrl = () => {
+export const getPutConfigUrl = () => {
 
 
   
@@ -128,9 +128,9 @@ export const getSetUrl = () => {
   return `/api/v1/configs`
 }
 
-export const set = async (configSetCommand: ConfigSetCommand, options?: RequestInit): Promise<void> => {
+export const putConfig = async (configSetCommand: ConfigSetCommand, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getSetUrl(),
+  return customInstance<void>(getPutConfigUrl(),
   {      
     ...options,
     method: 'PUT',
@@ -143,11 +143,11 @@ export const set = async (configSetCommand: ConfigSetCommand, options?: RequestI
 
 
 
-export const getSetMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof set>>, TError,{data: ConfigSetCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof set>>, TError,{data: ConfigSetCommand}, TContext> => {
+export const getPutConfigMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putConfig>>, TError,{data: ConfigSetCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putConfig>>, TError,{data: ConfigSetCommand}, TContext> => {
 
-const mutationKey = ['set'];
+const mutationKey = ['putConfig'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -157,10 +157,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof set>>, {data: ConfigSetCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putConfig>>, {data: ConfigSetCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  set(data,requestOptions)
+          return  putConfig(data,requestOptions)
         }
 
         
@@ -168,20 +168,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type SetMutationResult = NonNullable<Awaited<ReturnType<typeof set>>>
-    export type SetMutationBody = ConfigSetCommand
-    export type SetMutationError = unknown
+    export type PutConfigMutationResult = NonNullable<Awaited<ReturnType<typeof putConfig>>>
+    export type PutConfigMutationBody = ConfigSetCommand
+    export type PutConfigMutationError = unknown
 
-    export const useSet = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof set>>, TError,{data: ConfigSetCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const usePutConfig = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putConfig>>, TError,{data: ConfigSetCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof set>>,
+        Awaited<ReturnType<typeof putConfig>>,
         TError,
         {data: ConfigSetCommand},
         TContext
       > => {
 
-      const mutationOptions = getSetMutationOptions(options);
+      const mutationOptions = getPutConfigMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -190,7 +190,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `config:config:detail`
  */
-export const getGetByKeyUrl = (key: string,) => {
+export const getGetConfigByKeyUrl = (key: string,) => {
 
 
   
@@ -198,9 +198,9 @@ export const getGetByKeyUrl = (key: string,) => {
   return `/api/v1/configs/${key}`
 }
 
-export const getByKey = async (key: string, options?: RequestInit): Promise<ConfigView> => {
+export const getConfigByKey = async (key: string, options?: RequestInit): Promise<ConfigView> => {
   
-  return customInstance<ConfigView>(getGetByKeyUrl(key),
+  return customInstance<ConfigView>(getGetConfigByKeyUrl(key),
   {      
     ...options,
     method: 'GET'
@@ -213,42 +213,42 @@ export const getByKey = async (key: string, options?: RequestInit): Promise<Conf
 
 
 
-export const getGetByKeyQueryKey = (key?: string,) => {
+export const getGetConfigByKeyQueryKey = (key?: string,) => {
     return [
     `/api/v1/configs/${key}`
     ] as const;
     }
 
     
-export const getGetByKeyQueryOptions = <TData = Awaited<ReturnType<typeof getByKey>>, TError = unknown>(key: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getByKey>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetConfigByKeyQueryOptions = <TData = Awaited<ReturnType<typeof getConfigByKey>>, TError = unknown>(key: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConfigByKey>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetByKeyQueryKey(key);
+  const queryKey =  queryOptions?.queryKey ?? getGetConfigByKeyQueryKey(key);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getByKey>>> = ({ signal }) => getByKey(key, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getConfigByKey>>> = ({ signal }) => getConfigByKey(key, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(key), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getByKey>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(key), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getConfigByKey>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetByKeyQueryResult = NonNullable<Awaited<ReturnType<typeof getByKey>>>
-export type GetByKeyQueryError = unknown
+export type GetConfigByKeyQueryResult = NonNullable<Awaited<ReturnType<typeof getConfigByKey>>>
+export type GetConfigByKeyQueryError = unknown
 
 
 
-export function useGetByKey<TData = Awaited<ReturnType<typeof getByKey>>, TError = unknown>(
- key: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getByKey>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetConfigByKey<TData = Awaited<ReturnType<typeof getConfigByKey>>, TError = unknown>(
+ key: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getConfigByKey>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetByKeyQueryOptions(key,options)
+  const queryOptions = getGetConfigByKeyQueryOptions(key,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -265,7 +265,7 @@ export function useGetByKey<TData = Awaited<ReturnType<typeof getByKey>>, TError
 
 **权限:** `config:config:delete`
  */
-export const getDelete5Url = (key: string,) => {
+export const getDeleteConfigByKeyUrl = (key: string,) => {
 
 
   
@@ -273,9 +273,9 @@ export const getDelete5Url = (key: string,) => {
   return `/api/v1/configs/${key}`
 }
 
-export const delete5 = async (key: string, options?: RequestInit): Promise<void> => {
+export const deleteConfigByKey = async (key: string, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getDelete5Url(key),
+  return customInstance<void>(getDeleteConfigByKeyUrl(key),
   {      
     ...options,
     method: 'DELETE'
@@ -287,11 +287,11 @@ export const delete5 = async (key: string, options?: RequestInit): Promise<void>
 
 
 
-export const getDelete5MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete5>>, TError,{key: string}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof delete5>>, TError,{key: string}, TContext> => {
+export const getDeleteConfigByKeyMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteConfigByKey>>, TError,{key: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteConfigByKey>>, TError,{key: string}, TContext> => {
 
-const mutationKey = ['delete5'];
+const mutationKey = ['deleteConfigByKey'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -301,10 +301,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof delete5>>, {key: string}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteConfigByKey>>, {key: string}> = (props) => {
           const {key} = props ?? {};
 
-          return  delete5(key,requestOptions)
+          return  deleteConfigByKey(key,requestOptions)
         }
 
         
@@ -312,20 +312,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Delete5MutationResult = NonNullable<Awaited<ReturnType<typeof delete5>>>
+    export type DeleteConfigByKeyMutationResult = NonNullable<Awaited<ReturnType<typeof deleteConfigByKey>>>
     
-    export type Delete5MutationError = unknown
+    export type DeleteConfigByKeyMutationError = unknown
 
-    export const useDelete5 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete5>>, TError,{key: string}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useDeleteConfigByKey = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteConfigByKey>>, TError,{key: string}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof delete5>>,
+        Awaited<ReturnType<typeof deleteConfigByKey>>,
         TError,
         {key: string},
         TContext
       > => {
 
-      const mutationOptions = getDelete5MutationOptions(options);
+      const mutationOptions = getDeleteConfigByKeyMutationOptions(options);
 
       return useMutation(mutationOptions);
     }

@@ -1,8 +1,4 @@
-import {
-  getRecipientsQueryKey,
-  useRecipients,
-} from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
-import type { RecipientView } from '@mb/api-sdk/generated/models';
+import { type RecipientView, noticeQueryKeys, useNoticeRecipients } from '@mb/api-sdk';
 import { NxTable } from '@mb/ui-patterns';
 import type { NxTablePagination } from '@mb/ui-patterns';
 import { Badge } from '@mb/ui-primitives';
@@ -24,11 +20,9 @@ export function RecipientsTab({ noticeId }: RecipientsTabProps) {
   });
 
   const recipientsParams = { page: pagination.page, size: pagination.size };
-  const { data, isLoading } = useRecipients(noticeId, recipientsParams, {
-    query: { queryKey: getRecipientsQueryKey(noticeId, recipientsParams) },
+  const { data, isLoading } = useNoticeRecipients(noticeId, recipientsParams, {
+    query: { queryKey: noticeQueryKeys.recipients(noticeId, recipientsParams) },
   });
-
-  // orval 响应结构：{ data: PageResultRecipientView, status, headers }
   const pageResult = data;
   const recipients: RecipientView[] = pageResult?.content ?? [];
   const totalElements = pageResult?.totalElements ?? 0;

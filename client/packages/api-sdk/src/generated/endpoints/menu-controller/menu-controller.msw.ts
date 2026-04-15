@@ -24,52 +24,52 @@ import type {
 } from '../../models';
 
 
-export const getTreeResponseMock = (): MenuView[] => (Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([[], undefined])})))
+export const getGetMenuResponseMock = (): MenuView[] => (Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([[], undefined])})))
 
-export const getCreate4ResponseMock = (overrideResponse: Partial< MenuView > = {}): MenuView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([[], undefined])})), undefined]), ...overrideResponse})
+export const getPostMenuResponseMock = (overrideResponse: Partial< MenuView > = {}): MenuView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([[], undefined])})), undefined]), ...overrideResponse})
 
-export const getGetById2ResponseMock = (overrideResponse: Partial< MenuView > = {}): MenuView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([[], undefined])})), undefined]), ...overrideResponse})
+export const getGetMenuByIdResponseMock = (overrideResponse: Partial< MenuView > = {}): MenuView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([[], undefined])})), undefined]), ...overrideResponse})
 
-export const getCurrentUserMenuResponseMock = (overrideResponse: Partial< CurrentUserMenuView > = {}): CurrentUserMenuView => ({tree: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([[], undefined])})), undefined]), permissions: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined]), ...overrideResponse})
+export const getGetMenuCurrentUserResponseMock = (overrideResponse: Partial< CurrentUserMenuView > = {}): CurrentUserMenuView => ({tree: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), permissionCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), menuType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), icon: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), visible: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), children: faker.helpers.arrayElement([[], undefined])})), undefined]), permissions: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined]), ...overrideResponse})
 
 
-export const getTreeMockHandler = (overrideResponse?: MenuView[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MenuView[]> | MenuView[]), options?: RequestHandlerOptions) => {
+export const getGetMenuMockHandler = (overrideResponse?: MenuView[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MenuView[]> | MenuView[]), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/menus', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getTreeResponseMock()),
+    : getGetMenuResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getCreate4MockHandler = (overrideResponse?: MenuView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<MenuView> | MenuView), options?: RequestHandlerOptions) => {
+export const getPostMenuMockHandler = (overrideResponse?: MenuView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<MenuView> | MenuView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/menus', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreate4ResponseMock()),
+    : getPostMenuResponseMock()),
       { status: 201,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getGetById2MockHandler = (overrideResponse?: MenuView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MenuView> | MenuView), options?: RequestHandlerOptions) => {
+export const getGetMenuByIdMockHandler = (overrideResponse?: MenuView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MenuView> | MenuView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/menus/:id', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getGetById2ResponseMock()),
+    : getGetMenuByIdResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getDelete3MockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getDeleteMenuByIdMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.delete('*/api/v1/menus/:id', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -79,21 +79,21 @@ export const getDelete3MockHandler = (overrideResponse?: void | ((info: Paramete
   }, options)
 }
 
-export const getCurrentUserMenuMockHandler = (overrideResponse?: CurrentUserMenuView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CurrentUserMenuView> | CurrentUserMenuView), options?: RequestHandlerOptions) => {
+export const getGetMenuCurrentUserMockHandler = (overrideResponse?: CurrentUserMenuView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CurrentUserMenuView> | CurrentUserMenuView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/menus/current-user', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCurrentUserMenuResponseMock()),
+    : getGetMenuCurrentUserResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 export const getMenuControllerMock = () => [
-  getTreeMockHandler(),
-  getCreate4MockHandler(),
-  getGetById2MockHandler(),
-  getDelete3MockHandler(),
-  getCurrentUserMenuMockHandler()
+  getGetMenuMockHandler(),
+  getPostMenuMockHandler(),
+  getGetMenuByIdMockHandler(),
+  getDeleteMenuByIdMockHandler(),
+  getGetMenuCurrentUserMockHandler()
 ]

@@ -24,24 +24,24 @@ import type {
 } from '../../models';
 
 
-export const getListResponseMock = (overrideResponse: Partial< PageResultConfigView > = {}): PageResultConfigView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), configKey: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), configValue: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), configType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getGetConfigResponseMock = (overrideResponse: Partial< PageResultConfigView > = {}): PageResultConfigView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), configKey: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), configValue: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), configType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
-export const getGetByKeyResponseMock = (overrideResponse: Partial< ConfigView > = {}): ConfigView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), configKey: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), configValue: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), configType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getGetConfigByKeyResponseMock = (overrideResponse: Partial< ConfigView > = {}): ConfigView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), configKey: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), configValue: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), configType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
 
-export const getListMockHandler = (overrideResponse?: PageResultConfigView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultConfigView> | PageResultConfigView), options?: RequestHandlerOptions) => {
+export const getGetConfigMockHandler = (overrideResponse?: PageResultConfigView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultConfigView> | PageResultConfigView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/configs', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getListResponseMock()),
+    : getGetConfigResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getSetMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getPutConfigMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.put('*/api/v1/configs', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -51,19 +51,19 @@ export const getSetMockHandler = (overrideResponse?: void | ((info: Parameters<P
   }, options)
 }
 
-export const getGetByKeyMockHandler = (overrideResponse?: ConfigView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ConfigView> | ConfigView), options?: RequestHandlerOptions) => {
+export const getGetConfigByKeyMockHandler = (overrideResponse?: ConfigView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<ConfigView> | ConfigView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/configs/:key', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getGetByKeyResponseMock()),
+    : getGetConfigByKeyResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getDelete5MockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getDeleteConfigByKeyMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.delete('*/api/v1/configs/:key', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -73,8 +73,8 @@ export const getDelete5MockHandler = (overrideResponse?: void | ((info: Paramete
   }, options)
 }
 export const getConfigControllerMock = () => [
-  getListMockHandler(),
-  getSetMockHandler(),
-  getGetByKeyMockHandler(),
-  getDelete5MockHandler()
+  getGetConfigMockHandler(),
+  getPutConfigMockHandler(),
+  getGetConfigByKeyMockHandler(),
+  getDeleteConfigByKeyMockHandler()
 ]

@@ -37,7 +37,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `iam:menu:list`
  */
-export const getTreeUrl = () => {
+export const getGetMenuUrl = () => {
 
 
   
@@ -45,9 +45,9 @@ export const getTreeUrl = () => {
   return `/api/v1/menus`
 }
 
-export const tree = async ( options?: RequestInit): Promise<MenuView[]> => {
+export const getMenu = async ( options?: RequestInit): Promise<MenuView[]> => {
   
-  return customInstance<MenuView[]>(getTreeUrl(),
+  return customInstance<MenuView[]>(getGetMenuUrl(),
   {      
     ...options,
     method: 'GET'
@@ -60,42 +60,42 @@ export const tree = async ( options?: RequestInit): Promise<MenuView[]> => {
 
 
 
-export const getTreeQueryKey = () => {
+export const getGetMenuQueryKey = () => {
     return [
     `/api/v1/menus`
     ] as const;
     }
 
     
-export const getTreeQueryOptions = <TData = Awaited<ReturnType<typeof tree>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof tree>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetMenuQueryOptions = <TData = Awaited<ReturnType<typeof getMenu>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMenu>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getTreeQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetMenuQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof tree>>> = ({ signal }) => tree({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMenu>>> = ({ signal }) => getMenu({ signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof tree>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMenu>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type TreeQueryResult = NonNullable<Awaited<ReturnType<typeof tree>>>
-export type TreeQueryError = unknown
+export type GetMenuQueryResult = NonNullable<Awaited<ReturnType<typeof getMenu>>>
+export type GetMenuQueryError = unknown
 
 
 
-export function useTree<TData = Awaited<ReturnType<typeof tree>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof tree>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetMenu<TData = Awaited<ReturnType<typeof getMenu>>, TError = unknown>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMenu>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getTreeQueryOptions(options)
+  const queryOptions = getGetMenuQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -112,7 +112,7 @@ export function useTree<TData = Awaited<ReturnType<typeof tree>>, TError = unkno
 
 **权限:** `iam:menu:create`
  */
-export const getCreate4Url = () => {
+export const getPostMenuUrl = () => {
 
 
   
@@ -120,9 +120,9 @@ export const getCreate4Url = () => {
   return `/api/v1/menus`
 }
 
-export const create4 = async (menuCreateCommand: MenuCreateCommand, options?: RequestInit): Promise<MenuView> => {
+export const postMenu = async (menuCreateCommand: MenuCreateCommand, options?: RequestInit): Promise<MenuView> => {
   
-  return customInstance<MenuView>(getCreate4Url(),
+  return customInstance<MenuView>(getPostMenuUrl(),
   {      
     ...options,
     method: 'POST',
@@ -135,11 +135,11 @@ export const create4 = async (menuCreateCommand: MenuCreateCommand, options?: Re
 
 
 
-export const getCreate4MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create4>>, TError,{data: MenuCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof create4>>, TError,{data: MenuCreateCommand}, TContext> => {
+export const getPostMenuMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postMenu>>, TError,{data: MenuCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postMenu>>, TError,{data: MenuCreateCommand}, TContext> => {
 
-const mutationKey = ['create4'];
+const mutationKey = ['postMenu'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -149,10 +149,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create4>>, {data: MenuCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postMenu>>, {data: MenuCreateCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  create4(data,requestOptions)
+          return  postMenu(data,requestOptions)
         }
 
         
@@ -160,20 +160,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Create4MutationResult = NonNullable<Awaited<ReturnType<typeof create4>>>
-    export type Create4MutationBody = MenuCreateCommand
-    export type Create4MutationError = unknown
+    export type PostMenuMutationResult = NonNullable<Awaited<ReturnType<typeof postMenu>>>
+    export type PostMenuMutationBody = MenuCreateCommand
+    export type PostMenuMutationError = unknown
 
-    export const useCreate4 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create4>>, TError,{data: MenuCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const usePostMenu = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postMenu>>, TError,{data: MenuCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof create4>>,
+        Awaited<ReturnType<typeof postMenu>>,
         TError,
         {data: MenuCreateCommand},
         TContext
       > => {
 
-      const mutationOptions = getCreate4MutationOptions(options);
+      const mutationOptions = getPostMenuMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -182,7 +182,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:menu:detail`
  */
-export const getGetById2Url = (id: number,) => {
+export const getGetMenuByIdUrl = (id: number,) => {
 
 
   
@@ -190,9 +190,9 @@ export const getGetById2Url = (id: number,) => {
   return `/api/v1/menus/${id}`
 }
 
-export const getById2 = async (id: number, options?: RequestInit): Promise<MenuView> => {
+export const getMenuById = async (id: number, options?: RequestInit): Promise<MenuView> => {
   
-  return customInstance<MenuView>(getGetById2Url(id),
+  return customInstance<MenuView>(getGetMenuByIdUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -205,42 +205,42 @@ export const getById2 = async (id: number, options?: RequestInit): Promise<MenuV
 
 
 
-export const getGetById2QueryKey = (id?: number,) => {
+export const getGetMenuByIdQueryKey = (id?: number,) => {
     return [
     `/api/v1/menus/${id}`
     ] as const;
     }
 
     
-export const getGetById2QueryOptions = <TData = Awaited<ReturnType<typeof getById2>>, TError = unknown>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getById2>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetMenuByIdQueryOptions = <TData = Awaited<ReturnType<typeof getMenuById>>, TError = unknown>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMenuById>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetById2QueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetMenuByIdQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getById2>>> = ({ signal }) => getById2(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMenuById>>> = ({ signal }) => getMenuById(id, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getById2>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMenuById>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetById2QueryResult = NonNullable<Awaited<ReturnType<typeof getById2>>>
-export type GetById2QueryError = unknown
+export type GetMenuByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getMenuById>>>
+export type GetMenuByIdQueryError = unknown
 
 
 
-export function useGetById2<TData = Awaited<ReturnType<typeof getById2>>, TError = unknown>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getById2>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetMenuById<TData = Awaited<ReturnType<typeof getMenuById>>, TError = unknown>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMenuById>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetById2QueryOptions(id,options)
+  const queryOptions = getGetMenuByIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -257,7 +257,7 @@ export function useGetById2<TData = Awaited<ReturnType<typeof getById2>>, TError
 
 **权限:** `iam:menu:delete`
  */
-export const getDelete3Url = (id: number,) => {
+export const getDeleteMenuByIdUrl = (id: number,) => {
 
 
   
@@ -265,9 +265,9 @@ export const getDelete3Url = (id: number,) => {
   return `/api/v1/menus/${id}`
 }
 
-export const delete3 = async (id: number, options?: RequestInit): Promise<void> => {
+export const deleteMenuById = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getDelete3Url(id),
+  return customInstance<void>(getDeleteMenuByIdUrl(id),
   {      
     ...options,
     method: 'DELETE'
@@ -279,11 +279,11 @@ export const delete3 = async (id: number, options?: RequestInit): Promise<void> 
 
 
 
-export const getDelete3MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete3>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof delete3>>, TError,{id: number}, TContext> => {
+export const getDeleteMenuByIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMenuById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteMenuById>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['delete3'];
+const mutationKey = ['deleteMenuById'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -293,10 +293,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof delete3>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteMenuById>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  delete3(id,requestOptions)
+          return  deleteMenuById(id,requestOptions)
         }
 
         
@@ -304,24 +304,24 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Delete3MutationResult = NonNullable<Awaited<ReturnType<typeof delete3>>>
+    export type DeleteMenuByIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteMenuById>>>
     
-    export type Delete3MutationError = unknown
+    export type DeleteMenuByIdMutationError = unknown
 
-    export const useDelete3 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete3>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useDeleteMenuById = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteMenuById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof delete3>>,
+        Awaited<ReturnType<typeof deleteMenuById>>,
         TError,
         {id: number},
         TContext
       > => {
 
-      const mutationOptions = getDelete3MutationOptions(options);
+      const mutationOptions = getDeleteMenuByIdMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
-    export const getCurrentUserMenuUrl = () => {
+    export const getGetMenuCurrentUserUrl = () => {
 
 
   
@@ -329,9 +329,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return `/api/v1/menus/current-user`
 }
 
-export const currentUserMenu = async ( options?: RequestInit): Promise<CurrentUserMenuView> => {
+export const getMenuCurrentUser = async ( options?: RequestInit): Promise<CurrentUserMenuView> => {
   
-  return customInstance<CurrentUserMenuView>(getCurrentUserMenuUrl(),
+  return customInstance<CurrentUserMenuView>(getGetMenuCurrentUserUrl(),
   {      
     ...options,
     method: 'GET'
@@ -344,42 +344,42 @@ export const currentUserMenu = async ( options?: RequestInit): Promise<CurrentUs
 
 
 
-export const getCurrentUserMenuQueryKey = () => {
+export const getGetMenuCurrentUserQueryKey = () => {
     return [
     `/api/v1/menus/current-user`
     ] as const;
     }
 
     
-export const getCurrentUserMenuQueryOptions = <TData = Awaited<ReturnType<typeof currentUserMenu>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof currentUserMenu>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetMenuCurrentUserQueryOptions = <TData = Awaited<ReturnType<typeof getMenuCurrentUser>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMenuCurrentUser>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getCurrentUserMenuQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetMenuCurrentUserQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof currentUserMenu>>> = ({ signal }) => currentUserMenu({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMenuCurrentUser>>> = ({ signal }) => getMenuCurrentUser({ signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof currentUserMenu>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMenuCurrentUser>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type CurrentUserMenuQueryResult = NonNullable<Awaited<ReturnType<typeof currentUserMenu>>>
-export type CurrentUserMenuQueryError = unknown
+export type GetMenuCurrentUserQueryResult = NonNullable<Awaited<ReturnType<typeof getMenuCurrentUser>>>
+export type GetMenuCurrentUserQueryError = unknown
 
 
 
-export function useCurrentUserMenu<TData = Awaited<ReturnType<typeof currentUserMenu>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof currentUserMenu>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetMenuCurrentUser<TData = Awaited<ReturnType<typeof getMenuCurrentUser>>, TError = unknown>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMenuCurrentUser>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getCurrentUserMenuQueryOptions(options)
+  const queryOptions = getGetMenuCurrentUserQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

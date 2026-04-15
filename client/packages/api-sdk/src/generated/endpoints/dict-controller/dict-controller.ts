@@ -24,7 +24,7 @@ import type {
   DictDataView,
   DictTypeCreateCommand,
   DictTypeView,
-  ListTypesParams,
+  GetDictTypeParams,
   PageResultDictTypeView
 } from '../../models';
 
@@ -40,7 +40,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `dict:type:list`
  */
-export const getListTypesUrl = (params: ListTypesParams,) => {
+export const getGetDictTypeUrl = (params: GetDictTypeParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -55,9 +55,9 @@ export const getListTypesUrl = (params: ListTypesParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/dict/types?${stringifiedParams}` : `/api/v1/dict/types`
 }
 
-export const listTypes = async (params: ListTypesParams, options?: RequestInit): Promise<PageResultDictTypeView> => {
+export const getDictType = async (params: GetDictTypeParams, options?: RequestInit): Promise<PageResultDictTypeView> => {
   
-  return customInstance<PageResultDictTypeView>(getListTypesUrl(params),
+  return customInstance<PageResultDictTypeView>(getGetDictTypeUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -70,42 +70,42 @@ export const listTypes = async (params: ListTypesParams, options?: RequestInit):
 
 
 
-export const getListTypesQueryKey = (params?: ListTypesParams,) => {
+export const getGetDictTypeQueryKey = (params?: GetDictTypeParams,) => {
     return [
     `/api/v1/dict/types`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getListTypesQueryOptions = <TData = Awaited<ReturnType<typeof listTypes>>, TError = unknown>(params: ListTypesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listTypes>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetDictTypeQueryOptions = <TData = Awaited<ReturnType<typeof getDictType>>, TError = unknown>(params: GetDictTypeParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDictType>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListTypesQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetDictTypeQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listTypes>>> = ({ signal }) => listTypes(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDictType>>> = ({ signal }) => getDictType(params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listTypes>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDictType>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type ListTypesQueryResult = NonNullable<Awaited<ReturnType<typeof listTypes>>>
-export type ListTypesQueryError = unknown
+export type GetDictTypeQueryResult = NonNullable<Awaited<ReturnType<typeof getDictType>>>
+export type GetDictTypeQueryError = unknown
 
 
 
-export function useListTypes<TData = Awaited<ReturnType<typeof listTypes>>, TError = unknown>(
- params: ListTypesParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listTypes>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetDictType<TData = Awaited<ReturnType<typeof getDictType>>, TError = unknown>(
+ params: GetDictTypeParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDictType>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListTypesQueryOptions(params,options)
+  const queryOptions = getGetDictTypeQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -122,7 +122,7 @@ export function useListTypes<TData = Awaited<ReturnType<typeof listTypes>>, TErr
 
 **权限:** `dict:type:create`
  */
-export const getCreateTypeUrl = () => {
+export const getPostDictTypeUrl = () => {
 
 
   
@@ -130,9 +130,9 @@ export const getCreateTypeUrl = () => {
   return `/api/v1/dict/types`
 }
 
-export const createType = async (dictTypeCreateCommand: DictTypeCreateCommand, options?: RequestInit): Promise<DictTypeView> => {
+export const postDictType = async (dictTypeCreateCommand: DictTypeCreateCommand, options?: RequestInit): Promise<DictTypeView> => {
   
-  return customInstance<DictTypeView>(getCreateTypeUrl(),
+  return customInstance<DictTypeView>(getPostDictTypeUrl(),
   {      
     ...options,
     method: 'POST',
@@ -145,11 +145,11 @@ export const createType = async (dictTypeCreateCommand: DictTypeCreateCommand, o
 
 
 
-export const getCreateTypeMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createType>>, TError,{data: DictTypeCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof createType>>, TError,{data: DictTypeCreateCommand}, TContext> => {
+export const getPostDictTypeMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictType>>, TError,{data: DictTypeCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postDictType>>, TError,{data: DictTypeCreateCommand}, TContext> => {
 
-const mutationKey = ['createType'];
+const mutationKey = ['postDictType'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -159,10 +159,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createType>>, {data: DictTypeCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postDictType>>, {data: DictTypeCreateCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  createType(data,requestOptions)
+          return  postDictType(data,requestOptions)
         }
 
         
@@ -170,20 +170,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateTypeMutationResult = NonNullable<Awaited<ReturnType<typeof createType>>>
-    export type CreateTypeMutationBody = DictTypeCreateCommand
-    export type CreateTypeMutationError = unknown
+    export type PostDictTypeMutationResult = NonNullable<Awaited<ReturnType<typeof postDictType>>>
+    export type PostDictTypeMutationBody = DictTypeCreateCommand
+    export type PostDictTypeMutationError = unknown
 
-    export const useCreateType = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createType>>, TError,{data: DictTypeCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const usePostDictType = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictType>>, TError,{data: DictTypeCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof createType>>,
+        Awaited<ReturnType<typeof postDictType>>,
         TError,
         {data: DictTypeCreateCommand},
         TContext
       > => {
 
-      const mutationOptions = getCreateTypeMutationOptions(options);
+      const mutationOptions = getPostDictTypeMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -192,7 +192,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `dict:data:create`
  */
-export const getCreateDataUrl = () => {
+export const getPostDictDataUrl = () => {
 
 
   
@@ -200,9 +200,9 @@ export const getCreateDataUrl = () => {
   return `/api/v1/dict/data`
 }
 
-export const createData = async (dictDataCreateCommand: DictDataCreateCommand, options?: RequestInit): Promise<DictDataView> => {
+export const postDictData = async (dictDataCreateCommand: DictDataCreateCommand, options?: RequestInit): Promise<DictDataView> => {
   
-  return customInstance<DictDataView>(getCreateDataUrl(),
+  return customInstance<DictDataView>(getPostDictDataUrl(),
   {      
     ...options,
     method: 'POST',
@@ -215,11 +215,11 @@ export const createData = async (dictDataCreateCommand: DictDataCreateCommand, o
 
 
 
-export const getCreateDataMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createData>>, TError,{data: DictDataCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof createData>>, TError,{data: DictDataCreateCommand}, TContext> => {
+export const getPostDictDataMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictData>>, TError,{data: DictDataCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postDictData>>, TError,{data: DictDataCreateCommand}, TContext> => {
 
-const mutationKey = ['createData'];
+const mutationKey = ['postDictData'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -229,10 +229,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createData>>, {data: DictDataCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postDictData>>, {data: DictDataCreateCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  createData(data,requestOptions)
+          return  postDictData(data,requestOptions)
         }
 
         
@@ -240,20 +240,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateDataMutationResult = NonNullable<Awaited<ReturnType<typeof createData>>>
-    export type CreateDataMutationBody = DictDataCreateCommand
-    export type CreateDataMutationError = unknown
+    export type PostDictDataMutationResult = NonNullable<Awaited<ReturnType<typeof postDictData>>>
+    export type PostDictDataMutationBody = DictDataCreateCommand
+    export type PostDictDataMutationError = unknown
 
-    export const useCreateData = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createData>>, TError,{data: DictDataCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const usePostDictData = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictData>>, TError,{data: DictDataCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof createData>>,
+        Awaited<ReturnType<typeof postDictData>>,
         TError,
         {data: DictDataCreateCommand},
         TContext
       > => {
 
-      const mutationOptions = getCreateDataMutationOptions(options);
+      const mutationOptions = getPostDictDataMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -262,7 +262,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `dict:data:list`
  */
-export const getListDataUrl = (typeId: number,) => {
+export const getGetDictTypeByTypeidDataUrl = (typeId: number,) => {
 
 
   
@@ -270,9 +270,9 @@ export const getListDataUrl = (typeId: number,) => {
   return `/api/v1/dict/types/${typeId}/data`
 }
 
-export const listData = async (typeId: number, options?: RequestInit): Promise<DictDataView[]> => {
+export const getDictTypeByTypeidData = async (typeId: number, options?: RequestInit): Promise<DictDataView[]> => {
   
-  return customInstance<DictDataView[]>(getListDataUrl(typeId),
+  return customInstance<DictDataView[]>(getGetDictTypeByTypeidDataUrl(typeId),
   {      
     ...options,
     method: 'GET'
@@ -285,42 +285,42 @@ export const listData = async (typeId: number, options?: RequestInit): Promise<D
 
 
 
-export const getListDataQueryKey = (typeId?: number,) => {
+export const getGetDictTypeByTypeidDataQueryKey = (typeId?: number,) => {
     return [
     `/api/v1/dict/types/${typeId}/data`
     ] as const;
     }
 
     
-export const getListDataQueryOptions = <TData = Awaited<ReturnType<typeof listData>>, TError = unknown>(typeId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listData>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetDictTypeByTypeidDataQueryOptions = <TData = Awaited<ReturnType<typeof getDictTypeByTypeidData>>, TError = unknown>(typeId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDictTypeByTypeidData>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListDataQueryKey(typeId);
+  const queryKey =  queryOptions?.queryKey ?? getGetDictTypeByTypeidDataQueryKey(typeId);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listData>>> = ({ signal }) => listData(typeId, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDictTypeByTypeidData>>> = ({ signal }) => getDictTypeByTypeidData(typeId, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(typeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listData>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(typeId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDictTypeByTypeidData>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type ListDataQueryResult = NonNullable<Awaited<ReturnType<typeof listData>>>
-export type ListDataQueryError = unknown
+export type GetDictTypeByTypeidDataQueryResult = NonNullable<Awaited<ReturnType<typeof getDictTypeByTypeidData>>>
+export type GetDictTypeByTypeidDataQueryError = unknown
 
 
 
-export function useListData<TData = Awaited<ReturnType<typeof listData>>, TError = unknown>(
- typeId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listData>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetDictTypeByTypeidData<TData = Awaited<ReturnType<typeof getDictTypeByTypeidData>>, TError = unknown>(
+ typeId: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDictTypeByTypeidData>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListDataQueryOptions(typeId,options)
+  const queryOptions = getGetDictTypeByTypeidDataQueryOptions(typeId,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -337,7 +337,7 @@ export function useListData<TData = Awaited<ReturnType<typeof listData>>, TError
 
 **权限:** `dict:type:detail`
  */
-export const getGetTypeUrl = (id: number,) => {
+export const getGetDictTypeByIdUrl = (id: number,) => {
 
 
   
@@ -345,9 +345,9 @@ export const getGetTypeUrl = (id: number,) => {
   return `/api/v1/dict/types/${id}`
 }
 
-export const getType = async (id: number, options?: RequestInit): Promise<DictTypeView> => {
+export const getDictTypeById = async (id: number, options?: RequestInit): Promise<DictTypeView> => {
   
-  return customInstance<DictTypeView>(getGetTypeUrl(id),
+  return customInstance<DictTypeView>(getGetDictTypeByIdUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -360,42 +360,42 @@ export const getType = async (id: number, options?: RequestInit): Promise<DictTy
 
 
 
-export const getGetTypeQueryKey = (id?: number,) => {
+export const getGetDictTypeByIdQueryKey = (id?: number,) => {
     return [
     `/api/v1/dict/types/${id}`
     ] as const;
     }
 
     
-export const getGetTypeQueryOptions = <TData = Awaited<ReturnType<typeof getType>>, TError = unknown>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getType>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetDictTypeByIdQueryOptions = <TData = Awaited<ReturnType<typeof getDictTypeById>>, TError = unknown>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDictTypeById>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetTypeQueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetDictTypeByIdQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getType>>> = ({ signal }) => getType(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDictTypeById>>> = ({ signal }) => getDictTypeById(id, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getType>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDictTypeById>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetTypeQueryResult = NonNullable<Awaited<ReturnType<typeof getType>>>
-export type GetTypeQueryError = unknown
+export type GetDictTypeByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getDictTypeById>>>
+export type GetDictTypeByIdQueryError = unknown
 
 
 
-export function useGetType<TData = Awaited<ReturnType<typeof getType>>, TError = unknown>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getType>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetDictTypeById<TData = Awaited<ReturnType<typeof getDictTypeById>>, TError = unknown>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDictTypeById>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetTypeQueryOptions(id,options)
+  const queryOptions = getGetDictTypeByIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -412,7 +412,7 @@ export function useGetType<TData = Awaited<ReturnType<typeof getType>>, TError =
 
 **权限:** `dict:type:delete`
  */
-export const getDeleteTypeUrl = (id: number,) => {
+export const getDeleteDictTypeByIdUrl = (id: number,) => {
 
 
   
@@ -420,9 +420,9 @@ export const getDeleteTypeUrl = (id: number,) => {
   return `/api/v1/dict/types/${id}`
 }
 
-export const deleteType = async (id: number, options?: RequestInit): Promise<void> => {
+export const deleteDictTypeById = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getDeleteTypeUrl(id),
+  return customInstance<void>(getDeleteDictTypeByIdUrl(id),
   {      
     ...options,
     method: 'DELETE'
@@ -434,11 +434,11 @@ export const deleteType = async (id: number, options?: RequestInit): Promise<voi
 
 
 
-export const getDeleteTypeMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteType>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteType>>, TError,{id: number}, TContext> => {
+export const getDeleteDictTypeByIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDictTypeById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDictTypeById>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['deleteType'];
+const mutationKey = ['deleteDictTypeById'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -448,10 +448,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteType>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDictTypeById>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  deleteType(id,requestOptions)
+          return  deleteDictTypeById(id,requestOptions)
         }
 
         
@@ -459,20 +459,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type DeleteTypeMutationResult = NonNullable<Awaited<ReturnType<typeof deleteType>>>
+    export type DeleteDictTypeByIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDictTypeById>>>
     
-    export type DeleteTypeMutationError = unknown
+    export type DeleteDictTypeByIdMutationError = unknown
 
-    export const useDeleteType = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteType>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useDeleteDictTypeById = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDictTypeById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteType>>,
+        Awaited<ReturnType<typeof deleteDictTypeById>>,
         TError,
         {id: number},
         TContext
       > => {
 
-      const mutationOptions = getDeleteTypeMutationOptions(options);
+      const mutationOptions = getDeleteDictTypeByIdMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -481,7 +481,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `dict:data:delete`
  */
-export const getDeleteDataUrl = (id: number,) => {
+export const getDeleteDictDataByIdUrl = (id: number,) => {
 
 
   
@@ -489,9 +489,9 @@ export const getDeleteDataUrl = (id: number,) => {
   return `/api/v1/dict/data/${id}`
 }
 
-export const deleteData = async (id: number, options?: RequestInit): Promise<void> => {
+export const deleteDictDataById = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getDeleteDataUrl(id),
+  return customInstance<void>(getDeleteDictDataByIdUrl(id),
   {      
     ...options,
     method: 'DELETE'
@@ -503,11 +503,11 @@ export const deleteData = async (id: number, options?: RequestInit): Promise<voi
 
 
 
-export const getDeleteDataMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteData>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteData>>, TError,{id: number}, TContext> => {
+export const getDeleteDictDataByIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDictDataById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDictDataById>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['deleteData'];
+const mutationKey = ['deleteDictDataById'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -517,10 +517,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteData>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDictDataById>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  deleteData(id,requestOptions)
+          return  deleteDictDataById(id,requestOptions)
         }
 
         
@@ -528,20 +528,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type DeleteDataMutationResult = NonNullable<Awaited<ReturnType<typeof deleteData>>>
+    export type DeleteDictDataByIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDictDataById>>>
     
-    export type DeleteDataMutationError = unknown
+    export type DeleteDictDataByIdMutationError = unknown
 
-    export const useDeleteData = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteData>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useDeleteDictDataById = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDictDataById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteData>>,
+        Awaited<ReturnType<typeof deleteDictDataById>>,
         TError,
         {id: number},
         TContext
       > => {
 
-      const mutationOptions = getDeleteDataMutationOptions(options);
+      const mutationOptions = getDeleteDictDataByIdMutationOptions(options);
 
       return useMutation(mutationOptions);
     }

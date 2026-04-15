@@ -1,4 +1,4 @@
-import type { NoticeTarget } from '@mb/api-sdk/generated/models';
+import type { NoticeTarget } from '@mb/api-sdk';
 import {
   AlertDialog,
   AlertDialogAction,

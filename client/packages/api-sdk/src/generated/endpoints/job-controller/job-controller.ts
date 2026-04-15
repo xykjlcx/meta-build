@@ -16,7 +16,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ListLogsParams,
+  GetJobLogParams,
   PageResultJobLogView
 } from '../../models';
 
@@ -32,7 +32,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `job:log:list`
  */
-export const getListLogsUrl = (params: ListLogsParams,) => {
+export const getGetJobLogUrl = (params: GetJobLogParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -47,9 +47,9 @@ export const getListLogsUrl = (params: ListLogsParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/jobs/logs?${stringifiedParams}` : `/api/v1/jobs/logs`
 }
 
-export const listLogs = async (params: ListLogsParams, options?: RequestInit): Promise<PageResultJobLogView> => {
+export const getJobLog = async (params: GetJobLogParams, options?: RequestInit): Promise<PageResultJobLogView> => {
   
-  return customInstance<PageResultJobLogView>(getListLogsUrl(params),
+  return customInstance<PageResultJobLogView>(getGetJobLogUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -62,42 +62,42 @@ export const listLogs = async (params: ListLogsParams, options?: RequestInit): P
 
 
 
-export const getListLogsQueryKey = (params?: ListLogsParams,) => {
+export const getGetJobLogQueryKey = (params?: GetJobLogParams,) => {
     return [
     `/api/v1/jobs/logs`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getListLogsQueryOptions = <TData = Awaited<ReturnType<typeof listLogs>>, TError = unknown>(params: ListLogsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listLogs>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetJobLogQueryOptions = <TData = Awaited<ReturnType<typeof getJobLog>>, TError = unknown>(params: GetJobLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJobLog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListLogsQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetJobLogQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listLogs>>> = ({ signal }) => listLogs(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getJobLog>>> = ({ signal }) => getJobLog(params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listLogs>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getJobLog>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type ListLogsQueryResult = NonNullable<Awaited<ReturnType<typeof listLogs>>>
-export type ListLogsQueryError = unknown
+export type GetJobLogQueryResult = NonNullable<Awaited<ReturnType<typeof getJobLog>>>
+export type GetJobLogQueryError = unknown
 
 
 
-export function useListLogs<TData = Awaited<ReturnType<typeof listLogs>>, TError = unknown>(
- params: ListLogsParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listLogs>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetJobLog<TData = Awaited<ReturnType<typeof getJobLog>>, TError = unknown>(
+ params: GetJobLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getJobLog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListLogsQueryOptions(params,options)
+  const queryOptions = getGetJobLogQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

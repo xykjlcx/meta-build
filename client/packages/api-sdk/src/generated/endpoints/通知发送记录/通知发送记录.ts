@@ -16,7 +16,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  FindByModuleAndRefParams,
+  GetNotificationLogParams,
   NotificationLogView
 } from '../../models';
 
@@ -33,7 +33,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 **权限:** `notice:notice:detail`
  * @summary 按模块和关联 ID 查询发送记录
  */
-export const getFindByModuleAndRefUrl = (params: FindByModuleAndRefParams,) => {
+export const getGetNotificationLogUrl = (params: GetNotificationLogParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -48,9 +48,9 @@ export const getFindByModuleAndRefUrl = (params: FindByModuleAndRefParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/notification-logs?${stringifiedParams}` : `/api/v1/notification-logs`
 }
 
-export const findByModuleAndRef = async (params: FindByModuleAndRefParams, options?: RequestInit): Promise<NotificationLogView[]> => {
+export const getNotificationLog = async (params: GetNotificationLogParams, options?: RequestInit): Promise<NotificationLogView[]> => {
   
-  return customInstance<NotificationLogView[]>(getFindByModuleAndRefUrl(params),
+  return customInstance<NotificationLogView[]>(getGetNotificationLogUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -63,45 +63,45 @@ export const findByModuleAndRef = async (params: FindByModuleAndRefParams, optio
 
 
 
-export const getFindByModuleAndRefQueryKey = (params?: FindByModuleAndRefParams,) => {
+export const getGetNotificationLogQueryKey = (params?: GetNotificationLogParams,) => {
     return [
     `/api/v1/notification-logs`, ...(params ? [params]: [])
     ] as const;
     }
 
     
-export const getFindByModuleAndRefQueryOptions = <TData = Awaited<ReturnType<typeof findByModuleAndRef>>, TError = unknown>(params: FindByModuleAndRefParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof findByModuleAndRef>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetNotificationLogQueryOptions = <TData = Awaited<ReturnType<typeof getNotificationLog>>, TError = unknown>(params: GetNotificationLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotificationLog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getFindByModuleAndRefQueryKey(params);
+  const queryKey =  queryOptions?.queryKey ?? getGetNotificationLogQueryKey(params);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof findByModuleAndRef>>> = ({ signal }) => findByModuleAndRef(params, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getNotificationLog>>> = ({ signal }) => getNotificationLog(params, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof findByModuleAndRef>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getNotificationLog>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type FindByModuleAndRefQueryResult = NonNullable<Awaited<ReturnType<typeof findByModuleAndRef>>>
-export type FindByModuleAndRefQueryError = unknown
+export type GetNotificationLogQueryResult = NonNullable<Awaited<ReturnType<typeof getNotificationLog>>>
+export type GetNotificationLogQueryError = unknown
 
 
 /**
  * @summary 按模块和关联 ID 查询发送记录
  */
 
-export function useFindByModuleAndRef<TData = Awaited<ReturnType<typeof findByModuleAndRef>>, TError = unknown>(
- params: FindByModuleAndRefParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof findByModuleAndRef>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetNotificationLog<TData = Awaited<ReturnType<typeof getNotificationLog>>, TError = unknown>(
+ params: GetNotificationLogParams, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getNotificationLog>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getFindByModuleAndRefQueryOptions(params,options)
+  const queryOptions = getGetNotificationLogQueryOptions(params,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

@@ -23,20 +23,20 @@ import type {
 } from '../../models';
 
 
-export const getConnectResponseMock = (overrideResponse: Partial< SseEmitter > = {}): SseEmitter => ({timeout: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getGetSseConnectResponseMock = (overrideResponse: Partial< SseEmitter > = {}): SseEmitter => ({timeout: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
 
-export const getConnectMockHandler = (overrideResponse?: SseEmitter | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<SseEmitter> | SseEmitter), options?: RequestHandlerOptions) => {
+export const getGetSseConnectMockHandler = (overrideResponse?: SseEmitter | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<SseEmitter> | SseEmitter), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/sse/connect', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getConnectResponseMock()),
+    : getGetSseConnectResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 export const getSseMock = () => [
-  getConnectMockHandler()
+  getGetSseConnectMockHandler()
 ]

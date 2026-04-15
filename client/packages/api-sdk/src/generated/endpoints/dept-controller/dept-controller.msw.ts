@@ -23,50 +23,50 @@ import type {
 } from '../../models';
 
 
-export const getTree1ResponseMock = (): DeptView[] => (Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), leaderUserId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), children: faker.helpers.arrayElement([[], undefined])})))
+export const getGetDeptResponseMock = (): DeptView[] => (Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), leaderUserId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), children: faker.helpers.arrayElement([[], undefined])})))
 
-export const getCreate5ResponseMock = (overrideResponse: Partial< DeptView > = {}): DeptView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), leaderUserId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), children: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), leaderUserId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), children: faker.helpers.arrayElement([[], undefined])})), undefined]), ...overrideResponse})
+export const getPostDeptResponseMock = (overrideResponse: Partial< DeptView > = {}): DeptView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), leaderUserId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), children: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), leaderUserId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), children: faker.helpers.arrayElement([[], undefined])})), undefined]), ...overrideResponse})
 
-export const getGetById3ResponseMock = (overrideResponse: Partial< DeptView > = {}): DeptView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), leaderUserId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), children: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), leaderUserId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), children: faker.helpers.arrayElement([[], undefined])})), undefined]), ...overrideResponse})
+export const getGetDeptByIdResponseMock = (overrideResponse: Partial< DeptView > = {}): DeptView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), leaderUserId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), children: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), parentId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), leaderUserId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), children: faker.helpers.arrayElement([[], undefined])})), undefined]), ...overrideResponse})
 
 
-export const getTree1MockHandler = (overrideResponse?: DeptView[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<DeptView[]> | DeptView[]), options?: RequestHandlerOptions) => {
+export const getGetDeptMockHandler = (overrideResponse?: DeptView[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<DeptView[]> | DeptView[]), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/depts', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getTree1ResponseMock()),
+    : getGetDeptResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getCreate5MockHandler = (overrideResponse?: DeptView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<DeptView> | DeptView), options?: RequestHandlerOptions) => {
+export const getPostDeptMockHandler = (overrideResponse?: DeptView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<DeptView> | DeptView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/depts', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreate5ResponseMock()),
+    : getPostDeptResponseMock()),
       { status: 201,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getGetById3MockHandler = (overrideResponse?: DeptView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<DeptView> | DeptView), options?: RequestHandlerOptions) => {
+export const getGetDeptByIdMockHandler = (overrideResponse?: DeptView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<DeptView> | DeptView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/depts/:id', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getGetById3ResponseMock()),
+    : getGetDeptByIdResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getDelete4MockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getDeleteDeptByIdMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.delete('*/api/v1/depts/:id', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -76,8 +76,8 @@ export const getDelete4MockHandler = (overrideResponse?: void | ((info: Paramete
   }, options)
 }
 export const getDeptControllerMock = () => [
-  getTree1MockHandler(),
-  getCreate5MockHandler(),
-  getGetById3MockHandler(),
-  getDelete4MockHandler()
+  getGetDeptMockHandler(),
+  getPostDeptMockHandler(),
+  getGetDeptByIdMockHandler(),
+  getDeleteDeptByIdMockHandler()
 ]

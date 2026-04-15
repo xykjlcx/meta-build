@@ -23,20 +23,20 @@ import type {
 } from '../../models';
 
 
-export const getFindByModuleAndRefResponseMock = (): NotificationLogView[] => (Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), channelType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), recipientId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), templateCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), module: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), referenceId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), errorMessage: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sentAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})))
+export const getGetNotificationLogResponseMock = (): NotificationLogView[] => (Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), channelType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), recipientId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), templateCode: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), module: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), referenceId: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), errorMessage: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sentAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})))
 
 
-export const getFindByModuleAndRefMockHandler = (overrideResponse?: NotificationLogView[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<NotificationLogView[]> | NotificationLogView[]), options?: RequestHandlerOptions) => {
+export const getGetNotificationLogMockHandler = (overrideResponse?: NotificationLogView[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<NotificationLogView[]> | NotificationLogView[]), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/notification-logs', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getFindByModuleAndRefResponseMock()),
+    : getGetNotificationLogResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 export const getMock = () => [
-  getFindByModuleAndRefMockHandler()
+  getGetNotificationLogMockHandler()
 ]

@@ -1,4 +1,4 @@
-import { customInstance } from '@mb/api-sdk/mutator/custom-instance';
+import { type WeChatBindingView, wechatBindingApi } from '@mb/api-sdk';
 import { requireAuth } from '@mb/app-shell';
 import {
   Badge,
@@ -19,28 +19,16 @@ export const Route = createFileRoute('/_authed/settings/wechat-bind')({
   component: WechatBindPage,
 });
 
-interface WechatBinding {
-  id: number;
-  platform: string;
-  appId: string;
-  openId: string;
-  nickname?: string;
-  avatarUrl?: string;
-  boundAt?: string;
-}
-
 function WechatBindPage() {
   const { t } = useTranslation('notice');
-  const [bindings, setBindings] = useState<WechatBinding[]>([]);
+  const [bindings, setBindings] = useState<WeChatBindingView[]>([]);
   const [loading, setLoading] = useState(false);
 
   // 查询绑定状态 — 后端返回 WeChatBindingView[] 直接体
   const fetchBindings = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await customInstance<WechatBinding[]>('/api/v1/wechat/bindings', {
-        method: 'GET',
-      });
+      const result = await wechatBindingApi.myBindings();
       setBindings(result ?? []);
     } catch {
       // 静默处理
@@ -52,9 +40,7 @@ function WechatBindPage() {
   // 公众号绑定 — 后端返回 { state: string }，前端拼接微信 OAuth URL
   const handleBindMP = useCallback(async () => {
     try {
-      const result = await customInstance<{ state: string }>('/api/v1/wechat/mp/oauth-state', {
-        method: 'GET',
-      });
+      const result = await wechatBindingApi.generateMpOauthState();
       // 用 state 拼接微信 OAuth 授权 URL（appId 由后端 WeChatProperties 管理，
       // 前端通过 env 变量获取或由后端返回完整 URL。v1 先用 placeholder）
       const appId = import.meta.env.VITE_WECHAT_MP_APP_ID ?? '';
@@ -70,9 +56,7 @@ function WechatBindPage() {
   const handleUnbind = useCallback(
     async (platform: string) => {
       try {
-        await customInstance<void>(`/api/v1/wechat/unbind/${platform}`, {
-          method: 'DELETE',
-        });
+        await wechatBindingApi.unbind(platform);
         toast.success(t('wechat.unbind'));
         fetchBindings();
       } catch {

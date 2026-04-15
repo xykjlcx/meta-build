@@ -30,7 +30,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
  * 已登录用户建立 SSE 长连接，接收实时消息
  * @summary 建立 SSE 连接
  */
-export const getConnectUrl = () => {
+export const getGetSseConnectUrl = () => {
 
 
   
@@ -38,9 +38,9 @@ export const getConnectUrl = () => {
   return `/api/v1/sse/connect`
 }
 
-export const connect = async ( options?: RequestInit): Promise<SseEmitter> => {
+export const getSseConnect = async ( options?: RequestInit): Promise<SseEmitter> => {
   
-  return customInstance<SseEmitter>(getConnectUrl(),
+  return customInstance<SseEmitter>(getGetSseConnectUrl(),
   {      
     ...options,
     method: 'GET'
@@ -53,45 +53,45 @@ export const connect = async ( options?: RequestInit): Promise<SseEmitter> => {
 
 
 
-export const getConnectQueryKey = () => {
+export const getGetSseConnectQueryKey = () => {
     return [
     `/api/v1/sse/connect`
     ] as const;
     }
 
     
-export const getConnectQueryOptions = <TData = Awaited<ReturnType<typeof connect>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof connect>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetSseConnectQueryOptions = <TData = Awaited<ReturnType<typeof getSseConnect>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSseConnect>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getConnectQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetSseConnectQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof connect>>> = ({ signal }) => connect({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSseConnect>>> = ({ signal }) => getSseConnect({ signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof connect>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSseConnect>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type ConnectQueryResult = NonNullable<Awaited<ReturnType<typeof connect>>>
-export type ConnectQueryError = unknown
+export type GetSseConnectQueryResult = NonNullable<Awaited<ReturnType<typeof getSseConnect>>>
+export type GetSseConnectQueryError = unknown
 
 
 /**
  * @summary 建立 SSE 连接
  */
 
-export function useConnect<TData = Awaited<ReturnType<typeof connect>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof connect>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetSseConnect<TData = Awaited<ReturnType<typeof getSseConnect>>, TError = unknown>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getSseConnect>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getConnectQueryOptions(options)
+  const queryOptions = getGetSseConnectQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

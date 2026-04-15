@@ -20,63 +20,63 @@ import type {
 
 import type {
   BatchResultView,
+  GetNoticeUnreadCount200,
   NoticeDetailView,
   PageResultNoticeView,
-  PageResultRecipientView,
-  UnreadCount200
+  PageResultRecipientView
 } from '../../models';
 
 
-export const getDetailResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
+export const getGetNoticeByIdResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
 
-export const getUpdate2ResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
+export const getPutNoticeByIdResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
 
-export const getList4ResponseMock = (overrideResponse: Partial< PageResultNoticeView > = {}): PageResultNoticeView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getGetNoticeResponseMock = (overrideResponse: Partial< PageResultNoticeView > = {}): PageResultNoticeView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
-export const getCreate3ResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
+export const getPostNoticeResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
 
-export const getRevokeResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
+export const getPostNoticeByIdRevokeResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
 
-export const getPublishResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
+export const getPostNoticeByIdPublishResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
 
-export const getDuplicateResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
+export const getPostNoticeByIdDuplicateResponseMock = (overrideResponse: Partial< NoticeDetailView > = {}): NoticeDetailView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), pinned: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), startTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), endTime: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), createdByName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), version: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), readCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), recipientCount: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({fileId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), targets: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({targetType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), targetId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined])})), undefined]), ...overrideResponse})
 
-export const getBatchPublishResponseMock = (overrideResponse: Partial< BatchResultView > = {}): BatchResultView => ({success: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), skipped: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getPostNoticeBatchPublishResponseMock = (overrideResponse: Partial< BatchResultView > = {}): BatchResultView => ({success: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), skipped: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
-export const getRecipientsResponseMock = (overrideResponse: Partial< PageResultRecipientView > = {}): PageResultRecipientView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({userId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), readAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getGetNoticeByIdRecipientResponseMock = (overrideResponse: Partial< PageResultRecipientView > = {}): PageResultRecipientView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({userId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), readAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
-export const getUnreadCountResponseMock = (): UnreadCount200 => ({
+export const getGetNoticeUnreadCountResponseMock = (): GetNoticeUnreadCount200 => ({
         [faker.string.alphanumeric(5)]: faker.number.int({min: undefined, max: undefined})
       })
 
-export const getBatchDeleteResponseMock = (overrideResponse: Partial< BatchResultView > = {}): BatchResultView => ({success: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), skipped: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getDeleteNoticeBatchResponseMock = (overrideResponse: Partial< BatchResultView > = {}): BatchResultView => ({success: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), skipped: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
 
-export const getDetailMockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
+export const getGetNoticeByIdMockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/notices/:id', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getDetailResponseMock()),
+    : getGetNoticeByIdResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getUpdate2MockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
+export const getPutNoticeByIdMockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
   return http.put('*/api/v1/notices/:id', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getUpdate2ResponseMock()),
+    : getPutNoticeByIdResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getDelete2MockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getDeleteNoticeByIdMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.delete('*/api/v1/notices/:id', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -86,7 +86,7 @@ export const getDelete2MockHandler = (overrideResponse?: void | ((info: Paramete
   }, options)
 }
 
-export const getMarkReadMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getPutNoticeByIdReadMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.put('*/api/v1/notices/:id/read', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -96,103 +96,103 @@ export const getMarkReadMockHandler = (overrideResponse?: void | ((info: Paramet
   }, options)
 }
 
-export const getList4MockHandler = (overrideResponse?: PageResultNoticeView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultNoticeView> | PageResultNoticeView), options?: RequestHandlerOptions) => {
+export const getGetNoticeMockHandler = (overrideResponse?: PageResultNoticeView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultNoticeView> | PageResultNoticeView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/notices', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getList4ResponseMock()),
+    : getGetNoticeResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getCreate3MockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
+export const getPostNoticeMockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/notices', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreate3ResponseMock()),
+    : getPostNoticeResponseMock()),
       { status: 201,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getRevokeMockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
+export const getPostNoticeByIdRevokeMockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/notices/:id/revoke', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getRevokeResponseMock()),
+    : getPostNoticeByIdRevokeResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getPublishMockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
+export const getPostNoticeByIdPublishMockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/notices/:id/publish', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getPublishResponseMock()),
+    : getPostNoticeByIdPublishResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getDuplicateMockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
+export const getPostNoticeByIdDuplicateMockHandler = (overrideResponse?: NoticeDetailView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<NoticeDetailView> | NoticeDetailView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/notices/:id/duplicate', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getDuplicateResponseMock()),
+    : getPostNoticeByIdDuplicateResponseMock()),
       { status: 201,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getBatchPublishMockHandler = (overrideResponse?: BatchResultView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<BatchResultView> | BatchResultView), options?: RequestHandlerOptions) => {
+export const getPostNoticeBatchPublishMockHandler = (overrideResponse?: BatchResultView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<BatchResultView> | BatchResultView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/notices/batch-publish', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getBatchPublishResponseMock()),
+    : getPostNoticeBatchPublishResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getRecipientsMockHandler = (overrideResponse?: PageResultRecipientView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultRecipientView> | PageResultRecipientView), options?: RequestHandlerOptions) => {
+export const getGetNoticeByIdRecipientMockHandler = (overrideResponse?: PageResultRecipientView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultRecipientView> | PageResultRecipientView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/notices/:id/recipients', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getRecipientsResponseMock()),
+    : getGetNoticeByIdRecipientResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getUnreadCountMockHandler = (overrideResponse?: UnreadCount200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<UnreadCount200> | UnreadCount200), options?: RequestHandlerOptions) => {
+export const getGetNoticeUnreadCountMockHandler = (overrideResponse?: GetNoticeUnreadCount200 | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<GetNoticeUnreadCount200> | GetNoticeUnreadCount200), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/notices/unread-count', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getUnreadCountResponseMock()),
+    : getGetNoticeUnreadCountResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getExportMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getGetNoticeExportMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/notices/export', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -202,30 +202,30 @@ export const getExportMockHandler = (overrideResponse?: void | ((info: Parameter
   }, options)
 }
 
-export const getBatchDeleteMockHandler = (overrideResponse?: BatchResultView | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<BatchResultView> | BatchResultView), options?: RequestHandlerOptions) => {
+export const getDeleteNoticeBatchMockHandler = (overrideResponse?: BatchResultView | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<BatchResultView> | BatchResultView), options?: RequestHandlerOptions) => {
   return http.delete('*/api/v1/notices/batch', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getBatchDeleteResponseMock()),
+    : getDeleteNoticeBatchResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 export const getMock = () => [
-  getDetailMockHandler(),
-  getUpdate2MockHandler(),
-  getDelete2MockHandler(),
-  getMarkReadMockHandler(),
-  getList4MockHandler(),
-  getCreate3MockHandler(),
-  getRevokeMockHandler(),
-  getPublishMockHandler(),
-  getDuplicateMockHandler(),
-  getBatchPublishMockHandler(),
-  getRecipientsMockHandler(),
-  getUnreadCountMockHandler(),
-  getExportMockHandler(),
-  getBatchDeleteMockHandler()
+  getGetNoticeByIdMockHandler(),
+  getPutNoticeByIdMockHandler(),
+  getDeleteNoticeByIdMockHandler(),
+  getPutNoticeByIdReadMockHandler(),
+  getGetNoticeMockHandler(),
+  getPostNoticeMockHandler(),
+  getPostNoticeByIdRevokeMockHandler(),
+  getPostNoticeByIdPublishMockHandler(),
+  getPostNoticeByIdDuplicateMockHandler(),
+  getPostNoticeBatchPublishMockHandler(),
+  getGetNoticeByIdRecipientMockHandler(),
+  getGetNoticeUnreadCountMockHandler(),
+  getGetNoticeExportMockHandler(),
+  getDeleteNoticeBatchMockHandler()
 ]

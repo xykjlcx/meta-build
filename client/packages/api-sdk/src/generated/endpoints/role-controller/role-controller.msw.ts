@@ -24,40 +24,40 @@ import type {
 } from '../../models';
 
 
-export const getGetById1ResponseMock = (overrideResponse: Partial< RoleView > = {}): RoleView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), dataScope: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getGetRoleByIdResponseMock = (overrideResponse: Partial< RoleView > = {}): RoleView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), dataScope: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
-export const getUpdate1ResponseMock = (overrideResponse: Partial< RoleView > = {}): RoleView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), dataScope: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getPutRoleByIdResponseMock = (overrideResponse: Partial< RoleView > = {}): RoleView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), dataScope: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
-export const getList2ResponseMock = (overrideResponse: Partial< PageResultRoleView > = {}): PageResultRoleView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), dataScope: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getGetRoleResponseMock = (overrideResponse: Partial< PageResultRoleView > = {}): PageResultRoleView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), dataScope: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
-export const getCreate1ResponseMock = (overrideResponse: Partial< RoleView > = {}): RoleView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), dataScope: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getPostRoleResponseMock = (overrideResponse: Partial< RoleView > = {}): RoleView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), dataScope: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
 
-export const getGetById1MockHandler = (overrideResponse?: RoleView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<RoleView> | RoleView), options?: RequestHandlerOptions) => {
+export const getGetRoleByIdMockHandler = (overrideResponse?: RoleView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<RoleView> | RoleView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/roles/:id', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getGetById1ResponseMock()),
+    : getGetRoleByIdResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getUpdate1MockHandler = (overrideResponse?: RoleView | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<RoleView> | RoleView), options?: RequestHandlerOptions) => {
+export const getPutRoleByIdMockHandler = (overrideResponse?: RoleView | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<RoleView> | RoleView), options?: RequestHandlerOptions) => {
   return http.put('*/api/v1/roles/:id', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getUpdate1ResponseMock()),
+    : getPutRoleByIdResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getDelete1MockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getDeleteRoleByIdMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.delete('*/api/v1/roles/:id', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -67,7 +67,7 @@ export const getDelete1MockHandler = (overrideResponse?: void | ((info: Paramete
   }, options)
 }
 
-export const getAssignMenusMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getPutRoleByIdMenuMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.put>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.put('*/api/v1/roles/:id/menus', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -77,34 +77,34 @@ export const getAssignMenusMockHandler = (overrideResponse?: void | ((info: Para
   }, options)
 }
 
-export const getList2MockHandler = (overrideResponse?: PageResultRoleView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultRoleView> | PageResultRoleView), options?: RequestHandlerOptions) => {
+export const getGetRoleMockHandler = (overrideResponse?: PageResultRoleView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultRoleView> | PageResultRoleView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/roles', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getList2ResponseMock()),
+    : getGetRoleResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getCreate1MockHandler = (overrideResponse?: RoleView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<RoleView> | RoleView), options?: RequestHandlerOptions) => {
+export const getPostRoleMockHandler = (overrideResponse?: RoleView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<RoleView> | RoleView), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/roles', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreate1ResponseMock()),
+    : getPostRoleResponseMock()),
       { status: 201,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 export const getRoleControllerMock = () => [
-  getGetById1MockHandler(),
-  getUpdate1MockHandler(),
-  getDelete1MockHandler(),
-  getAssignMenusMockHandler(),
-  getList2MockHandler(),
-  getCreate1MockHandler()
+  getGetRoleByIdMockHandler(),
+  getPutRoleByIdMockHandler(),
+  getDeleteRoleByIdMockHandler(),
+  getPutRoleByIdMenuMockHandler(),
+  getGetRoleMockHandler(),
+  getPostRoleMockHandler()
 ]

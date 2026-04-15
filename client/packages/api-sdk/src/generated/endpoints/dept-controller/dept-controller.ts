@@ -36,7 +36,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `iam:dept:list`
  */
-export const getTree1Url = () => {
+export const getGetDeptUrl = () => {
 
 
   
@@ -44,9 +44,9 @@ export const getTree1Url = () => {
   return `/api/v1/depts`
 }
 
-export const tree1 = async ( options?: RequestInit): Promise<DeptView[]> => {
+export const getDept = async ( options?: RequestInit): Promise<DeptView[]> => {
   
-  return customInstance<DeptView[]>(getTree1Url(),
+  return customInstance<DeptView[]>(getGetDeptUrl(),
   {      
     ...options,
     method: 'GET'
@@ -59,42 +59,42 @@ export const tree1 = async ( options?: RequestInit): Promise<DeptView[]> => {
 
 
 
-export const getTree1QueryKey = () => {
+export const getGetDeptQueryKey = () => {
     return [
     `/api/v1/depts`
     ] as const;
     }
 
     
-export const getTree1QueryOptions = <TData = Awaited<ReturnType<typeof tree1>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof tree1>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetDeptQueryOptions = <TData = Awaited<ReturnType<typeof getDept>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDept>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getTree1QueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetDeptQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof tree1>>> = ({ signal }) => tree1({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDept>>> = ({ signal }) => getDept({ signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof tree1>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDept>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type Tree1QueryResult = NonNullable<Awaited<ReturnType<typeof tree1>>>
-export type Tree1QueryError = unknown
+export type GetDeptQueryResult = NonNullable<Awaited<ReturnType<typeof getDept>>>
+export type GetDeptQueryError = unknown
 
 
 
-export function useTree1<TData = Awaited<ReturnType<typeof tree1>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof tree1>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetDept<TData = Awaited<ReturnType<typeof getDept>>, TError = unknown>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDept>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getTree1QueryOptions(options)
+  const queryOptions = getGetDeptQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -111,7 +111,7 @@ export function useTree1<TData = Awaited<ReturnType<typeof tree1>>, TError = unk
 
 **权限:** `iam:dept:create`
  */
-export const getCreate5Url = () => {
+export const getPostDeptUrl = () => {
 
 
   
@@ -119,9 +119,9 @@ export const getCreate5Url = () => {
   return `/api/v1/depts`
 }
 
-export const create5 = async (deptCreateCommand: DeptCreateCommand, options?: RequestInit): Promise<DeptView> => {
+export const postDept = async (deptCreateCommand: DeptCreateCommand, options?: RequestInit): Promise<DeptView> => {
   
-  return customInstance<DeptView>(getCreate5Url(),
+  return customInstance<DeptView>(getPostDeptUrl(),
   {      
     ...options,
     method: 'POST',
@@ -134,11 +134,11 @@ export const create5 = async (deptCreateCommand: DeptCreateCommand, options?: Re
 
 
 
-export const getCreate5MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create5>>, TError,{data: DeptCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof create5>>, TError,{data: DeptCreateCommand}, TContext> => {
+export const getPostDeptMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDept>>, TError,{data: DeptCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postDept>>, TError,{data: DeptCreateCommand}, TContext> => {
 
-const mutationKey = ['create5'];
+const mutationKey = ['postDept'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -148,10 +148,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof create5>>, {data: DeptCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postDept>>, {data: DeptCreateCommand}> = (props) => {
           const {data} = props ?? {};
 
-          return  create5(data,requestOptions)
+          return  postDept(data,requestOptions)
         }
 
         
@@ -159,20 +159,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Create5MutationResult = NonNullable<Awaited<ReturnType<typeof create5>>>
-    export type Create5MutationBody = DeptCreateCommand
-    export type Create5MutationError = unknown
+    export type PostDeptMutationResult = NonNullable<Awaited<ReturnType<typeof postDept>>>
+    export type PostDeptMutationBody = DeptCreateCommand
+    export type PostDeptMutationError = unknown
 
-    export const useCreate5 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof create5>>, TError,{data: DeptCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const usePostDept = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDept>>, TError,{data: DeptCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof create5>>,
+        Awaited<ReturnType<typeof postDept>>,
         TError,
         {data: DeptCreateCommand},
         TContext
       > => {
 
-      const mutationOptions = getCreate5MutationOptions(options);
+      const mutationOptions = getPostDeptMutationOptions(options);
 
       return useMutation(mutationOptions);
     }
@@ -181,7 +181,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 **权限:** `iam:dept:detail`
  */
-export const getGetById3Url = (id: number,) => {
+export const getGetDeptByIdUrl = (id: number,) => {
 
 
   
@@ -189,9 +189,9 @@ export const getGetById3Url = (id: number,) => {
   return `/api/v1/depts/${id}`
 }
 
-export const getById3 = async (id: number, options?: RequestInit): Promise<DeptView> => {
+export const getDeptById = async (id: number, options?: RequestInit): Promise<DeptView> => {
   
-  return customInstance<DeptView>(getGetById3Url(id),
+  return customInstance<DeptView>(getGetDeptByIdUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -204,42 +204,42 @@ export const getById3 = async (id: number, options?: RequestInit): Promise<DeptV
 
 
 
-export const getGetById3QueryKey = (id?: number,) => {
+export const getGetDeptByIdQueryKey = (id?: number,) => {
     return [
     `/api/v1/depts/${id}`
     ] as const;
     }
 
     
-export const getGetById3QueryOptions = <TData = Awaited<ReturnType<typeof getById3>>, TError = unknown>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getById3>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetDeptByIdQueryOptions = <TData = Awaited<ReturnType<typeof getDeptById>>, TError = unknown>(id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDeptById>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetById3QueryKey(id);
+  const queryKey =  queryOptions?.queryKey ?? getGetDeptByIdQueryKey(id);
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getById3>>> = ({ signal }) => getById3(id, { signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDeptById>>> = ({ signal }) => getDeptById(id, { signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getById3>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: !!(id), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDeptById>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type GetById3QueryResult = NonNullable<Awaited<ReturnType<typeof getById3>>>
-export type GetById3QueryError = unknown
+export type GetDeptByIdQueryResult = NonNullable<Awaited<ReturnType<typeof getDeptById>>>
+export type GetDeptByIdQueryError = unknown
 
 
 
-export function useGetById3<TData = Awaited<ReturnType<typeof getById3>>, TError = unknown>(
- id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getById3>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetDeptById<TData = Awaited<ReturnType<typeof getDeptById>>, TError = unknown>(
+ id: number, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getDeptById>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getGetById3QueryOptions(id,options)
+  const queryOptions = getGetDeptByIdQueryOptions(id,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -256,7 +256,7 @@ export function useGetById3<TData = Awaited<ReturnType<typeof getById3>>, TError
 
 **权限:** `iam:dept:delete`
  */
-export const getDelete4Url = (id: number,) => {
+export const getDeleteDeptByIdUrl = (id: number,) => {
 
 
   
@@ -264,9 +264,9 @@ export const getDelete4Url = (id: number,) => {
   return `/api/v1/depts/${id}`
 }
 
-export const delete4 = async (id: number, options?: RequestInit): Promise<void> => {
+export const deleteDeptById = async (id: number, options?: RequestInit): Promise<void> => {
   
-  return customInstance<void>(getDelete4Url(id),
+  return customInstance<void>(getDeleteDeptByIdUrl(id),
   {      
     ...options,
     method: 'DELETE'
@@ -278,11 +278,11 @@ export const delete4 = async (id: number, options?: RequestInit): Promise<void> 
 
 
 
-export const getDelete4MutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete4>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof delete4>>, TError,{id: number}, TContext> => {
+export const getDeleteDeptByIdMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDeptById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteDeptById>>, TError,{id: number}, TContext> => {
 
-const mutationKey = ['delete4'];
+const mutationKey = ['deleteDeptById'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -292,10 +292,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof delete4>>, {id: number}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDeptById>>, {id: number}> = (props) => {
           const {id} = props ?? {};
 
-          return  delete4(id,requestOptions)
+          return  deleteDeptById(id,requestOptions)
         }
 
         
@@ -303,20 +303,20 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type Delete4MutationResult = NonNullable<Awaited<ReturnType<typeof delete4>>>
+    export type DeleteDeptByIdMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDeptById>>>
     
-    export type Delete4MutationError = unknown
+    export type DeleteDeptByIdMutationError = unknown
 
-    export const useDelete4 = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof delete4>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
+    export const useDeleteDeptById = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDeptById>>, TError,{id: number}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
-        Awaited<ReturnType<typeof delete4>>,
+        Awaited<ReturnType<typeof deleteDeptById>>,
         TError,
         {id: number},
         TContext
       > => {
 
-      const mutationOptions = getDelete4MutationOptions(options);
+      const mutationOptions = getDeleteDeptByIdMutationOptions(options);
 
       return useMutation(mutationOptions);
     }

@@ -1,14 +1,13 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  getDetailQueryKey,
-  getList4QueryKey,
-  getUnreadCountQueryKey,
-  useCreate3,
-  useDetail,
-  usePublish,
-  useUpdate2,
-} from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
-import type { NoticeDetailView, NoticeTarget } from '@mb/api-sdk/generated/models';
+  type NoticeDetailView,
+  type NoticeTarget,
+  noticeQueryKeys,
+  useCreateNotice,
+  useNoticeDetail,
+  usePublishNotice,
+  useUpdateNotice,
+} from '@mb/api-sdk';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -62,16 +61,15 @@ export function NoticeDialog({ open, onOpenChange, noticeId, onSuccess }: Notice
 
   // 查询详情（编辑模式）— 非编辑模式传 0 但 enabled=false 不会发请求
   const detailId = noticeId ?? 0;
-  const { data: detailResponse } = useDetail(detailId, {
-    query: { queryKey: getDetailQueryKey(detailId), enabled: isEditing && open },
+  const { data: detailResponse } = useNoticeDetail(detailId, {
+    query: { queryKey: noticeQueryKeys.detail(detailId), enabled: isEditing && open },
   });
 
-  // orval 生成的响应结构：{ data: NoticeDetailView, status: 200, headers }
   const detail: NoticeDetailView | undefined = detailResponse;
 
-  const createMutation = useCreate3();
-  const updateMutation = useUpdate2();
-  const publishMutation = usePublish();
+  const createMutation = useCreateNotice();
+  const updateMutation = useUpdateNotice();
+  const publishMutation = usePublishNotice();
 
   // 发布目标选择器
   const [targetSelectorOpen, setTargetSelectorOpen] = useState(false);
@@ -174,8 +172,8 @@ export function NoticeDialog({ open, onOpenChange, noticeId, onSuccess }: Notice
         { id: pendingPublishId, data: { targets } },
         {
           onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: getList4QueryKey() });
-            queryClient.invalidateQueries({ queryKey: getUnreadCountQueryKey() });
+            queryClient.invalidateQueries({ queryKey: noticeQueryKeys.list() });
+            queryClient.invalidateQueries({ queryKey: noticeQueryKeys.unreadCount() });
             toast.success(t('action.publish'));
             onSuccess();
           },

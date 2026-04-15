@@ -31,7 +31,7 @@ type SecondParameter<T extends (...args: never) => unknown> = Parameters<T>[1];
 
 **权限:** `monitor:server:list`
  */
-export const getServerInfoUrl = () => {
+export const getGetMonitorServerInfoUrl = () => {
 
 
   
@@ -39,9 +39,9 @@ export const getServerInfoUrl = () => {
   return `/api/v1/monitor/server-info`
 }
 
-export const serverInfo = async ( options?: RequestInit): Promise<ServerInfoView> => {
+export const getMonitorServerInfo = async ( options?: RequestInit): Promise<ServerInfoView> => {
   
-  return customInstance<ServerInfoView>(getServerInfoUrl(),
+  return customInstance<ServerInfoView>(getGetMonitorServerInfoUrl(),
   {      
     ...options,
     method: 'GET'
@@ -54,42 +54,42 @@ export const serverInfo = async ( options?: RequestInit): Promise<ServerInfoView
 
 
 
-export const getServerInfoQueryKey = () => {
+export const getGetMonitorServerInfoQueryKey = () => {
     return [
     `/api/v1/monitor/server-info`
     ] as const;
     }
 
     
-export const getServerInfoQueryOptions = <TData = Awaited<ReturnType<typeof serverInfo>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof serverInfo>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export const getGetMonitorServerInfoQueryOptions = <TData = Awaited<ReturnType<typeof getMonitorServerInfo>>, TError = unknown>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMonitorServerInfo>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
 ) => {
 
 const {query: queryOptions, request: requestOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getServerInfoQueryKey();
+  const queryKey =  queryOptions?.queryKey ?? getGetMonitorServerInfoQueryKey();
 
   
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof serverInfo>>> = ({ signal }) => serverInfo({ signal, ...requestOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getMonitorServerInfo>>> = ({ signal }) => getMonitorServerInfo({ signal, ...requestOptions });
 
       
 
       
 
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof serverInfo>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getMonitorServerInfo>>, TError, TData> & { queryKey: QueryKey }
 }
 
-export type ServerInfoQueryResult = NonNullable<Awaited<ReturnType<typeof serverInfo>>>
-export type ServerInfoQueryError = unknown
+export type GetMonitorServerInfoQueryResult = NonNullable<Awaited<ReturnType<typeof getMonitorServerInfo>>>
+export type GetMonitorServerInfoQueryError = unknown
 
 
 
-export function useServerInfo<TData = Awaited<ReturnType<typeof serverInfo>>, TError = unknown>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof serverInfo>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
+export function useGetMonitorServerInfo<TData = Awaited<ReturnType<typeof getMonitorServerInfo>>, TError = unknown>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getMonitorServerInfo>>, TError, TData>, request?: SecondParameter<typeof customInstance>}
   
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getServerInfoQueryOptions(options)
+  const queryOptions = getGetMonitorServerInfoQueryOptions(options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 

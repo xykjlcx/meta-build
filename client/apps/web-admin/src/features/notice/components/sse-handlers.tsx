@@ -1,7 +1,4 @@
-import {
-  getList4QueryKey,
-  getUnreadCountQueryKey,
-} from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
+import { noticeQueryKeys } from '@mb/api-sdk';
 import { useAuth, useSseSubscription } from '@mb/app-shell';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
@@ -47,8 +44,8 @@ export function SseHandlers() {
       (data: unknown) => {
         const { title } = data as { id?: number; title?: string };
         toast.info(`${t('title')}: ${title}`);
-        queryClient.invalidateQueries({ queryKey: getList4QueryKey() });
-        queryClient.invalidateQueries({ queryKey: getUnreadCountQueryKey() });
+        queryClient.invalidateQueries({ queryKey: noticeQueryKeys.list() });
+        queryClient.invalidateQueries({ queryKey: noticeQueryKeys.unreadCount() });
       },
       [t, queryClient],
     ),

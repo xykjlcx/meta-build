@@ -381,7 +381,7 @@ export default defineConfig({
 | 路径 | git 状态 | 说明 |
 |------|---------|-----|
 | `client/packages/api-sdk/src/index.ts` | 入 git | 手写包装层 |
-| `client/packages/api-sdk/src/generated/` | **不入 git** | CI 重新生成，`.gitignore` 排除 |
+| `client/packages/api-sdk/src/generated/` | **入 git** | orval 生成产物，作为契约快照提交并接受 drift 校验 |
 | `client/packages/api-sdk/package.json` | 入 git | - |
 | `server/api-contract/openapi-v1.json` | **入 git** | **契约基线**（手动 commit 或 pre-commit hook 更新） |
 | `server/mb-admin/target/openapi.json` | 不入 git | Maven 构建产物（`target/` 在 `.gitignore`） |

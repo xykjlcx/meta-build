@@ -23,36 +23,36 @@ import type {
 } from '../../models';
 
 
-export const getList3ResponseMock = (overrideResponse: Partial< PageResultNotificationView > = {}): PageResultNotificationView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), senderId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getGetNotificationResponseMock = (overrideResponse: Partial< PageResultNotificationView > = {}): PageResultNotificationView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), senderId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
-export const getCreate2ResponseMock = (): number => (faker.number.int())
+export const getPostNotificationResponseMock = (): number => (faker.number.int())
 
 
-export const getList3MockHandler = (overrideResponse?: PageResultNotificationView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultNotificationView> | PageResultNotificationView), options?: RequestHandlerOptions) => {
+export const getGetNotificationMockHandler = (overrideResponse?: PageResultNotificationView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultNotificationView> | PageResultNotificationView), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/notifications', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getList3ResponseMock()),
+    : getGetNotificationResponseMock()),
       { status: 200,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getCreate2MockHandler = (overrideResponse?: number | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<number> | number), options?: RequestHandlerOptions) => {
+export const getPostNotificationMockHandler = (overrideResponse?: number | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<number> | number), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/notifications', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
     ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreate2ResponseMock()),
+    : getPostNotificationResponseMock()),
       { status: 201,
         headers: { 'Content-Type': 'application/json' }
       })
   }, options)
 }
 
-export const getMarkRead1MockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getPostNotificationByIdReadMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/notifications/:id/read', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -62,7 +62,7 @@ export const getMarkRead1MockHandler = (overrideResponse?: void | ((info: Parame
   }, options)
 }
 
-export const getDelete6MockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+export const getDeleteNotificationByIdMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.delete>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
   return http.delete('*/api/v1/notifications/:id', async (info) => {await delay(1000);
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
     return new HttpResponse(null,
@@ -72,8 +72,8 @@ export const getDelete6MockHandler = (overrideResponse?: void | ((info: Paramete
   }, options)
 }
 export const getNotificationControllerMock = () => [
-  getList3MockHandler(),
-  getCreate2MockHandler(),
-  getMarkRead1MockHandler(),
-  getDelete6MockHandler()
+  getGetNotificationMockHandler(),
+  getPostNotificationMockHandler(),
+  getPostNotificationByIdReadMockHandler(),
+  getDeleteNotificationByIdMockHandler()
 ]
