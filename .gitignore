@@ -65,6 +65,12 @@ redis-data/
 # ===== Playwright MCP =====
 .playwright-mcp/
 
+# ===== Claude Code 本地工作区 =====
+# EnterWorktree 工具默认路径（硬编码）
+.claude/worktrees/
+# superpowers using-git-worktrees skill 推荐路径
+.worktrees/
+
 # ===== 其他 OS =====
 Thumbs.db
 .flattened-pom.xml
