@@ -12,7 +12,7 @@ import com.metabuild.business.notice.api.qry.NoticeQry;
 import com.metabuild.business.notice.api.NoticeTarget;
 import com.metabuild.business.notice.api.cmd.NoticeUpdateCmd;
 import com.metabuild.business.notice.api.vo.RecipientVo;
-import com.metabuild.business.notice.domain.NoticeService;
+import com.metabuild.business.notice.domain.notice.NoticeService;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.exception.BusinessException;
@@ -21,7 +21,7 @@ import com.metabuild.common.exception.ForbiddenException;
 import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.common.security.DataScopeType;
-import com.metabuild.platform.notification.domain.NotificationService;
+import com.metabuild.platform.notification.domain.notification.NotificationService;
 import org.jooq.DSLContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -567,7 +567,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
     class ExportTests {
 
         @Autowired
-        private com.metabuild.business.notice.domain.NoticeExportService noticeExportService;
+        private com.metabuild.business.notice.domain.export.NoticeExportService noticeExportService;
 
         @Test
         void export_serviceCanBeInvoked() {

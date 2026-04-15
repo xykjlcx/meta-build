@@ -1,4 +1,4 @@
-package com.metabuild.business.notice.domain;
+package com.metabuild.business.notice.domain.event;
 
 import java.util.List;
 

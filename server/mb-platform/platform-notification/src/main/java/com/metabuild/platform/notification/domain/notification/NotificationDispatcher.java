@@ -1,8 +1,9 @@
-package com.metabuild.platform.notification.domain;
+package com.metabuild.platform.notification.domain.notification;
 
 import com.metabuild.platform.notification.api.NotificationChannel;
 import com.metabuild.platform.notification.api.NotificationException;
 import com.metabuild.platform.notification.api.NotificationMessage;
+import com.metabuild.platform.notification.domain.log.NotificationLogRepository;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

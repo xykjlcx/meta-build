@@ -6,7 +6,7 @@ import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.notification.api.cmd.NotificationCreateCmd;
 import com.metabuild.platform.notification.api.vo.NotificationVo;
-import com.metabuild.platform.notification.domain.NotificationService;
+import com.metabuild.platform.notification.domain.notification.NotificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springdoc.core.annotations.ParameterObject;

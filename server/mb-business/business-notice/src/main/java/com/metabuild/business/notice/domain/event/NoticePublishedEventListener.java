@@ -1,4 +1,4 @@
-package com.metabuild.business.notice.domain;
+package com.metabuild.business.notice.domain.event;
 
 import com.metabuild.platform.notification.api.NotificationApi;
 import com.metabuild.platform.notification.api.NotificationMessage;

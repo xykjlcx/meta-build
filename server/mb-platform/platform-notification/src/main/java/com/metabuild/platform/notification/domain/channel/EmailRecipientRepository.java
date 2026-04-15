@@ -1,4 +1,4 @@
-package com.metabuild.platform.notification.domain;
+package com.metabuild.platform.notification.domain.channel;
 
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;

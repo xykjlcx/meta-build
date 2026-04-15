@@ -1,4 +1,4 @@
-package com.metabuild.business.notice.domain;
+package com.metabuild.business.notice.domain.notice;
 
 import com.metabuild.business.notice.api.vo.RecipientVo;
 import com.metabuild.common.dto.PageQuery;

@@ -1,4 +1,4 @@
-package com.metabuild.business.notice.domain;
+package com.metabuild.business.notice.domain.notice;
 
 import cn.idev.excel.write.handler.CellWriteHandler;
 import cn.idev.excel.write.handler.context.CellWriteHandlerContext;

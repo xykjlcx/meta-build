@@ -1,4 +1,4 @@
-package com.metabuild.business.notice.domain;
+package com.metabuild.business.notice.domain.notice;
 
 import com.metabuild.business.notice.api.vo.AttachmentVo;
 import com.metabuild.common.id.SnowflakeIdGenerator;

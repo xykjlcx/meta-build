@@ -1,4 +1,4 @@
-package com.metabuild.platform.notification.domain;
+package com.metabuild.platform.notification.domain.binding;
 
 import com.metabuild.platform.notification.api.vo.WeChatBindingVo;
 import com.metabuild.schema.tables.records.MbUserWechatBindingRecord;

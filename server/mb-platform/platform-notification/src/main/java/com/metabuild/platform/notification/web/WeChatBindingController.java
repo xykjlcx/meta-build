@@ -3,7 +3,7 @@ package com.metabuild.platform.notification.web;
 import com.metabuild.platform.notification.api.vo.WeChatBindingVo;
 import com.metabuild.platform.notification.api.cmd.WeChatMiniBindCmd;
 import com.metabuild.platform.notification.api.cmd.WeChatMpBindCmd;
-import com.metabuild.platform.notification.domain.WeChatBindingService;
+import com.metabuild.platform.notification.domain.binding.WeChatBindingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;

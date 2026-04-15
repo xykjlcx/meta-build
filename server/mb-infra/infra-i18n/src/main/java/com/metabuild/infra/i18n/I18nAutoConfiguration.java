@@ -13,7 +13,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 /**
  * 国际化自动配置
  * <p>
- * 注册 MessageSource 和 LocaleResolver，覆盖所有 platform 模块的消息文件。
+ * 注册 MessageSource 和 LocaleResolver，覆盖共享层、platform 模块与 business 模块的消息文件。
  * 通过 Accept-Language 请求头自动切换语言，默认简体中文。
  * after = WebMvcAutoConfiguration 确保在 Spring MVC 注册 localeResolver 之后执行，
  * @ConditionalOnMissingBean 防止重复注册。
@@ -23,7 +23,7 @@ import org.springframework.web.servlet.i18n.AcceptHeaderLocaleResolver;
 public class I18nAutoConfiguration {
 
     /**
-     * 注册消息源，覆盖所有 platform 模块的消息文件
+     * 注册消息源，覆盖共享层、platform 模块与 business 模块的消息文件。
      */
     @Bean
     public MessageSource messageSource(MbI18nProperties props) {
@@ -34,6 +34,7 @@ public class I18nAutoConfiguration {
                 "classpath:messages/iam",
                 "classpath:messages/oplog",
                 "classpath:messages/file",
+                "classpath:messages/notice",
                 "classpath:messages/notification",
                 "classpath:messages/dict",
                 "classpath:messages/config",

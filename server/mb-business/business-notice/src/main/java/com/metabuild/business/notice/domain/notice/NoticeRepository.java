@@ -1,4 +1,4 @@
-package com.metabuild.business.notice.domain;
+package com.metabuild.business.notice.domain.notice;
 
 import com.metabuild.business.notice.api.vo.NoticeDetailVo;
 import com.metabuild.business.notice.api.qry.NoticeQry;

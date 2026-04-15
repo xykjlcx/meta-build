@@ -1,4 +1,4 @@
-package com.metabuild.platform.notification.domain;
+package com.metabuild.platform.notification.domain.channel;
 
 import com.metabuild.platform.notification.api.NotificationChannel;
 import com.metabuild.platform.notification.api.NotificationException;

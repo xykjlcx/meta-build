@@ -1,4 +1,4 @@
-package com.metabuild.platform.notification.domain;
+package com.metabuild.platform.notification.domain.binding;
 
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;

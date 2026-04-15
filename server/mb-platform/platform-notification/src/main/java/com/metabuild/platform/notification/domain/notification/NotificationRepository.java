@@ -1,4 +1,4 @@
-package com.metabuild.platform.notification.domain;
+package com.metabuild.platform.notification.domain.notification;
 
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;

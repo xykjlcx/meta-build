@@ -1,7 +1,7 @@
 package com.metabuild.platform.notification.web;
 
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.notification.domain.NotificationLogService;
+import com.metabuild.platform.notification.domain.log.NotificationLogService;
 import com.metabuild.platform.notification.api.vo.NotificationLogVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

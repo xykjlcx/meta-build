@@ -1,4 +1,4 @@
-package com.metabuild.platform.notification.domain;
+package com.metabuild.platform.notification.domain.log;
 
 import com.metabuild.platform.notification.api.vo.NotificationLogVo;
 import lombok.RequiredArgsConstructor;

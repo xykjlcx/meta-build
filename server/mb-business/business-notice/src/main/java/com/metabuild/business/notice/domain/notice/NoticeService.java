@@ -1,4 +1,4 @@
-package com.metabuild.business.notice.domain;
+package com.metabuild.business.notice.domain.notice;
 
 import com.metabuild.business.notice.api.cmd.BatchIdsCmd;
 import com.metabuild.business.notice.api.vo.BatchResultVo;
@@ -11,6 +11,7 @@ import com.metabuild.business.notice.api.NoticeTarget;
 import com.metabuild.business.notice.api.cmd.NoticeUpdateCmd;
 import com.metabuild.business.notice.api.vo.NoticeVo;
 import com.metabuild.business.notice.api.vo.RecipientVo;
+import com.metabuild.business.notice.domain.event.NoticePublishedEvent;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.exception.BusinessException;

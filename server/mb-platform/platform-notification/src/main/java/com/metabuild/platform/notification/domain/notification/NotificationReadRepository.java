@@ -1,4 +1,4 @@
-package com.metabuild.platform.notification.domain;
+package com.metabuild.platform.notification.domain.notification;
 
 import com.metabuild.schema.tables.records.MbNotificationReadRecord;
 import lombok.RequiredArgsConstructor;
