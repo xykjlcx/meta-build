@@ -19,12 +19,20 @@
 > | 决策 9 DataScope 修复:"Repository 基类 + VisitListener 双保险" | **方案 E**:零基类,`DataScopeVisitListener` 单点拦截 + `DataScopeRegistry` 集中声明 + `NO_RAW_SQL_FETCH` ArchUnit 兜底 | [ADR-0007](docs/adr/0007-继承遗产前先问原生哲学.md) |
 > | M1 里程碑:"Spring Modulith 包结构 + verify() 测试" | 此项作废,替换为 ArchUnit 3 条启动规则 | ADR-0003 |
 > | M4 里程碑:"mb-common / mb-framework / mb-system / mb-admin 四层" | 应为 6 层 + 所有子模块相应改名 | ADR-0002 + ADR-0004 |
+> | 表前缀 `sys_*`(L297 `sys_menu`、L497 `sys_user/sys_role/sys_menu`) | 改为 `mb_*`(`mb_iam_user / mb_iam_role / mb_iam_menu` 等) | [ADR-0009](docs/adr/0009-表前缀sys改mb.md) |
+> | platform 模块 `audit`(L388,业务审计日志/操作日志) | 改名为 `platform-log`,注解 `@Audit` 改为 `@OperationLog` 并下沉到 `mb-common` | [ADR-0010](docs/adr/0010-审计日志改操作日志.md) + [ADR-0013](docs/adr/0013-oplog改名platform-log加注解下沉.md) |
+> | infra 模块 `websocket`(L379) | v1 改为 `infra-sse`,用 SSE 单向推送替代 WebSocket 双向通信;`infra-websocket` 目录保留空占位 | [ADR-0014](docs/adr/0014-sse-替代-websocket-实时推送.md) |
+> | Flyway 脚本组织(L682 开放讨论"V1_1__iam 还是 V20260410_001") | 统一采用时间戳命名:`V<yyyymmdd>_<nnn>__<module>_<table>.sql` | [ADR-0008](docs/adr/0008-flyway-migration命名用时间戳.md) |
 >
-> 此外增补了两份新 ADR(未翻转既有决策,仅补充规范):
+> 此外增补了以下新 ADR(未翻转既有决策,仅补充规范):
 > - [ADR-0001](docs/adr/0001-m0-文档从7份收敛到3份.md):M0 文档从 7 份收敛到 3 份
 > - [ADR-0006](docs/adr/0006-canonical-reference质量规范.md):canonical reference 代码质量规范(P0 六维度 + P1 五维度)
+> - [ADR-0011](docs/adr/0011-version字段按需添加.md):`version` 字段按需添加(不强制所有表)
+> - [ADR-0012](docs/adr/0012-全局时间策略clock-bean.md):全局时间策略(Clock Bean + OffsetDateTime + DDL TIMESTAMPTZ)
 >
 > **维护约定**:本对照表在新增 ADR 翻转既有决策时同步更新;规划文档正文永不修改。详见 `CLAUDE.md` 的"维护约定"小节。
+>
+> **当前 ADR 总数**:14 份(0001-0014)。**以 `docs/adr/` 和 `CLAUDE.md` 的当前状态为准。**
 
 ---
 
