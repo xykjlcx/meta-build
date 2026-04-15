@@ -301,13 +301,13 @@ public class UserController {
 
     @RequirePermission("iam.user.list")
     @GetMapping
-    public PageResult<UserView> list(UserQuery query) {
+    public PageResult<UserVo> list(UserQry query) {
         return userApi.page(query);
     }
 
     @RequirePermission("iam.user.create")
     @PostMapping
-    public UserView create(@RequestBody @Valid UserCreateCommand cmd) {
+    public UserVo create(@RequestBody @Valid UserCreateCmd cmd) {
         return userApi.create(cmd);
     }
 }
@@ -433,7 +433,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
     @Test
     void admin_should_create_user() {
         currentUser.asAdmin();
-        UserView user = userService.create(new UserCreateCommand("alice", "password"));
+        UserVo user = userService.create(new UserCreateCmd("alice", "password"));
         assertThat(user.id()).isNotNull();
     }
 
@@ -441,7 +441,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
     void normal_user_should_fail_to_create_user() {
         currentUser.asUser(100L, "bob", "iam.user.list");  // 没有 create 权限
         assertThatThrownBy(() ->
-            userService.create(new UserCreateCommand("alice", "password"))
+            userService.create(new UserCreateCmd("alice", "password"))
         ).isInstanceOf(ForbiddenException.class);
     }
 }

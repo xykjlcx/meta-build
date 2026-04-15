@@ -21,10 +21,10 @@ import type {
 
 import type {
   GetRoleParams,
-  PageResultRoleView,
-  RoleCreateCommand,
-  RoleUpdateCommand,
-  RoleView
+  PageResultRoleVo,
+  RoleCreateCmd,
+  RoleUpdateCmd,
+  RoleVo
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -47,9 +47,9 @@ export const getGetRoleByIdUrl = (id: number,) => {
   return `/api/v1/roles/${id}`
 }
 
-export const getRoleById = async (id: number, options?: RequestInit): Promise<RoleView> => {
+export const getRoleById = async (id: number, options?: RequestInit): Promise<RoleVo> => {
   
-  return customInstance<RoleView>(getGetRoleByIdUrl(id),
+  return customInstance<RoleVo>(getGetRoleByIdUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -123,15 +123,15 @@ export const getPutRoleByIdUrl = (id: number,) => {
 }
 
 export const putRoleById = async (id: number,
-    roleUpdateCommand: RoleUpdateCommand, options?: RequestInit): Promise<RoleView> => {
+    roleUpdateCmd: RoleUpdateCmd, options?: RequestInit): Promise<RoleVo> => {
   
-  return customInstance<RoleView>(getPutRoleByIdUrl(id),
+  return customInstance<RoleVo>(getPutRoleByIdUrl(id),
   {      
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      roleUpdateCommand,)
+      roleUpdateCmd,)
   }
 );}
 
@@ -139,8 +139,8 @@ export const putRoleById = async (id: number,
 
 
 export const getPutRoleByIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putRoleById>>, TError,{id: number;data: RoleUpdateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof putRoleById>>, TError,{id: number;data: RoleUpdateCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putRoleById>>, TError,{id: number;data: RoleUpdateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putRoleById>>, TError,{id: number;data: RoleUpdateCmd}, TContext> => {
 
 const mutationKey = ['putRoleById'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -152,7 +152,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putRoleById>>, {id: number;data: RoleUpdateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putRoleById>>, {id: number;data: RoleUpdateCmd}> = (props) => {
           const {id,data} = props ?? {};
 
           return  putRoleById(id,data,requestOptions)
@@ -164,15 +164,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PutRoleByIdMutationResult = NonNullable<Awaited<ReturnType<typeof putRoleById>>>
-    export type PutRoleByIdMutationBody = RoleUpdateCommand
+    export type PutRoleByIdMutationBody = RoleUpdateCmd
     export type PutRoleByIdMutationError = unknown
 
     export const usePutRoleById = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putRoleById>>, TError,{id: number;data: RoleUpdateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putRoleById>>, TError,{id: number;data: RoleUpdateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof putRoleById>>,
         TError,
-        {id: number;data: RoleUpdateCommand},
+        {id: number;data: RoleUpdateCmd},
         TContext
       > => {
 
@@ -348,9 +348,9 @@ export const getGetRoleUrl = (params?: GetRoleParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/roles?${stringifiedParams}` : `/api/v1/roles`
 }
 
-export const getRole = async (params?: GetRoleParams, options?: RequestInit): Promise<PageResultRoleView> => {
+export const getRole = async (params?: GetRoleParams, options?: RequestInit): Promise<PageResultRoleVo> => {
   
-  return customInstance<PageResultRoleView>(getGetRoleUrl(params),
+  return customInstance<PageResultRoleVo>(getGetRoleUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -423,15 +423,15 @@ export const getPostRoleUrl = () => {
   return `/api/v1/roles`
 }
 
-export const postRole = async (roleCreateCommand: RoleCreateCommand, options?: RequestInit): Promise<RoleView> => {
+export const postRole = async (roleCreateCmd: RoleCreateCmd, options?: RequestInit): Promise<RoleVo> => {
   
-  return customInstance<RoleView>(getPostRoleUrl(),
+  return customInstance<RoleVo>(getPostRoleUrl(),
   {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      roleCreateCommand,)
+      roleCreateCmd,)
   }
 );}
 
@@ -439,8 +439,8 @@ export const postRole = async (roleCreateCommand: RoleCreateCommand, options?: R
 
 
 export const getPostRoleMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRole>>, TError,{data: RoleCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postRole>>, TError,{data: RoleCreateCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRole>>, TError,{data: RoleCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postRole>>, TError,{data: RoleCreateCmd}, TContext> => {
 
 const mutationKey = ['postRole'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -452,7 +452,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postRole>>, {data: RoleCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postRole>>, {data: RoleCreateCmd}> = (props) => {
           const {data} = props ?? {};
 
           return  postRole(data,requestOptions)
@@ -464,15 +464,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostRoleMutationResult = NonNullable<Awaited<ReturnType<typeof postRole>>>
-    export type PostRoleMutationBody = RoleCreateCommand
+    export type PostRoleMutationBody = RoleCreateCmd
     export type PostRoleMutationError = unknown
 
     export const usePostRole = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRole>>, TError,{data: RoleCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postRole>>, TError,{data: RoleCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof postRole>>,
         TError,
-        {data: RoleCreateCommand},
+        {data: RoleCreateCmd},
         TContext
       > => {
 

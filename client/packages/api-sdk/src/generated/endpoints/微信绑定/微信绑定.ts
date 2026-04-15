@@ -21,9 +21,9 @@ import type {
 
 import type {
   GetWechatMpOauthState200,
-  WeChatBindingView,
-  WeChatMiniBindCommand,
-  WeChatMpBindCommand
+  WeChatBindingVo,
+  WeChatMiniBindCmd,
+  WeChatMpBindCmd
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -45,15 +45,15 @@ export const getPostWechatBindMpUrl = () => {
   return `/api/v1/wechat/bind-mp`
 }
 
-export const postWechatBindMp = async (weChatMpBindCommand: WeChatMpBindCommand, options?: RequestInit): Promise<WeChatBindingView> => {
+export const postWechatBindMp = async (weChatMpBindCmd: WeChatMpBindCmd, options?: RequestInit): Promise<WeChatBindingVo> => {
   
-  return customInstance<WeChatBindingView>(getPostWechatBindMpUrl(),
+  return customInstance<WeChatBindingVo>(getPostWechatBindMpUrl(),
   {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      weChatMpBindCommand,)
+      weChatMpBindCmd,)
   }
 );}
 
@@ -61,8 +61,8 @@ export const postWechatBindMp = async (weChatMpBindCommand: WeChatMpBindCommand,
 
 
 export const getPostWechatBindMpMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMp>>, TError,{data: WeChatMpBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMp>>, TError,{data: WeChatMpBindCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMp>>, TError,{data: WeChatMpBindCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMp>>, TError,{data: WeChatMpBindCmd}, TContext> => {
 
 const mutationKey = ['postWechatBindMp'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -74,7 +74,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWechatBindMp>>, {data: WeChatMpBindCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWechatBindMp>>, {data: WeChatMpBindCmd}> = (props) => {
           const {data} = props ?? {};
 
           return  postWechatBindMp(data,requestOptions)
@@ -86,18 +86,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostWechatBindMpMutationResult = NonNullable<Awaited<ReturnType<typeof postWechatBindMp>>>
-    export type PostWechatBindMpMutationBody = WeChatMpBindCommand
+    export type PostWechatBindMpMutationBody = WeChatMpBindCmd
     export type PostWechatBindMpMutationError = unknown
 
     /**
  * @summary 公众号绑定
  */
 export const usePostWechatBindMp = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMp>>, TError,{data: WeChatMpBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMp>>, TError,{data: WeChatMpBindCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof postWechatBindMp>>,
         TError,
-        {data: WeChatMpBindCommand},
+        {data: WeChatMpBindCmd},
         TContext
       > => {
 
@@ -117,15 +117,15 @@ export const getPostWechatBindMiniUrl = () => {
   return `/api/v1/wechat/bind-mini`
 }
 
-export const postWechatBindMini = async (weChatMiniBindCommand: WeChatMiniBindCommand, options?: RequestInit): Promise<WeChatBindingView> => {
+export const postWechatBindMini = async (weChatMiniBindCmd: WeChatMiniBindCmd, options?: RequestInit): Promise<WeChatBindingVo> => {
   
-  return customInstance<WeChatBindingView>(getPostWechatBindMiniUrl(),
+  return customInstance<WeChatBindingVo>(getPostWechatBindMiniUrl(),
   {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      weChatMiniBindCommand,)
+      weChatMiniBindCmd,)
   }
 );}
 
@@ -133,8 +133,8 @@ export const postWechatBindMini = async (weChatMiniBindCommand: WeChatMiniBindCo
 
 
 export const getPostWechatBindMiniMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMini>>, TError,{data: WeChatMiniBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMini>>, TError,{data: WeChatMiniBindCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMini>>, TError,{data: WeChatMiniBindCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMini>>, TError,{data: WeChatMiniBindCmd}, TContext> => {
 
 const mutationKey = ['postWechatBindMini'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -146,7 +146,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWechatBindMini>>, {data: WeChatMiniBindCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postWechatBindMini>>, {data: WeChatMiniBindCmd}> = (props) => {
           const {data} = props ?? {};
 
           return  postWechatBindMini(data,requestOptions)
@@ -158,18 +158,18 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostWechatBindMiniMutationResult = NonNullable<Awaited<ReturnType<typeof postWechatBindMini>>>
-    export type PostWechatBindMiniMutationBody = WeChatMiniBindCommand
+    export type PostWechatBindMiniMutationBody = WeChatMiniBindCmd
     export type PostWechatBindMiniMutationError = unknown
 
     /**
  * @summary 小程序绑定
  */
 export const usePostWechatBindMini = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMini>>, TError,{data: WeChatMiniBindCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postWechatBindMini>>, TError,{data: WeChatMiniBindCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof postWechatBindMini>>,
         TError,
-        {data: WeChatMiniBindCommand},
+        {data: WeChatMiniBindCmd},
         TContext
       > => {
 
@@ -266,9 +266,9 @@ export const getGetWechatBindingUrl = () => {
   return `/api/v1/wechat/bindings`
 }
 
-export const getWechatBinding = async ( options?: RequestInit): Promise<WeChatBindingView[]> => {
+export const getWechatBinding = async ( options?: RequestInit): Promise<WeChatBindingVo[]> => {
   
-  return customInstance<WeChatBindingView[]>(getGetWechatBindingUrl(),
+  return customInstance<WeChatBindingVo[]>(getGetWechatBindingUrl(),
   {      
     ...options,
     method: 'GET'

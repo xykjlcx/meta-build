@@ -7,6 +7,7 @@ import com.metabuild.infra.archunit.ConfigManagementRule;
 import com.metabuild.infra.archunit.ControllerRule;
 import com.metabuild.infra.archunit.DoNotIncludeGeneratedJooq;
 import com.metabuild.infra.archunit.GeneralCodingRulesBundle;
+import com.metabuild.infra.archunit.ApiNamingRule;
 import com.metabuild.infra.archunit.JdbcIsolationRule;
 import com.metabuild.infra.archunit.JooqIsolationRule;
 import com.metabuild.infra.archunit.ModuleBoundaryRule;
@@ -153,6 +154,26 @@ class ArchitectureTest {
     @Test
     void no_at_value_annotation() {
         ConfigManagementRule.NO_AT_VALUE_ANNOTATION.check(classes);
+    }
+
+    @Test
+    void api_vo_must_end_with_vo() {
+        ApiNamingRule.API_VO_MUST_END_WITH_VO.check(classes);
+    }
+
+    @Test
+    void api_cmd_must_end_with_cmd() {
+        ApiNamingRule.API_CMD_MUST_END_WITH_CMD.check(classes);
+    }
+
+    @Test
+    void api_qry_must_end_with_qry() {
+        ApiNamingRule.API_QRY_MUST_END_WITH_QRY.check(classes);
+    }
+
+    @Test
+    void module_error_codes_must_stay_in_api() {
+        ApiNamingRule.MODULE_ERROR_CODES_MUST_STAY_IN_API.check(classes);
     }
 
     @Test

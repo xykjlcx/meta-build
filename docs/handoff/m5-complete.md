@@ -22,9 +22,9 @@
 
 ```
 ├── api/                          [12 DTO]
-│   ├── NoticeCreateCommand / NoticeUpdateCommand / NoticePublishCommand
-│   ├── NoticeView / NoticeDetailView / AttachmentView / RecipientView / NoticeTargetView
-│   ├── NoticeQuery / BatchIdsCommand / BatchResultView / NoticeTarget
+│   ├── NoticeCreateCmd / NoticeUpdateCmd / NoticePublishCmd
+│   ├── NoticeVo / NoticeDetailVo / AttachmentVo / RecipientVo / NoticeTargetVo
+│   ├── NoticeQry / BatchIdsCmd / BatchResultVo / NoticeTarget
 ├── domain/
 │   ├── NoticeService                 [业务核心]
 │   ├── NoticeRepository              [jOOQ 查询]

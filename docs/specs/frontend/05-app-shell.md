@@ -380,7 +380,7 @@ export function useCurrentUser(): CurrentUser {
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { authApi } from "@mb/api-sdk";
-import type { LoginCommand } from "@mb/api-sdk";
+import type { LoginCmd } from "@mb/api-sdk";
 
 /**
  * 认证写门面——执行登录/登出/刷新等会改变认证状态的操作。
@@ -396,7 +396,7 @@ export function useAuth() {
   const navigate = useNavigate();
 
   const login = useMutation({
-    mutationFn: (cmd: LoginCommand) => authApi.login(cmd),
+    mutationFn: (cmd: LoginCmd) => authApi.login(cmd),
     onSuccess: async (result) => {
       // 1. 双 token 存到 localStorage（access token 由 @mb/api-sdk 拦截器读取，详见 08-contract-client.md §4.1）
       localStorage.setItem("mb_access_token", result.accessToken);

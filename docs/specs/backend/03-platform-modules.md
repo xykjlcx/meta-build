@@ -144,14 +144,14 @@ public class UserController {
     @PostMapping
     @RequirePermission("iam:user:create")
     @OperationLog(action = "iam.user.create", module = "iam")
-    public UserView create(@RequestBody @Valid UserCreateCommand cmd) {
+    public UserVo create(@RequestBody @Valid UserCreateCmd cmd) {
         return api.create(cmd);
     }
 
     @PutMapping("/{id}")
     @RequirePermission("iam:user:update")
     @OperationLog(action = "iam.user.update", module = "iam")
-    public UserView update(@PathVariable Long id, @RequestBody @Valid UserUpdateCommand cmd) {
+    public UserVo update(@PathVariable Long id, @RequestBody @Valid UserUpdateCmd cmd) {
         return api.update(id, cmd);
     }
 }
@@ -463,10 +463,12 @@ platform-<name>/  (或 business-<name>/)
 ├── src/main/java/com/metabuild/<layer>/<name>/
 │   ├── api/                              # 对外契约
 │   │   ├── <Name>Api.java                # 接口
-│   │   └── dto/
-│   │       ├── <Name>View.java
-│   │       ├── <Name>CreateCommand.java
-│   │       └── <Name>Query.java
+│   │   ├── vo/
+│   │   │   └── <Name>Vo.java
+│   │   ├── cmd/
+│   │   │   └── <Name>CreateCmd.java
+│   │   └── qry/
+│   │       └── <Name>Qry.java
 │   ├── domain/                           # 业务逻辑（Service + Repository，不拆 infrastructure）
 │   │   ├── <Name>Service.java            # implements <Name>Api
 │   │   └── <Name>Repository.java         # 普通类（方案 E：数据权限在 jOOQ VisitListener 层拦截，Repository 零继承）
@@ -497,14 +499,14 @@ public class <Name>Controller {
     @GetMapping("/{id}")
     @Operation(summary = "查询详情")
     @RequirePermission("<layer>:<name>:view")
-    public <Name>View getById(@PathVariable Long id) {
+    public <Name>Vo getById(@PathVariable Long id) {
         return api.findById(id);
     }
 
     @PostMapping
     @Operation(summary = "创建")
     @RequirePermission("<layer>:<name>:create")
-    public <Name>View create(@RequestBody @Valid <Name>CreateCommand cmd) {
+    public <Name>Vo create(@RequestBody @Valid <Name>CreateCmd cmd) {
         return api.create(cmd);
     }
 }
@@ -523,20 +525,20 @@ public class <Name>Service implements <Name>Api {
 
     @Override
     @Transactional(readOnly = true)
-    public <Name>View findById(Long id) {
+    public <Name>Vo findById(Long id) {
         return repository.findById(id)
-            .map(<Name>View::from)
+            .map(<Name>Vo::from)
             .orElseThrow(() -> new NotFoundException("<layer>.<name>.notFound"));
     }
 
     @Override
     @Transactional
-    public <Name>View create(<Name>CreateCommand cmd) {
+    public <Name>Vo create(<Name>CreateCmd cmd) {
         Long currentUserId = currentUser.userId();      // 通过门面获取，零 Sa-Token 引用
         <Name> entity = new <Name>(cmd, currentUserId);
         entity = repository.save(entity);
         events.publishEvent(new <Name>CreatedEvent(entity.id(), currentUserId));
-        return <Name>View.from(entity);
+        return <Name>Vo.from(entity);
     }
 }
 ```
@@ -593,11 +595,11 @@ mkdir -p server/mb-business/business-order/src/test/java/com/metabuild/business/
 package com.metabuild.business.order.api;
 
 public interface OrderApi {
-    OrderView findById(Long id);
-    PageResult<OrderView> page(OrderQuery query);
-    OrderView create(OrderCreateCommand cmd);
-    OrderView submit(Long orderId);
-    OrderView cancel(Long orderId, String reason);
+    OrderVo findById(Long id);
+    PageResult<OrderVo> page(OrderQry query);
+    OrderVo create(OrderCreateCmd cmd);
+    OrderVo submit(Long orderId);
+    OrderVo cancel(Long orderId, String reason);
 }
 ```
 
@@ -676,10 +678,10 @@ cd server && mvn -Pcodegen generate-sources -pl mb-schema
 
 | 文件 | 位置 | 角色 |
 |---|---|---|
-| `<Entity>View.java` | `api/dto/` | API 响应 DTO（record + `from()` 静态工厂）|
-| `<Entity>CreateCommand.java` | `api/dto/` | API 创建请求（record）|
-| `<Entity>Update<Action>Command.java` | `api/dto/` | API 更新/业务动作请求（按业务语义命名，record）|
-| `<Entity>Query.java` | `api/dto/` | API 查询条件（record）|
+| `<Entity>Vo.java` | `api/vo/` | API 响应 DTO（record + `from()` 静态工厂）|
+| `<Entity>CreateCmd.java` | `api/cmd/` | API 创建请求（record）|
+| `<Entity>Update<Action>Cmd.java` | `api/cmd/` | API 更新/业务动作请求（按业务语义命名，record）|
+| `<Entity>Qry.java` | `api/qry/` | API 查询条件（record）|
 | `<Entity>CreatedEvent.java` | `api/event/` | 领域事件（record）|
 | `<Entity>Api.java` | `api/` | 跨模块调用接口 |
 | `<Entity>Service.java` | `domain/<aggregate>/` | `implements <Entity>Api`，业务编排 |
@@ -729,7 +731,7 @@ class OrderServiceIntegrationTest extends BaseIntegrationTest {
     @Test
     void user_with_permission_can_create_order() {
         currentUser.asUser(100L, "alice", "business:order:create");
-        OrderView view = orderApi.create(new OrderCreateCommand(...));
+        OrderVo view = orderApi.create(new OrderCreateCmd(...));
         assertThat(view.id()).isNotNull();
     }
 
@@ -737,7 +739,7 @@ class OrderServiceIntegrationTest extends BaseIntegrationTest {
     void user_without_permission_fails_to_create() {
         currentUser.asUser(100L, "alice");  // 没有任何权限
         assertThatThrownBy(() ->
-            orderApi.create(new OrderCreateCommand(...))
+            orderApi.create(new OrderCreateCmd(...))
         ).isInstanceOf(ForbiddenException.class);
     }
 }

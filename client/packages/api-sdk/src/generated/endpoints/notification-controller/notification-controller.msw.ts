@@ -19,16 +19,16 @@ import type {
 } from 'msw';
 
 import type {
-  PageResultNotificationView
+  PageResultNotificationVo
 } from '../../models';
 
 
-export const getGetNotificationResponseMock = (overrideResponse: Partial< PageResultNotificationView > = {}): PageResultNotificationView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), senderId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getGetNotificationResponseMock = (overrideResponse: Partial< PageResultNotificationVo > = {}): PageResultNotificationVo => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), title: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), content: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), type: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), senderId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), read: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
 export const getPostNotificationResponseMock = (): number => (faker.number.int())
 
 
-export const getGetNotificationMockHandler = (overrideResponse?: PageResultNotificationView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultNotificationView> | PageResultNotificationView), options?: RequestHandlerOptions) => {
+export const getGetNotificationMockHandler = (overrideResponse?: PageResultNotificationVo | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultNotificationVo> | PageResultNotificationVo), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/notifications', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined

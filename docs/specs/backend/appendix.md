@@ -232,9 +232,9 @@
 | **CurrentUser** | **认证读门面接口**（ADR-0005）。业务层必须通过这个接口获取当前用户信息和权限判断，禁止直接依赖 Sa-Token API。接口定义在 `mb-common.security`，Sa-Token 实现在 `infra-security`。v1 M4.2 扩展:新增常量 `SYSTEM_USER_ID = 0L` 和默认方法 `userIdOrSystem()`,用于无认证上下文（`@Scheduled` / `@Async`）场景下的审计字段填充。|
 | **AuthFacade** | **认证写门面接口**（ADR-0005 + 方案 E）。封装登录/登出/强制注销/续期等"改变认证状态"的操作，业务层要做登录等技术动作时必须通过此接口。与 `CurrentUser` 对称（读 vs 写） |
 | **@RequirePermission** | **自定义权限注解**（ADR-0005）。**必须放在 Controller 层的方法上**（N3 §2.5），不能放 Service 层。AOP 委托给 `CurrentUser.hasPermission()` 判断。Service 间调用不重新检查权限，跨模块可见性通过 `<Module>Api` 接口 + ArchUnit 编译期保护 |
-| **View** | API 响应 DTO 的命名后缀，如 `UserView` / `OrderDetailView`，必须是 record，带 `from(Record)` 静态工厂方法 |
-| **Command** | 写操作请求 DTO 的命名后缀，如 `UserCreateCommand` / `UserUpdateEmailCommand` / `OrderSubmitCommand`，必须是 record |
-| **Query** | 查询参数 DTO 的命名后缀，如 `UserQuery` / `OrderQuery`，必须是 record |
+| **Vo** | API 响应 DTO 的命名后缀，如 `UserVo` / `OrderDetailVo`，必须是 record，带 `from(Record)` 静态工厂方法 |
+| **Cmd** | 写操作请求 DTO 的命名后缀，如 `UserCreateCmd` / `UserUpdateEmailCmd` / `OrderSubmitCmd`，必须是 record |
+| **Qry** | 查询参数 DTO 的命名后缀，如 `UserQry` / `OrderQry`，必须是 record |
 | **Event** | 领域事件 DTO 的命名后缀，如 `UserCreatedEvent`，必须是 record，通过 `ApplicationEventPublisher` 发布 |
 | **&lt;Module&gt;Api** | 跨模块调用接口的命名，如 `UserApi` / `OrderApi`。模块内的 `Service` class `implements <Module>Api`。跨模块调用必须走 Api 接口（`CROSS_PLATFORM_ONLY_VIA_API` ArchUnit 规则强制）|
 | **Use Case / 编排 Service** | meta-build 不把它当“第二套领域层”。模块内复杂编排仍放本模块 `domain/`；管理端特有的跨模块聚合流程放 `mb-admin/usecase/`。详见 [01-module-structure.md §4.7](./01-module-structure.md) |

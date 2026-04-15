@@ -262,8 +262,8 @@ client/packages/api-sdk/src/generated/
 ```typescript
 // 手写类型 — 不被 orval 生成替代
 export type { PageResult, ProblemDetail } from './common';
-export type { LoginCommand, LoginView, UserSummary, RefreshCommand, CurrentUserView } from './auth';
-export type { MenuNodeDto, CurrentUserMenuView } from './menu';
+export type { LoginCmd, LoginVo, UserSummary, RefreshCmd, CurrentUserVo } from './auth';
+export type { MenuNodeDto, CurrentUserMenuVo } from './menu';
 export type { AppPermission } from './permission';
 export { ALL_APP_PERMISSIONS } from './permission';
 ```
@@ -273,8 +273,8 @@ export { ALL_APP_PERMISSIONS } from './permission';
 ```typescript
 // === 手写类型（保留，不被 orval 替代）===
 export type { PageResult, ProblemDetail } from './types/common';
-export type { LoginCommand, LoginView, UserSummary, RefreshCommand, CurrentUserView } from './types/auth';
-export type { MenuNodeDto, CurrentUserMenuView } from './types/menu';
+export type { LoginCmd, LoginVo, UserSummary, RefreshCmd, CurrentUserVo } from './types/auth';
+export type { MenuNodeDto, CurrentUserMenuVo } from './types/menu';
 export type { AppPermission } from './types/permission';
 export { ALL_APP_PERMISSIONS } from './types/permission';
 
@@ -693,11 +693,11 @@ ls server/mb-schema/src/main/jooq-generated/com/metabuild/schema/tables/BizNotic
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticeStatus.java`
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticeRepository.java`
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticeService.java`
-- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/NoticeView.java`
-- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/NoticeDetailView.java`
-- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/NoticeCreateCommand.java`
-- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/NoticeUpdateCommand.java`
-- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/NoticeQuery.java`
+- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/vo/NoticeVo.java`
+- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/vo/NoticeDetailVo.java`
+- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/cmd/NoticeCreateCmd.java`
+- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/cmd/NoticeUpdateCmd.java`
+- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/qry/NoticeQry.java`
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/web/NoticeController.java`
 
 **Steps:**
@@ -724,25 +724,25 @@ public enum NoticeStatus {
 ```
 
 - [ ] 创建 `NoticeRepository`：jOOQ 查询封装
-  - `PageResult<NoticeView> findPage(NoticeQuery query, Long currentUserId)` — 分页列表，JOIN recipient 获取当前用户已读状态，聚合 readCount/recipientCount
-  - `Optional<NoticeDetailView> findById(Long id, Long currentUserId)` — 详情含附件 + targets + readCount/recipientCount
+  - `PageResult<NoticeVo> findPage(NoticeQry query, Long currentUserId)` — 分页列表，JOIN recipient 获取当前用户已读状态，聚合 readCount/recipientCount
+  - `Optional<NoticeDetailVo> findById(Long id, Long currentUserId)` — 详情含附件 + targets + readCount/recipientCount
   - `int insert(BizNoticeRecord record)` — 插入
   - `int update(BizNoticeRecord record)` — 更新（含乐观锁 WHERE version = ?）
   - `int deleteById(Long id)` — 物理删除
   - 所有查询方法通过 jOOQ 的 DSL 构建，**不泄漏 jOOQ 类型到 Service 层**
 
 - [ ] 创建 DTO record 类（在 `api` 包下）：
-  - `NoticeView` — 列表视图（id, title, status, pinned, startTime, endTime, createdByName, createdAt, updatedAt, read, readCount, recipientCount）
-  - `NoticeDetailView` — 详情视图（含 content, attachments, targets, version）
-  - `NoticeCreateCommand` — 新增（@NotBlank title, @Size content, pinned, startTime, endTime, @Size(max=10) attachmentFileIds）
-  - `NoticeUpdateCommand` — 编辑（同 Create + @NotNull version）
-  - `NoticeQuery` — 查询条件（status, keyword, startTimeFrom, startTimeTo, page, size, sort）
+  - `NoticeVo` — 列表视图（id, title, status, pinned, startTime, endTime, createdByName, createdAt, updatedAt, read, readCount, recipientCount）
+  - `NoticeDetailVo` — 详情视图（含 content, attachments, targets, version）
+  - `NoticeCreateCmd` — 新增（@NotBlank title, @Size content, pinned, startTime, endTime, @Size(max=10) attachmentFileIds）
+  - `NoticeUpdateCmd` — 编辑（同 Create + @NotNull version）
+  - `NoticeQry` — 查询条件（status, keyword, startTimeFrom, startTimeTo, page, size, sort）
 
 - [ ] 创建 `NoticeService`：
-  - `PageResult<NoticeView> list(NoticeQuery query)` — 从 CurrentUser 获取 userId，委托 Repository
-  - `NoticeDetailView detail(Long id)` — 委托 Repository
-  - `NoticeView create(NoticeCreateCommand cmd)` — 生成 Snowflake ID，sanitizeHtml(content)，设置 ownerDeptId（从 CurrentUser.deptId()），插入，处理附件关联
-  - `NoticeView update(Long id, NoticeUpdateCommand cmd)` — **校验 status == DRAFT**，否则抛 400 `notice.onlyDraftCanEdit`；sanitizeHtml；乐观锁更新（version 不匹配抛 409）
+  - `PageResult<NoticeVo> list(NoticeQry query)` — 从 CurrentUser 获取 userId，委托 Repository
+  - `NoticeDetailVo detail(Long id)` — 委托 Repository
+  - `NoticeVo create(NoticeCreateCmd cmd)` — 生成 Snowflake ID，sanitizeHtml(content)，设置 ownerDeptId（从 CurrentUser.deptId()），插入，处理附件关联
+  - `NoticeVo update(Long id, NoticeUpdateCmd cmd)` — **校验 status == DRAFT**，否则抛 400 `notice.onlyDraftCanEdit`；sanitizeHtml；乐观锁更新（version 不匹配抛 409）
   - `void delete(Long id)` — **校验 status == DRAFT 或 REVOKED**，否则抛 400 `notice.onlyDraftOrRevokedCanDelete`
   - 内部 `sanitizeHtml(String html)` 方法使用 jsoup `Safelist.relaxed()` 扩展（见 spec 3.6）
 
@@ -769,27 +769,27 @@ cd server && mvn compile -pl mb-business/business-notice -am
 
 **Files:**
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticeService.java`（追加方法）
-- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/NoticePublishCommand.java`（新建）
+- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/cmd/NoticePublishCmd.java`（新建）
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/NoticeTarget.java`（新建）
-- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/BatchIdsCommand.java`（新建）
-- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/BatchResultView.java`（新建）
+- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/cmd/BatchIdsCmd.java`（新建）
+- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/vo/BatchResultVo.java`（新建）
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/web/NoticeController.java`（追加端点）
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/config/NoticeDataScopeConfig.java`（新建）
 
 **Steps:**
 
 - [ ] 创建 DTO：
-  - `NoticePublishCommand` — `@NotEmpty List<NoticeTarget> targets`
+  - `NoticePublishCmd` — `@NotEmpty List<NoticeTarget> targets`
   - `NoticeTarget` — `@NotNull String targetType`, `Long targetId`（ALL 时为 null）
-  - `BatchIdsCommand` — `@NotEmpty @Size(max=100) List<Long> ids`
-  - `BatchResultView` — `int success, int skipped`
+  - `BatchIdsCmd` — `@NotEmpty @Size(max=100) List<Long> ids`
+  - `BatchResultVo` — `int success, int skipped`
 
 - [ ] 在 `NoticeService` 中新增方法：
-  - `NoticeView publish(Long id, NoticePublishCommand cmd)` — 校验 status == DRAFT，**此处只做状态变更为 PUBLISHED**（recipient 展开在 Task 9 实现）
-  - `NoticeView revoke(Long id)` — 校验 status == PUBLISHED，变更为 REVOKED
-  - `NoticeView duplicate(Long id)` — 校验 status == PUBLISHED 或 REVOKED，复制 title/content/pinned/startTime/endTime + 附件关联，生成新 DRAFT 公告
-  - `BatchResultView batchPublish(BatchIdsCommand cmd)` — 遍历 ids，逐条校验状态，合规的调 publish（简化版，不展开 recipient），不合规的 skip
-  - `BatchResultView batchDelete(BatchIdsCommand cmd)` — 遍历 ids，逐条校验状态（DRAFT/REVOKED），合规的删除
+  - `NoticeVo publish(Long id, NoticePublishCmd cmd)` — 校验 status == DRAFT，**此处只做状态变更为 PUBLISHED**（recipient 展开在 Task 9 实现）
+  - `NoticeVo revoke(Long id)` — 校验 status == PUBLISHED，变更为 REVOKED
+  - `NoticeVo duplicate(Long id)` — 校验 status == PUBLISHED 或 REVOKED，复制 title/content/pinned/startTime/endTime + 附件关联，生成新 DRAFT 公告
+  - `BatchResultVo batchPublish(BatchIdsCmd cmd)` — 遍历 ids，逐条校验状态，合规的调 publish（简化版，不展开 recipient），不合规的 skip
+  - `BatchResultVo batchDelete(BatchIdsCmd cmd)` — 遍历 ids，逐条校验状态（DRAFT/REVOKED），合规的删除
 
 - [ ] 在 `NoticeController` 中新增端点：
   - `POST /{id}/publish` — `@RequirePermission("notice:notice:publish")` + `@OperationLog`
@@ -830,23 +830,23 @@ cd server && mvn compile -pl mb-business/business-notice -am
 
 **Files:**
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticeAttachmentRepository.java`（新建）
-- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/AttachmentView.java`（新建）
+- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/vo/AttachmentVo.java`（新建）
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticeService.java`（修改，集成附件逻辑）
 
 **Steps:**
 
-- [ ] 创建 `AttachmentView`：
+- [ ] 创建 `AttachmentVo`：
 
 ```java
 package com.metabuild.business.notice.api;
 
-public record AttachmentView(Long fileId, String fileName, Long fileSize, String url) {}
+public record AttachmentVo(Long fileId, String fileName, Long fileSize, String url) {}
 ```
 
 - [ ] 创建 `NoticeAttachmentRepository`：
   - `void batchInsert(Long noticeId, List<Long> fileIds, Long createdBy, Long tenantId)` — 批量插入附件关联，设置 sortOrder 按 list 顺序
   - `void deleteByNoticeId(Long noticeId)` — 删除公告的所有附件关联
-  - `List<AttachmentView> findByNoticeId(Long noticeId)` — 查附件列表（JOIN platform-file 的 `mb_file` 表获取 fileName/fileSize/url，或通过 platform-file API 获取）
+  - `List<AttachmentVo> findByNoticeId(Long noticeId)` — 查附件列表（JOIN platform-file 的 `mb_file` 表获取 fileName/fileSize/url，或通过 platform-file API 获取）
 
 - [ ] 修改 `NoticeService`：
   - `create` 方法：插入 notice 后，如果 `attachmentFileIds` 非空，调 `NoticeAttachmentRepository.batchInsert`
@@ -877,21 +877,21 @@ cd server && mvn compile -pl mb-business/business-notice -am
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticeRecipientRepository.java`（新建）
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticePublishedEvent.java`（新建）
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticePublishedEventListener.java`（新建）
-- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/NoticeTargetView.java`（新建）
+- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/vo/NoticeTargetVo.java`（新建）
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticeService.java`（修改 publish 方法）
 
 **Steps:**
 
-- [ ] 创建 `NoticeTargetView`：
+- [ ] 创建 `NoticeTargetVo`：
 
 ```java
-public record NoticeTargetView(String targetType, Long targetId, String targetName) {}
+public record NoticeTargetVo(String targetType, Long targetId, String targetName) {}
 ```
 
 - [ ] 创建 `NoticeTargetRepository`：
   - `void batchInsert(Long noticeId, List<NoticeTarget> targets)` — 批量插入 target
   - `void deleteByNoticeId(Long noticeId)` — 删除公告的所有 target
-  - `List<NoticeTargetView> findByNoticeId(Long noticeId)` — 查 target 列表（targetName 需 JOIN dept/role/user 表）
+  - `List<NoticeTargetVo> findByNoticeId(Long noticeId)` — 查 target 列表（targetName 需 JOIN dept/role/user 表）
 
 - [ ] 创建 `NoticeRecipientRepository`：
   - `void batchInsert(Long noticeId, List<Long> userIds)` — **分批插入，每批 500 条**，使用 jOOQ batch insert
@@ -939,7 +939,7 @@ public class NoticePublishedEventListener {
 
 ```java
 @Transactional
-public NoticeView publish(Long id, NoticePublishCommand cmd) {
+public NoticeVo publish(Long id, NoticePublishCmd cmd) {
     // 1. 校验 status == DRAFT
     // 2. 更新 status = PUBLISHED
     // 3. 写入 biz_notice_target
@@ -951,7 +951,7 @@ public NoticeView publish(Long id, NoticePublishCommand cmd) {
     //    - 去重
     // 5. batchInsert 到 biz_notice_recipient（每批 500 条）
     // 6. publishEvent(new NoticePublishedEvent(id, title, recipientUserIds))
-    // 7. 返回 NoticeView
+    // 7. 返回 NoticeVo
 }
 ```
 
@@ -972,33 +972,33 @@ cd server && mvn compile -pl mb-business/business-notice -am
 **Files:**
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticeRecipientRepository.java`（追加方法）
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/domain/NoticeService.java`（追加方法）
-- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/RecipientView.java`（新建）
+- `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/api/vo/RecipientVo.java`（新建）
 - `server/mb-business/business-notice/src/main/java/com/metabuild/business/notice/web/NoticeController.java`（追加端点）
 
 **Steps:**
 
-- [ ] 创建 `RecipientView`：
+- [ ] 创建 `RecipientVo`：
 
 ```java
-public record RecipientView(Long userId, String username, Instant readAt) {}
+public record RecipientVo(Long userId, String username, Instant readAt) {}
 ```
 
 - [ ] 在 `NoticeRecipientRepository` 中追加方法：
   - `boolean markRead(Long noticeId, Long userId, Instant readAt)` — `UPDATE biz_notice_recipient SET read_at = ? WHERE notice_id = ? AND user_id = ? AND read_at IS NULL`，返回影响行数 > 0（幂等：已读不更新）
   - `int unreadCount(Long userId)` — `SELECT count(*) FROM biz_notice_recipient WHERE user_id = ? AND read_at IS NULL`
-  - `PageResult<RecipientView> findRecipients(Long noticeId, String readStatus, int page, int size)` — 分页查接收人列表，readStatus 过滤（all/read/unread），JOIN user 表获取 username
+  - `PageResult<RecipientVo> findRecipients(Long noticeId, String readStatus, int page, int size)` — 分页查接收人列表，readStatus 过滤（all/read/unread），JOIN user 表获取 username
 
 - [ ] 在 `NoticeService` 中追加方法：
   - `void markRead(Long noticeId)` — 从 CurrentUser 获取 userId，委托 Repository
   - `int unreadCount()` — 从 CurrentUser 获取 userId，委托 Repository
-  - `PageResult<RecipientView> recipients(Long noticeId, String readStatus, int page, int size)` — 委托 Repository
+  - `PageResult<RecipientVo> recipients(Long noticeId, String readStatus, int page, int size)` — 委托 Repository
 
 - [ ] 在 `NoticeController` 中追加端点：
   - `PUT /{id}/read` — **无权限注解**（已登录即可） → markRead → 204
   - `GET /unread-count` — **无权限注解**（已登录即可） → unreadCount → `{ "count": N }`
   - `GET /{id}/recipients` — `@RequirePermission("notice:notice:detail")` → recipients → PageResult
 
-- [ ] 确认 `NoticeView` 和 `NoticeDetailView` 中的 `readCount` / `recipientCount` 已通过 Repository 聚合查询填充（在 Task 6 的 Repository 层实现）
+- [ ] 确认 `NoticeVo` 和 `NoticeDetailVo` 中的 `readCount` / `recipientCount` 已通过 Repository 聚合查询填充（在 Task 6 的 Repository 层实现）
 
 **Verify:**
 
@@ -1050,7 +1050,7 @@ public class FormulaInjectionHandler implements CellWriteHandler {
 ```
 
 - [ ] 创建 `NoticeExportService`：
-  - `void export(NoticeQuery query, OutputStream out)` — 分页查询（每页 1000 条）→ FastExcel 流式写入
+  - `void export(NoticeQry query, OutputStream out)` — 分页查询（每页 1000 条）→ FastExcel 流式写入
   - **行数上限 10 万行**，超出截断并在最后一行提示"数据量过大，请缩小筛选范围"
   - 注册 `FormulaInjectionHandler`
   - 导出字段：标题 / 状态（中文映射） / 置顶 / 生效时间 / 失效时间 / 创建人 / 创建时间 / 已读率
@@ -1062,7 +1062,7 @@ public class FormulaInjectionHandler implements CellWriteHandler {
 @GetMapping("/export")
 @RequirePermission("notice:notice:export")
 @OperationLog(module = "notice", type = "导出公告")
-public void export(NoticeQuery query, HttpServletResponse response) {
+public void export(NoticeQry query, HttpServletResponse response) {
     // 限流检查：每用户每分钟 1 次 + 全局并发上限 3
     // 设置 response headers
     response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
@@ -1113,7 +1113,7 @@ cd server && mvn compile -pl mb-business/business-notice -am
 11. `optimisticLockConflict_returns409` — 并发编辑乐观锁冲突，验证 409
 
 **批量操作（2 用例）：**
-12. `batchPublish_returnsSuccessAndSkipped` — 混合状态批量发布，验证 BatchResultView
+12. `batchPublish_returnsSuccessAndSkipped` — 混合状态批量发布，验证 BatchResultVo
 13. `batchDelete_returnsSuccessAndSkipped` — 混合状态批量删除
 
 **查询（3 用例）：**

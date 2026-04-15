@@ -17,7 +17,7 @@ import type {
 
 import type {
   GetJobLogParams,
-  PageResultJobLogView
+  PageResultJobLogVo
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -55,9 +55,9 @@ export const getGetJobLogUrl = (params?: GetJobLogParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/jobs/logs?${stringifiedParams}` : `/api/v1/jobs/logs`
 }
 
-export const getJobLog = async (params?: GetJobLogParams, options?: RequestInit): Promise<PageResultJobLogView> => {
+export const getJobLog = async (params?: GetJobLogParams, options?: RequestInit): Promise<PageResultJobLogVo> => {
   
-  return customInstance<PageResultJobLogView>(getGetJobLogUrl(params),
+  return customInstance<PageResultJobLogVo>(getGetJobLogUrl(params),
   {      
     ...options,
     method: 'GET'

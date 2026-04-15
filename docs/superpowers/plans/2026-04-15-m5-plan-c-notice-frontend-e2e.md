@@ -706,7 +706,7 @@ import {
   getList4QueryKey,
   getUnreadCountQueryKey,
 } from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
-import type { NoticeView } from '@mb/api-sdk/generated/models';
+import type { NoticeVo } from '@mb/api-sdk/generated/models';
 import { NOTICE_STATUS, PAGE_SIZE, type NoticeStatusValue } from '../constants';
 import { NoticeStatusBadge } from '../components/notice-status-badge';
 import { BatchConfirmDialog } from '../components/batch-confirm-dialog';
@@ -859,7 +859,7 @@ export function NoticeListPage() {
   const handleBatchAction = useCallback(
     (action: 'publish' | 'delete') => {
       const selected = notices.filter((n) => selectedIds.includes(n.id!));
-      let validItems: NoticeView[];
+      let validItems: NoticeVo[];
       if (action === 'publish') {
         validItems = selected.filter((n) => n.status === NOTICE_STATUS.DRAFT);
       } else {
@@ -924,7 +924,7 @@ export function NoticeListPage() {
   }, [invalidateNotices]);
 
   // ─── 表格列定义 ─────────────────────────────────────
-  const columns = useMemo<ColumnDef<NoticeView, unknown>[]>(
+  const columns = useMemo<ColumnDef<NoticeVo, unknown>[]>(
     () => [
       {
         accessorKey: 'title',
@@ -1856,7 +1856,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useRecipients } from '@mb/api-sdk/generated/endpoints/公告管理/公告管理';
-import type { RecipientView } from '@mb/api-sdk/generated/models';
+import type { RecipientVo } from '@mb/api-sdk/generated/models';
 
 interface RecipientsTabProps {
   noticeId: number;
@@ -1885,7 +1885,7 @@ export function RecipientsTab({ noticeId }: RecipientsTabProps) {
     [pagination, totalElements, totalPages],
   );
 
-  const columns = useMemo<ColumnDef<RecipientView, unknown>[]>(
+  const columns = useMemo<ColumnDef<RecipientVo, unknown>[]>(
     () => [
       {
         accessorKey: 'username',
@@ -3544,15 +3544,15 @@ cd client/apps/web-admin && npx playwright test --reporter=list
 
 | 前端类型 | 后端对应 | orval 生成 |
 |---------|---------|-----------|
-| `NoticeView` | `NoticeView` | 已生成 |
-| `NoticeDetailView` | `NoticeDetailView` | 已生成 |
-| `NoticeCreateCommand` | `NoticeCreateCommand` | 已生成 |
-| `NoticeUpdateCommand` | `NoticeUpdateCommand` | 已生成 |
-| `NoticePublishCommand` | `NoticePublishCommand` | 已生成 |
+| `NoticeVo` | `NoticeVo` | 已生成 |
+| `NoticeDetailVo` | `NoticeDetailVo` | 已生成 |
+| `NoticeCreateCmd` | `NoticeCreateCmd` | 已生成 |
+| `NoticeUpdateCmd` | `NoticeUpdateCmd` | 已生成 |
+| `NoticePublishCmd` | `NoticePublishCmd` | 已生成 |
 | `NoticeTarget` | `NoticeTarget` | 已生成 |
-| `BatchResultView` | `BatchResultView` | 已生成 |
-| `RecipientView` | `RecipientView` | 已生成 |
-| `AttachmentView` | `AttachmentView` | 已生成 |
+| `BatchResultVo` | `BatchResultVo` | 已生成 |
+| `RecipientVo` | `RecipientVo` | 已生成 |
+| `AttachmentVo` | `AttachmentVo` | 已生成 |
 | `List4Params` | 查询参数 | 已生成 |
 | `UnreadCount200` | 未读计数响应 | 已生成 |
 

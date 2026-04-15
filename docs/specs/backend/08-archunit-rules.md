@@ -493,29 +493,29 @@ private static ArchCondition<JavaClass> onlyDependOnJooqDataCarriers() {
 >
 > **定位**：给 AI 和使用者一份明确的"do/don't"清单，避免 M4 落地时各业务模块风格不一。
 
-### 8.1 DTO / VO / Command / Query / Event 必须用 `record`
+### 8.1 DTO / Vo / Cmd / Qry / Event 必须用 `record`
 
-**规则**：所有 API 边界的数据类（`*View` / `*Command` / `*Query` / `*Event`）必须用 Java `record` 定义，禁用 Lombok `@Data` / `@Value` / `@Getter` + `@Setter` 组合。
+**规则**：所有 API 边界的数据类（`*Vo` / `*Cmd` / `*Qry` / `*Event`）必须用 Java `record` 定义，禁用 Lombok `@Data` / `@Value` / `@Getter` + `@Setter` 组合。
 
 **理由**：
 - Spring Boot 3.x 对 record 是一等公民（Jackson / Jakarta Validation / @ConfigurationProperties 原生支持）
 - record 天然不可变，线程安全
-- 代码量少（`public record UserView(Long id, String username) {}` vs 30+ 行传统 class）
+- 代码量少（`public record UserVo(Long id, String username) {}` vs 30+ 行传统 class）
 - 2024+ 主流做法
 
 **示例**：
 
 ```java
 // ✅ 正确
-public record UserView(Long id, String username, String email, OffsetDateTime createdAt) {
-    public static UserView from(UserRecord record) {
-        return new UserView(record.getId(), record.getUsername(), record.getEmail(), record.getCreatedAt());
+public record UserVo(Long id, String username, String email, OffsetDateTime createdAt) {
+    public static UserVo from(UserRecord record) {
+        return new UserVo(record.getId(), record.getUsername(), record.getEmail(), record.getCreatedAt());
     }
 }
 
 // ❌ 错误：Lombok @Data 定义 DTO
 @Data
-public class UserView {
+public class UserVo {
     private Long id;
     private String username;
     // ...
@@ -557,7 +557,7 @@ public class UserService {
 
 ### 8.3 实体 → DTO 映射手写 `from()` 静态方法，不引入 MapStruct
 
-**规则**：实体（`UserRecord`）到 DTO（`UserView`）的映射通过 DTO record 里的 `public static <DTO> from(<Entity>)` 静态工厂方法手写。v1 **禁用** MapStruct / ModelMapper。
+**规则**：实体（`UserRecord`）到 DTO（`UserVo`）的映射通过 DTO record 里的 `public static <DTO> from(<Entity>)` 静态工厂方法手写。v1 **禁用** MapStruct / ModelMapper。
 
 **ArchUnit 规则**：
 
@@ -571,12 +571,12 @@ static final ArchRule NO_MAPSTRUCT = noClasses()
 ```
 
 **理由**：
-- meta-build DTO 用 record，简单映射手写 `from()` 更直白（`return new UserView(record.getId(), ...)`）
+- meta-build DTO 用 record，简单映射手写 `from()` 更直白（`return new UserVo(record.getId(), ...)`）
 - MapStruct 的 annotation processor 增加 build 时间，随 mapper 数量显著变慢
 - AI 生成手写 `from()` 错误率比 MapStruct 注解低
 - M5 canonical reference 写完后有实战数据再评估 MapStruct（v1.5+）
 
-**示例**见 §8.1 的 `UserView.from()`。
+**示例**见 §8.1 的 `UserVo.from()`。
 
 ### 8.4 virtual thread 默认关闭
 
@@ -730,16 +730,16 @@ new Date()              // 不推荐
 - **`List.of()` / `Map.of()`** 优先于 `Arrays.asList` / `new HashMap`（Java 9+ 不可变工厂方法）
 - **`var` 类型推断**在方法内部局部变量可用，公开 API（方法返回值 / 参数）推荐显式类型
 - **Text blocks**（`"""`）推荐用于多行字符串（SQL / JSON 字符串 / 模板）
-- **方法引用** `UserView::from` 优先于等价 lambda `r -> UserView.from(r)`
+- **方法引用** `UserVo::from` 优先于等价 lambda `r -> UserVo.from(r)`
 - **Stream API** 推荐用于集合转换（`stream().map().toList()`），传统 for 循环用于有副作用的场景
 
 ### 8.10 M4 实施 checklist
 
 每个业务模块 M4 落地时应该通过以下自检：
 
-- [ ] 所有 DTO（View/Command/Query/Event）都是 record
+- [ ] 所有 DTO（Vo/Cmd/Qry/Event）都是 record
 - [ ] Service / Repository / Controller 用 `@RequiredArgsConstructor`，无 `@Autowired` 字段
-- [ ] 实体映射用 `XxxView.from(record)`，无 MapStruct 依赖
+- [ ] 实体映射用 `XxxVo.from(record)`，无 MapStruct 依赖
 - [ ] `application.yml` 未开启 `spring.threads.virtual.enabled`
 - [ ] `Optional` 只在方法返回值出现，无字段/参数
 - [ ] 所有状态字段用 enum，无 sealed class

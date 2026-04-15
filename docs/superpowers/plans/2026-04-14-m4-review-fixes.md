@@ -25,7 +25,7 @@
 - Modify: `server/mb-common/src/main/java/com/metabuild/common/security/AuthFacade.java`
 - Create: `server/mb-common/src/main/java/com/metabuild/common/log/OperationLog.java`（注解下沉）
 - Modify: `server/mb-platform/platform-iam/src/main/java/com/metabuild/platform/iam/domain/auth/AuthService.java`
-- Create: `server/mb-platform/platform-iam/src/main/java/com/metabuild/platform/iam/api/dto/ResetPasswordCommand.java`
+- Create: `server/mb-platform/platform-iam/src/main/java/com/metabuild/platform/iam/api/cmd/ResetPasswordCmd.java`
 - Modify: `server/mb-platform/platform-iam/src/main/java/com/metabuild/platform/iam/web/UserController.java`
 - Modify: `server/mb-platform/platform-iam/src/main/java/com/metabuild/platform/iam/domain/auth/PasswordPolicy.java`
 - Modify: `server/mb-platform/platform-iam/src/main/java/com/metabuild/platform/iam/domain/dept/DeptService.java`
@@ -415,7 +415,7 @@ git commit -m "fix(infra-jooq): 合并 ExecuteListener 注册，修复互相覆�
 ## Task 4: 后端 C-2 + C-3 + C-4 + C-9 — Critical 修复
 
 **Files:**
-- Create: `server/mb-platform/platform-iam/src/main/java/com/metabuild/platform/iam/api/dto/ResetPasswordCommand.java`
+- Create: `server/mb-platform/platform-iam/src/main/java/com/metabuild/platform/iam/api/cmd/ResetPasswordCmd.java`
 - Modify: `server/mb-platform/platform-iam/src/main/java/com/metabuild/platform/iam/web/UserController.java:73`
 - Modify: `server/mb-common/src/main/java/com/metabuild/common/security/AuthFacade.java`
 - Modify: `server/mb-platform/platform-iam/src/main/java/com/metabuild/platform/iam/domain/auth/AuthService.java:156-161`
@@ -424,14 +424,14 @@ git commit -m "fix(infra-jooq): 合并 ExecuteListener 注册，修复互相覆�
 
 - [ ] **Step 1: C-2 — resetPassword DTO 化**
 
-创建 `ResetPasswordCommand.java`：
+创建 `ResetPasswordCmd.java`：
 
 ```java
 package com.metabuild.platform.iam.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record ResetPasswordCommand(
+public record ResetPasswordCmd(
     @NotBlank String newPassword
 ) {}
 ```
@@ -441,7 +441,7 @@ public record ResetPasswordCommand(
 ```java
 @PostMapping("/{id}/reset-password")
 @RequirePermission("iam:user:resetPassword")
-public void resetPassword(@PathVariable Long id, @Valid @RequestBody ResetPasswordCommand request) {
+public void resetPassword(@PathVariable Long id, @Valid @RequestBody ResetPasswordCmd request) {
     userService.resetPassword(id, request.newPassword());
 }
 ```
@@ -904,7 +904,7 @@ function AuthedLayout() {
 
 ```typescript
 // use-current-user.ts — 将 toCurrentUser 改为 export
-export function toCurrentUser(dto: CurrentUserView): CurrentUser {
+export function toCurrentUser(dto: CurrentUserVo): CurrentUser {
 ```
 
 并在 `@mb/app-shell` 的 barrel export 中加上 `toCurrentUser`。

@@ -32,8 +32,8 @@ packages/api-sdk/src/
 ├── types/
 │   ├── index.ts                → barrel export
 │   ├── common.ts               → PageResult<T>, ProblemDetail
-│   ├── auth.ts                 → LoginCommand, RefreshCommand, LoginView, UserSummary, CurrentUserView
-│   ├── menu.ts                 → MenuNodeDto, CurrentUserMenuView
+│   ├── auth.ts                 → LoginCmd, RefreshCmd, LoginVo, UserSummary, CurrentUserVo
+│   ├── menu.ts                 → MenuNodeDto, CurrentUserMenuVo
 │   └── permission.ts           → AppPermission 联合类型（42 个）+ ALL_APP_PERMISSIONS
 ├── apis/
 │   ├── index.ts                → barrel export
@@ -161,7 +161,7 @@ scripts/
 | HTTP 客户端 | 基于原生 fetch + 拦截器链 + 401 自动 refresh retry（零运行时依赖） |
 | 4 个拦截器 | auth / language / request-id / error |
 | ProblemDetailError | RFC 9457 + isProblemDetail 类型守卫 |
-| 类型定义 | PageResult / ProblemDetail / LoginCommand / RefreshCommand / LoginView / UserSummary / CurrentUserView / MenuNodeDto / CurrentUserMenuView / AppPermission（42 个权限码） |
+| 类型定义 | PageResult / ProblemDetail / LoginCmd / RefreshCmd / LoginVo / UserSummary / CurrentUserVo / MenuNodeDto / CurrentUserMenuVo / AppPermission（42 个权限码） |
 | API 门面 | authApi（4 方法：login / logout / refresh / getCurrentUser）+ menuApi（3 方法：queryCurrentUserMenu / tree / getById） |
 | 单元测试 | 19 tests（含 refresh retry / refresh failure / concurrent refresh / no-refresh-configured） |
 
@@ -303,12 +303,12 @@ M5 需要 M3（前端）+ M4（后端）都完成：
 |------|----|-----|
 | 权限码分隔符 | 点号 `iam.user.list` | **冒号** `iam:user:list` |
 | 权限码数量 | 8 个（仅 IAM） | **42 个**（覆盖全部后端模块） |
-| LoginResult | `{ accessToken, refreshToken }` | **LoginView** `{ accessToken, refreshToken, expiresInSeconds, user: UserSummary }` |
-| CurrentUserDto | 手写估计 | **CurrentUserView**（对齐后端 `GET /auth/me` 响应） |
+| LoginResult | `{ accessToken, refreshToken }` | **LoginVo** `{ accessToken, refreshToken, expiresInSeconds, user: UserSummary }` |
+| CurrentUserDto | 手写估计 | **CurrentUserVo**（对齐后端 `GET /auth/me` 响应） |
 | MenuNodeDto.kind | `'directory' \| 'menu' \| 'button'` | **menuType** `'DIRECTORY' \| 'MENU' \| 'BUTTON'` |
 | MenuNodeDto.path / isOrphan | 存在 | **移除**（后端无此字段） |
 | MenuNodeDto 新增 | — | **sortOrder** + **visible** |
-| UserMenuPayload | `{ tree, permissions }` 在 api-sdk | **CurrentUserMenuView** `{ tree, permissions }` 在 api-sdk |
+| UserMenuPayload | `{ tree, permissions }` 在 api-sdk | **CurrentUserMenuVo** `{ tree, permissions }` 在 api-sdk |
 
 ### 新增 API 端点
 

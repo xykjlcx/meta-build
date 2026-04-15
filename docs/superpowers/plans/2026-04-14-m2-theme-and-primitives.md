@@ -1402,7 +1402,7 @@ git commit -m "feat(L2): Tooltip + Popover + Toast + HoverCard 组件"
 - **Breadcrumb**: 纯语义 HTML（`<nav>` + `<ol>`），无 Radix 依赖
 - **DropdownMenu**: wrap `@radix-ui/react-dropdown-menu`，导出全套子组件
 - **NavigationMenu**: wrap `@radix-ui/react-navigation-menu`
-- **Command**: wrap `cmdk`，导出 `Command` / `CommandDialog` / `CommandInput` / `CommandList` / `CommandEmpty` / `CommandGroup` / `CommandItem` / `CommandSeparator`
+- **Cmd**: wrap `cmdk`，导出 `Command` / `CommandDialog` / `CommandInput` / `CommandList` / `CommandEmpty` / `CommandGroup` / `CommandItem` / `CommandSeparator`
 
 - [ ] **Step 1-5: 逐个实现 + commit**
 

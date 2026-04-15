@@ -17,7 +17,7 @@ import type {
 
 import type {
   GetOplogParams,
-  PageResultOperationLogView
+  PageResultOperationLogVo
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -55,9 +55,9 @@ export const getGetOplogUrl = (params?: GetOplogParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/oplog?${stringifiedParams}` : `/api/v1/oplog`
 }
 
-export const getOplog = async (params?: GetOplogParams, options?: RequestInit): Promise<PageResultOperationLogView> => {
+export const getOplog = async (params?: GetOplogParams, options?: RequestInit): Promise<PageResultOperationLogVo> => {
   
-  return customInstance<PageResultOperationLogView>(getGetOplogUrl(params),
+  return customInstance<PageResultOperationLogVo>(getGetOplogUrl(params),
   {      
     ...options,
     method: 'GET'

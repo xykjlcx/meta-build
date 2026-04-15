@@ -41,7 +41,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public LoginVo login(@Valid @RequestBody LoginCmd request) {
-        return toLoginView(authService.login(request));
+        return toLoginVo(authService.login(request));
     }
 
     @PostMapping("/logout")
@@ -55,13 +55,13 @@ public class AuthController {
      */
     @PostMapping("/refresh")
     public LoginVo refresh(@Valid @RequestBody RefreshCmd request) {
-        return toLoginView(authService.refresh(request.refreshToken()));
+        return toLoginVo(authService.refresh(request.refreshToken()));
     }
 
     /**
      * 将内部 LoginResult 转换为 API 视图（移除数据权限字段）。
      */
-    private LoginVo toLoginView(LoginResult result) {
+    private LoginVo toLoginVo(LoginResult result) {
         CurrentUserInfo userInfo = result.user();
         LoginVo.UserSummary summary = userInfo != null
             ? new LoginVo.UserSummary(

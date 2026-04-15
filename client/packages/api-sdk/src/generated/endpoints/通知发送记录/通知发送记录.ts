@@ -17,7 +17,7 @@ import type {
 
 import type {
   GetNotificationLogParams,
-  NotificationLogView
+  NotificationLogVo
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -48,9 +48,9 @@ export const getGetNotificationLogUrl = (params: GetNotificationLogParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/notification-logs?${stringifiedParams}` : `/api/v1/notification-logs`
 }
 
-export const getNotificationLog = async (params: GetNotificationLogParams, options?: RequestInit): Promise<NotificationLogView[]> => {
+export const getNotificationLog = async (params: GetNotificationLogParams, options?: RequestInit): Promise<NotificationLogVo[]> => {
   
-  return customInstance<NotificationLogView[]>(getGetNotificationLogUrl(params),
+  return customInstance<NotificationLogVo[]>(getGetNotificationLogUrl(params),
   {      
     ...options,
     method: 'GET'

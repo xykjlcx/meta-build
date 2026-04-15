@@ -308,7 +308,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
     @Test
     void admin_creates_user_successfully() {
         currentUser.asAdmin();
-        UserView user = userService.create(new UserCreateCommand("alice", "pwd"));
+        UserVo user = userService.create(new UserCreateCmd("alice", "pwd"));
         assertThat(user.id()).isNotNull();
     }
 }
@@ -381,7 +381,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
     @Test
     void list_users_returns_seeded_data() {
         currentUser.asAdmin();
-        PageResult<UserView> result = userService.page(new UserQuery(), 1, 10);
+        PageResult<UserVo> result = userService.page(new UserQry(), 1, 10);
         assertThat(result.totalElements()).isEqualTo(3);  // 01-users.sql 里有 3 条
     }
 }

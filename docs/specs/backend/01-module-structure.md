@@ -209,10 +209,14 @@ com.metabuild.platform.iam/
 │   ├── RoleApi.java
 │   ├── MenuApi.java
 │   ├── AuthApi.java
-│   └── dto/                       # 对外 DTO（record 类型）
-│       ├── UserView.java
-│       ├── UserCreateCommand.java
-│       ├── UserQuery.java
+│   ├── vo/                        # 响应契约（record 类型）
+│   │   ├── UserVo.java
+│   │   └── ...
+│   ├── cmd/                       # 写操作契约
+│   │   ├── UserCreateCmd.java
+│   │   └── ...
+│   └── qry/                       # 查询契约
+│       ├── UserQry.java
 │       └── ...
 │
 ├── domain/                        # 业务逻辑（Service + Repository，不拆 infrastructure）
@@ -294,7 +298,7 @@ public class UserService implements UserApi {
     private final ApplicationEventPublisher events;
 
     @Transactional
-    public User create(UserCreateCommand cmd) {
+    public User create(UserCreateCmd cmd) {
         User saved = userRepository.save(User.from(cmd));
         events.publishEvent(new UserCreatedEvent(saved.id(), saved.username()));
         return saved;
@@ -474,10 +478,10 @@ public class ModuleBoundaryRule {
 |---|---|---|---|---|---|
 | 1 | `mb_iam_user` | Flyway SQL | 手写 | `mb-schema/src/main/resources/db/migration/` | 数据库表 |
 | 2 | `MbIamUserRecord` | jOOQ 生成 | codegen | `com.metabuild.schema.tables.records` | **Service 层的数据载体**（不手写）|
-| 3 | `UserView` | record | 手写 | `com.metabuild.platform.iam.api.dto` | API 响应 DTO（脱敏，带 `from(MbIamUserRecord)` 静态工厂）|
-| 4 | `UserCreateCommand` | record | 手写 | 同上 | API 创建请求 |
-| 5 | `UserUpdateEmailCommand` | record | 手写 | 同上 | API 更新请求（业务动作命名）|
-| 6 | `UserQuery` | record | 手写 | 同上 | API 查询条件 |
+| 3 | `UserVo` | record | 手写 | `com.metabuild.platform.iam.api.dto` | API 响应 DTO（脱敏，带 `from(MbIamUserRecord)` 静态工厂）|
+| 4 | `UserCreateCmd` | record | 手写 | 同上 | API 创建请求 |
+| 5 | `UserUpdateEmailCmd` | record | 手写 | 同上 | API 更新请求（业务动作命名）|
+| 6 | `UserQry` | record | 手写 | 同上 | API 查询条件 |
 | 7 | `UserCreatedEvent` | record | 手写 | `com.metabuild.platform.iam.api.event` | 领域事件 |
 | 8 | `UserApi` | interface | 手写 | `com.metabuild.platform.iam.api` | 跨模块调用接口 |
 | 9 | `UserService` | class | 手写 | `com.metabuild.platform.iam.domain.user` | `implements UserApi`，业务编排 |
@@ -501,7 +505,7 @@ public class ModuleBoundaryRule {
 | ✅ 参数 bean validation | `@Valid`（Jakarta Bean Validation）|
 | ✅ **静态权限检查** | `@RequirePermission("iam.user.create")` 标注方法 |
 | ✅ `@OperationLog` 操作日志注解标注 | 推荐放 Controller 层（离 HTTP 入口近）|
-| ✅ 调 Service，返回 View | 通常一行 `return userService.create(cmd);` |
+| ✅ 调 Service，返回 Vo | 通常一行 `return userService.create(cmd);` |
 | ❌ 业务逻辑 | 在 Service 层 |
 | ❌ 事务 | 在 Service 层 |
 | ❌ 直接 import `DSLContext` / `MbIamUserRecord` | 通过 Service 间接用 |
@@ -570,11 +574,15 @@ platform-iam/
 ├── api/                              # 对外 API 边界
 │   ├── UserApi.java                  # 跨模块调用接口
 │   ├── RoleApi.java
-│   ├── dto/                          # 所有 DTO 集中
-│   │   ├── UserView.java
-│   │   ├── UserCreateCommand.java
-│   │   ├── UserUpdateEmailCommand.java
-│   │   ├── UserQuery.java
+│   ├── vo/                           # 响应契约
+│   │   ├── UserVo.java
+│   │   └── ...
+│   ├── cmd/                          # 写操作契约
+│   │   ├── UserCreateCmd.java
+│   │   ├── UserUpdateEmailCmd.java
+│   │   └── ...
+│   ├── qry/                          # 查询契约
+│   │   ├── UserQry.java
 │   │   └── ...
 │   └── event/                        # 领域事件
 │       ├── UserCreatedEvent.java
@@ -613,11 +621,11 @@ mb-admin/
 // platform-iam/domain/user/UserRepository.java
 package com.metabuild.platform.iam.domain.user;
 
-import com.metabuild.common.pagination.PageQuery;
-import com.metabuild.common.pagination.PageResult;
-import com.metabuild.common.pagination.SortParser;
-import com.metabuild.platform.iam.api.dto.UserQuery;
-import com.metabuild.platform.iam.api.dto.UserView;
+import com.metabuild.common.dto.PageQuery;
+import com.metabuild.common.dto.PageResult;
+import com.metabuild.infra.jooq.query.SortParser;
+import com.metabuild.platform.iam.api.dto.UserQry;
+import com.metabuild.platform.iam.api.dto.UserVo;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.Condition;
@@ -651,7 +659,7 @@ public class UserRepository {
         return dsl.fetchExists(MB_IAM_USER, MB_IAM_USER.USERNAME.eq(username));
     }
 
-    public PageResult<UserView> page(UserQuery query, PageQuery pagination) {
+    public PageResult<UserVo> page(UserQry query, PageQuery pagination) {
         List<SortField<?>> orderBy = SortParser.builder()
             .forTable(MB_IAM_USER)
             .allow("username", MB_IAM_USER.USERNAME)
@@ -670,13 +678,13 @@ public class UserRepository {
             .fetch();
 
         return PageResult.of(
-            records.stream().map(UserView::from).toList(),
+            records.stream().map(UserVo::from).toList(),
             total,
             pagination
         );
     }
 
-    private Condition buildCondition(UserQuery query) {
+    private Condition buildCondition(UserQry query) {
         Condition c = DSL.trueCondition();
         if (query.usernameLike() != null) {
             c = c.and(MB_IAM_USER.USERNAME.likeIgnoreCase("%" + query.usernameLike() + "%"));
@@ -737,7 +745,7 @@ public class UserService implements UserApi {
     private final ApplicationEventPublisher events;
 
     @Transactional
-    public UserView create(UserCreateCommand cmd) {
+    public UserVo create(UserCreateCmd cmd) {
         // 业务校验
         if (userRepository.existsByUsername(cmd.username())) {
             throw new BusinessException("iam.user.usernameExists", cmd.username());
@@ -756,11 +764,11 @@ public class UserService implements UserApi {
         // 发事件
         events.publishEvent(new UserCreatedEvent(saved.getId(), currentUser.userId()));
 
-        return UserView.from(saved);
+        return UserVo.from(saved);
     }
 
     @Transactional
-    public UserView updateEmail(Long userId, UserUpdateEmailCommand cmd) {
+    public UserVo updateEmail(Long userId, UserUpdateEmailCmd cmd) {
         MbIamUserRecord record = userRepository.findById(userId)
             .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
 
@@ -771,11 +779,11 @@ public class UserService implements UserApi {
 
         record.setEmail(cmd.newEmail());
         MbIamUserRecord saved = userRepository.save(record);
-        return UserView.from(saved);
+        return UserVo.from(saved);
     }
 
     @Transactional(readOnly = true)
-    public PageResult<UserView> page(UserQuery query, PageQuery pagination) {
+    public PageResult<UserVo> page(UserQry query, PageQuery pagination) {
         return userRepository.page(query, pagination);
     }
 }
@@ -787,8 +795,8 @@ public class UserService implements UserApi {
 // platform-iam/web/UserController.java
 package com.metabuild.platform.iam.web;
 
-import com.metabuild.common.pagination.PageQuery;
-import com.metabuild.common.pagination.PageResult;
+import com.metabuild.common.dto.PageQuery;
+import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.operationlog.OperationLog;
 import com.metabuild.platform.iam.api.dto.*;
@@ -807,20 +815,20 @@ public class UserController {
     @PostMapping
     @RequirePermission("iam.user.create")                // ← 权限在 Controller 层
     @OperationLog(action = "iam.user.create", targetType = "User", targetIdExpr = "#result.id")
-    public UserView create(@RequestBody @Valid UserCreateCommand cmd) {
+    public UserVo create(@RequestBody @Valid UserCreateCmd cmd) {
         return userService.create(cmd);
     }
 
     @PatchMapping("/{id}/email")
     @RequirePermission("iam.user.update")
     @OperationLog(action = "iam.user.updateEmail", targetType = "User", targetIdExpr = "#id")
-    public UserView updateEmail(@PathVariable Long id, @RequestBody @Valid UserUpdateEmailCommand cmd) {
+    public UserVo updateEmail(@PathVariable Long id, @RequestBody @Valid UserUpdateEmailCmd cmd) {
         return userService.updateEmail(id, cmd);
     }
 
     @GetMapping
     @RequirePermission("iam.user.view")
-    public PageResult<UserView> list(UserQuery query, PageQuery pagination) {
+    public PageResult<UserVo> list(UserQry query, PageQuery pagination) {
         return userService.page(query, pagination);
     }
 }
@@ -863,9 +871,9 @@ M5 canonical reference `business-approval` 仍是模块内编排 Service 的示�
 | 后缀 | 角色 | 例子 |
 |---|---|---|
 | `*Record` | jOOQ 生成的数据行（不手写）| `MbIamUserRecord` / `BizOrderMainRecord` |
-| `*View` | API 响应 DTO | `UserView` / `OrderDetailView` |
-| `*Command` | 写操作请求（Create/Update/Delete/业务动作）| `UserCreateCommand` / `UserUpdateEmailCommand` / `OrderSubmitCommand` / `UserLockCommand` |
-| `*Query` | 读操作查询参数 | `UserQuery` / `OrderQuery` |
+| `*Vo` | API 响应 DTO | `UserVo` / `OrderDetailVo` |
+| `*Cmd` | 写操作请求（Create/Update/Delete/业务动作）| `UserCreateCmd` / `UserUpdateEmailCmd` / `OrderSubmitCmd` / `UserLockCmd` |
+| `*Qry` | 读操作查询参数 | `UserQry` / `OrderQry` |
 | `*Event` | 领域事件 | `UserCreatedEvent` / `OrderSubmittedEvent` |
 | `*Api` | 跨模块调用接口 | `UserApi` / `OrderApi` |
 | `*Service` | 模块内业务服务 class | `UserService implements UserApi` |

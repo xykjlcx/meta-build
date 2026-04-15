@@ -668,7 +668,7 @@ import { ordersApi } from "@mb/api-sdk";
 import { requireAuth } from "@mb/app-shell/auth";
 import { NxTable, NxLoading } from "@mb/ui-patterns";
 import type { ColumnDef } from "@tanstack/react-table";
-import type { OrderView } from "@mb/api-sdk";
+import type { OrderVo } from "@mb/api-sdk";
 
 const orderListSearchSchema = z.object({
   page: z.number().int().min(1).default(1),
@@ -705,7 +705,7 @@ function OrderListPage() {
   const { t } = useTranslation("order");
 
   // 列定义：所有文案走 i18n（MUST #6）
-  const columns: ColumnDef<OrderView>[] = [
+  const columns: ColumnDef<OrderVo>[] = [
     { accessorKey: "orderNo", header: t("columns.orderNo") },
     { accessorKey: "customerName", header: t("columns.customerName") },
     { accessorKey: "amount", header: t("columns.amount") },
@@ -716,7 +716,7 @@ function OrderListPage() {
   return (
     <div className="space-y-4 p-6">
       <h1 className="text-2xl font-semibold text-foreground">{t("title.list")}</h1>
-      <NxTable<OrderView>
+      <NxTable<OrderVo>
         columns={columns}
         data={data.content}
         pagination={{
@@ -800,7 +800,7 @@ function OrderDetailPage() {
 |------|------|
 | `requireAuth({ permission: 'order.read' })` | `@RequirePermission("order.read")`（详见 [backend/05-security.md §2](../backend/05-security.md#2-权限模型-currentuser--requirepermission)） |
 | `_authed` 布局路由 context 扩展的 `currentUser`（来自 `ensureQueryData`，对应 `useCurrentUser`） | `CurrentUser` 门面（详见 [backend/05-security.md §6](../backend/05-security.md#6-currentuser-门面层设计adr-0005)） |
-| `ordersApi.list({ page: 1, size: 20 })` | `GET /api/v1/orders?page=1&size=20`，返回 `PageResult<OrderView>`（详见 [backend/06-api-and-contract.md §3](../backend/06-api-and-contract.md#3-响应格式混合方案-m4)） |
+| `ordersApi.list({ page: 1, size: 20 })` | `GET /api/v1/orders?page=1&size=20`，返回 `PageResult<OrderVo>`（详见 [backend/06-api-and-contract.md §3](../backend/06-api-and-contract.md#3-响应格式混合方案-m4)） |
 | `errorComponent` 接 `ProblemDetailError` | 后端 `RFC 9457 ProblemDetail`（详见 [backend/06-api-and-contract.md §3](../backend/06-api-and-contract.md#3-响应格式混合方案-m4)） |
 | `notFound()` 触发 `notFoundComponent` | 后端 `NotFoundException` → `404 ProblemDetail`（详见 [backend/06-api-and-contract.md §1](../backend/06-api-and-contract.md#1-异常基类层次-m4)） |
 | `Accept-Language` header（由 `@mb/api-sdk` 拦截器同步 `i18n.language`） | `AcceptHeaderLocaleResolver`（详见 [backend/06-api-and-contract.md §4](../backend/06-api-and-contract.md#4-i18n-国际化-m4)） |

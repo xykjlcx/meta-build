@@ -21,8 +21,8 @@ import type {
 
 import type {
   GetNotificationParams,
-  NotificationCreateCommand,
-  PageResultNotificationView
+  NotificationCreateCmd,
+  PageResultNotificationVo
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -60,9 +60,9 @@ export const getGetNotificationUrl = (params?: GetNotificationParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/notifications?${stringifiedParams}` : `/api/v1/notifications`
 }
 
-export const getNotification = async (params?: GetNotificationParams, options?: RequestInit): Promise<PageResultNotificationView> => {
+export const getNotification = async (params?: GetNotificationParams, options?: RequestInit): Promise<PageResultNotificationVo> => {
   
-  return customInstance<PageResultNotificationView>(getGetNotificationUrl(params),
+  return customInstance<PageResultNotificationVo>(getGetNotificationUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -135,7 +135,7 @@ export const getPostNotificationUrl = () => {
   return `/api/v1/notifications`
 }
 
-export const postNotification = async (notificationCreateCommand: NotificationCreateCommand, options?: RequestInit): Promise<number> => {
+export const postNotification = async (notificationCreateCmd: NotificationCreateCmd, options?: RequestInit): Promise<number> => {
   
   return customInstance<number>(getPostNotificationUrl(),
   {      
@@ -143,7 +143,7 @@ export const postNotification = async (notificationCreateCommand: NotificationCr
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      notificationCreateCommand,)
+      notificationCreateCmd,)
   }
 );}
 
@@ -151,8 +151,8 @@ export const postNotification = async (notificationCreateCommand: NotificationCr
 
 
 export const getPostNotificationMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNotification>>, TError,{data: NotificationCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postNotification>>, TError,{data: NotificationCreateCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNotification>>, TError,{data: NotificationCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postNotification>>, TError,{data: NotificationCreateCmd}, TContext> => {
 
 const mutationKey = ['postNotification'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -164,7 +164,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postNotification>>, {data: NotificationCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postNotification>>, {data: NotificationCreateCmd}> = (props) => {
           const {data} = props ?? {};
 
           return  postNotification(data,requestOptions)
@@ -176,15 +176,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostNotificationMutationResult = NonNullable<Awaited<ReturnType<typeof postNotification>>>
-    export type PostNotificationMutationBody = NotificationCreateCommand
+    export type PostNotificationMutationBody = NotificationCreateCmd
     export type PostNotificationMutationError = unknown
 
     export const usePostNotification = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNotification>>, TError,{data: NotificationCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postNotification>>, TError,{data: NotificationCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof postNotification>>,
         TError,
-        {data: NotificationCreateCommand},
+        {data: NotificationCreateCmd},
         TContext
       > => {
 

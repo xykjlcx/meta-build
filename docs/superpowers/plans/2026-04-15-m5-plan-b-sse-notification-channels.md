@@ -1241,7 +1241,7 @@ public class NotificationDispatcher {
 ```java
 package com.metabuild.platform.notification.api;
 
-import com.metabuild.platform.notification.api.dto.NotificationCreateCommand;
+import com.metabuild.platform.notification.api.dto.NotificationCreateCmd;
 
 /**
  * 通知模块对外 API 接口。
@@ -1257,7 +1257,7 @@ public interface NotificationApi {
      * @param command 创建命令
      * @return 通知 ID
      */
-    Long create(NotificationCreateCommand command);
+    Long create(NotificationCreateCmd command);
 
     /**
      * 分发通知到所有配置的渠道。
@@ -1428,17 +1428,17 @@ public class NotificationLogRepository {
     /**
      * 按模块 + 关联 ID 查询发送记录。
      */
-    public List<NotificationLogView> findByModuleAndRef(String module, String referenceId) {
+    public List<NotificationLogVo> findByModuleAndRef(String module, String referenceId) {
         return dsl.selectFrom(MB_NOTIFICATION_LOG)
                 .where(MB_NOTIFICATION_LOG.MODULE.eq(module))
                 .and(MB_NOTIFICATION_LOG.REFERENCE_ID.eq(referenceId))
                 .orderBy(MB_NOTIFICATION_LOG.CREATED_AT.desc())
-                .fetchInto(NotificationLogView.class);
+                .fetchInto(NotificationLogVo.class);
     }
 }
 ```
 
-- [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/domain/NotificationLogView.java`：
+- [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/vo/NotificationLogVo.java`：
 
 ```java
 package com.metabuild.platform.notification.domain;
@@ -1448,7 +1448,7 @@ import java.time.OffsetDateTime;
 /**
  * 通知发送记录视图。
  */
-public record NotificationLogView(
+public record NotificationLogVo(
     Long id,
     String channelType,
     Long recipientId,
@@ -2279,13 +2279,13 @@ cd server && mvn compile -pl mb-platform/platform-notification -am
 **Files:**
 - `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/domain/WeChatBindingService.java`（新建）
 - `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/web/WeChatBindingController.java`（新建）
-- `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/dto/WeChatMpBindCommand.java`（新建）
-- `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/dto/WeChatMiniBindCommand.java`（新建）
-- `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/dto/WeChatBindingView.java`（新建）
+- `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/cmd/WeChatMpBindCmd.java`（新建）
+- `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/cmd/WeChatMiniBindCmd.java`（新建）
+- `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/vo/WeChatBindingVo.java`（新建）
 
 **Steps:**
 
-- [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/dto/WeChatMpBindCommand.java`：
+- [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/cmd/WeChatMpBindCmd.java`：
 
 ```java
 package com.metabuild.platform.notification.api.dto;
@@ -2298,13 +2298,13 @@ import jakarta.validation.constraints.NotBlank;
  * @param code  微信 OAuth 授权码
  * @param state CSRF state（后端校验后删除）
  */
-public record WeChatMpBindCommand(
+public record WeChatMpBindCmd(
     @NotBlank String code,
     @NotBlank String state
 ) {}
 ```
 
-- [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/dto/WeChatMiniBindCommand.java`：
+- [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/cmd/WeChatMiniBindCmd.java`：
 
 ```java
 package com.metabuild.platform.notification.api.dto;
@@ -2316,12 +2316,12 @@ import jakarta.validation.constraints.NotBlank;
  *
  * @param code wx.login() 返回的临时登录凭证
  */
-public record WeChatMiniBindCommand(
+public record WeChatMiniBindCmd(
     @NotBlank String code
 ) {}
 ```
 
-- [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/dto/WeChatBindingView.java`：
+- [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/api/vo/WeChatBindingVo.java`：
 
 ```java
 package com.metabuild.platform.notification.api.dto;
@@ -2331,7 +2331,7 @@ import java.time.OffsetDateTime;
 /**
  * 微信绑定状态视图。
  */
-public record WeChatBindingView(
+public record WeChatBindingVo(
     Long id,
     String platform,
     String appId,
@@ -2377,16 +2377,16 @@ public boolean unbind(Long userId, String platform, String appId, Long tenantId)
 /**
  * 查询用户的所有绑定关系。
  */
-public List<WeChatBindingView> findByUserId(Long userId, Long tenantId) {
+public List<WeChatBindingVo> findByUserId(Long userId, Long tenantId) {
     return dsl.selectFrom(MB_USER_WECHAT_BINDING)
         .where(MB_USER_WECHAT_BINDING.USER_ID.eq(userId))
         .and(MB_USER_WECHAT_BINDING.TENANT_ID.eq(tenantId))
         .orderBy(MB_USER_WECHAT_BINDING.BOUND_AT.desc())
-        .fetchInto(WeChatBindingView.class);
+        .fetchInto(WeChatBindingVo.class);
 }
 ```
 
-> 注意：需要在 WeChatBindingRepository 中添加 `import com.metabuild.platform.notification.api.dto.WeChatBindingView;` 和 `import com.metabuild.schema.tables.records.MbUserWechatBindingRecord;`，以及 `import static com.metabuild.schema.tables.MbUserWechatBinding.MB_USER_WECHAT_BINDING;`。
+> 注意：需要在 WeChatBindingRepository 中添加 `import com.metabuild.platform.notification.api.dto.WeChatBindingVo;` 和 `import com.metabuild.schema.tables.records.MbUserWechatBindingRecord;`，以及 `import static com.metabuild.schema.tables.MbUserWechatBinding.MB_USER_WECHAT_BINDING;`。
 
 - [ ] 创建 `server/mb-platform/platform-notification/src/main/java/com/metabuild/platform/notification/domain/WeChatBindingService.java`：
 
@@ -2396,9 +2396,9 @@ package com.metabuild.platform.notification.domain;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.notification.api.NotificationException;
-import com.metabuild.platform.notification.api.dto.WeChatBindingView;
-import com.metabuild.platform.notification.api.dto.WeChatMiniBindCommand;
-import com.metabuild.platform.notification.api.dto.WeChatMpBindCommand;
+import com.metabuild.platform.notification.api.dto.WeChatBindingVo;
+import com.metabuild.platform.notification.api.dto.WeChatMiniBindCmd;
+import com.metabuild.platform.notification.api.dto.WeChatMpBindCmd;
 import com.metabuild.platform.notification.config.WeChatProperties;
 import com.metabuild.schema.tables.records.MbUserWechatBindingRecord;
 import lombok.RequiredArgsConstructor;
@@ -2460,7 +2460,7 @@ public class WeChatBindingService {
      */
     @Transactional
     @SuppressWarnings("unchecked")
-    public WeChatBindingView bindMp(WeChatMpBindCommand cmd) {
+    public WeChatBindingVo bindMp(WeChatMpBindCmd cmd) {
         // 1. 校验 state（CSRF 防护）
         String stateKey = STATE_KEY_PREFIX + cmd.state();
         String storedUserId = redisTemplate.opsForValue().get(stateKey);
@@ -2504,7 +2504,7 @@ public class WeChatBindingService {
 
         log.info("公众号绑定成功: userId={}, openId={}", currentUser.userId(), openId);
 
-        return new WeChatBindingView(record.getId(), "MP", mp.appId(), openId, nickname, avatarUrl, record.getBoundAt());
+        return new WeChatBindingVo(record.getId(), "MP", mp.appId(), openId, nickname, avatarUrl, record.getBoundAt());
     }
 
     /**
@@ -2512,7 +2512,7 @@ public class WeChatBindingService {
      */
     @Transactional
     @SuppressWarnings("unchecked")
-    public WeChatBindingView bindMini(WeChatMiniBindCommand cmd) {
+    public WeChatBindingVo bindMini(WeChatMiniBindCmd cmd) {
         WeChatProperties.MiniConfig mini = weChatProperties.mini();
 
         // code 换 openid + session_key
@@ -2538,7 +2538,7 @@ public class WeChatBindingService {
 
         log.info("小程序绑定成功: userId={}, openId={}", currentUser.userId(), openId);
 
-        return new WeChatBindingView(record.getId(), "MINI", mini.appId(), openId, null, null, record.getBoundAt());
+        return new WeChatBindingVo(record.getId(), "MINI", mini.appId(), openId, null, null, record.getBoundAt());
     }
 
     /**
@@ -2557,7 +2557,7 @@ public class WeChatBindingService {
     /**
      * 查询当前用户的微信绑定状态。
      */
-    public List<WeChatBindingView> myBindings() {
+    public List<WeChatBindingVo> myBindings() {
         return bindingRepository.findByUserId(currentUser.userId(), currentUser.tenantId());
     }
 }
@@ -2568,9 +2568,9 @@ public class WeChatBindingService {
 ```java
 package com.metabuild.platform.notification.web;
 
-import com.metabuild.platform.notification.api.dto.WeChatBindingView;
-import com.metabuild.platform.notification.api.dto.WeChatMiniBindCommand;
-import com.metabuild.platform.notification.api.dto.WeChatMpBindCommand;
+import com.metabuild.platform.notification.api.dto.WeChatBindingVo;
+import com.metabuild.platform.notification.api.dto.WeChatMiniBindCmd;
+import com.metabuild.platform.notification.api.dto.WeChatMpBindCmd;
 import com.metabuild.platform.notification.domain.WeChatBindingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -2605,14 +2605,14 @@ public class WeChatBindingController {
     @PostMapping("/bind-mp")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "公众号绑定", description = "微信 OAuth 授权回调后，用 code + state 完成绑定")
-    public WeChatBindingView bindMp(@Valid @RequestBody WeChatMpBindCommand cmd) {
+    public WeChatBindingVo bindMp(@Valid @RequestBody WeChatMpBindCmd cmd) {
         return bindingService.bindMp(cmd);
     }
 
     @PostMapping("/bind-mini")
     @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "小程序绑定", description = "wx.login() 获取 code 后完成绑定")
-    public WeChatBindingView bindMini(@Valid @RequestBody WeChatMiniBindCommand cmd) {
+    public WeChatBindingVo bindMini(@Valid @RequestBody WeChatMiniBindCmd cmd) {
         return bindingService.bindMini(cmd);
     }
 
@@ -2625,7 +2625,7 @@ public class WeChatBindingController {
 
     @GetMapping("/bindings")
     @Operation(summary = "查询我的微信绑定", description = "返回当前用户的全部微信绑定关系")
-    public List<WeChatBindingView> myBindings() {
+    public List<WeChatBindingVo> myBindings() {
         return bindingService.myBindings();
     }
 }
@@ -2766,7 +2766,7 @@ public class NotificationLogService {
     /**
      * 按模块 + 关联 ID 查询发送记录。
      */
-    public List<NotificationLogView> findByModuleAndRef(String module, String referenceId) {
+    public List<NotificationLogVo> findByModuleAndRef(String module, String referenceId) {
         return logRepository.findByModuleAndRef(module, referenceId);
     }
 }
@@ -2779,7 +2779,7 @@ package com.metabuild.platform.notification.web;
 
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.notification.domain.NotificationLogService;
-import com.metabuild.platform.notification.domain.NotificationLogView;
+import com.metabuild.platform.notification.domain.NotificationLogVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -2805,7 +2805,7 @@ public class NotificationLogController {
     @GetMapping
     @RequirePermission("notice:notice:detail")
     @Operation(summary = "按模块和关联 ID 查询发送记录")
-    public List<NotificationLogView> findByModuleAndRef(
+    public List<NotificationLogVo> findByModuleAndRef(
             @Parameter(description = "来源模块", example = "notice") @RequestParam String module,
             @Parameter(description = "关联业务 ID", example = "123456") @RequestParam String referenceId) {
         return logService.findByModuleAndRef(module, referenceId);
@@ -2840,7 +2840,7 @@ import com.metabuild.platform.notification.api.NotificationChannel;
 import com.metabuild.platform.notification.api.NotificationMessage;
 import com.metabuild.platform.notification.domain.NotificationDispatcher;
 import com.metabuild.platform.notification.domain.NotificationLogRepository;
-import com.metabuild.platform.notification.domain.NotificationLogView;
+import com.metabuild.platform.notification.domain.NotificationLogVo;
 import com.metabuild.platform.notification.domain.InAppChannel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -2940,7 +2940,7 @@ class NotificationChannelIntegrationTest extends BaseIntegrationTest {
 
         dispatcher.dispatch(msg);
 
-        List<NotificationLogView> logs = logRepository.findByModuleAndRef("notice", "test-ref-001");
+        List<NotificationLogVo> logs = logRepository.findByModuleAndRef("notice", "test-ref-001");
         // 至少 IN_APP 渠道会写入记录（每个接收人一条）
         assertThat(logs).isNotEmpty();
         assertThat(logs).allMatch(l -> l.status() == 1); // 全部成功
@@ -2988,7 +2988,7 @@ class NotificationChannelIntegrationTest extends BaseIntegrationTest {
                 Map.of(), "test_module", "idx-test-ref");
         dispatcher.dispatch(msg);
 
-        List<NotificationLogView> logs = logRepository.findByModuleAndRef("test_module", "idx-test-ref");
+        List<NotificationLogVo> logs = logRepository.findByModuleAndRef("test_module", "idx-test-ref");
         assertThat(logs).isNotEmpty();
     }
 

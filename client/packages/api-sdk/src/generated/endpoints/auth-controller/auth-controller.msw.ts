@@ -19,19 +19,19 @@ import type {
 } from 'msw';
 
 import type {
-  CurrentUserView,
-  LoginView
+  CurrentUserVo,
+  LoginVo
 } from '../../models';
 
 
-export const getPostAuthRefreshResponseMock = (overrideResponse: Partial< LoginView > = {}): LoginView => ({accessToken: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), refreshToken: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), expiresInSeconds: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), user: faker.helpers.arrayElement([{userId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), permissions: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined])}, undefined]), ...overrideResponse})
+export const getPostAuthRefreshResponseMock = (overrideResponse: Partial< LoginVo > = {}): LoginVo => ({accessToken: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), refreshToken: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), expiresInSeconds: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), user: faker.helpers.arrayElement([{userId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), permissions: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined])}, undefined]), ...overrideResponse})
 
-export const getPostAuthLoginResponseMock = (overrideResponse: Partial< LoginView > = {}): LoginView => ({accessToken: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), refreshToken: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), expiresInSeconds: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), user: faker.helpers.arrayElement([{userId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), permissions: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined])}, undefined]), ...overrideResponse})
+export const getPostAuthLoginResponseMock = (overrideResponse: Partial< LoginVo > = {}): LoginVo => ({accessToken: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), refreshToken: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), expiresInSeconds: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), user: faker.helpers.arrayElement([{userId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), permissions: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined])}, undefined]), ...overrideResponse})
 
-export const getGetAuthMeResponseMock = (overrideResponse: Partial< CurrentUserView > = {}): CurrentUserView => ({userId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), permissions: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined]), roles: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined]), isAdmin: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), ...overrideResponse})
+export const getGetAuthMeResponseMock = (overrideResponse: Partial< CurrentUserVo > = {}): CurrentUserVo => ({userId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), username: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), deptId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), permissions: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined]), roles: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => (faker.string.alpha({length: {min: 10, max: 20}}))), undefined]), isAdmin: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]), ...overrideResponse})
 
 
-export const getPostAuthRefreshMockHandler = (overrideResponse?: LoginView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<LoginView> | LoginView), options?: RequestHandlerOptions) => {
+export const getPostAuthRefreshMockHandler = (overrideResponse?: LoginVo | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<LoginVo> | LoginVo), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/auth/refresh', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
@@ -53,7 +53,7 @@ export const getPostAuthLogoutMockHandler = (overrideResponse?: void | ((info: P
   }, options)
 }
 
-export const getPostAuthLoginMockHandler = (overrideResponse?: LoginView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<LoginView> | LoginView), options?: RequestHandlerOptions) => {
+export const getPostAuthLoginMockHandler = (overrideResponse?: LoginVo | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<LoginVo> | LoginVo), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/auth/login', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
@@ -65,7 +65,7 @@ export const getPostAuthLoginMockHandler = (overrideResponse?: LoginView | ((inf
   }, options)
 }
 
-export const getGetAuthMeMockHandler = (overrideResponse?: CurrentUserView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CurrentUserView> | CurrentUserView), options?: RequestHandlerOptions) => {
+export const getGetAuthMeMockHandler = (overrideResponse?: CurrentUserVo | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<CurrentUserVo> | CurrentUserVo), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/auth/me', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined

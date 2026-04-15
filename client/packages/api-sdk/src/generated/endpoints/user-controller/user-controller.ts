@@ -20,14 +20,14 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  AssignRolesCommand,
-  ChangePasswordCommand,
+  AssignRolesCmd,
+  ChangePasswordCmd,
   GetUserParams,
-  PageResultUserView,
-  ResetPasswordCommand,
-  UserCreateCommand,
-  UserUpdateCommand,
-  UserView
+  PageResultUserVo,
+  ResetPasswordCmd,
+  UserCreateCmd,
+  UserUpdateCmd,
+  UserVo
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -50,9 +50,9 @@ export const getGetUserByIdUrl = (id: number,) => {
   return `/api/v1/users/${id}`
 }
 
-export const getUserById = async (id: number, options?: RequestInit): Promise<UserView> => {
+export const getUserById = async (id: number, options?: RequestInit): Promise<UserVo> => {
   
-  return customInstance<UserView>(getGetUserByIdUrl(id),
+  return customInstance<UserVo>(getGetUserByIdUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -126,15 +126,15 @@ export const getPutUserByIdUrl = (id: number,) => {
 }
 
 export const putUserById = async (id: number,
-    userUpdateCommand: UserUpdateCommand, options?: RequestInit): Promise<UserView> => {
+    userUpdateCmd: UserUpdateCmd, options?: RequestInit): Promise<UserVo> => {
   
-  return customInstance<UserView>(getPutUserByIdUrl(id),
+  return customInstance<UserVo>(getPutUserByIdUrl(id),
   {      
     ...options,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      userUpdateCommand,)
+      userUpdateCmd,)
   }
 );}
 
@@ -142,8 +142,8 @@ export const putUserById = async (id: number,
 
 
 export const getPutUserByIdMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserById>>, TError,{id: number;data: UserUpdateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof putUserById>>, TError,{id: number;data: UserUpdateCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserById>>, TError,{id: number;data: UserUpdateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putUserById>>, TError,{id: number;data: UserUpdateCmd}, TContext> => {
 
 const mutationKey = ['putUserById'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -155,7 +155,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUserById>>, {id: number;data: UserUpdateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUserById>>, {id: number;data: UserUpdateCmd}> = (props) => {
           const {id,data} = props ?? {};
 
           return  putUserById(id,data,requestOptions)
@@ -167,15 +167,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PutUserByIdMutationResult = NonNullable<Awaited<ReturnType<typeof putUserById>>>
-    export type PutUserByIdMutationBody = UserUpdateCommand
+    export type PutUserByIdMutationBody = UserUpdateCmd
     export type PutUserByIdMutationError = unknown
 
     export const usePutUserById = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserById>>, TError,{id: number;data: UserUpdateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserById>>, TError,{id: number;data: UserUpdateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof putUserById>>,
         TError,
-        {id: number;data: UserUpdateCommand},
+        {id: number;data: UserUpdateCmd},
         TContext
       > => {
 
@@ -266,7 +266,7 @@ export const getPutUserByIdRoleUrl = (id: number,) => {
 }
 
 export const putUserByIdRole = async (id: number,
-    assignRolesCommand: AssignRolesCommand, options?: RequestInit): Promise<void> => {
+    assignRolesCmd: AssignRolesCmd, options?: RequestInit): Promise<void> => {
   
   return customInstance<void>(getPutUserByIdRoleUrl(id),
   {      
@@ -274,7 +274,7 @@ export const putUserByIdRole = async (id: number,
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      assignRolesCommand,)
+      assignRolesCmd,)
   }
 );}
 
@@ -282,8 +282,8 @@ export const putUserByIdRole = async (id: number,
 
 
 export const getPutUserByIdRoleMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserByIdRole>>, TError,{id: number;data: AssignRolesCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof putUserByIdRole>>, TError,{id: number;data: AssignRolesCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserByIdRole>>, TError,{id: number;data: AssignRolesCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putUserByIdRole>>, TError,{id: number;data: AssignRolesCmd}, TContext> => {
 
 const mutationKey = ['putUserByIdRole'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -295,7 +295,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUserByIdRole>>, {id: number;data: AssignRolesCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUserByIdRole>>, {id: number;data: AssignRolesCmd}> = (props) => {
           const {id,data} = props ?? {};
 
           return  putUserByIdRole(id,data,requestOptions)
@@ -307,15 +307,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PutUserByIdRoleMutationResult = NonNullable<Awaited<ReturnType<typeof putUserByIdRole>>>
-    export type PutUserByIdRoleMutationBody = AssignRolesCommand
+    export type PutUserByIdRoleMutationBody = AssignRolesCmd
     export type PutUserByIdRoleMutationError = unknown
 
     export const usePutUserByIdRole = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserByIdRole>>, TError,{id: number;data: AssignRolesCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserByIdRole>>, TError,{id: number;data: AssignRolesCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof putUserByIdRole>>,
         TError,
-        {id: number;data: AssignRolesCommand},
+        {id: number;data: AssignRolesCmd},
         TContext
       > => {
 
@@ -331,7 +331,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return `/api/v1/users/me/password`
 }
 
-export const putUserMePassword = async (changePasswordCommand: ChangePasswordCommand, options?: RequestInit): Promise<void> => {
+export const putUserMePassword = async (changePasswordCmd: ChangePasswordCmd, options?: RequestInit): Promise<void> => {
   
   return customInstance<void>(getPutUserMePasswordUrl(),
   {      
@@ -339,7 +339,7 @@ export const putUserMePassword = async (changePasswordCommand: ChangePasswordCom
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      changePasswordCommand,)
+      changePasswordCmd,)
   }
 );}
 
@@ -347,8 +347,8 @@ export const putUserMePassword = async (changePasswordCommand: ChangePasswordCom
 
 
 export const getPutUserMePasswordMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserMePassword>>, TError,{data: ChangePasswordCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof putUserMePassword>>, TError,{data: ChangePasswordCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserMePassword>>, TError,{data: ChangePasswordCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putUserMePassword>>, TError,{data: ChangePasswordCmd}, TContext> => {
 
 const mutationKey = ['putUserMePassword'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -360,7 +360,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUserMePassword>>, {data: ChangePasswordCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putUserMePassword>>, {data: ChangePasswordCmd}> = (props) => {
           const {data} = props ?? {};
 
           return  putUserMePassword(data,requestOptions)
@@ -372,15 +372,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PutUserMePasswordMutationResult = NonNullable<Awaited<ReturnType<typeof putUserMePassword>>>
-    export type PutUserMePasswordMutationBody = ChangePasswordCommand
+    export type PutUserMePasswordMutationBody = ChangePasswordCmd
     export type PutUserMePasswordMutationError = unknown
 
     export const usePutUserMePassword = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserMePassword>>, TError,{data: ChangePasswordCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putUserMePassword>>, TError,{data: ChangePasswordCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof putUserMePassword>>,
         TError,
-        {data: ChangePasswordCommand},
+        {data: ChangePasswordCmd},
         TContext
       > => {
 
@@ -416,9 +416,9 @@ export const getGetUserUrl = (params?: GetUserParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/users?${stringifiedParams}` : `/api/v1/users`
 }
 
-export const getUser = async (params?: GetUserParams, options?: RequestInit): Promise<PageResultUserView> => {
+export const getUser = async (params?: GetUserParams, options?: RequestInit): Promise<PageResultUserVo> => {
   
-  return customInstance<PageResultUserView>(getGetUserUrl(params),
+  return customInstance<PageResultUserVo>(getGetUserUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -491,15 +491,15 @@ export const getPostUserUrl = () => {
   return `/api/v1/users`
 }
 
-export const postUser = async (userCreateCommand: UserCreateCommand, options?: RequestInit): Promise<UserView> => {
+export const postUser = async (userCreateCmd: UserCreateCmd, options?: RequestInit): Promise<UserVo> => {
   
-  return customInstance<UserView>(getPostUserUrl(),
+  return customInstance<UserVo>(getPostUserUrl(),
   {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      userCreateCommand,)
+      userCreateCmd,)
   }
 );}
 
@@ -507,8 +507,8 @@ export const postUser = async (userCreateCommand: UserCreateCommand, options?: R
 
 
 export const getPostUserMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUser>>, TError,{data: UserCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postUser>>, TError,{data: UserCreateCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUser>>, TError,{data: UserCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postUser>>, TError,{data: UserCreateCmd}, TContext> => {
 
 const mutationKey = ['postUser'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -520,7 +520,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUser>>, {data: UserCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUser>>, {data: UserCreateCmd}> = (props) => {
           const {data} = props ?? {};
 
           return  postUser(data,requestOptions)
@@ -532,15 +532,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostUserMutationResult = NonNullable<Awaited<ReturnType<typeof postUser>>>
-    export type PostUserMutationBody = UserCreateCommand
+    export type PostUserMutationBody = UserCreateCmd
     export type PostUserMutationError = unknown
 
     export const usePostUser = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUser>>, TError,{data: UserCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUser>>, TError,{data: UserCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof postUser>>,
         TError,
-        {data: UserCreateCommand},
+        {data: UserCreateCmd},
         TContext
       > => {
 
@@ -562,7 +562,7 @@ export const getPostUserByIdResetPasswordUrl = (id: number,) => {
 }
 
 export const postUserByIdResetPassword = async (id: number,
-    resetPasswordCommand: ResetPasswordCommand, options?: RequestInit): Promise<void> => {
+    resetPasswordCmd: ResetPasswordCmd, options?: RequestInit): Promise<void> => {
   
   return customInstance<void>(getPostUserByIdResetPasswordUrl(id),
   {      
@@ -570,7 +570,7 @@ export const postUserByIdResetPassword = async (id: number,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      resetPasswordCommand,)
+      resetPasswordCmd,)
   }
 );}
 
@@ -578,8 +578,8 @@ export const postUserByIdResetPassword = async (id: number,
 
 
 export const getPostUserByIdResetPasswordMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUserByIdResetPassword>>, TError,{id: number;data: ResetPasswordCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postUserByIdResetPassword>>, TError,{id: number;data: ResetPasswordCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUserByIdResetPassword>>, TError,{id: number;data: ResetPasswordCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postUserByIdResetPassword>>, TError,{id: number;data: ResetPasswordCmd}, TContext> => {
 
 const mutationKey = ['postUserByIdResetPassword'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -591,7 +591,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUserByIdResetPassword>>, {id: number;data: ResetPasswordCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postUserByIdResetPassword>>, {id: number;data: ResetPasswordCmd}> = (props) => {
           const {id,data} = props ?? {};
 
           return  postUserByIdResetPassword(id,data,requestOptions)
@@ -603,15 +603,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostUserByIdResetPasswordMutationResult = NonNullable<Awaited<ReturnType<typeof postUserByIdResetPassword>>>
-    export type PostUserByIdResetPasswordMutationBody = ResetPasswordCommand
+    export type PostUserByIdResetPasswordMutationBody = ResetPasswordCmd
     export type PostUserByIdResetPasswordMutationError = unknown
 
     export const usePostUserByIdResetPassword = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUserByIdResetPassword>>, TError,{id: number;data: ResetPasswordCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postUserByIdResetPassword>>, TError,{id: number;data: ResetPasswordCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof postUserByIdResetPassword>>,
         TError,
-        {id: number;data: ResetPasswordCommand},
+        {id: number;data: ResetPasswordCmd},
         TContext
       > => {
 

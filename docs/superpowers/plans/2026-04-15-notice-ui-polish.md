@@ -767,7 +767,7 @@ git commit -m "feat(notice): 详情页 UI 重构（Card 包裹 + 元信息区 + 
 }
 ```
 
-确保 mock 数据中的字段名与 orval 生成的 `NoticeView` 类型匹配。
+确保 mock 数据中的字段名与 orval 生成的 `NoticeVo` 类型匹配。
 
 - [ ] 运行全量前端质量检查：
 

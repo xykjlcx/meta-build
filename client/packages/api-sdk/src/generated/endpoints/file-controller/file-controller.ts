@@ -20,7 +20,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  FileUploadView,
+  FileUploadVo,
   PostFileBody
 } from '../../models';
 
@@ -44,11 +44,11 @@ export const getPostFileUrl = () => {
   return `/api/v1/files`
 }
 
-export const postFile = async (postFileBody: PostFileBody, options?: RequestInit): Promise<FileUploadView> => {
+export const postFile = async (postFileBody: PostFileBody, options?: RequestInit): Promise<FileUploadVo> => {
     const formData = new FormData();
 formData.append(`file`, postFileBody.file)
 
-  return customInstance<FileUploadView>(getPostFileUrl(),
+  return customInstance<FileUploadVo>(getPostFileUrl(),
   {      
     ...options,
     method: 'POST'

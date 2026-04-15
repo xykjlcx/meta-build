@@ -16,7 +16,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ServerInfoView
+  ServerInfoVo
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -39,9 +39,9 @@ export const getGetMonitorServerInfoUrl = () => {
   return `/api/v1/monitor/server-info`
 }
 
-export const getMonitorServerInfo = async ( options?: RequestInit): Promise<ServerInfoView> => {
+export const getMonitorServerInfo = async ( options?: RequestInit): Promise<ServerInfoVo> => {
   
-  return customInstance<ServerInfoView>(getGetMonitorServerInfoUrl(),
+  return customInstance<ServerInfoVo>(getGetMonitorServerInfoUrl(),
   {      
     ...options,
     method: 'GET'

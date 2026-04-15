@@ -39,7 +39,7 @@ server/mb-infra/
 ```
 server/mb-platform/
 ├── platform-iam/          → 最大模块（50+ 文件）
-│   ├── api/               → 6 Api 接口 + 13 DTO（*View/*Command 命名）
+│   ├── api/               → 6 Api 接口 + 13 DTO（*Vo/*Cmd 命名）
 │   ├── domain/
 │   │   ├── user/          → UserService + UserRepository + PasswordHistoryRepository
 │   │   ├── role/          → RoleService + RoleRepository
@@ -150,7 +150,7 @@ server/mb-admin/src/test/java/com/metabuild/admin/
 | 数据权限 | ExecuteListener（非 VisitListener） | VisitListener 的 Clause API 已 deprecated，ExecuteListener.renderStart 更稳定 |
 | 审计字段 | AuditFieldsRecordListener | 不在 JooqHelper 中做，统一用 RecordListener |
 | 时间类型 | OffsetDateTime + Clock Bean | DDL 用 TIMESTAMPTZ，代码用 now(clock)（ADR-0012） |
-| DTO 命名 | *View / *Command | 4 角色审查后对齐 spec（原代码用 Response/Request） |
+| DTO 命名 | *Vo / *Cmd | 4 角色审查后对齐 spec（原代码用 Response/Request） |
 | 权限码格式 | 冒号分隔 `iam:user:list` | Sa-Token 惯例，spec 已对齐 |
 | 安全模型 | opt-out（SaInterceptor 全局认证） | 4 角色审查发现原实现是 opt-in，nxboot 反面教材 #2 |
 | Lombok | 1.18.44 + annotationProcessorPaths | 1.18.34 不兼容 JDK 25 |
@@ -226,9 +226,9 @@ M4 合流后前后端联合审查，新增 2 个端点 + 2 处修复：
 
 | 变更 | 说明 |
 |------|------|
-| `GET /api/v1/auth/me` | 新增端点，返回 `CurrentUserView`（userId/username/nickname/roles/permissions/deptId/isAdmin），前端 `useCurrentUser` hook 消费 |
-| `GET /api/v1/menus/current-user` | 新增端点，返回 `List<CurrentUserMenuView>`（嵌套树结构），前端 `useMenu` hook 消费 |
-| `CurrentUserView.isAdmin` 加 `@JsonProperty("isAdmin")` | 修复 Jackson 默认将 `isAdmin` 序列化为 `admin` 的问题，确保前端字段名一致 |
+| `GET /api/v1/auth/me` | 新增端点，返回 `CurrentUserVo`（userId/username/nickname/roles/permissions/deptId/isAdmin），前端 `useCurrentUser` hook 消费 |
+| `GET /api/v1/menus/current-user` | 新增端点，返回 `List<CurrentUserMenuVo>`（嵌套树结构），前端 `useMenu` hook 消费 |
+| `CurrentUserVo.isAdmin` 加 `@JsonProperty("isAdmin")` | 修复 Jackson 默认将 `isAdmin` 序列化为 `admin` 的问题，确保前端字段名一致 |
 | `MenuService.toResponse` parentId 0→null 转换 | 根节点 parentId 在数据库为 0，转换为 null 返回前端，避免前端树构建时找不到 parent=0 的节点 |
 | `MenuRepository.findByRoleIds` | 新增方法，按角色 ID 集合查询菜单（`current-user` 端点依赖），替代原先只有 `findAll` 的实现 |
 

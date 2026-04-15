@@ -19,14 +19,14 @@ import type {
 } from 'msw';
 
 import type {
-  FileUploadView
+  FileUploadVo
 } from '../../models';
 
 
-export const getPostFileResponseMock = (overrideResponse: Partial< FileUploadView > = {}): FileUploadView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), originalName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), filePath: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), fileSize: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), contentType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sha256: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getPostFileResponseMock = (overrideResponse: Partial< FileUploadVo > = {}): FileUploadVo => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), originalName: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), filePath: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), fileSize: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), contentType: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), sha256: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
 
-export const getPostFileMockHandler = (overrideResponse?: FileUploadView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<FileUploadView> | FileUploadView), options?: RequestHandlerOptions) => {
+export const getPostFileMockHandler = (overrideResponse?: FileUploadVo | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<FileUploadVo> | FileUploadVo), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/files', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined

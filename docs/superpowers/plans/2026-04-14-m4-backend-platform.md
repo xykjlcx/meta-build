@@ -290,7 +290,7 @@ public record MbI18nProperties(
 
 配置 `ReloadableResourceBundleMessageSource` + `AcceptHeaderLocaleResolver`。MessageSource basenames 覆盖所有 platform 模块的消息文件。
 
-- [ ] **Step 3: 创建公共 messages 文件（errors.system.internal / errors.validation / errors.auth.* / errors.common.pagination.*）**
+- [ ] **Step 3: 创建公共 messages 文件（system.internal / validation / auth.* / common.pagination.*）**
 - [ ] **Step 4: 编译验证 + Commit**
 
 ---

@@ -500,11 +500,11 @@ export const Route = createFileRoute('/_authed/orders/')({
 
 ```ts
 // 正确：通过 @mb/api-sdk
-import { orderApi, type OrderView, type PageResult } from '@mb/api-sdk';
+import { orderApi, type OrderVo, type PageResult } from '@mb/api-sdk';
 import { useQuery } from '@tanstack/react-query';
 
 export function useOrderList(page: number, size: number) {
-  return useQuery<PageResult<OrderView>, Error>({
+  return useQuery<PageResult<OrderVo>, Error>({
     queryKey: ['orders', 'list', page, size],
     queryFn: () => orderApi.list({ page, size }),
   });

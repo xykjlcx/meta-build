@@ -20,12 +20,12 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  DictDataCreateCommand,
-  DictDataView,
-  DictTypeCreateCommand,
-  DictTypeView,
+  DictDataCreateCmd,
+  DictDataVo,
+  DictTypeCreateCmd,
+  DictTypeVo,
   GetDictTypeParams,
-  PageResultDictTypeView
+  PageResultDictTypeVo
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -63,9 +63,9 @@ export const getGetDictTypeUrl = (params?: GetDictTypeParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/dict/types?${stringifiedParams}` : `/api/v1/dict/types`
 }
 
-export const getDictType = async (params?: GetDictTypeParams, options?: RequestInit): Promise<PageResultDictTypeView> => {
+export const getDictType = async (params?: GetDictTypeParams, options?: RequestInit): Promise<PageResultDictTypeVo> => {
   
-  return customInstance<PageResultDictTypeView>(getGetDictTypeUrl(params),
+  return customInstance<PageResultDictTypeVo>(getGetDictTypeUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -138,15 +138,15 @@ export const getPostDictTypeUrl = () => {
   return `/api/v1/dict/types`
 }
 
-export const postDictType = async (dictTypeCreateCommand: DictTypeCreateCommand, options?: RequestInit): Promise<DictTypeView> => {
+export const postDictType = async (dictTypeCreateCmd: DictTypeCreateCmd, options?: RequestInit): Promise<DictTypeVo> => {
   
-  return customInstance<DictTypeView>(getPostDictTypeUrl(),
+  return customInstance<DictTypeVo>(getPostDictTypeUrl(),
   {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      dictTypeCreateCommand,)
+      dictTypeCreateCmd,)
   }
 );}
 
@@ -154,8 +154,8 @@ export const postDictType = async (dictTypeCreateCommand: DictTypeCreateCommand,
 
 
 export const getPostDictTypeMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictType>>, TError,{data: DictTypeCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postDictType>>, TError,{data: DictTypeCreateCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictType>>, TError,{data: DictTypeCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postDictType>>, TError,{data: DictTypeCreateCmd}, TContext> => {
 
 const mutationKey = ['postDictType'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -167,7 +167,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postDictType>>, {data: DictTypeCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postDictType>>, {data: DictTypeCreateCmd}> = (props) => {
           const {data} = props ?? {};
 
           return  postDictType(data,requestOptions)
@@ -179,15 +179,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostDictTypeMutationResult = NonNullable<Awaited<ReturnType<typeof postDictType>>>
-    export type PostDictTypeMutationBody = DictTypeCreateCommand
+    export type PostDictTypeMutationBody = DictTypeCreateCmd
     export type PostDictTypeMutationError = unknown
 
     export const usePostDictType = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictType>>, TError,{data: DictTypeCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictType>>, TError,{data: DictTypeCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof postDictType>>,
         TError,
-        {data: DictTypeCreateCommand},
+        {data: DictTypeCreateCmd},
         TContext
       > => {
 
@@ -208,15 +208,15 @@ export const getPostDictDataUrl = () => {
   return `/api/v1/dict/data`
 }
 
-export const postDictData = async (dictDataCreateCommand: DictDataCreateCommand, options?: RequestInit): Promise<DictDataView> => {
+export const postDictData = async (dictDataCreateCmd: DictDataCreateCmd, options?: RequestInit): Promise<DictDataVo> => {
   
-  return customInstance<DictDataView>(getPostDictDataUrl(),
+  return customInstance<DictDataVo>(getPostDictDataUrl(),
   {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      dictDataCreateCommand,)
+      dictDataCreateCmd,)
   }
 );}
 
@@ -224,8 +224,8 @@ export const postDictData = async (dictDataCreateCommand: DictDataCreateCommand,
 
 
 export const getPostDictDataMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictData>>, TError,{data: DictDataCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postDictData>>, TError,{data: DictDataCreateCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictData>>, TError,{data: DictDataCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postDictData>>, TError,{data: DictDataCreateCmd}, TContext> => {
 
 const mutationKey = ['postDictData'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -237,7 +237,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postDictData>>, {data: DictDataCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postDictData>>, {data: DictDataCreateCmd}> = (props) => {
           const {data} = props ?? {};
 
           return  postDictData(data,requestOptions)
@@ -249,15 +249,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostDictDataMutationResult = NonNullable<Awaited<ReturnType<typeof postDictData>>>
-    export type PostDictDataMutationBody = DictDataCreateCommand
+    export type PostDictDataMutationBody = DictDataCreateCmd
     export type PostDictDataMutationError = unknown
 
     export const usePostDictData = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictData>>, TError,{data: DictDataCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDictData>>, TError,{data: DictDataCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof postDictData>>,
         TError,
-        {data: DictDataCreateCommand},
+        {data: DictDataCreateCmd},
         TContext
       > => {
 
@@ -278,9 +278,9 @@ export const getGetDictTypeByTypeidDataUrl = (typeId: number,) => {
   return `/api/v1/dict/types/${typeId}/data`
 }
 
-export const getDictTypeByTypeidData = async (typeId: number, options?: RequestInit): Promise<DictDataView[]> => {
+export const getDictTypeByTypeidData = async (typeId: number, options?: RequestInit): Promise<DictDataVo[]> => {
   
-  return customInstance<DictDataView[]>(getGetDictTypeByTypeidDataUrl(typeId),
+  return customInstance<DictDataVo[]>(getGetDictTypeByTypeidDataUrl(typeId),
   {      
     ...options,
     method: 'GET'
@@ -353,9 +353,9 @@ export const getGetDictTypeByIdUrl = (id: number,) => {
   return `/api/v1/dict/types/${id}`
 }
 
-export const getDictTypeById = async (id: number, options?: RequestInit): Promise<DictTypeView> => {
+export const getDictTypeById = async (id: number, options?: RequestInit): Promise<DictTypeVo> => {
   
-  return customInstance<DictTypeView>(getGetDictTypeByIdUrl(id),
+  return customInstance<DictTypeVo>(getGetDictTypeByIdUrl(id),
   {      
     ...options,
     method: 'GET'

@@ -346,14 +346,14 @@ public class JooqIsolationRule {
 public class UserService implements UserApi {
 
     @Transactional(readOnly = true)
-    public UserView findById(Long id) {
+    public UserVo findById(Long id) {
         return userRepository.findById(id)
-            .map(UserView::from)
+            .map(UserVo::from)
             .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
     }
 
     @Transactional
-    public User create(UserCreateCommand cmd) {
+    public User create(UserCreateCmd cmd) {
         // 默认 propagation = REQUIRED
         return userRepository.save(new User(cmd));
     }
@@ -505,12 +505,12 @@ public class DSLContextConfig {
 ```java
 // UserService.updateEmail（N3 修正：Service 通过 Repository 访问，不直接持有 DSLContext）
 @Transactional
-public UserView updateEmail(Long userId, UserUpdateEmailCommand cmd) {
+public UserVo updateEmail(Long userId, UserUpdateEmailCmd cmd) {
     MbIamUserRecord record = userRepository.findById(userId)
         .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
     record.setEmail(cmd.newEmail());
     MbIamUserRecord saved = userRepository.save(record);  // Repository 内部调 record.store()
-    return UserView.from(saved);
+    return UserVo.from(saved);
     // Repository.save() 内部执行:
     //   UPDATE mb_iam_user
     //   SET email=?, version=version+1, updated_at=CURRENT_TIMESTAMP, updated_by=?
@@ -538,7 +538,7 @@ public ProblemDetail handleDataChanged(DataChangedException e, Locale locale) {
         HttpStatus.CONFLICT,
         messageSource.getMessage("common.optimisticLock", null, locale)
     );
-    pd.setType(URI.create("https://errors.metabuild.com/common/optimistic-lock"));
+    pd.setType(URI.create("urn:metabuild:error:common.optimisticLock"));
     pd.setProperty("errorCode", "common.optimisticLock");
     return pd;
 }
@@ -787,7 +787,7 @@ public class JooqHelper {
 ```java
 // 单条:直接 Record API(最常用)
 @Transactional
-public UserView createUser(UserCreateCommand cmd) {
+public UserVo createUser(UserCreateCmd cmd) {
     MbIamUserRecord record = dsl.newRecord(MB_IAM_USER);
     record.setId(snowflake.nextId());
     record.setUsername(cmd.username());
@@ -797,12 +797,12 @@ public UserView createUser(UserCreateCommand cmd) {
     record.insert();
     //   触发 AuditFieldsRecordListener.insertStart → 填 created_by/updated_by
     //   created_at/updated_at 由 DB DEFAULT 填
-    return UserView.from(record);
+    return UserVo.from(record);
 }
 
 // 批量 N 条:走 helper
 @Transactional
-public void importUsers(List<UserCreateCommand> cmds) {
+public void importUsers(List<UserCreateCmd> cmds) {
     List<MbIamUserRecord> records = cmds.stream()
         .map(this::buildRecord)
         .collect(toList());
@@ -1171,7 +1171,7 @@ spring:
 
 ```java
 // ✅ 正确：使用 Instant
-public record UserView(
+public record UserVo(
     Long id,
     String username,
     Instant createdAt,       // 序列化为 "2026-04-11T10:30:00Z"
@@ -1179,7 +1179,7 @@ public record UserView(
 ) {}
 
 // ❌ 错误：LocalDateTime 丢失时区信息
-public record UserView(
+public record UserVo(
     Long id,
     String username,
     LocalDateTime createdAt  // 禁止在 api 包使用
@@ -1212,7 +1212,7 @@ public static final ArchRule NO_LOCALDATETIME_IN_API = noClasses()
 public class OrderService implements OrderApi {
     private final Clock clock;
 
-    public OrderView create(OrderCreateCommand cmd) {
+    public OrderVo create(OrderCreateCmd cmd) {
         Instant now = Instant.now(clock);   // 可在测试中冻结时间
         // ...
     }
@@ -1267,7 +1267,7 @@ public class UserRepository {
 
     private final DSLContext dsl;
 
-    public PageResult<UserView> page(PageQuery query) {
+    public PageResult<UserVo> page(PageQuery query) {
         // 1. 解析 sort 白名单 + 默认排序
         List<SortField<?>> orderBy = SortParser.builder()
             .forTable(MB_IAM_USER)                         // 自动：id/createdAt/updatedAt
@@ -1290,7 +1290,7 @@ public class UserRepository {
 
         // 4. 映射到 View + 封装结果
         return PageResult.of(
-            records.stream().map(UserView::from).toList(),
+            records.stream().map(UserVo::from).toList(),
             total,
             query
         );
@@ -1301,7 +1301,7 @@ public class UserRepository {
 ### 13.2 带 WHERE 条件的分页
 
 ```java
-public PageResult<UserView> pageByStatus(PageQuery query, int status) {
+public PageResult<UserVo> pageByStatus(PageQuery query, int status) {
     List<SortField<?>> orderBy = SortParser.builder()
         .forTable(MB_IAM_USER)
         .allow("username", MB_IAM_USER.USERNAME)
@@ -1323,7 +1323,7 @@ public PageResult<UserView> pageByStatus(PageQuery query, int status) {
         .fetch();
 
     return PageResult.of(
-        records.stream().map(UserView::from).toList(),
+        records.stream().map(UserVo::from).toList(),
         total,
         query
     );
@@ -1333,7 +1333,7 @@ public PageResult<UserView> pageByStatus(PageQuery query, int status) {
 ### 13.3 复杂 JOIN 查询的分页
 
 ```java
-public PageResult<UserWithDeptView> pageWithDept(PageQuery query) {
+public PageResult<UserWithDeptVo> pageWithDept(PageQuery query) {
     // JOIN 查询的 SortParser 需要显式列举所有允许字段
     // （forTable 只识别单表的 id/createdAt/updatedAt，不跨表）
     List<SortField<?>> orderBy = SortParser.builder()
@@ -1358,7 +1358,7 @@ public PageResult<UserWithDeptView> pageWithDept(PageQuery query) {
         .fetch();
 
     return PageResult.of(
-        records.stream().map(UserWithDeptView::from).toList(),
+        records.stream().map(UserWithDeptVo::from).toList(),
         total,
         query
     );

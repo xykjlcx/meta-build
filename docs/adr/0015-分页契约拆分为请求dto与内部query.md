@@ -62,7 +62,7 @@ M5 之后开始补平台模块前端页面时，发现分页列表接口的 Open
 平台模块 controller 统一采用：
 
 ```java
-public PageResult<UserView> list(@ParameterObject PageRequestDto request) {
+public PageResult<UserVo> list(@ParameterObject PageRequestDto request) {
     return userService.list(paginationPolicy.normalize(request));
 }
 ```

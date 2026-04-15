@@ -219,7 +219,7 @@ HTTP query
 则 Service 层可以直接收显式参数，例如：
 
 ```java
-PageResult<UserView> list(String keyword, Integer status, PageQuery page)
+PageResult<UserVo> list(String keyword, Integer status, PageQuery page)
 ```
 
 不必为了形式统一而制造无复用的小类型。
@@ -233,10 +233,10 @@ PageResult<UserView> list(String keyword, Integer status, PageQuery page)
 - 多处复用
 - Repository / Export / 统计都要共享
 
-则可以定义业务 Query 类型，例如：
+则可以定义业务查询对象，例如：
 
 ```java
-public record NoticeQuery(
+public record NoticeQry(
     Short status,
     String keyword,
     OffsetDateTime startTimeFrom,
@@ -247,7 +247,7 @@ public record NoticeQuery(
 然后 Service 层拿：
 
 ```java
-PageResult<NoticeView> list(NoticeQuery query, PageQuery page)
+PageResult<NoticeVo> list(NoticeQry query, PageQuery page)
 ```
 
 ### 4.3 推荐模式
@@ -269,8 +269,8 @@ public class NoticeListRequestDto extends PageRequestDto {
 ```
 
 ```java
-public PageResult<NoticeView> list(@ParameterObject NoticeListRequestDto request) {
-    NoticeQuery query = new NoticeQuery(
+public PageResult<NoticeVo> list(@ParameterObject NoticeListRequestDto request) {
+    NoticeQry query = new NoticeQry(
         request.getStatus(),
         request.getKeyword(),
         request.getStartTimeFrom(),

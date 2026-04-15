@@ -20,8 +20,8 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  DeptCreateCommand,
-  DeptView
+  DeptCreateCmd,
+  DeptVo
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -44,9 +44,9 @@ export const getGetDeptUrl = () => {
   return `/api/v1/depts`
 }
 
-export const getDept = async ( options?: RequestInit): Promise<DeptView[]> => {
+export const getDept = async ( options?: RequestInit): Promise<DeptVo[]> => {
   
-  return customInstance<DeptView[]>(getGetDeptUrl(),
+  return customInstance<DeptVo[]>(getGetDeptUrl(),
   {      
     ...options,
     method: 'GET'
@@ -119,15 +119,15 @@ export const getPostDeptUrl = () => {
   return `/api/v1/depts`
 }
 
-export const postDept = async (deptCreateCommand: DeptCreateCommand, options?: RequestInit): Promise<DeptView> => {
+export const postDept = async (deptCreateCmd: DeptCreateCmd, options?: RequestInit): Promise<DeptVo> => {
   
-  return customInstance<DeptView>(getPostDeptUrl(),
+  return customInstance<DeptVo>(getPostDeptUrl(),
   {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      deptCreateCommand,)
+      deptCreateCmd,)
   }
 );}
 
@@ -135,8 +135,8 @@ export const postDept = async (deptCreateCommand: DeptCreateCommand, options?: R
 
 
 export const getPostDeptMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDept>>, TError,{data: DeptCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postDept>>, TError,{data: DeptCreateCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDept>>, TError,{data: DeptCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postDept>>, TError,{data: DeptCreateCmd}, TContext> => {
 
 const mutationKey = ['postDept'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -148,7 +148,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postDept>>, {data: DeptCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postDept>>, {data: DeptCreateCmd}> = (props) => {
           const {data} = props ?? {};
 
           return  postDept(data,requestOptions)
@@ -160,15 +160,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostDeptMutationResult = NonNullable<Awaited<ReturnType<typeof postDept>>>
-    export type PostDeptMutationBody = DeptCreateCommand
+    export type PostDeptMutationBody = DeptCreateCmd
     export type PostDeptMutationError = unknown
 
     export const usePostDept = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDept>>, TError,{data: DeptCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postDept>>, TError,{data: DeptCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof postDept>>,
         TError,
-        {data: DeptCreateCommand},
+        {data: DeptCreateCmd},
         TContext
       > => {
 
@@ -189,9 +189,9 @@ export const getGetDeptByIdUrl = (id: number,) => {
   return `/api/v1/depts/${id}`
 }
 
-export const getDeptById = async (id: number, options?: RequestInit): Promise<DeptView> => {
+export const getDeptById = async (id: number, options?: RequestInit): Promise<DeptVo> => {
   
-  return customInstance<DeptView>(getGetDeptByIdUrl(id),
+  return customInstance<DeptVo>(getGetDeptByIdUrl(id),
   {      
     ...options,
     method: 'GET'

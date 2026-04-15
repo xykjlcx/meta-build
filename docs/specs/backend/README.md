@@ -146,7 +146,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | 9 | jOOQ codegen 生成的代码放在 `mb-schema/src/main/jooq-generated/` 并入 git | [04-data-persistence.md §6 jOOQ 代码生成流程](./04-data-persistence.md#6-jooq-代码生成流程-m1m4) |
 | 10 | ArchUnit 测试集中放在 `mb-admin/src/test/java/com/metabuild/admin/architecture/` | [08-archunit-rules.md §5 测试基类 ArchitectureTest](./08-archunit-rules.md#5-测试基类-architecturetest-m1m4) |
 | 11 | 新增业务表**必须**在 `DataScopeConfig` 调用 `registry.register(tableName, deptColumn)` 注册到 `DataScopeRegistry`，否则数据权限不会生效（漏注册 = 超权风险） | [05-security.md §7.7 使用者注册受保护表](./05-security.md#77-使用者注册受保护表集中声明) + [03-platform-modules.md §5 步骤 10.1](./03-platform-modules.md#5-新增业务模块的完整操作流程12-步清单-p0) |
-| 12 | 所有 API 边界数据类（`*View` / `*Command` / `*Query` / `*Event`）**必须**用 Java `record` 定义，禁用 Lombok `@Data` / `@Value` 定义 DTO（C2）| [08-archunit-rules.md §7.1 DTO / VO / Command / Query / Event 必须用 record](./08-archunit-rules.md) |
+| 12 | 所有 API 边界数据类（`*Vo` / `*Cmd` / `*Qry` / `*Event`）**必须**用 Java `record` 定义，禁用 Lombok `@Data` / `@Value` 定义 DTO（C2）| [08-archunit-rules.md §7.1 DTO / Vo / Cmd / Qry / Event 必须用 record](./08-archunit-rules.md) |
 | 13 | Service / Repository / Controller **必须**用 Lombok `@RequiredArgsConstructor` + `final` 字段构造器注入（C2）| [08-archunit-rules.md §7.2](./08-archunit-rules.md) |
 | 14 | 实体 → DTO 映射**必须**手写 `from()` 静态方法，v1 **禁用** MapStruct / ModelMapper（C2）| [08-archunit-rules.md §7.3](./08-archunit-rules.md) |
 | 15 | Service 对 `org.jooq` 的依赖**仅限** `Record` / `Result` / `exception` 白名单（`SERVICE_JOOQ_WHITELIST`）；`DSLContext` / `DSL` / `Field` / `Condition` / 各类 Step 一律禁止（C8）| [08-archunit-rules.md §6 N3 精化规则](./08-archunit-rules.md) |

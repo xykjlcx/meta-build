@@ -19,24 +19,24 @@ import type {
 } from 'msw';
 
 import type {
-  DictDataView,
-  DictTypeView,
-  PageResultDictTypeView
+  DictDataVo,
+  DictTypeVo,
+  PageResultDictTypeVo
 } from '../../models';
 
 
-export const getGetDictTypeResponseMock = (overrideResponse: Partial< PageResultDictTypeView > = {}): PageResultDictTypeView => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
+export const getGetDictTypeResponseMock = (overrideResponse: Partial< PageResultDictTypeVo > = {}): PageResultDictTypeVo => ({content: faker.helpers.arrayElement([Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})), undefined]), totalElements: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), totalPages: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), page: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), size: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), ...overrideResponse})
 
-export const getPostDictTypeResponseMock = (overrideResponse: Partial< DictTypeView > = {}): DictTypeView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getPostDictTypeResponseMock = (overrideResponse: Partial< DictTypeVo > = {}): DictTypeVo => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
-export const getPostDictDataResponseMock = (overrideResponse: Partial< DictDataView > = {}): DictDataView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), dictTypeId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), label: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getPostDictDataResponseMock = (overrideResponse: Partial< DictDataVo > = {}): DictDataVo => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), dictTypeId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), label: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
-export const getGetDictTypeByTypeidDataResponseMock = (): DictDataView[] => (Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), dictTypeId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), label: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})))
+export const getGetDictTypeByTypeidDataResponseMock = (): DictDataVo[] => (Array.from({ length: faker.number.int({ min: 1, max: 10 }) }, (_, i) => i + 1).map(() => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), dictTypeId: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), label: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), value: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), sortOrder: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined])})))
 
-export const getGetDictTypeByIdResponseMock = (overrideResponse: Partial< DictTypeView > = {}): DictTypeView => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
+export const getGetDictTypeByIdResponseMock = (overrideResponse: Partial< DictTypeVo > = {}): DictTypeVo => ({id: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), name: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), code: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), status: faker.helpers.arrayElement([faker.number.int({min: undefined, max: undefined}), undefined]), remark: faker.helpers.arrayElement([faker.string.alpha({length: {min: 10, max: 20}}), undefined]), createdAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), updatedAt: faker.helpers.arrayElement([`${faker.date.past().toISOString().split('.')[0]}Z`, undefined]), ...overrideResponse})
 
 
-export const getGetDictTypeMockHandler = (overrideResponse?: PageResultDictTypeView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultDictTypeView> | PageResultDictTypeView), options?: RequestHandlerOptions) => {
+export const getGetDictTypeMockHandler = (overrideResponse?: PageResultDictTypeVo | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<PageResultDictTypeVo> | PageResultDictTypeVo), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/dict/types', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
@@ -48,7 +48,7 @@ export const getGetDictTypeMockHandler = (overrideResponse?: PageResultDictTypeV
   }, options)
 }
 
-export const getPostDictTypeMockHandler = (overrideResponse?: DictTypeView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<DictTypeView> | DictTypeView), options?: RequestHandlerOptions) => {
+export const getPostDictTypeMockHandler = (overrideResponse?: DictTypeVo | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<DictTypeVo> | DictTypeVo), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/dict/types', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
@@ -60,7 +60,7 @@ export const getPostDictTypeMockHandler = (overrideResponse?: DictTypeView | ((i
   }, options)
 }
 
-export const getPostDictDataMockHandler = (overrideResponse?: DictDataView | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<DictDataView> | DictDataView), options?: RequestHandlerOptions) => {
+export const getPostDictDataMockHandler = (overrideResponse?: DictDataVo | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<DictDataVo> | DictDataVo), options?: RequestHandlerOptions) => {
   return http.post('*/api/v1/dict/data', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
@@ -72,7 +72,7 @@ export const getPostDictDataMockHandler = (overrideResponse?: DictDataView | ((i
   }, options)
 }
 
-export const getGetDictTypeByTypeidDataMockHandler = (overrideResponse?: DictDataView[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<DictDataView[]> | DictDataView[]), options?: RequestHandlerOptions) => {
+export const getGetDictTypeByTypeidDataMockHandler = (overrideResponse?: DictDataVo[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<DictDataVo[]> | DictDataVo[]), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/dict/types/:typeId/data', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined
@@ -84,7 +84,7 @@ export const getGetDictTypeByTypeidDataMockHandler = (overrideResponse?: DictDat
   }, options)
 }
 
-export const getGetDictTypeByIdMockHandler = (overrideResponse?: DictTypeView | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<DictTypeView> | DictTypeView), options?: RequestHandlerOptions) => {
+export const getGetDictTypeByIdMockHandler = (overrideResponse?: DictTypeVo | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<DictTypeVo> | DictTypeVo), options?: RequestHandlerOptions) => {
   return http.get('*/api/v1/dict/types/:id', async (info) => {await delay(1000);
   
     return new HttpResponse(JSON.stringify(overrideResponse !== undefined

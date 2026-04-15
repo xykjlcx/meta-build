@@ -76,8 +76,8 @@ public class SystemException extends MetaBuildException {
 
 | 场景 | 格式 | Content-Type | HTTP Status |
 |------|------|--------------|------------|
-| **成功（单对象）** | 直接返回业务对象 `UserView { ... }` | `application/json` | 200 / 201 |
-| **成功（列表）** | 直接返回数组 `[UserView, ...]` | `application/json` | 200 |
+| **成功（单对象）** | 直接返回业务对象 `UserVo { ... }` | `application/json` | 200 / 201 |
+| **成功（列表）** | 直接返回数组 `[UserVo, ...]` | `application/json` | 200 |
 | **成功（分页）** | `PageResult<T>` | `application/json` | 200 |
 | **成功（无内容）** | 空 body | - | 204 |
 | **错误（业务）** | `ProblemDetail` + 扩展字段 `code` | `application/problem+json` | 4xx |
@@ -99,14 +99,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MetaBuildException.class)
     public ProblemDetail handleMetaBuild(MetaBuildException ex, HttpServletRequest req) {
         Locale locale = LocaleContextHolder.getLocale();
-        String detail = messageSource.getMessage(
-            "errors." + ex.getCode() + ".detail", ex.getArgs(), ex.getCode(), locale);
-        String title = messageSource.getMessage(
-            "errors." + ex.getCode() + ".title", null, ex.getCode(), locale);
+        String detail = messageSource.getMessage(ex.getCode(), ex.getArgs(), ex.getCode(), locale);
 
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(ex.getStatus(), detail);
         pd.setType(URI.create(errorBaseUri + ex.getCode()));
-        pd.setTitle(title);
+        pd.setTitle(HttpStatus.valueOf(ex.getStatus()).getReasonPhrase());
         pd.setInstance(URI.create(req.getRequestURI()));
         pd.setProperty("code", ex.getCode());
         pd.setProperty("traceId", MDC.get("traceId"));
@@ -156,38 +153,37 @@ public class GlobalExceptionHandler {
 #### 消息文件组织
 
 ```
-mb-admin/src/main/resources/messages/
-├── messages_zh_CN.properties     # 顶层消息（common）
+mb-common/src/main/resources/messages/
+├── messages_zh_CN.properties     # 共享消息（system/auth/common/validation）
 ├── messages_en_US.properties
-└── ...
 
 mb-platform/platform-iam/src/main/resources/messages/
 ├── iam_zh_CN.properties
 └── iam_en_US.properties
 
-mb-platform/platform-log/src/main/resources/messages/
-├── oplog_zh_CN.properties
-└── oplog_en_US.properties
+mb-business/business-notice/src/main/resources/messages/
+├── notice_zh_CN.properties
+└── notice_en_US.properties
+
+mb-platform/platform-file/src/main/resources/messages/
+├── file_zh_CN.properties
+└── file_en_US.properties
 ```
 
 #### 消息 key 命名
 
-每个错误码对应两个 key：
+每个错误码对应一个 key：
 
 ```properties
 # iam_zh_CN.properties
-errors.iam.user.notFound.title=用户不存在
-errors.iam.user.notFound.detail=用户 ID {0} 不存在
-errors.iam.user.duplicateEmail.title=邮箱已存在
-errors.iam.user.duplicateEmail.detail=邮箱 {0} 已被其他用户使用
+iam.user.notFound=用户 ID {0} 不存在
+iam.user.usernameExists=用户名已存在: {0}
 ```
 
 ```properties
 # iam_en_US.properties
-errors.iam.user.notFound.title=User Not Found
-errors.iam.user.notFound.detail=User with ID {0} does not exist
-errors.iam.user.duplicateEmail.title=Duplicate Email
-errors.iam.user.duplicateEmail.detail=Email {0} is already in use
+iam.user.notFound=User with ID {0} does not exist
+iam.user.usernameExists=Username already exists: {0}
 ```
 
 ## 5. 错误码命名规范 [M4]
@@ -334,8 +330,8 @@ public class UserController {
     })
     @GetMapping
     @RequirePermission("iam:user:list")
-    public PageResult<UserView> list(
-            @Parameter(description = "查询参数") @Valid UserQuery query,
+    public PageResult<UserVo> list(
+            @Parameter(description = "查询参数") @Valid UserQry query,
             @Parameter(description = "页码（从 1 开始）") @RequestParam(defaultValue = "1") int page,
             @Parameter(description = "每页大小") @RequestParam(defaultValue = "20") int size) {
         return userApi.page(query, page, size);
@@ -410,7 +406,7 @@ CI 流程:
 ```java
 @Deprecated(since = "v1.5", forRemoval = true)
 @GetMapping("/api/v1/iam/users/legacy")
-public List<UserView> listLegacy(HttpServletResponse res) {
+public List<UserVo> listLegacy(HttpServletResponse res) {
     res.setHeader("Sunset", "Wed, 01 Jan 2027 00:00:00 GMT");
     res.setHeader("Deprecation", "true");
     res.setHeader("Link", "</api/v2/iam/users>; rel=\"successor-version\"");
@@ -513,9 +509,9 @@ public PageQuery normalize(PageRequestDto request) {
     int page = request.getPage() == null ? 1 : request.getPage();
     int size = request.getSize() == null ? props.defaultSize() : request.getSize();
 
-    if (page < 1) throw new BusinessException("errors.common.pagination.invalidPage", 400);
+    if (page < 1) throw new BusinessException("common.pagination.invalidPage");
     if (size < 1 || size > props.maxSize()) {
-        throw new BusinessException("errors.common.pagination.invalidSize", 400, props.maxSize());
+        throw new BusinessException("common.pagination.invalidSize", props.maxSize());
     }
 
     return PageQuery.normalized(page, size, normalizeSort(request.getSort()));
@@ -526,7 +522,7 @@ Controller 写法：
 
 ```java
 @GetMapping("/api/v1/admin/iam/users")
-public PageResult<UserView> list(@ParameterObject PageRequestDto request) {
+public PageResult<UserVo> list(@ParameterObject PageRequestDto request) {
     return userService.page(paginationPolicy.normalize(request));
 }
 ```

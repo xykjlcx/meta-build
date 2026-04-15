@@ -20,9 +20,9 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  CurrentUserMenuView,
-  MenuCreateCommand,
-  MenuView
+  CurrentUserMenuVo,
+  MenuCreateCmd,
+  MenuVo
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -45,9 +45,9 @@ export const getGetMenuUrl = () => {
   return `/api/v1/menus`
 }
 
-export const getMenu = async ( options?: RequestInit): Promise<MenuView[]> => {
+export const getMenu = async ( options?: RequestInit): Promise<MenuVo[]> => {
   
-  return customInstance<MenuView[]>(getGetMenuUrl(),
+  return customInstance<MenuVo[]>(getGetMenuUrl(),
   {      
     ...options,
     method: 'GET'
@@ -120,15 +120,15 @@ export const getPostMenuUrl = () => {
   return `/api/v1/menus`
 }
 
-export const postMenu = async (menuCreateCommand: MenuCreateCommand, options?: RequestInit): Promise<MenuView> => {
+export const postMenu = async (menuCreateCmd: MenuCreateCmd, options?: RequestInit): Promise<MenuVo> => {
   
-  return customInstance<MenuView>(getPostMenuUrl(),
+  return customInstance<MenuVo>(getPostMenuUrl(),
   {      
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      menuCreateCommand,)
+      menuCreateCmd,)
   }
 );}
 
@@ -136,8 +136,8 @@ export const postMenu = async (menuCreateCommand: MenuCreateCommand, options?: R
 
 
 export const getPostMenuMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postMenu>>, TError,{data: MenuCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof postMenu>>, TError,{data: MenuCreateCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postMenu>>, TError,{data: MenuCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof postMenu>>, TError,{data: MenuCreateCmd}, TContext> => {
 
 const mutationKey = ['postMenu'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -149,7 +149,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postMenu>>, {data: MenuCreateCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof postMenu>>, {data: MenuCreateCmd}> = (props) => {
           const {data} = props ?? {};
 
           return  postMenu(data,requestOptions)
@@ -161,15 +161,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PostMenuMutationResult = NonNullable<Awaited<ReturnType<typeof postMenu>>>
-    export type PostMenuMutationBody = MenuCreateCommand
+    export type PostMenuMutationBody = MenuCreateCmd
     export type PostMenuMutationError = unknown
 
     export const usePostMenu = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postMenu>>, TError,{data: MenuCreateCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof postMenu>>, TError,{data: MenuCreateCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof postMenu>>,
         TError,
-        {data: MenuCreateCommand},
+        {data: MenuCreateCmd},
         TContext
       > => {
 
@@ -190,9 +190,9 @@ export const getGetMenuByIdUrl = (id: number,) => {
   return `/api/v1/menus/${id}`
 }
 
-export const getMenuById = async (id: number, options?: RequestInit): Promise<MenuView> => {
+export const getMenuById = async (id: number, options?: RequestInit): Promise<MenuVo> => {
   
-  return customInstance<MenuView>(getGetMenuByIdUrl(id),
+  return customInstance<MenuVo>(getGetMenuByIdUrl(id),
   {      
     ...options,
     method: 'GET'
@@ -329,9 +329,9 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return `/api/v1/menus/current-user`
 }
 
-export const getMenuCurrentUser = async ( options?: RequestInit): Promise<CurrentUserMenuView> => {
+export const getMenuCurrentUser = async ( options?: RequestInit): Promise<CurrentUserMenuVo> => {
   
-  return customInstance<CurrentUserMenuView>(getGetMenuCurrentUserUrl(),
+  return customInstance<CurrentUserMenuVo>(getGetMenuCurrentUserUrl(),
   {      
     ...options,
     method: 'GET'

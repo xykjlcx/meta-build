@@ -39,7 +39,7 @@ client/
 │   │   ├── types/
 │   │   │   ├── index.ts
 │   │   │   ├── common.ts                     # PageResult, ProblemDetail
-│   │   │   ├── auth.ts                       # LoginCommand, LoginResult, CurrentUserDto
+│   │   │   ├── auth.ts                       # LoginCmd, LoginResult, CurrentUserDto
 │   │   │   ├── menu.ts                       # MenuNodeDto, UserMenuPayload
 │   │   │   └── permission.ts                 # AppPermission 联合类型
 │   │   └── apis/
@@ -461,7 +461,7 @@ export interface ProblemDetail {
 
 `src/types/auth.ts`:
 ```ts
-export interface LoginCommand {
+export interface LoginCmd {
   username: string;
   password: string;
   captchaCode?: string;
@@ -721,10 +721,10 @@ export function getClient(): HttpClient {
 `src/apis/auth-api.ts`:
 ```ts
 import { getClient } from '../config';
-import type { LoginCommand, LoginResult, CurrentUserDto } from '../types/auth';
+import type { LoginCmd, LoginResult, CurrentUserDto } from '../types/auth';
 
 export const authApi = {
-  login(cmd: LoginCommand): Promise<LoginResult> {
+  login(cmd: LoginCmd): Promise<LoginResult> {
     return getClient().request('/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -757,7 +757,7 @@ export const menuApi = {
 ```ts
 // 类型
 export type { PageResult, ProblemDetail } from './types/common';
-export type { LoginCommand, LoginResult, CurrentUserDto } from './types/auth';
+export type { LoginCmd, LoginResult, CurrentUserDto } from './types/auth';
 export type { MenuNodeDto, UserMenuPayload } from './types/menu';
 export type { AppPermission } from './types/permission';
 export { ALL_APP_PERMISSIONS } from './types/permission';
@@ -1585,7 +1585,7 @@ export function useCurrentUser(): CurrentUser {
 ```ts
 // auth/use-auth.ts
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { authApi, type LoginCommand } from '@mb/api-sdk';
+import { authApi, type LoginCmd } from '@mb/api-sdk';
 import { useNavigate } from '@tanstack/react-router';
 
 const ACCESS_TOKEN_KEY = 'mb_access_token';
@@ -1596,7 +1596,7 @@ export function useAuth() {
   const navigate = useNavigate();
 
   const loginMutation = useMutation({
-    mutationFn: (cmd: LoginCommand) => authApi.login(cmd),
+    mutationFn: (cmd: LoginCmd) => authApi.login(cmd),
     onSuccess: (result) => {
       localStorage.setItem(ACCESS_TOKEN_KEY, result.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, result.refreshToken);

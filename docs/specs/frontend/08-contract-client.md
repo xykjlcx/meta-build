@@ -142,13 +142,13 @@ export function useOrderList(): ReturnType<typeof useQuery> {
 ```ts
 // ✅ L5 features 通过 @mb/api-sdk 调用
 import { useQuery } from '@tanstack/react-query';
-import { orderApi, type OrderView, type PageResult } from '@mb/api-sdk';
+import { orderApi, type OrderVo, type PageResult } from '@mb/api-sdk';
 
 export function useOrderList(
   page: number,
   size: number
-): ReturnType<typeof useQuery<PageResult<OrderView>, Error>> {
-  return useQuery<PageResult<OrderView>, Error>({
+): ReturnType<typeof useQuery<PageResult<OrderVo>, Error>> {
+  return useQuery<PageResult<OrderVo>, Error>({
     queryKey: ['orders', 'list', page, size],
     queryFn: () => orderApi.list({ page, size })
   });
@@ -198,8 +198,8 @@ export function useOrderList(
 生成出来的 DTO 类型约束：
 
 ```ts
-// client/packages/api-sdk/src/generated/models/OrderView.ts （生成产物，示意）
-export interface OrderView {
+// client/packages/api-sdk/src/generated/models/OrderVo.ts （生成产物，示意）
+export interface OrderVo {
   id: number;
   orderNo: string;
   amount: string;                 // 后端 BigDecimal → string 避免精度损失
@@ -208,7 +208,7 @@ export interface OrderView {
   createdAt: string;              // Instant → ISO-8601 string
 }
 
-export interface OrderCreateCommand {
+export interface OrderCreateCmd {
   customerId: number;
   amount: string;
   remark?: string;
@@ -220,12 +220,12 @@ export interface OrderCreateCommand {
 ```ts
 // features/orders/use-create-order.ts
 import { useMutation } from '@tanstack/react-query';
-import { orderApi, type OrderCreateCommand, type OrderView } from '@mb/api-sdk';
+import { orderApi, type OrderCreateCmd, type OrderVo } from '@mb/api-sdk';
 
 export function useCreateOrder(): ReturnType<
-  typeof useMutation<OrderView, Error, OrderCreateCommand>
+  typeof useMutation<OrderVo, Error, OrderCreateCmd>
 > {
-  return useMutation<OrderView, Error, OrderCreateCommand>({
+  return useMutation<OrderVo, Error, OrderCreateCmd>({
     mutationFn: (cmd) => orderApi.create(cmd)
   });
 }
@@ -251,8 +251,8 @@ import { createAcceptLanguageMiddleware } from './interceptors/accept-language';
 import { createRequestIdMiddleware } from './interceptors/request-id';
 import { createErrorMiddleware } from './interceptors/error';
 
-export type { OrderView, OrderCreateCommand } from './generated/models/OrderView';
-export type { UserView, UserQuery } from './generated/models/UserView';
+export type { OrderVo, OrderCreateCmd } from './generated/models/OrderVo';
+export type { UserVo, UserQry } from './generated/models/UserVo';
 export type { MenuNodeDto, RouteTreeNodeDto } from './generated/models/MenuNodeDto';
 export type { PageResult } from './generated/models/PageResult';
 export type { ProblemDetail } from './generated/models/ProblemDetail';
@@ -539,7 +539,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useTranslation } from 'react-i18next';
 import { useMutation } from '@tanstack/react-query';
-import { orderApi, ProblemDetailError, type OrderCreateCommand, type OrderView } from '@mb/api-sdk';
+import { orderApi, ProblemDetailError, type OrderCreateCmd, type OrderVo } from '@mb/api-sdk';
 import { NxForm, NxInput, NxButton } from '@mb/ui-patterns';
 
 const schema = z.object({
@@ -550,14 +550,14 @@ const schema = z.object({
 
 export const OrderCreateForm: React.FC = () => {
   const { t } = useTranslation('order');
-  const form = useForm<OrderCreateCommand>({ resolver: zodResolver(schema) });
+  const form = useForm<OrderCreateCmd>({ resolver: zodResolver(schema) });
 
-  const mutation = useMutation<OrderView, ProblemDetailError, OrderCreateCommand>({
+  const mutation = useMutation<OrderVo, ProblemDetailError, OrderCreateCmd>({
     mutationFn: (cmd) => orderApi.create(cmd),
     onError: (err) => {
       if (err.validationErrors.length > 0) {
         for (const v of err.validationErrors) {
-          form.setError(v.field as keyof OrderCreateCommand, { message: v.message });
+          form.setError(v.field as keyof OrderCreateCmd, { message: v.message });
         }
         return;
       }
@@ -600,11 +600,11 @@ export interface PageResult<T> {
 L5 使用：
 
 ```ts
-import { orderApi, type PageResult, type OrderView } from '@mb/api-sdk';
+import { orderApi, type PageResult, type OrderVo } from '@mb/api-sdk';
 import { useQuery } from '@tanstack/react-query';
 
 export function useOrderPage(page: number, size: number) {
-  return useQuery<PageResult<OrderView>, Error>({
+  return useQuery<PageResult<OrderVo>, Error>({
     queryKey: ['orders', page, size],
     queryFn: () => orderApi.list({ page, size })
   });
@@ -694,10 +694,10 @@ module.exports = {
 // apps/web-admin/src/routes/auth/login.tsx
 import { createFileRoute, useRouter } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
-import { authApi, type LoginCommand } from '@mb/api-sdk';  // 豁免：routes/auth/** 可以直调
+import { authApi, type LoginCmd } from '@mb/api-sdk';  // 豁免：routes/auth/** 可以直调
 
 function LoginPage(): React.ReactElement {
-  const form = useForm<LoginCommand>();
+  const form = useForm<LoginCmd>();
   const router = useRouter();
 
   const onSubmit = form.handleSubmit(async (cmd) => {

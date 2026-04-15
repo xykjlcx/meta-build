@@ -20,10 +20,10 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  ConfigSetCommand,
-  ConfigView,
+  ConfigSetCmd,
+  ConfigVo,
   GetConfigParams,
-  PageResultConfigView
+  PageResultConfigVo
 } from '../../models';
 
 import { customInstance } from '../../../mutator/custom-instance';
@@ -61,9 +61,9 @@ export const getGetConfigUrl = (params?: GetConfigParams,) => {
   return stringifiedParams.length > 0 ? `/api/v1/configs?${stringifiedParams}` : `/api/v1/configs`
 }
 
-export const getConfig = async (params?: GetConfigParams, options?: RequestInit): Promise<PageResultConfigView> => {
+export const getConfig = async (params?: GetConfigParams, options?: RequestInit): Promise<PageResultConfigVo> => {
   
-  return customInstance<PageResultConfigView>(getGetConfigUrl(params),
+  return customInstance<PageResultConfigVo>(getGetConfigUrl(params),
   {      
     ...options,
     method: 'GET'
@@ -136,7 +136,7 @@ export const getPutConfigUrl = () => {
   return `/api/v1/configs`
 }
 
-export const putConfig = async (configSetCommand: ConfigSetCommand, options?: RequestInit): Promise<void> => {
+export const putConfig = async (configSetCmd: ConfigSetCmd, options?: RequestInit): Promise<void> => {
   
   return customInstance<void>(getPutConfigUrl(),
   {      
@@ -144,7 +144,7 @@ export const putConfig = async (configSetCommand: ConfigSetCommand, options?: Re
     method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      configSetCommand,)
+      configSetCmd,)
   }
 );}
 
@@ -152,8 +152,8 @@ export const putConfig = async (configSetCommand: ConfigSetCommand, options?: Re
 
 
 export const getPutConfigMutationOptions = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putConfig>>, TError,{data: ConfigSetCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
-): UseMutationOptions<Awaited<ReturnType<typeof putConfig>>, TError,{data: ConfigSetCommand}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putConfig>>, TError,{data: ConfigSetCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
+): UseMutationOptions<Awaited<ReturnType<typeof putConfig>>, TError,{data: ConfigSetCmd}, TContext> => {
 
 const mutationKey = ['putConfig'];
 const {mutation: mutationOptions, request: requestOptions} = options ?
@@ -165,7 +165,7 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
       
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putConfig>>, {data: ConfigSetCommand}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof putConfig>>, {data: ConfigSetCmd}> = (props) => {
           const {data} = props ?? {};
 
           return  putConfig(data,requestOptions)
@@ -177,15 +177,15 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
   return  { mutationFn, ...mutationOptions }}
 
     export type PutConfigMutationResult = NonNullable<Awaited<ReturnType<typeof putConfig>>>
-    export type PutConfigMutationBody = ConfigSetCommand
+    export type PutConfigMutationBody = ConfigSetCmd
     export type PutConfigMutationError = unknown
 
     export const usePutConfig = <TError = unknown,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putConfig>>, TError,{data: ConfigSetCommand}, TContext>, request?: SecondParameter<typeof customInstance>}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof putConfig>>, TError,{data: ConfigSetCmd}, TContext>, request?: SecondParameter<typeof customInstance>}
  ): UseMutationResult<
         Awaited<ReturnType<typeof putConfig>>,
         TError,
-        {data: ConfigSetCommand},
+        {data: ConfigSetCmd},
         TContext
       > => {
 
@@ -206,9 +206,9 @@ export const getGetConfigByKeyUrl = (key: string,) => {
   return `/api/v1/configs/${key}`
 }
 
-export const getConfigByKey = async (key: string, options?: RequestInit): Promise<ConfigView> => {
+export const getConfigByKey = async (key: string, options?: RequestInit): Promise<ConfigVo> => {
   
-  return customInstance<ConfigView>(getGetConfigByKeyUrl(key),
+  return customInstance<ConfigVo>(getGetConfigByKeyUrl(key),
   {      
     ...options,
     method: 'GET'

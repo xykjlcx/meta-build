@@ -102,7 +102,7 @@ public class AuthService implements AuthApi {
     private final AuthFacade authFacade;                // mb-common 接口，SaTokenAuthFacade 实现在 infra-security
 
     @Transactional(readOnly = true)
-    public LoginResult login(LoginCommand cmd) {
+    public LoginResult login(LoginCmd cmd) {
         User user = userRepository.findByUsername(cmd.username())
             .orElseThrow(() -> new UnauthorizedException("iam.auth.invalidCredentials"));
         if (!passwordEncoder.matches(cmd.password(), user.passwordHash())) {
@@ -249,19 +249,19 @@ public class UserController {
 
     @GetMapping
     @RequirePermission("iam:user:list")
-    public PageResult<UserView> list(UserQuery query) {
+    public PageResult<UserVo> list(UserQry query) {
         return userApi.page(query);
     }
 
     @PostMapping
     @RequirePermission("iam:user:create")
-    public UserView create(@RequestBody @Valid UserCreateCommand cmd) {
+    public UserVo create(@RequestBody @Valid UserCreateCmd cmd) {
         return userApi.create(cmd);
     }
 
     @PutMapping("/{id}")
     @RequirePermission("iam:user:update")
-    public UserView update(@PathVariable Long id, @RequestBody @Valid UserUpdateCommand cmd) {
+    public UserVo update(@PathVariable Long id, @RequestBody @Valid UserUpdateCmd cmd) {
         return userApi.update(id, cmd);
     }
 }
@@ -285,7 +285,7 @@ public class UserController {
 public class UserController {
     @PostMapping("/users")
     @RequirePermission("iam:user:create")
-    public UserView create(@RequestBody @Valid UserCreateCommand cmd) {
+    public UserVo create(@RequestBody @Valid UserCreateCmd cmd) {
         return userService.create(cmd);
     }
 }
@@ -293,14 +293,14 @@ public class UserController {
 @Service
 public class UserService {
     // 没有 @RequirePermission
-    public UserView create(UserCreateCommand cmd) { ... }
+    public UserVo create(UserCreateCmd cmd) { ... }
 }
 
 // ❌ 错误：@RequirePermission 在 Service 层（禁止！）
 @Service
 public class UserService {
     // @RequirePermission("iam:user:create")  ← 禁止！
-    public UserView create(UserCreateCommand cmd) { ... }
+    public UserVo create(UserCreateCmd cmd) { ... }
 }
 ```
 
@@ -308,7 +308,7 @@ public class UserService {
 
 ```java
 // Service 层的动态权限检查（不是注解）
-public UserView updateEmail(Long userId, UserUpdateEmailCommand cmd) {
+public UserVo updateEmail(Long userId, UserUpdateEmailCmd cmd) {
     if (!currentUser.userId().equals(userId) && !currentUser.hasPermission("iam:user:update")) {
         throw new BusinessException("iam.user.cannotUpdate");
     }
@@ -671,7 +671,7 @@ class UserServiceIntegrationTest extends BaseIntegrationTest {
     @Test
     void admin_creates_user() {
         currentUser.asAdmin();
-        UserView user = userService.create(new UserCreateCommand("alice", "password"));
+        UserVo user = userService.create(new UserCreateCmd("alice", "password"));
         assertThat(user.id()).isNotNull();
     }
 
@@ -1813,7 +1813,7 @@ public void requestPasswordReset(String email) {
 
 ```java
 @Transactional
-public void changePassword(ChangePasswordCommand cmd) {
+public void changePassword(ChangePasswordCmd cmd) {
     // 注意：@OperationLog 放对应的 Controller 方法上（N3 §2.5）
     Long userId = currentUser.userId();
     User user = userRepository.findById(userId)
@@ -2209,7 +2209,7 @@ public class AuthService {
     }
 
     @Transactional
-    public void changePassword(ChangePasswordCommand cmd) {
+    public void changePassword(ChangePasswordCmd cmd) {
         // 注意：@OperationLog 放对应的 Controller 方法上（N3 §2.5）
         Long userId = currentUser.userId();
         User user = userRepository.findById(userId)
@@ -2333,7 +2333,7 @@ public class AuthController {
 
     @PostMapping("/login")
     @OperationLog(action = "iam.auth.login")
-    public LoginResult login(@RequestBody @Valid LoginCommand cmd) {
+    public LoginResult login(@RequestBody @Valid LoginCmd cmd) {
         return authService.login(cmd.username(), cmd.password());
     }
 
