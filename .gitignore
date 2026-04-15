@@ -69,3 +69,4 @@ redis-data/
 # ===== 其他 OS =====
 Thumbs.db
 .flattened-pom.xml
+.superpowers/

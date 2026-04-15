@@ -63,7 +63,11 @@ scope: [后端/前端/全栈/构建/部署/流程]
 （M1 编码阶段积累）
 
 ### 前端
-（M2 编码阶段积累）
+| 规则 | triggers | 来源 |
+|------|----------|------|
+| [优先用 orval hooks，手写 API 必须交叉验证](orval-hooks-over-handwritten.md) | customInstance, api-sdk, fetch, 手写, API, endpoint | 0415 M5 微信绑定页 3 个 API 路径全错 |
+| [新增页面必须同步补全 MSW mock handler](msw-handler-sync.md) | MSW, mock, handler, 前端页面, dev server, 401 | 0415 M5 登录后 401 循环 |
+| [Radix 组件禁止空字符串 value](radix-no-empty-value.md) | Select, SelectItem, RadioGroup, Radix, value | 0415 M5 列表页白屏 |
 
 ### 构建与部署
 （M1 CI 搭建后积累）
