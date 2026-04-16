@@ -147,7 +147,7 @@ server/mb-admin/src/test/java/com/metabuild/admin/
 |------|------|------|
 | JWT 模式 | Simple（JWT 格式 + Redis session） | Stateless 无法 logout/踢人，Phase 1 review 修正 |
 | Refresh Token | 手写 RefreshTokenService（Redis） | Sa-Token 无内置双 token（仅 OAuth2 模块有） |
-| 数据权限 | ExecuteListener（非 VisitListener） | VisitListener 的 Clause API 已 deprecated，ExecuteListener.renderStart 更稳定 |
+| 数据权限 | ExecuteListener（方案 E） | `renderStart` 在 SQL 渲染前注入条件，行为稳定 |
 | 审计字段 | AuditFieldsRecordListener | 不在 JooqHelper 中做，统一用 RecordListener |
 | 时间类型 | OffsetDateTime + Clock Bean | DDL 用 TIMESTAMPTZ，代码用 now(clock)（ADR-0012） |
 | DTO 命名 | *Vo / *Cmd | 4 角色审查后对齐 spec（原代码用 Response/Request） |
@@ -165,7 +165,7 @@ server/mb-admin/src/test/java/com/metabuild/admin/
 - **I18nAutoConfiguration Bean 名冲突**：Spring MVC 已注册 `localeResolver`，需加 `@ConditionalOnMissingBean`
 - **CaptchaService disabled 时 Bean 缺失**：`captcha.enabled=false` 但 AuthService 注入 CaptchaService → 启动失败。需注册 no-op stub
 - **UserService 未设置 Snowflake ID**：表无自增序列，insert 前必须 `idGenerator.nextId()`
-- **DataScopeExecuteListener 用 VisitListener 时 topLevel() 行为不可靠**：改为 ExecuteListener.renderStart 在 SQL 渲染时注入条件
+- **DataScopeExecuteListener 初版拦截点选择不可靠**：最终改为 `ExecuteListener.renderStart` 在 SQL 渲染时注入条件
 
 ---
 

@@ -3,12 +3,12 @@ import { useQuery } from '@tanstack/react-query';
 import { ANONYMOUS, type CurrentUser } from './types';
 
 export function toCurrentUser(dto: CurrentUserVo): CurrentUser {
-  const permissions = new Set(dto.permissions ?? []) as ReadonlySet<string> as CurrentUser['permissions'];
+  const permissions = new Set(dto.permissions) as ReadonlySet<string> as CurrentUser['permissions'];
   return {
     isAuthenticated: true,
-    userId: dto.userId ?? 0,
-    username: dto.username ?? '',
-    deptId: dto.deptId ?? null,
+    userId: dto.userId,
+    username: dto.username,
+    deptId: dto.deptId,
     permissions,
     hasPermission: (code) => permissions.has(code),
     hasAnyPermission: (...codes) => codes.some((c) => permissions.has(c)),

@@ -4,15 +4,15 @@ import type { MenuNode, UserMenuPayload } from './types';
 
 function toMenuNode(dto: MenuVo): MenuNode {
   return {
-    id: dto.id ?? 0,
-    parentId: dto.parentId ?? null,
-    name: dto.name ?? '',
+    id: dto.id,
+    parentId: dto.parentId,
+    name: dto.name,
     permissionCode: dto.permissionCode as MenuNode['permissionCode'],
-    menuType: dto.menuType ?? 'MENU',
-    icon: dto.icon ?? null,
-    sortOrder: dto.sortOrder ?? null,
-    visible: dto.visible ?? null,
-    children: (dto.children ?? []).map(toMenuNode),
+    menuType: dto.menuType,
+    icon: dto.icon,
+    sortOrder: dto.sortOrder,
+    visible: dto.visible,
+    children: dto.children.map(toMenuNode),
   };
 }
 
@@ -28,8 +28,8 @@ export function useMenu(): UseQueryResult<UserMenuPayload, Error> {
     queryFn: async () => {
       const payload = await menuApi.queryCurrentUserMenu();
       return {
-        tree: (payload.tree ?? []).map(toMenuNode),
-        permissions: new Set(payload.permissions ?? []) as ReadonlySet<AppPermission>,
+        tree: payload.tree.map(toMenuNode),
+        permissions: new Set(payload.permissions) as ReadonlySet<AppPermission>,
       } satisfies UserMenuPayload;
     },
     staleTime: 60 * 60 * 1000,

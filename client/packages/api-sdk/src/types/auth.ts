@@ -17,25 +17,10 @@ export interface RefreshCmd extends Omit<GeneratedRefreshCmd, 'refreshToken'> {
   refreshToken: string;
 }
 
-export interface UserSummary extends Omit<GeneratedUserSummary, 'userId' | 'username' | 'deptId' | 'permissions'> {
-  userId: number;
-  username: string;
-  deptId: number | null;
-  permissions: string[];
-}
+export type UserSummary = GeneratedUserSummary;
 
-export interface LoginVo extends Omit<GeneratedLoginVo, 'accessToken' | 'refreshToken' | 'expiresInSeconds' | 'user'> {
-  accessToken: string;
-  refreshToken: string;
-  expiresInSeconds: number | null;
+export interface LoginVo extends Omit<GeneratedLoginVo, 'user'> {
   user: UserSummary | null;
 }
 
-export interface CurrentUserVo extends Omit<GeneratedCurrentUserVo, 'userId' | 'username' | 'deptId' | 'permissions' | 'roles' | 'isAdmin'> {
-  userId: number;
-  username: string;
-  deptId: number | null;
-  permissions: string[];
-  roles: string[];
-  isAdmin: boolean;
-}
+export type CurrentUserVo = GeneratedCurrentUserVo;
