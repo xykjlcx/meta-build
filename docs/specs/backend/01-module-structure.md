@@ -54,12 +54,12 @@ mb-admin     ← 依赖所有上层模块（聚合启动 + ArchUnit 测试基地
 |---|---|---|
 | common | `com.metabuild.common.<功能>` | `com.metabuild.common.exception.MetaBuildException`、`com.metabuild.common.security.CurrentUser`、`com.metabuild.common.security.DataScope` |
 | schema | `com.metabuild.schema.<jooq 概念>` | `com.metabuild.schema.tables.MbIamUser` |
-| infra | `com.metabuild.infra.<能力>` | `com.metabuild.infra.security.SaTokenCurrentUser`、`com.metabuild.infra.jooq.DataScopeVisitListener` |
+| infra | `com.metabuild.infra.<能力>` | `com.metabuild.infra.security.SaTokenCurrentUser`、`com.metabuild.infra.jooq.datascope.DataScopeExecuteListener` |
 | platform | `com.metabuild.platform.<域>.<子包>` | `com.metabuild.platform.iam.domain.user.UserService` |
 | business | `com.metabuild.business.<域>.<子包>` | `com.metabuild.business.order.domain.OrderService` |
 | admin | `com.metabuild.admin` | `com.metabuild.admin.MetaBuildApplication` |
 
-**关键位置澄清**：`CurrentUser` / `DataScope` / `DataScopeType` / `BypassDataScope` 等**抽象接口和类型定义**在 `mb-common.security`；Sa-Token 相关的**实现类**（`SaTokenCurrentUser` / `SaTokenAuthFacade`）在 `infra-security`；**数据权限的 SQL 注入机制**（`DataScopeRegistry` / `DataScopeVisitListener` / `BypassDataScopeAspect`）在 `infra-jooq`。三层严格分工，见 §5.3 数据权限 opt-out 实现（方案 E）。
+**关键位置澄清**：`CurrentUser` / `DataScope` / `DataScopeType` / `BypassDataScope` 等**抽象接口和类型定义**在 `mb-common.security`；Sa-Token 相关的**实现类**（`SaTokenCurrentUser` / `SaTokenAuthFacade`）在 `infra-security`；**数据权限的 SQL 注入机制**（`DataScopeRegistry` / `DataScopeExecuteListener` / `BypassDataScopeAspect`）在 `infra-jooq`。三层严格分工，见 §5.3 数据权限 opt-out 实现（方案 E）。
 
 ### 1.4 server/ 完整目录树
 
@@ -109,7 +109,7 @@ server/
 │   ├── pom.xml                               # parent pom
 │   ├── infra-security/                       # Sa-Token 实现：SaTokenCurrentUser + AuthFacade/SaTokenAuthFacade + @RequirePermission + CorsConfig
 │   ├── infra-cache/                          # Redis + CacheEvictSupport
-│   ├── infra-jooq/                           # JooqHelper + SlowQueryListener + DataScopeRegistry + DataScopeVisitListener + BypassDataScopeAspect（方案 E：数据权限的唯一归属，不含 jOOQ 生成代码）
+│   ├── infra-jooq/                           # JooqHelper + SlowQueryListener + DataScopeRegistry + DataScopeExecuteListener + BypassDataScopeAspect（方案 E：数据权限的唯一归属，不含 jOOQ 生成代码）
 │   ├── infra-web/                            # 共享 Web 边界（PageRequestDto / PaginationPolicy / MbPaginationProperties）
 │   ├── infra-exception/                      # GlobalExceptionHandler + ProblemDetail + SecurityHeaderFilter
 │   ├── infra-i18n/                           # MessageSource + LocaleResolver
@@ -222,7 +222,7 @@ com.metabuild.platform.iam/
 ├── domain/                        # 业务逻辑（Service + Repository，不拆 infrastructure）
 │   ├── user/
 │   │   ├── UserService.java       # implements UserApi
-│   │   └── UserRepository.java   # 普通类，零继承；数据权限由 DataScopeVisitListener 在 jOOQ 层自动拦截（方案 E）
+│   │   └── UserRepository.java   # 普通类，零继承；数据权限由 DataScopeExecuteListener 在 jOOQ 层自动拦截（方案 E）
 │   ├── role/
 │   │   ├── RoleService.java
 │   │   └── RoleRepository.java
@@ -624,8 +624,8 @@ package com.metabuild.platform.iam.domain.user;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.jooq.query.SortParser;
-import com.metabuild.platform.iam.api.dto.UserQry;
-import com.metabuild.platform.iam.api.dto.UserVo;
+import com.metabuild.platform.iam.api.qry.UserQry;
+import com.metabuild.platform.iam.api.vo.UserVo;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
 import lombok.RequiredArgsConstructor;
 import org.jooq.Condition;
@@ -725,7 +725,9 @@ import com.metabuild.common.exception.BusinessException;
 import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.UserApi;
-import com.metabuild.platform.iam.api.dto.*;
+import com.metabuild.platform.iam.api.cmd.*;
+import com.metabuild.platform.iam.api.qry.*;
+import com.metabuild.platform.iam.api.vo.*;
 import com.metabuild.platform.iam.api.event.UserCreatedEvent;
 import com.metabuild.schema.tables.records.MbIamUserRecord;  // ← 数据类型，不是 org.jooq.*
 import lombok.RequiredArgsConstructor;
@@ -798,8 +800,10 @@ package com.metabuild.platform.iam.web;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.security.RequirePermission;
-import com.metabuild.platform.operationlog.OperationLog;
-import com.metabuild.platform.iam.api.dto.*;
+import com.metabuild.common.log.OperationLog;
+import com.metabuild.platform.iam.api.cmd.*;
+import com.metabuild.platform.iam.api.qry.*;
+import com.metabuild.platform.iam.api.vo.*;
 import com.metabuild.platform.iam.domain.user.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

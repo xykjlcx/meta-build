@@ -71,7 +71,7 @@ public class ConfigRepository {
         }
     }
 
-    public void deleteByKey(String configKey) {
-        dsl.deleteFrom(MB_CONFIG).where(MB_CONFIG.CONFIG_KEY.eq(configKey)).execute();
+    public int deleteByKey(String configKey) {
+        return dsl.deleteFrom(MB_CONFIG).where(MB_CONFIG.CONFIG_KEY.eq(configKey)).execute();
     }
 }

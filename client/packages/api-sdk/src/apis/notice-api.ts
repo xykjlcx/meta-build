@@ -38,35 +38,35 @@ import {
   useGetNotificationLog,
 } from '../generated/endpoints/通知发送记录/通知发送记录';
 import type {
-  BatchIdsCommand,
-  BatchResultView,
-  NoticeDetailView as GeneratedNoticeDetailView,
+  BatchIdsCmd,
+  BatchResultVo,
+  NoticeDetailVo as GeneratedNoticeDetailVo,
   NoticeTarget as GeneratedNoticeTarget,
-  NoticeView as GeneratedNoticeView,
-  NotificationLogView as GeneratedNotificationLogView,
-  RecipientView as GeneratedRecipientView,
+  NoticeVo as GeneratedNoticeVo,
+  NotificationLogVo as GeneratedNotificationLogVo,
+  RecipientVo as GeneratedRecipientVo,
   GetNoticeByIdRecipientParams,
   GetNoticeExportParams,
   GetNoticeParams,
   GetNoticeUnreadCount200,
-  NoticeCreateCommand,
-  NoticePublishCommand,
-  NoticeUpdateCommand,
+  NoticeCreateCmd,
+  NoticePublishCmd,
+  NoticeUpdateCmd,
 } from '../generated/models';
 import { triggerDownload } from '../http-client';
 
-export type NoticeView = GeneratedNoticeView;
-export type NoticeDetailView = GeneratedNoticeDetailView;
+export type NoticeVo = GeneratedNoticeVo;
+export type NoticeDetailVo = GeneratedNoticeDetailVo;
 export type NoticeTarget = GeneratedNoticeTarget;
-export type RecipientView = GeneratedRecipientView;
-export type NotificationLogView = GeneratedNotificationLogView;
+export type RecipientVo = GeneratedRecipientVo;
+export type NotificationLogVo = GeneratedNotificationLogVo;
 export type NoticeListParams = GetNoticeParams;
 export type NoticeRecipientsParams = GetNoticeByIdRecipientParams;
-export type NoticeCreateInput = NoticeCreateCommand;
-export type NoticeUpdateInput = NoticeUpdateCommand;
-export type NoticePublishInput = NoticePublishCommand;
-export type NoticeBatchInput = BatchIdsCommand;
-export type NoticeBatchResult = BatchResultView;
+export type NoticeCreateInput = NoticeCreateCmd;
+export type NoticeUpdateInput = NoticeUpdateCmd;
+export type NoticePublishInput = NoticePublishCmd;
+export type NoticeBatchInput = BatchIdsCmd;
+export type NoticeBatchResult = BatchResultVo;
 export type NoticeUnreadCount = GetNoticeUnreadCount200;
 export type NoticeExportParams = GetNoticeExportParams;
 

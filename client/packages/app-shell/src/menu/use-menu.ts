@@ -1,12 +1,18 @@
-import { type AppPermission, type MenuNodeDto, menuApi } from '@mb/api-sdk';
+import { type AppPermission, type MenuVo, menuApi } from '@mb/api-sdk';
 import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 import type { MenuNode, UserMenuPayload } from './types';
 
-function toMenuNode(dto: MenuNodeDto): MenuNode {
+function toMenuNode(dto: MenuVo): MenuNode {
   return {
-    ...dto,
+    id: dto.id ?? 0,
+    parentId: dto.parentId ?? null,
+    name: dto.name ?? '',
     permissionCode: dto.permissionCode as MenuNode['permissionCode'],
-    children: dto.children.map(toMenuNode),
+    menuType: dto.menuType ?? 'MENU',
+    icon: dto.icon ?? null,
+    sortOrder: dto.sortOrder ?? null,
+    visible: dto.visible ?? null,
+    children: (dto.children ?? []).map(toMenuNode),
   };
 }
 
@@ -22,8 +28,8 @@ export function useMenu(): UseQueryResult<UserMenuPayload, Error> {
     queryFn: async () => {
       const payload = await menuApi.queryCurrentUserMenu();
       return {
-        tree: payload.tree.map(toMenuNode),
-        permissions: new Set(payload.permissions) as ReadonlySet<AppPermission>,
+        tree: (payload.tree ?? []).map(toMenuNode),
+        permissions: new Set(payload.permissions ?? []) as ReadonlySet<AppPermission>,
       } satisfies UserMenuPayload;
     },
     staleTime: 60 * 60 * 1000,

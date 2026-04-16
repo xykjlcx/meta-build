@@ -33,7 +33,7 @@ packages/api-sdk/src/
 │   ├── index.ts                → barrel export
 │   ├── common.ts               → PageResult<T>, ProblemDetail
 │   ├── auth.ts                 → LoginCmd, RefreshCmd, LoginVo, UserSummary, CurrentUserVo
-│   ├── menu.ts                 → MenuNodeDto, CurrentUserMenuVo
+│   ├── menu.ts                 → MenuVo, CurrentUserMenuVo
 │   └── permission.ts           → AppPermission 联合类型（42 个）+ ALL_APP_PERMISSIONS
 ├── apis/
 │   ├── index.ts                → barrel export
@@ -161,7 +161,7 @@ scripts/
 | HTTP 客户端 | 基于原生 fetch + 拦截器链 + 401 自动 refresh retry（零运行时依赖） |
 | 4 个拦截器 | auth / language / request-id / error |
 | ProblemDetailError | RFC 9457 + isProblemDetail 类型守卫 |
-| 类型定义 | PageResult / ProblemDetail / LoginCmd / RefreshCmd / LoginVo / UserSummary / CurrentUserVo / MenuNodeDto / CurrentUserMenuVo / AppPermission（42 个权限码） |
+| 类型定义 | PageResult / ProblemDetail / LoginCmd / RefreshCmd / LoginVo / UserSummary / CurrentUserVo / MenuVo / CurrentUserMenuVo / AppPermission（42 个权限码） |
 | API 门面 | authApi（4 方法：login / logout / refresh / getCurrentUser）+ menuApi（3 方法：queryCurrentUserMenu / tree / getById） |
 | 单元测试 | 19 tests（含 refresh retry / refresh failure / concurrent refresh / no-refresh-configured） |
 

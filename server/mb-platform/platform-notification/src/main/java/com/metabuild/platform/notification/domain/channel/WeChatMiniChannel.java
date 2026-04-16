@@ -1,6 +1,7 @@
 package com.metabuild.platform.notification.domain.channel;
 
 import com.metabuild.platform.notification.api.NotificationChannel;
+import com.metabuild.platform.notification.api.NotificationErrorCodes;
 import com.metabuild.platform.notification.api.NotificationException;
 import com.metabuild.platform.notification.api.NotificationMessage;
 import com.metabuild.platform.notification.config.WeChatProperties;
@@ -84,8 +85,7 @@ public class WeChatMiniChannel implements NotificationChannel {
         String url = String.format(TOKEN_URL, appId, appSecret);
         Map<String, Object> response = restTemplate.getForObject(url, Map.class);
         if (response == null || !response.containsKey("access_token")) {
-            String errMsg = response != null ? String.valueOf(response.get("errmsg")) : "null response";
-            throw new NotificationException("获取小程序 access_token 失败: " + errMsg);
+            throw new NotificationException(NotificationErrorCodes.MINI_ACCESS_TOKEN_FAILED);
         }
         return (String) response.get("access_token");
     }

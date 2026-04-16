@@ -1,5 +1,5 @@
 import {
-  type NoticeDetailView,
+  type NoticeDetailVo,
   type NoticeTarget,
   fileApi,
   noticeQueryKeys,
@@ -57,7 +57,7 @@ export function NoticeDetailPage() {
     query: { queryKey: noticeQueryKeys.detail(noticeId) },
   });
 
-  const notice: NoticeDetailView | undefined = detailResponse;
+  const notice: NoticeDetailVo | undefined = detailResponse;
 
   // 标记已读 — 使用 ref 避免 exhaustive-deps 重复触发
   const markReadMutation = useMarkNoticeRead();

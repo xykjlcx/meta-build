@@ -1,4 +1,4 @@
-import { type LoginCommand, authApi } from '@mb/api-sdk';
+import { type LoginCmd, authApi } from '@mb/api-sdk';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from '@tanstack/react-router';
 
@@ -10,11 +10,14 @@ export function useAuth() {
   const navigate = useNavigate();
 
   const loginMutation = useMutation({
-    mutationFn: (cmd: LoginCommand) => authApi.login(cmd),
+    mutationFn: (cmd: LoginCmd) => authApi.login(cmd),
     onSuccess: (result) => {
+      if (!result.accessToken || !result.refreshToken) {
+        throw new Error('登录响应缺少 token');
+      }
       localStorage.setItem(ACCESS_TOKEN_KEY, result.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, result.refreshToken);
-      // 不手动缓存用户信息 — 让 _authed.tsx 的 ensureQueryData 调 /auth/me 获取完整 CurrentUserView
+      // 不手动缓存用户信息 — 让 _authed.tsx 的 ensureQueryData 调 /auth/me 获取完整 CurrentUserVo
       queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
       const params = new URLSearchParams(window.location.search);
       const redirectTo = params.get('redirect') ?? '/';

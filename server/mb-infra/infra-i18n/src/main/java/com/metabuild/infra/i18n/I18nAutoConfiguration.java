@@ -32,14 +32,11 @@ public class I18nAutoConfiguration {
         source.setBasenames(
                 "classpath:messages/messages",
                 "classpath:messages/iam",
-                "classpath:messages/oplog",
                 "classpath:messages/file",
                 "classpath:messages/notice",
                 "classpath:messages/notification",
                 "classpath:messages/dict",
-                "classpath:messages/config",
-                "classpath:messages/job",
-                "classpath:messages/monitor"
+                "classpath:messages/config"
         );
         source.setDefaultEncoding("UTF-8");
         source.setDefaultLocale(props.defaultLocale());

@@ -27,7 +27,7 @@ server/mb-infra/
 ├── infra-cache/           → RedisCacheManager + CacheEvictSupport(afterCommit)
 ├── infra-rate-limit/      → @RateLimit + Bucket4j 内存限流
 ├── infra-captcha/         → CaptchaService(BufferedImage) + Redis 一次性 token
-├── infra-jooq/            → [M4 补全] DataScopeVisitListener + DataScopeRegistry
+├── infra-jooq/            → [M4 补全] DataScopeExecuteListener + DataScopeRegistry
 │   │                        + AuditFieldsRecordListener + BypassDataScopeAspect + SortParser
 ├── infra-observability/   → [M4 补全] DatabaseReadinessIndicator + AuthMetrics
 │   │                        + UserIdMdcInterceptor
@@ -107,7 +107,7 @@ server/mb-admin/src/test/java/com/metabuild/admin/
 
 | 交付物 | 说明 |
 |--------|------|
-| DataScopeVisitListener | ExecuteListener 在 SQL 渲染时注入 WHERE 条件 |
+| DataScopeExecuteListener | ExecuteListener 在 SQL 渲染时注入 WHERE 条件 |
 | DataScopeRegistry | 集中声明哪些表需要数据权限 + dept 列名 |
 | BypassDataScopeAspect | @BypassDataScope 注解显式旁路 |
 | 5 种 DataScopeType | ALL / CUSTOM_DEPT / OWN_DEPT / OWN_DEPT_AND_CHILD / SELF |
@@ -165,7 +165,7 @@ server/mb-admin/src/test/java/com/metabuild/admin/
 - **I18nAutoConfiguration Bean 名冲突**：Spring MVC 已注册 `localeResolver`，需加 `@ConditionalOnMissingBean`
 - **CaptchaService disabled 时 Bean 缺失**：`captcha.enabled=false` 但 AuthService 注入 CaptchaService → 启动失败。需注册 no-op stub
 - **UserService 未设置 Snowflake ID**：表无自增序列，insert 前必须 `idGenerator.nextId()`
-- **DataScopeVisitListener 用 VisitListener 时 topLevel() 行为不可靠**：改为 ExecuteListener.renderStart 在 SQL 渲染时注入条件
+- **DataScopeExecuteListener 用 VisitListener 时 topLevel() 行为不可靠**：改为 ExecuteListener.renderStart 在 SQL 渲染时注入条件
 
 ---
 
@@ -207,7 +207,7 @@ M5 需要 M3（前端）+ M4（后端）都完成：
 - 全部 8 个 platform 模块的 Controller API
 - @RequirePermission 权限码（42 个，冒号分隔）
 - Sa-Token JWT + RefreshTokenService 认证流
-- DataScopeVisitListener 数据权限自动过滤
+- DataScopeExecuteListener 数据权限自动过滤
 - GlobalExceptionHandler → ProblemDetail 错误格式
 - PageQuery / PageResult / SortParser 分页体系
 

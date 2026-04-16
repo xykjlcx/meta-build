@@ -13,15 +13,15 @@ import {
   usePostWechatBindMp,
 } from '../generated/endpoints/微信绑定/微信绑定';
 import type {
-  WeChatBindingView as GeneratedWeChatBindingView,
+  WeChatBindingVo as GeneratedWeChatBindingVo,
   GetWechatMpOauthState200,
-  WeChatMiniBindCommand,
-  WeChatMpBindCommand,
+  WeChatMiniBindCmd,
+  WeChatMpBindCmd,
 } from '../generated/models';
 
-export type WeChatBindingView = GeneratedWeChatBindingView;
-export type WeChatMpBindInput = WeChatMpBindCommand;
-export type WeChatMiniBindInput = WeChatMiniBindCommand;
+export type WeChatBindingVo = GeneratedWeChatBindingVo;
+export type WeChatMpBindInput = WeChatMpBindCmd;
+export type WeChatMiniBindInput = WeChatMiniBindCmd;
 export type WeChatMpOauthState = GetWechatMpOauthState200;
 
 export const wechatBindingQueryKeys = {

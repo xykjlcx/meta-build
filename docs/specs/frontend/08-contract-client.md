@@ -253,7 +253,7 @@ import { createErrorMiddleware } from './interceptors/error';
 
 export type { OrderVo, OrderCreateCmd } from './generated/models/OrderVo';
 export type { UserVo, UserQry } from './generated/models/UserVo';
-export type { MenuNodeDto, RouteTreeNodeDto } from './generated/models/MenuNodeDto';
+export type { MenuVo, RouteTreeNodeVo } from './generated/models/MenuVo';
 export type { PageResult } from './generated/models/PageResult';
 export type { ProblemDetail } from './generated/models/ProblemDetail';
 export type { AppPermission, ALL_APP_PERMISSIONS } from './generated/permissions';

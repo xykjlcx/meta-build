@@ -59,16 +59,18 @@ public class GlobalExceptionHandler {
      */
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ProblemDetail handleValidation(MethodArgumentNotValidException ex) {
+        var locale = LocaleContextHolder.getLocale();
         List<Map<String, String>> errors = ex.getBindingResult().getFieldErrors().stream()
             .map(fe -> Map.of(
                 "field", fe.getField(),
                 "message", fe.getDefaultMessage() != null ? fe.getDefaultMessage() : "invalid"
             ))
             .toList();
+        String message = messageSource.getMessage(CommonErrorCodes.VALIDATION, null, CommonErrorCodes.VALIDATION, locale);
 
         var pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
-        pd.setTitle("Validation Failed");
-        pd.setDetail("请求参数校验失败");
+        pd.setTitle(HttpStatus.BAD_REQUEST.getReasonPhrase());
+        pd.setDetail(message);
         pd.setProperty("code", CommonErrorCodes.VALIDATION);
         pd.setProperty("errors", errors);
         pd.setProperty("traceId", MDC.get("traceId"));
@@ -166,10 +168,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ProblemDetail handleGeneral(Exception ex) {
         log.error("未处理异常: {}", ex.getMessage(), ex);
+        var locale = LocaleContextHolder.getLocale();
+        String message = messageSource.getMessage(CommonErrorCodes.SYSTEM_INTERNAL, null, CommonErrorCodes.SYSTEM_INTERNAL, locale);
 
         var pd = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
-        pd.setTitle("Internal Server Error");
-        pd.setDetail("系统内部错误，请稍后重试");
+        pd.setTitle(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+        pd.setDetail(message);
         pd.setProperty("code", CommonErrorCodes.SYSTEM_INTERNAL);
         pd.setProperty("traceId", MDC.get("traceId"));
         return pd;

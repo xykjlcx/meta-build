@@ -38,7 +38,7 @@
 | 6 | `RateLimitInterceptor` | 🟢 | M1 用内存版（Bucket4j），标注"高并发时升级 Redis" | `mb-infra/infra-rate-limit/.../RateLimitInterceptor.java` |
 | 7 | `GlobalExceptionHandler` | 🟡 | 骨架保留，**响应格式重写**（自定义 `R<T>` → RFC 9457 `ProblemDetail`），见 [A.2.3](#a23) | `mb-infra/infra-exception/.../GlobalExceptionHandler.java` |
 | 8 | `JooqHelper` | 🟠 | **概念重写**：从静态工具聚合类改为 `@Component` + 二元路径（批量 `batch*`、条件 `conditional*`），砍掉 `softDeletedFilter` / `setAuditInsert` / `setAuditUpdate` / `dataScopeFilter`（全部被 jOOQ 原生机制替代）；详见 [A.2.4](#a24) | `mb-infra/infra-jooq/.../JooqHelper.java` |
-| 9 | `DataScopeAspect` → `DataScopeVisitListener` | 🟠 | 生态切换（MyBatis AOP 基类 → jOOQ `VisitListener` 单点），**方案 E = ADR-0007 的触发样本**，见 [A.2.5](#a25) | `mb-infra/infra-jooq/.../DataScopeVisitListener.java` |
+| 9 | `DataScopeAspect` → `DataScopeExecuteListener` | 🟠 | 生态切换（MyBatis AOP 基类 → jOOQ `ExecuteListener` 单点），**方案 E = ADR-0007 的触发样本**，见 [A.2.5](#a25) | `mb-infra/infra-jooq/.../DataScopeExecuteListener.java` |
 | 10 | ~~`JwtTokenProvider`~~ | 🔴 | Sa-Token `sa-token-jwt` 模块原生支持，零代码复用，见 [A.2.6](#a26) | Sa-Token `sa-token-jwt` |
 | 11 | ~~`SecurityUtils`~~ → `CurrentUser` | 🔴→🟠 | Spring Security 静态工具彻底放弃；门面接口是新生态原生架构答案，见 [A.2.7](#a27) | 接口：`mb-common/.../security/CurrentUser.java`；实现：`mb-infra/infra-security/.../SaTokenCurrentUser.java` |
 | 12 | ~~`MemoryTokenBlacklist` / `RedisTokenBlacklist`~~ | 🔴 | Sa-Token `StpLogic` + Redis session 原生支持黑名单/强制注销/踢人下线 | Sa-Token 内置 |
@@ -95,20 +95,20 @@
 | 审查问 | 答案 |
 |---|---|
 | **原生范式来源** | nxboot 的 `JooqHelper` 是一个静态工具聚合类，承载 14 个方法：分页辅助、软删除过滤 `softDeletedFilter()`、审计字段填充 `setAuditInsert()`/`setAuditUpdate()`、乐观锁辅助、jOOQ 便捷操作等。这是"把所有横切关注点聚合到单个 helper"的传统 Java 工具类范式 |
-| **新生态答案** | **jOOQ 原生已经为这些横切关注点提供了框架级拦截机制**，根本不需要 helper 聚合：① **乐观锁**：`Settings.executeWithOptimisticLocking + updateRecordVersion` 全局开关 ② **`updated_at` 自动**：`Settings.updateRecordTimestamp` ③ **`created_by / updated_by` 填充**：`RecordListener.insertStart / updateStart` 钩子（`AuditFieldsRecordListener`）④ **`created_at` 初始值**：数据库 `DEFAULT CURRENT_TIMESTAMP` ⑤ **数据权限 `WHERE dept_id IN (...)`**：`VisitListener`（方案 E，[05-security.md §7](05-security.md)）⑥ **软删除**：meta-build 不做（详见 [04-data-persistence.md §8.8](04-data-persistence.md)）⑦ **慢查询日志**：`ExecuteListener`（nxboot `SlowQueryListener` 本来就是原生） |
+| **新生态答案** | **jOOQ 原生已经为这些横切关注点提供了框架级拦截机制**，根本不需要 helper 聚合：① **乐观锁**：`Settings.executeWithOptimisticLocking + updateRecordVersion` 全局开关 ② **`updated_at` 自动**：`Settings.updateRecordTimestamp` ③ **`created_by / updated_by` 填充**：`RecordListener.insertStart / updateStart` 钩子（`AuditFieldsRecordListener`）④ **`created_at` 初始值**：数据库 `DEFAULT CURRENT_TIMESTAMP` ⑤ **数据权限 `WHERE dept_id IN (...)`**：`ExecuteListener`（方案 E，[05-security.md §7](05-security.md)）⑥ **软删除**：meta-build 不做（详见 [04-data-persistence.md §8.8](04-data-persistence.md)）⑦ **慢查询日志**：`ExecuteListener`（nxboot `SlowQueryListener` 本来就是原生） |
 | **改造策略** | **🟠 概念重写**：把 `JooqHelper` 从"静态工具聚合类"重新定义为 `@Component`（Spring bean，注入 `DSLContext + CurrentUser`），只保留**批量操作和业务条件更新**两类方法（`batchInsert` / `batchUpdate` / `batchDelete` / `conditionalUpdate` / `conditionalDelete`）。**全部砍掉**的方法：`softDeletedFilter` / `setAuditInsert` / `setAuditUpdate` / `dataScopeFilter` / `optimisticUpdate`（这些全部被 jOOQ 原生机制替代）。保留的 nxboot 借用方法：仅分页辅助和 Snowflake ID 相关的纯工具方法（具体清单见实施时的 Javadoc）|
-| **决策依据** | ADR-0007 元方法论第三次应用（前两次：方案 E 数据权限、ADR-0008 Flyway 命名）。本次的元规则强化："**决策起点是官方文档，不是 nxboot 或项目已有抽象**"——官方 jOOQ 文档清晰说明 `Settings + RecordListener + VisitListener` 是横切关注点的原生归宿，helper 聚合范式只在这三个原生机制无法覆盖的场景（批量 DSL 不触发 listener）才有意义 |
+| **决策依据** | ADR-0007 元方法论第三次应用（前两次：方案 E 数据权限、ADR-0008 Flyway 命名）。本次的元规则强化："**决策起点是官方文档，不是 nxboot 或项目已有抽象**"——官方 jOOQ 文档清晰说明 `Settings + RecordListener + ExecuteListener` 是横切关注点的原生归宿，helper 聚合范式只在这三个原生机制无法覆盖的场景（批量 DSL 不触发 listener）才有意义 |
 
 > ⚠️ **本条是一次较大规模的改造**：`JooqHelper` 的形态从静态工具改为 `@Component`，砍掉 5 个方法，新增 5 个二元路径方法。业务层的所有写操作收敛到两个入口——`UpdatableRecord.store()` 或 `jooqHelper.batch*/conditional*`，由 ArchUnit 的 4 条规则硬性强制（见 [08-archunit-rules.md](08-archunit-rules.md)）。
 ---
 
 <a id="a25"></a>
-#### A.2.5 `DataScopeAspect` → `DataScopeVisitListener`（🟠 概念重写）
+#### A.2.5 `DataScopeAspect` → `DataScopeExecuteListener`（🟠 概念重写）
 
 | 审查问 | 答案 |
 |---|---|
 | **原生范式来源** | nxboot 所在的 **MyBatis-Plus 生态**的继承范式：`@Aspect` 切面 + `DataScopeContext` ThreadLocal + `extends BaseMapper` 基类在 where 条件中拼接部门过滤（**方案 E 已废弃这套 MyBatis 继承惯性**）。MyBatis-Plus 官方甚至提供了 `DataPermissionInterceptor` 插件 |
-| **新生态答案** | **jOOQ 原生范式**的标准答案是 **`VisitListener` 在 SQL AST 构建层单点拦截**（Lukas Eder 博客长期案例 + jOOQ 官方文档 + Stack Overflow 主流答案）。jOOQ 鼓励组合 + 函数式风格，**不鼓励基类继承**。方案 E 的完整结构：`DataScopeRegistry`（集中声明受保护表）+ `DataScopeVisitListener`（单点拦截，opt-out 本体）+ `BypassDataScopeAspect`（窄范围 AOP，ThreadLocal boolean 标记，`@BypassDataScope` 强制填 `reason`） |
+| **新生态答案** | **jOOQ 原生范式**的标准答案是 **`ExecuteListener` 在 SQL AST 构建层单点拦截**（Lukas Eder 博客长期案例 + jOOQ 官方文档 + Stack Overflow 主流答案）。jOOQ 鼓励组合 + 函数式风格，**不鼓励基类继承**。方案 E 的完整结构：`DataScopeRegistry`（集中声明受保护表）+ `DataScopeExecuteListener`（单点拦截，opt-out 本体）+ `BypassDataScopeAspect`（窄范围 AOP，ThreadLocal boolean 标记，`@BypassDataScope` 强制填 `reason`） |
 | **改造策略** | **只借鉴"动态注入 `dept_id IN (...)` 条件"的问题定义**，代码完全重写。**砍掉基类 `DataScopedRepository`**（MyBatis-Plus 继承惯性残留）**砍掉 `DataScopeContext` ThreadLocal**（冗余，`CurrentUser` 已是单一数据源） |
 | **决策依据** | **ADR-0007 本身的触发样本** —— 这是元方法论的第一个落地案例。前四轮方案都在优化"基类怎么变好"，第五轮才问"为什么需要基类"并砍掉。详见 [ADR-0007 §背景](../../adr/0007-继承遗产前先问原生哲学.md#背景) |
 
@@ -164,7 +164,7 @@
 |------|---------|---------|
 | `infra-security` | （占位 pom） | `SaTokenCurrentUser`（实现 `com.metabuild.common.security.CurrentUser`）+ `AuthFacade` 接口 + `SaTokenAuthFacade` 实现 + `@RequirePermission` + `RequirePermissionAspect` + `CorsConfig` + Sa-Token 配置 |
 | `infra-cache` | （占位 pom） | `CacheEvictSupport`, `RedisCacheConfig`, TTL 抖动工具 |
-| `infra-jooq` | `JooqHelper`（基础 5 方法）, `SlowQueryListener`, `SnowflakeIdGenerator` Bean | `JooqHelper`（完整 14 方法）, **方案 E 数据权限三件套**：`DataScopeRegistry` + `DataScopeVisitListener` + `BypassDataScopeAspect` |
+| `infra-jooq` | `JooqHelper`（基础 5 方法）, `SlowQueryListener`, `SnowflakeIdGenerator` Bean | `JooqHelper`（完整 14 方法）, **方案 E 数据权限三件套**：`DataScopeRegistry` + `DataScopeExecuteListener` + `BypassDataScopeAspect` |
 | `infra-web` | （占位 pom） | `PageRequestDto`, `PaginationPolicy`, `MbPaginationProperties`, `WebAutoConfiguration` |
 | `infra-exception` | （占位 pom） | `GlobalExceptionHandler`（ProblemDetail 输出）, `SecurityHeaderFilter` |
 | `infra-i18n` | （占位 pom） | `MessageSourceAutoConfiguration`, `AcceptHeaderLocaleResolver`, `I18nHelper` |
@@ -248,8 +248,8 @@
 | **SortParser** | Sort 字段解析器（`infra-jooq`），Builder 风格 API，`.forTable()` 自动注册通用字段，`.allow()` 显式列举业务字段，`.defaultSort()` 指定默认排序。详见 [06-api-and-contract.md §12.5](./06-api-and-contract.md) |
 | **ArchUnit** | Java 架构测试库，把架构规则写成 JUnit 测试。meta-build 用它做模块边界 + 代码细节守护（ADR-0003） |
 | **DataScope** | 数据范围值对象（`DataScopeType + Set<Long> deptIds`）。5 种类型：`ALL / CUSTOM_DEPT / OWN_DEPT / OWN_DEPT_AND_CHILD / SELF`。类型定义在 `mb-common.security`，登录时由 `DataScopeLoader` 展开并存入 Sa-Token session |
-| **DataScopeRegistry**（方案 E） | 数据权限受保护表的**集中注册中心**（`infra-jooq`）。使用者在 `@Configuration` 里声明"表名 → 部门字段名"映射，`DataScopeVisitListener` 读取此映射决定哪些查询要注入 where 条件 |
-| **DataScopeVisitListener**（方案 E） | 数据权限的**唯一拦截点**。jOOQ 全局 VisitListener，在 SQL AST 构建层自动对注册过的表注入 `dept_id IN (...)` 条件。替代 nxboot 的 `DataScopeAspect` + `DataScopedRepository` 基类双保险（详见 ADR-0007） |
+| **DataScopeRegistry**（方案 E） | 数据权限受保护表的**集中注册中心**（`infra-jooq`）。使用者在 `@Configuration` 里声明"表名 → 部门字段名"映射，`DataScopeExecuteListener` 读取此映射决定哪些查询要注入 where 条件 |
+| **DataScopeExecuteListener**（方案 E） | 数据权限的**唯一拦截点**。jOOQ 全局 ExecuteListener，在 SQL AST 构建层自动对注册过的表注入 `dept_id IN (...)` 条件。替代 nxboot 的 `DataScopeAspect` + `DataScopedRepository` 基类双保险（详见 ADR-0007） |
 | **BypassDataScope** | 显式跳过数据权限的注解。实现是 `BypassDataScopeAspect`（`infra-jooq`）——一个窄范围 AOP 切面，只持有一个 `boolean` ThreadLocal 标记，`@BypassDataScope` 方法返回时 try-finally 清理。注解必须填 `reason` 说明 bypass 理由 |
 | **@OperationLog** | 自定义操作日志注解（ADR-0006 P0.6），AOP 拦截写入 `mb_log_operation` |
 | **ShedLock** | 分布式定时任务锁库，防止多实例重复执行 `@Scheduled` 任务 |

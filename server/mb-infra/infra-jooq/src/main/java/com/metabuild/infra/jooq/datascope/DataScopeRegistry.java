@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * 数据权限注册表：记录哪些表需要数据权限过滤，以及用哪个字段做部门隔离。
- * 业务模块启动时调用 register() 声明需要过滤的表，DataScopeVisitListener 在构建 SQL 时读取。
+ * 业务模块启动时调用 register() 声明需要过滤的表，DataScopeExecuteListener 在构建 SQL 时读取。
  */
 public class DataScopeRegistry {
 

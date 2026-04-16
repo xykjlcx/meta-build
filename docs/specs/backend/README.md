@@ -10,7 +10,7 @@
 
 meta-build 后端 = **给 AI 执行的不可动摇的契约**。架构边界、代码约束、行为验证由 **Maven 依赖隔离 + ArchUnit 规则集 + Testcontainers 集成测试** 三层守护，让 AI 越界即编译失败或测试失败。
 
-业务层（`platform` / `business` / `schema`）零感知基础设施细节——不直接依赖认证框架（Sa-Token），不直接写原始 SQL（通过 jOOQ DSL），不绕过缓存失效机制。所有外部技术细节通过**公共抽象接口**（`CurrentUser` / `AuthFacade` 在 `mb-common.security`，`CacheEvictSupport` 在 `infra-cache`）隔离；数据权限通过 **`DataScopeVisitListener` 在 jOOQ SQL 构建层单点拦截**（方案 E，零继承），Repository 写起来是普通类。
+业务层（`platform` / `business` / `schema`）零感知基础设施细节——不直接依赖认证框架（Sa-Token），不直接写原始 SQL（通过 jOOQ DSL），不绕过缓存失效机制。所有外部技术细节通过**公共抽象接口**（`CurrentUser` / `AuthFacade` 在 `mb-common.security`，`CacheEvictSupport` 在 `infra-cache`）隔离；数据权限通过 **`DataScopeExecuteListener` 在 jOOQ SQL 构建层单点拦截**（方案 E，零继承），Repository 写起来是普通类。
 
 ---
 
@@ -121,12 +121,12 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | 10 | `mb-common` 依赖 Spring / jOOQ / JJWT / Sa-Token | Maven 依赖检查 | [01-module-structure.md §1.5 单向依赖硬约束](./01-module-structure.md#15-单向依赖硬约束) |
 | 11 | `mb-schema` 依赖任何 `mb-*` 模块（只能依赖 `org.jooq` runtime） | Maven 依赖检查 | [01-module-structure.md §1.5 单向依赖硬约束](./01-module-structure.md#15-单向依赖硬约束) |
 | 12 | 业务异常抛 checked Exception（必须继承 `RuntimeException`） | 代码约定 | [04-data-persistence.md §8 事务边界规范（回滚规则）](./04-data-persistence.md#8-事务边界规范-m4) |
-| 13 | 业务层使用 jOOQ `@PlainSQL` 字符串 SQL API（`dsl.fetch(String)` 等，会绕过 `DataScopeVisitListener` 数据权限拦截） | ArchUnit `NO_RAW_SQL_FETCH` | [05-security.md §7.9 ArchUnit 规则 NO_RAW_SQL_FETCH](./05-security.md#79-archunit-规则-no_raw_sql_fetch) |
+| 13 | 业务层使用 jOOQ `@PlainSQL` 字符串 SQL API（`dsl.fetch(String)` 等，会绕过 `DataScopeExecuteListener` 数据权限拦截） | ArchUnit `NO_RAW_SQL_FETCH` | [05-security.md §7.9 ArchUnit 规则 NO_RAW_SQL_FETCH](./05-security.md#79-archunit-规则-no_raw_sql_fetch) |
 | 14 | jOOQ 生成代码放在 `mb-infra` 或业务层(必须在 `mb-schema/src/main/jooq-generated/`) | 约定 + codegen profile 配置 | [04-data-persistence.md §6 jOOQ 代码生成流程](./04-data-persistence.md#6-jooq-代码生成流程-m1m4) |
 | 15 | 硬编码敏感配置 / 用 `@Value` 注入（必须全部通过 `@ConfigurationProperties` + `@Validated` + env var）；含敏感字段的 record 应手动覆盖 `toString()` 脱敏（文档约定，由 code review 守护） | ArchUnit `NO_AT_VALUE_ANNOTATION` / `PROPERTIES_MUST_BE_VALIDATED` + 启动失败兜底（§9.5）| [09-config-management.md §9.5 fail-fast 启动校验](./09-config-management.md#95-fail-fast-启动校验) + [§9.6 敏感配置处理](./09-config-management.md#96-敏感配置处理) |
 | 16 | 业务层直接调用 `StpUtil.login()` / `logout()` / `kickout()` 等 Sa-Token 写 API（必须通过 `AuthFacade` 门面） | ArchUnit `BUSINESS_MUST_NOT_DEPEND_ON_SA_TOKEN` + `ONLY_INFRA_SECURITY_DEPENDS_ON_SA_TOKEN` | [05-security.md §6.6 AuthFacade 登录登出技术门面](./05-security.md#66-authfacade登录登出技术门面) |
 | 17 | `Optional<T>` 作为字段类型 / 方法参数 / 集合元素（只能作为返回值）| ArchUnit `OPTIONAL_ONLY_RETURN` + `NO_OPTIONAL_PARAMETERS`（C2）| [08-archunit-rules.md §7.5](./08-archunit-rules.md) |
-| 18 | 业务层（`platform` / `business`）使用 `JdbcTemplate` / `NamedParameterJdbcTemplate` / `DataSource.getConnection()`（会绕过 `DataScopeVisitListener` 数据权限拦截） | ArchUnit `NO_JDBC_TEMPLATE_IN_BUSINESS` | [08-archunit-rules.md](./08-archunit-rules.md) + [05-security.md §7](./05-security.md) |
+| 18 | 业务层（`platform` / `business`）使用 `JdbcTemplate` / `NamedParameterJdbcTemplate` / `DataSource.getConnection()`（会绕过 `DataScopeExecuteListener` 数据权限拦截） | ArchUnit `NO_JDBC_TEMPLATE_IN_BUSINESS` | [08-archunit-rules.md](./08-archunit-rules.md) + [05-security.md §7](./05-security.md) |
 | 19 | `mb-admin/usecase` 直接依赖 `platform` / `business` 模块内部实现（`domain` / `web` / Repository / jOOQ） | ArchUnit `ADMIN_USECASE_ONLY_DEPENDS_ON_MODULE_API_OR_SHARED` | [01-module-structure.md §4.2](./01-module-structure.md#42-层次职责严格划分) + [08-archunit-rules.md §3.1](./08-archunit-rules.md#31-admin-usecase-边界规则-m5) |
 | 20 | `mb-admin/web` 直接依赖 `platform` / `business` 模块（绕过 `mb-admin/usecase`） | ArchUnit `ADMIN_WEB_MUST_NOT_DEPEND_ON_MODULES_DIRECTLY` | [01-module-structure.md §4.2](./01-module-structure.md#42-层次职责严格划分) + [08-archunit-rules.md §3.1](./08-archunit-rules.md#31-admin-usecase-边界规则-m5) |
 | **元** | **从 nxboot（或任何遗产项目）借用组件时，未先挑战新技术栈的原生范式**（继承惯性把 MyBatis-Plus 的基类范式带到 jOOQ 世界） | ADR-0007 元方法论 + 借用清单审查流程 | [ADR-0007 继承遗产前先问原生哲学](../../adr/0007-继承遗产前先问原生哲学.md) + [appendix.md 附录 A 借用清单](./appendix.md#附录-a-从-nxboot-借用的组件清单) |

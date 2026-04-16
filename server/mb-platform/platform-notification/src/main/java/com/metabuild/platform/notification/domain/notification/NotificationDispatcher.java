@@ -57,9 +57,9 @@ public class NotificationDispatcher {
                         log.info("通知发送成功: channel={}, module={}, ref={}",
                                 ch.channelType(), message.module(), message.referenceId());
                     } catch (NotificationException e) {
-                        logRepository.logFailure(message, ch.channelType(), e.getMessage());
-                        log.error("通知发送失败: channel={}, module={}, ref={}, error={}",
-                                ch.channelType(), message.module(), message.referenceId(), e.getMessage());
+                        logRepository.logFailure(message, ch.channelType(), e.getCode());
+                        log.error("通知发送失败: channel={}, module={}, ref={}, code={}",
+                                ch.channelType(), message.module(), message.referenceId(), e.getCode(), e);
                     }
                 }, mbAsyncExecutor))
                 .toList();

@@ -1,4 +1,4 @@
-import { type NotificationLogView, useNoticeNotificationLogs } from '@mb/api-sdk';
+import { type NotificationLogVo, useNoticeNotificationLogs } from '@mb/api-sdk';
 import { NxTable } from '@mb/ui-patterns';
 import { Badge } from '@mb/ui-primitives';
 import type { ColumnDef } from '@tanstack/react-table';
@@ -20,7 +20,7 @@ export function NotificationLogTab({ noticeId }: NotificationLogTabProps) {
   const { data, isLoading } = useNoticeNotificationLogs(noticeId);
   const logs = data ?? [];
 
-  const columns = useMemo<ColumnDef<NotificationLogView, unknown>[]>(
+  const columns = useMemo<ColumnDef<NotificationLogVo, unknown>[]>(
     () => [
       {
         accessorKey: 'channelType',

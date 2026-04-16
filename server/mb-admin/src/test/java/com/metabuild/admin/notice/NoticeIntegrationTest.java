@@ -677,7 +677,7 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
                 DataScopeType.OWN_DEPT, Set.of(DEPT_B));
 
             // 使用简单 selectFrom 查询（与 DataScopeIntegrationTest 一致），
-            // 验证 DataScopeVisitListener 对 biz_notice 表的 owner_dept_id 过滤生效
+            // 验证 DataScopeExecuteListener 对 biz_notice 表的 owner_dept_id 过滤生效
             var records = dsl.selectFrom(BIZ_NOTICE)
                 .where(BIZ_NOTICE.ID.in(noticeIdA, noticeIdB))
                 .fetch();

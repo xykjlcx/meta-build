@@ -2,8 +2,11 @@ package com.metabuild.admin.dict;
 
 import com.metabuild.admin.BaseIntegrationTest;
 import com.metabuild.admin.TestSecurityConfig;
+import com.metabuild.common.exception.ConflictException;
+import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
+import com.metabuild.platform.dict.api.DictErrorCodes;
 import com.metabuild.platform.dict.api.cmd.DictDataCreateCmd;
 import com.metabuild.platform.dict.api.vo.DictDataVo;
 import com.metabuild.platform.dict.api.cmd.DictTypeCreateCmd;
@@ -14,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -71,8 +73,8 @@ class DictServiceIntegrationTest extends BaseIntegrationTest {
 
         assertThatThrownBy(() ->
             dictService.createType(new DictTypeCreateCmd("另一类型", "duplicate_code", null))
-        ).isInstanceOf(IllegalArgumentException.class)
-         .hasMessageContaining("duplicate_code");
+        ).isInstanceOf(ConflictException.class)
+         .hasMessageContaining(DictErrorCodes.TYPE_CODE_EXISTS);
     }
 
     @Test
@@ -83,7 +85,8 @@ class DictServiceIntegrationTest extends BaseIntegrationTest {
         dictService.deleteType(typeId);
 
         assertThatThrownBy(() -> dictService.getTypeById(typeId))
-            .isInstanceOf(NoSuchElementException.class);
+            .isInstanceOf(NotFoundException.class)
+            .hasMessageContaining(DictErrorCodes.TYPE_NOT_FOUND);
 
         // 类型下的数据也应被级联删除
         List<DictDataVo> data = dictService.listDataByTypeId(typeId);

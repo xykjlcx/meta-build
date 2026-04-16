@@ -114,7 +114,7 @@ CREATE UNIQUE INDEX uk_mb_file_tenant_sha256
 **AOP 注解驱动**（注解标注在 **Controller 层**，不在 Service 层）：
 
 ```java
-// platform-log/src/main/java/com/metabuild/platform/oplog/api/OperationLog.java
+// mb-common/src/main/java/com/metabuild/common/log/OperationLog.java
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OperationLog {
@@ -198,7 +198,7 @@ CREATE INDEX idx_mb_log_operation_created_at ON mb_log_operation (created_at);
 
 **`OperationLogWriter`**（异步写入组件）：
 ```java
-// platform-log/src/main/java/com/metabuild/platform/oplog/domain/OperationLogWriter.java
+// platform-log/src/main/java/com/metabuild/platform/log/domain/OperationLogWriter.java
 @Component
 @RequiredArgsConstructor
 public class OperationLogWriter {
@@ -415,7 +415,7 @@ public interface MenuApi {
     List<MenuTreeNode> queryMenuTreeForAdmin(long tenantId);
 
     /** 查询路由树节点（菜单管理 UI 的路由 picker） */
-    List<RouteTreeNodeView> listRouteTreeNodes(String kindFilter, boolean includeStale);
+    List<RouteTreeNodeVo> listRouteTreeNodes(String kindFilter, boolean includeStale);
 }
 ```
 
@@ -434,22 +434,23 @@ public interface MenuApi {
 ```java
 /**
  * 当前用户菜单 + 权限（前端 useMenu() 消费）。
- * 返回扁平节点列表（前端自己 buildMenuTree）+ 权限 code 数组。
+ * 返回树形菜单节点 + 权限 code 数组。
  */
-public record CurrentUserMenuResult(
-    List<MenuNodeView> nodes,       // 扁平菜单节点列表
+public record CurrentUserMenuVo(
+    List<MenuVo> tree,             // 树形菜单节点
     List<String> permissions        // 权限点 code 列表（用于构造 Set<AppPermission>）
 ) {}
 
-public record MenuNodeView(
+public record MenuVo(
     long id,
     Long parentId,                  // NULL 为顶级
     String name,
     String icon,
     String path,                    // 前端路由路径（仅 menu 类型有）
     String kind,                    // directory / menu / button
-    String permissionCode,          // 对应 mb_iam_route_tree.code（button 类型有）
-    boolean isOrphan                // route_ref 指向的 route_tree 节点 is_stale=true
+    String permissionCode,          // 对应 mb_iam_route_tree.permission_code（button 类型有）
+    boolean isOrphan,               // route_ref 指向的 route_tree 节点 is_stale=true
+    List<MenuVo> children
 ) {}
 ```
 
@@ -696,7 +697,7 @@ cd server && mvn -Pcodegen generate-sources -pl mb-schema
 - Service 对 `org.jooq` 的依赖仅限 `Record` / `Result` / `exception` 白名单（ArchUnit 规则 `SERVICE_JOOQ_WHITELIST` 强制，`DSLContext` / `DSL` / `Field` / `Condition` 等一律禁止）
 - Service 不直接调 `record.store()`，通过 `orderRepository.save(record)` 包装（N3 §4.2）
 - Controller 不 `import cn.dev33.satoken.*`（ArchUnit 强制，通过 `CurrentUser` / `AuthFacade` 门面）
-- Repository 是**普通类**——方案 E 不再需要继承任何基类。数据权限由 `DataScopeVisitListener` 在 jOOQ 层单点拦截，**前提是在 `DataScopeConfig` 里把新表注册到 `DataScopeRegistry`**（见步骤 10.1）
+- Repository 是**普通类**——方案 E 不再需要继承任何基类。数据权限由 `DataScopeExecuteListener` 在 jOOQ 层单点拦截，**前提是在 `DataScopeConfig` 里把新表注册到 `DataScopeRegistry`**（见步骤 10.1）
 - Repository 禁止使用 jOOQ 的 `@PlainSQL` API（`fetch(String)` 等），由 ArchUnit 规则 `NO_RAW_SQL_FETCH` 强制
 - Controller 每个方法标注 `@RequirePermission("business:order:<action>")`（**权限只能在 Controller 层，不在 Service 层**，详见 [05-security.md §2.5](05-security.md)）
 

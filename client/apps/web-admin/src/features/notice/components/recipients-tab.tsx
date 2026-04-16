@@ -1,4 +1,4 @@
-import { type RecipientView, noticeQueryKeys, useNoticeRecipients } from '@mb/api-sdk';
+import { type RecipientVo, noticeQueryKeys, useNoticeRecipients } from '@mb/api-sdk';
 import { NxTable } from '@mb/ui-patterns';
 import type { NxTablePagination } from '@mb/ui-patterns';
 import { Badge } from '@mb/ui-primitives';
@@ -24,7 +24,7 @@ export function RecipientsTab({ noticeId }: RecipientsTabProps) {
     query: { queryKey: noticeQueryKeys.recipients(noticeId, recipientsParams) },
   });
   const pageResult = data;
-  const recipients: RecipientView[] = pageResult?.content ?? [];
+  const recipients: RecipientVo[] = pageResult?.content ?? [];
   const totalElements = pageResult?.totalElements ?? 0;
   const totalPages = pageResult?.totalPages ?? 0;
 
@@ -33,7 +33,7 @@ export function RecipientsTab({ noticeId }: RecipientsTabProps) {
     [pagination, totalElements, totalPages],
   );
 
-  const columns = useMemo<ColumnDef<RecipientView, unknown>[]>(
+  const columns = useMemo<ColumnDef<RecipientVo, unknown>[]>(
     () => [
       {
         accessorKey: 'username',

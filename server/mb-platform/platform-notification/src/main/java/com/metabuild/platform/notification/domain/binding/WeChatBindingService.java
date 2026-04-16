@@ -1,8 +1,10 @@
 package com.metabuild.platform.notification.domain.binding;
 
 import com.metabuild.common.id.SnowflakeIdGenerator;
+import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.security.CurrentUser;
-import com.metabuild.platform.notification.api.NotificationException;
+import com.metabuild.platform.notification.api.NotificationErrorCodes;
 import com.metabuild.platform.notification.api.vo.WeChatBindingVo;
 import com.metabuild.platform.notification.api.cmd.WeChatMiniBindCmd;
 import com.metabuild.platform.notification.api.cmd.WeChatMpBindCmd;
@@ -72,7 +74,7 @@ public class WeChatBindingService {
         String stateKey = STATE_KEY_PREFIX + cmd.state();
         String storedUserId = redisTemplate.opsForValue().get(stateKey);
         if (storedUserId == null || !storedUserId.equals(currentUser.userId().toString())) {
-            throw new NotificationException("OAuth state 无效或已过期");
+            throw new BusinessException(NotificationErrorCodes.WECHAT_STATE_INVALID);
         }
         // 一次性使用，立即删除
         redisTemplate.delete(stateKey);
@@ -83,7 +85,7 @@ public class WeChatBindingService {
         String tokenUrl = String.format(MP_TOKEN_URL, mp.appId(), mp.appSecret(), cmd.code());
         Map<String, Object> tokenResp = restTemplate.getForObject(tokenUrl, Map.class);
         if (tokenResp == null || !tokenResp.containsKey("openid")) {
-            throw new NotificationException("公众号 code 换 token 失败: " + tokenResp);
+            throw new BusinessException(NotificationErrorCodes.MP_TOKEN_EXCHANGE_FAILED);
         }
         String accessToken = (String) tokenResp.get("access_token");
         String openId = (String) tokenResp.get("openid");
@@ -126,7 +128,7 @@ public class WeChatBindingService {
         String sessionUrl = String.format(MINI_SESSION_URL, mini.appId(), mini.appSecret(), cmd.code());
         Map<String, Object> sessionResp = restTemplate.getForObject(sessionUrl, Map.class);
         if (sessionResp == null || !sessionResp.containsKey("openid")) {
-            throw new NotificationException("小程序 code 换 session 失败: " + sessionResp);
+            throw new BusinessException(NotificationErrorCodes.MINI_SESSION_EXCHANGE_FAILED);
         }
         String openId = (String) sessionResp.get("openid");
         String unionId = (String) sessionResp.get("unionid");
@@ -154,12 +156,12 @@ public class WeChatBindingService {
     @Transactional
     public void unbind(String platform) {
         if (!"MP".equals(platform) && !"MINI".equals(platform)) {
-            throw new IllegalArgumentException("platform 必须是 MP 或 MINI");
+            throw new BusinessException(NotificationErrorCodes.WECHAT_PLATFORM_INVALID, platform);
         }
         String appId = "MP".equals(platform) ? weChatProperties.mp().appId() : weChatProperties.mini().appId();
         boolean deleted = bindingRepository.unbind(currentUser.userId(), platform, appId, currentUser.tenantId());
         if (!deleted) {
-            throw new NotificationException("未找到对应的微信绑定关系");
+            throw new NotFoundException(NotificationErrorCodes.WECHAT_BINDING_NOT_FOUND);
         }
         log.info("微信解绑成功: userId={}, platform={}", currentUser.userId(), platform);
     }

@@ -151,14 +151,19 @@
 | Notice 列表筛选(打磨阶段) | 去 NxFilter 改 L2 即时筛选 | 对标飞书筛选面板式 |
 | Notice 编辑(打磨阶段) | NxDrawer → 全屏 Dialog 双栏 | 富文本编辑需要宽屏 |
 
+## 契约兼容性提醒
+
+- **错误码前缀已收敛**：不再使用 `errors.` 前缀，旧值 `errors.common.pagination.invalidPage` / `errors.common.pagination.invalidSize` 已统一为 `common.pagination.invalidPage` / `common.pagination.invalidSize`
+- **前端消费约束**：UI 分支判断、埋点归因、测试断言都必须匹配新错误码；禁止再写兼容旧前缀的双分支
+
 ---
 
 ## M5 踩坑记录(对应新增的 3 条规则)
 
-- **登录后 401 循环** — MSW 未覆盖 `/api/v1/notices/unread-count`,穿透后端 401 触发重定向 → 规则 [`msw-handler-sync`](../../.claude/rules/msw-handler-sync.md)
+- **登录后 401 循环** — MSW 未覆盖 `/api/v1/notices/unread-count`,穿透后端 401 触发重定向 → 规则 [`msw-handler-sync`](../rules/msw-handler-sync.md)
 - **SSE connect 不断 401 重连** — `fetchEventSource` 不经过 MSW service worker → MSW 模式下 `__msw_enabled__` 标记跳过 SSE
-- **Radix Select 崩溃** — `<SelectItem value="">` 被 Radix 禁止 → 规则 [`radix-no-empty-value`](../../.claude/rules/radix-no-empty-value.md)
-- **微信绑定页 3 处 API 全错** — 手写 customInstance 绕过了 orval 契约(路径错 + 响应类型错) → 规则 [`orval-hooks-over-handwritten`](../../.claude/rules/orval-hooks-over-handwritten.md)
+- **Radix Select 崩溃** — `<SelectItem value="">` 被 Radix 禁止 → 规则 [`radix-no-empty-value`](../rules/radix-no-empty-value.md)
+- **微信绑定页 3 处 API 全错** — 手写 customInstance 绕过了 orval 契约(路径错 + 响应类型错) → 规则 [`orval-hooks-over-handwritten`](../rules/orval-hooks-over-handwritten.md)
 - **Caffeine 缓存修复** — SSE 限流桶原用 ConcurrentHashMap,中期 Review 发现无限增长风险 → 改 Caffeine + expireAfterAccess
 
 ---

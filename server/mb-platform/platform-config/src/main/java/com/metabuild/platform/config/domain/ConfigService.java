@@ -2,9 +2,11 @@ package com.metabuild.platform.config.domain;
 
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
+import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.infra.cache.CacheEvictSupport;
+import com.metabuild.platform.config.api.ConfigErrorCodes;
 import com.metabuild.platform.config.api.vo.ConfigVo;
 import com.metabuild.platform.config.api.cmd.ConfigSetCmd;
 import com.metabuild.schema.tables.records.MbConfigRecord;
@@ -15,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.NoSuchElementException;
 
 /**
  * 系统配置业务服务（get/set/delete + Spring Cache）。
@@ -48,7 +49,7 @@ public class ConfigService {
     public ConfigVo getByKey(String configKey) {
         return repository.findByKey(configKey)
             .map(this::toResponse)
-            .orElseThrow(() -> new NoSuchElementException("配置项不存在: " + configKey));
+            .orElseThrow(() -> new NotFoundException(ConfigErrorCodes.ITEM_NOT_FOUND, configKey));
     }
 
     @Transactional
@@ -83,7 +84,9 @@ public class ConfigService {
 
     @Transactional
     public void deleteByKey(String configKey) {
-        repository.deleteByKey(configKey);
+        if (repository.deleteByKey(configKey) == 0) {
+            throw new NotFoundException(ConfigErrorCodes.ITEM_NOT_FOUND, configKey);
+        }
         // 事务提交后再失效缓存
         cacheEvictSupport.evictAfterCommit(CACHE_PREFIX + configKey);
     }

@@ -1,8 +1,8 @@
 import { getClient } from '../config';
-import type { CurrentUserView, LoginCommand, LoginView } from '../types/auth';
+import type { CurrentUserVo, LoginCmd, LoginVo } from '../types/auth';
 
 export const authApi = {
-  login(cmd: LoginCommand): Promise<LoginView> {
+  login(cmd: LoginCmd): Promise<LoginVo> {
     return getClient().request('/api/v1/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -14,7 +14,7 @@ export const authApi = {
     return getClient().request('/api/v1/auth/logout', { method: 'POST' });
   },
 
-  refresh(refreshToken: string): Promise<LoginView> {
+  refresh(refreshToken: string): Promise<LoginVo> {
     return getClient().request('/api/v1/auth/refresh', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -23,7 +23,7 @@ export const authApi = {
   },
 
   /** 获取当前登录用户信息（GET /auth/me，需认证） */
-  getCurrentUser(): Promise<CurrentUserView> {
+  getCurrentUser(): Promise<CurrentUserVo> {
     return getClient().request('/api/v1/auth/me');
   },
 };

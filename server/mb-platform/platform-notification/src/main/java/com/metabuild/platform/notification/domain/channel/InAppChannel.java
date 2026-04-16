@@ -2,6 +2,7 @@ package com.metabuild.platform.notification.domain.channel;
 
 import com.metabuild.infra.sse.SseMessageSender;
 import com.metabuild.platform.notification.api.NotificationChannel;
+import com.metabuild.platform.notification.api.NotificationErrorCodes;
 import com.metabuild.platform.notification.api.NotificationException;
 import com.metabuild.platform.notification.api.NotificationMessage;
 import lombok.RequiredArgsConstructor;
@@ -43,7 +44,7 @@ public class InAppChannel implements NotificationChannel {
             ));
             log.info("站内信 SSE 广播完成: module={}, ref={}", message.module(), message.referenceId());
         } catch (Exception e) {
-            throw new NotificationException("站内信 SSE 广播失败: " + e.getMessage(), e);
+            throw new NotificationException(NotificationErrorCodes.IN_APP_BROADCAST_FAILED, e);
         }
     }
 

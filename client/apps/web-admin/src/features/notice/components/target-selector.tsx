@@ -1,4 +1,4 @@
-import { type DeptView, type NoticeTarget, getDept, getRole, getUser } from '@mb/api-sdk';
+import { type DeptVo, type NoticeTarget, getDept, getRole, getUser } from '@mb/api-sdk';
 import { ApiSelect, type ApiSelectFetchResult } from '@mb/ui-patterns';
 import {
   AlertDialog,
@@ -54,7 +54,7 @@ export function TargetSelector({ open, onOpenChange, onConfirm }: TargetSelector
       page: number;
       size: number;
     }): Promise<ApiSelectFetchResult<number>> => {
-      const flattenDepts = (nodes: DeptView[], depth = 0): Array<{ id: number; label: string }> =>
+      const flattenDepts = (nodes: DeptVo[], depth = 0): Array<{ id: number; label: string }> =>
         nodes.flatMap((node) => {
           if (!node.id) {
             return [];

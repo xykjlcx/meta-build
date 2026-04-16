@@ -1,5 +1,5 @@
 import {
-  type NoticeView,
+  type NoticeVo,
   noticeApi,
   noticeQueryKeys,
   useBatchDeleteNotices,
@@ -121,7 +121,7 @@ export function NoticeListPage() {
   });
 
   // 从响应中提取数据和分页信息
-  const notices: NoticeView[] = data?.content ?? [];
+  const notices: NoticeVo[] = data?.content ?? [];
   const totalElements = data?.totalElements ?? 0;
   const totalPages = data?.totalPages ?? 0;
 
@@ -184,7 +184,7 @@ export function NoticeListPage() {
   const handleBatchAction = useCallback(
     (action: 'publish' | 'delete') => {
       const selected = notices.filter((n) => selectedIds.includes(n.id ?? -1));
-      let validItems: NoticeView[];
+      let validItems: NoticeVo[];
       if (action === 'publish') {
         validItems = selected.filter((n) => n.status === NOTICE_STATUS.DRAFT);
       } else {
@@ -274,7 +274,7 @@ export function NoticeListPage() {
   }, []);
 
   // ─── 表格列定义 ─────────────────────────────────────
-  const columns = useMemo<ColumnDef<NoticeView, unknown>[]>(
+  const columns = useMemo<ColumnDef<NoticeVo, unknown>[]>(
     () => [
       {
         accessorKey: 'title',
@@ -608,7 +608,7 @@ function NoticeRowActions({
   onDuplicate,
   onConfirmAction,
 }: {
-  notice: NoticeView;
+  notice: NoticeVo;
   t: Translate;
   user: ReturnType<typeof useCurrentUser>;
   navigateToDetail: (id: number) => void;

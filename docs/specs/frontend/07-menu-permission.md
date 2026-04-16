@@ -764,37 +764,30 @@ export function useMenu(): UseQueryResult<UserMenuPayload, Error> {
   });
 }
 
-function buildMenuTree(flat: ReadonlyArray<MenuNodeDto>): MenuNode[] {
-  const byId = new Map<number, MenuNode>();
-  for (const node of flat) {
-    byId.set(node.id, { ...node, children: [] });
-  }
-  const roots: MenuNode[] = [];
-  for (const node of byId.values()) {
-    if (node.parentId == null) {
-      roots.push(node);
-    } else {
-      const parent = byId.get(node.parentId);
-      if (parent) {
-        parent.children.push(node);
-      } else {
-        // parent 被运维删了但子节点没清理 → 当作根节点处理
-        roots.push(node);
-      }
-    }
-  }
-  return roots;
+function toMenuTree(nodes: ReadonlyArray<MenuVo>): MenuNode[] {
+  return nodes.map((node) => ({
+    id: node.id,
+    parentId: node.parentId,
+    name: node.name,
+    icon: node.icon,
+    permissionCode: node.permissionCode,
+    menuType: node.menuType,
+    sortOrder: node.sortOrder,
+    visible: node.visible,
+    children: toMenuTree(node.children ?? []),
+  }));
 }
 
-interface MenuNodeDto {
+interface MenuVo {
   id: number;
   parentId: number | null;
   name: string;
   icon: string | null;
-  path: string | null;
-  kind: 'directory' | 'menu' | 'button';
   permissionCode: AppPermission | null;
-  isOrphan: boolean;
+  menuType: 'DIRECTORY' | 'MENU' | 'BUTTON';
+  sortOrder: number | null;
+  visible: boolean | null;
+  children?: MenuVo[];
 }
 ```
 
@@ -1391,7 +1384,7 @@ export function RouteTreePicker<TForm extends FieldValues>(
 
 ### 13.4 元教训（不仅适用于本架构）
 
-来自 `~/.claude/rules/deterministic-boundary.md` 的元方法论：
+来自 `deterministic-boundary`（全局规则）的元方法论：
 
 > 设计任何系统时，先画一条线：哪些是确定性的（代码 / 自动同步），哪些是不确定性的（运维 / 业务）。混淆这条线会导致过度工程化或失控。
 

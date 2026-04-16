@@ -1,6 +1,7 @@
 package com.metabuild.platform.file.domain;
 
 import com.metabuild.common.id.SnowflakeIdGenerator;
+import com.metabuild.common.exception.BusinessException;
 import com.metabuild.common.exception.ForbiddenException;
 import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.security.CurrentUser;
@@ -24,7 +25,6 @@ import java.security.NoSuchAlgorithmException;
 import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.HexFormat;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 
 /**
@@ -57,13 +57,13 @@ public class FileService {
         // 2. MIME 类型校验
         String contentType = file.getContentType();
         if (contentType == null || !properties.allowedTypes().contains(contentType)) {
-            throw new IllegalArgumentException("不支持的文件类型: " + contentType);
+            throw new BusinessException(FileErrorCodes.TYPE_NOT_ALLOWED, contentType);
         }
 
         // 3. 文件大小校验
         long maxBytes = (long) properties.maxSizeMb() * 1024 * 1024;
         if (file.getSize() > maxBytes) {
-            throw new IllegalArgumentException("文件超过最大限制: " + properties.maxSizeMb() + "MB");
+            throw new BusinessException(FileErrorCodes.SIZE_EXCEEDED, properties.maxSizeMb());
         }
 
         // 4. 计算 SHA-256
@@ -178,7 +178,7 @@ public class FileService {
             ext = filename.substring(dotIdx + 1).toLowerCase();
         }
         if (!properties.allowedExtensions().contains(ext)) {
-            throw new IllegalArgumentException("不允许的文件扩展名: " + ext);
+            throw new BusinessException(FileErrorCodes.EXTENSION_NOT_ALLOWED, ext);
         }
     }
 

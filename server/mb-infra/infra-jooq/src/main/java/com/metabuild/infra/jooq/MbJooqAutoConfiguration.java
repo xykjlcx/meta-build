@@ -3,8 +3,8 @@ package com.metabuild.infra.jooq;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.infra.jooq.audit.AuditFieldsRecordListener;
 import com.metabuild.infra.jooq.datascope.BypassDataScopeAspect;
+import com.metabuild.infra.jooq.datascope.DataScopeExecuteListener;
 import com.metabuild.infra.jooq.datascope.DataScopeRegistry;
-import com.metabuild.infra.jooq.datascope.DataScopeVisitListener;
 import com.metabuild.infra.jooq.id.MbIdProperties;
 import com.metabuild.infra.jooq.query.SlowQueryListener;
 import org.jooq.ExecuteListenerProvider;
@@ -62,17 +62,17 @@ public class MbJooqAutoConfiguration {
      * VisitListener 的 clauseEnd 触发时 SQL 可能已渲染，addConditions() 无法影响已生成的 SQL。
      */
     @Bean
-    public DataScopeVisitListener dataScopeExecuteListener(
+    public DataScopeExecuteListener dataScopeExecuteListener(
             DataScopeRegistry registry,
             ObjectProvider<CurrentUser> currentUserProvider) {
-        return new DataScopeVisitListener(registry, currentUserProvider);
+        return new DataScopeExecuteListener(registry, currentUserProvider);
     }
 
     /**
      * 将 DataScopeExecuteListener 注册为独立的 ExecuteListenerProvider Bean。
      */
     @Bean
-    public ExecuteListenerProvider dataScopeListenerProvider(DataScopeVisitListener listener) {
+    public ExecuteListenerProvider dataScopeListenerProvider(DataScopeExecuteListener listener) {
         return new DefaultExecuteListenerProvider(listener);
     }
 

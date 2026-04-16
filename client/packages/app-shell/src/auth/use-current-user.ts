@@ -1,14 +1,14 @@
-import { type CurrentUserView, ProblemDetailError, authApi } from '@mb/api-sdk';
+import { type CurrentUserVo, ProblemDetailError, authApi } from '@mb/api-sdk';
 import { useQuery } from '@tanstack/react-query';
 import { ANONYMOUS, type CurrentUser } from './types';
 
-export function toCurrentUser(dto: CurrentUserView): CurrentUser {
-  const permissions = new Set(dto.permissions) as ReadonlySet<string> as CurrentUser['permissions'];
+export function toCurrentUser(dto: CurrentUserVo): CurrentUser {
+  const permissions = new Set(dto.permissions ?? []) as ReadonlySet<string> as CurrentUser['permissions'];
   return {
     isAuthenticated: true,
-    userId: dto.userId,
-    username: dto.username,
-    deptId: dto.deptId,
+    userId: dto.userId ?? 0,
+    username: dto.username ?? '',
+    deptId: dto.deptId ?? null,
     permissions,
     hasPermission: (code) => permissions.has(code),
     hasAnyPermission: (...codes) => codes.some((c) => permissions.has(c)),

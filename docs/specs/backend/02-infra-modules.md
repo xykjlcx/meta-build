@@ -14,7 +14,7 @@
 |---|------|------|---------|-----------|
 | 1 | `infra-security` | **Sa-Token 封装 + `SaTokenCurrentUser` / `SaTokenAuthFacade` 实现 + `@RequirePermission` 注解 + CORS**（ADR-0005；数据权限拦截在 `infra-jooq`） | Sa-Token 1.39.x + 自研门面层 | M4 |
 | 2 | `infra-cache` | Redis + CacheEvictSupport（key 级失效） | nxboot CacheEvictSupport | M4 |
-| 3 | `infra-jooq` | JooqHelper + SlowQueryListener + DataScopeVisitListener（**不含生成代码，生成代码在 mb-schema**） | nxboot JooqHelper, SlowQueryListener | M1 启动 + M4 补全 |
+| 3 | `infra-jooq` | JooqHelper + SlowQueryListener + DataScopeExecuteListener（**不含生成代码，生成代码在 mb-schema**） | nxboot JooqHelper, SlowQueryListener | M1 启动 + M4 补全 |
 | 4 | `infra-web` | 共享 Web 边界能力（`PageRequestDto` / `PaginationPolicy` / `MbPaginationProperties`） | 新增 | M5+ |
 | 5 | `infra-exception` | GlobalExceptionHandler + ProblemDetail 映射 + SecurityHeaderFilter | nxboot GlobalExceptionHandler（改造） | M4 |
 | 6 | `infra-i18n` | MessageSource + Accept-Language LocaleResolver | nxboot I18nHelper（改造） | M4 |

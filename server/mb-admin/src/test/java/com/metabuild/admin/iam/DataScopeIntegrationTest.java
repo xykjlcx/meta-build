@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 /**
  * DataScope（数据权限）集成测试。
  *
- * <p>验证 DataScopeVisitListener（实现为 ExecuteListener）在 jOOQ SELECT 层正确注入过滤条件：
+ * <p>验证 DataScopeExecuteListener（实现为 ExecuteListener）在 jOOQ SELECT 层正确注入过滤条件：
  * <ul>
  *   <li>SELF：仅查到自己创建的记录（created_by = userId）</li>
  *   <li>OWN_DEPT：仅查到同部门的记录（owner_dept_id = deptId）</li>
@@ -29,7 +29,7 @@ import static org.mockito.Mockito.when;
  * </ul>
  *
  * <p>数据写入通过 JdbcTemplate 直接操作（绕过 jOOQ RecordListener，确保 created_by / owner_dept_id 精确可控）。
- * 数据查询通过 jOOQ DSLContext（SELECT 走 DataScopeVisitListener）。
+ * 数据查询通过 jOOQ DSLContext（SELECT 走 DataScopeExecuteListener）。
  *
  * <p>使用 @MockitoBean CurrentUser，通过 Mockito 按测试方法配置不同的数据权限类型。
  * @Transactional 保证测试结束后回滚，不影响其他测试。
@@ -84,7 +84,7 @@ class DataScopeIntegrationTest extends BaseIntegrationTest {
         // currentUser: SELF scope, userId=USER_SELF_ID
         when(currentUser.dataScopeType()).thenReturn(DataScopeType.SELF);
 
-        // 通过 jOOQ DSL 查询（走 DataScopeVisitListener）
+        // 通过 jOOQ DSL 查询（走 DataScopeExecuteListener）
         var records = dsl.selectFrom(MB_IAM_USER)
             .where(MB_IAM_USER.USERNAME.in("ds_user_a", "ds_user_b"))
             .fetch();

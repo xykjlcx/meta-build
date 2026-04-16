@@ -9,7 +9,7 @@ import org.aspectj.lang.annotation.Aspect;
  * 数据权限绕过切面：拦截标注了 @BypassDataScope 的方法，
  * 通过 ThreadLocal 标记当前线程跳过数据权限过滤。
  *
- * <p>DataScopeVisitListener 在构建 SQL 时通过 isBypassed() 检查此标记。
+ * <p>DataScopeExecuteListener 在构建 SQL 时通过 isBypassed() 检查此标记。
  */
 @Aspect
 @Slf4j
@@ -34,7 +34,7 @@ public class BypassDataScopeAspect {
 
     /**
      * 判断当前线程是否处于数据权限绕过状态。
-     * 供 DataScopeVisitListener 调用。
+     * 供 DataScopeExecuteListener 调用。
      *
      * @return 绕过返回 true
      */

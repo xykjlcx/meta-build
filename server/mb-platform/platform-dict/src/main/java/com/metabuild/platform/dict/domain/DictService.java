@@ -2,9 +2,12 @@ package com.metabuild.platform.dict.domain;
 
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
+import com.metabuild.common.exception.ConflictException;
+import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.infra.cache.CacheEvictSupport;
+import com.metabuild.platform.dict.api.DictErrorCodes;
 import com.metabuild.platform.dict.api.cmd.DictDataCreateCmd;
 import com.metabuild.platform.dict.api.vo.DictDataVo;
 import com.metabuild.platform.dict.api.cmd.DictTypeCreateCmd;
@@ -16,9 +19,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 /**
  * 字典业务服务（DictType + DictData CRUD，Redis 缓存）。
@@ -50,13 +51,13 @@ public class DictService {
     public DictTypeVo getTypeById(Long id) {
         return typeRepository.findById(id)
             .map(this::toTypeResponse)
-            .orElseThrow(() -> new NoSuchElementException("字典类型不存在: " + id));
+            .orElseThrow(() -> new NotFoundException(DictErrorCodes.TYPE_NOT_FOUND, id));
     }
 
     @Transactional
     public Long createType(DictTypeCreateCmd req) {
         if (typeRepository.existsByCode(req.code())) {
-            throw new IllegalArgumentException("字典编码已存在: " + req.code());
+            throw new ConflictException(DictErrorCodes.TYPE_CODE_EXISTS, req.code());
         }
         MbDictTypeRecord record = new MbDictTypeRecord();
         record.setId(idGenerator.nextId());
@@ -75,7 +76,7 @@ public class DictService {
     @Transactional
     public void deleteType(Long id) {
         MbDictTypeRecord type = typeRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("字典类型不存在: " + id));
+            .orElseThrow(() -> new NotFoundException(DictErrorCodes.TYPE_NOT_FOUND, id));
         dataRepository.deleteByDictTypeId(id);
         typeRepository.deleteById(id);
         // 失效缓存
@@ -115,7 +116,7 @@ public class DictService {
     @Transactional
     public void deleteData(Long id) {
         MbDictDataRecord data = dataRepository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("字典数据不存在: " + id));
+            .orElseThrow(() -> new NotFoundException(DictErrorCodes.DATA_NOT_FOUND, id));
         dataRepository.deleteById(id);
         cacheEvictSupport.evictAfterCommit(CACHE_DATA_PREFIX + data.getDictTypeId());
     }

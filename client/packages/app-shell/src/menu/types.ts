@@ -1,8 +1,8 @@
 import type { AppPermission } from '@mb/api-sdk';
 
 /**
- * 前端菜单节点 — 由 api-sdk MenuNodeDto 转换而来。
- * 字段与后端 MenuView 一一对应。
+ * 前端菜单节点 — 由 api-sdk MenuVo 转换而来。
+ * 字段与后端 MenuVo 一一对应。
  */
 export interface MenuNode {
   id: number;

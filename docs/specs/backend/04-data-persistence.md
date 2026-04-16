@@ -460,7 +460,7 @@ public class DSLContextConfig {
     @Bean
     public DSLContext dslContext(
         DataSource dataSource,
-        DataScopeVisitListener dataScopeVisitListener,
+        DataScopeExecuteListener dataScopeVisitListener,
         AuditFieldsRecordListener auditFieldsRecordListener,
         SlowQueryListener slowQueryListener
     ) {

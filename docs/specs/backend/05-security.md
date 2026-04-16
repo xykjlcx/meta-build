@@ -1,6 +1,6 @@
 # 05 - 安全模型
 
-> **关注点**：Sa-Token JWT Simple 模式 + Refresh Token Rotation、`CurrentUser` 读门面、`AuthFacade` 写门面、`@RequirePermission` 注解、CORS、Web 安全基线（XSS/CSRF）、敏感配置、**方案 E 数据权限**（DataScopeRegistry + DataScopeVisitListener + BypassDataScopeAspect）。
+> **关注点**：Sa-Token JWT Simple 模式 + Refresh Token Rotation、`CurrentUser` 读门面、`AuthFacade` 写门面、`@RequirePermission` 注解、CORS、Web 安全基线（XSS/CSRF）、敏感配置、**方案 E 数据权限**（DataScopeRegistry + DataScopeExecuteListener + BypassDataScopeAspect）。
 >
 > **本文件吸收原 backend-architecture.md §8（安全模型）+ §5.3（数据权限方案 E）**。这是本目录最长的文件，因为安全相关的所有概念高度内聚，硬拆会让交叉引用爆炸。
 >
@@ -323,7 +323,7 @@ public UserVo updateEmail(Long userId, UserUpdateEmailCmd cmd) {
 | 静态用户权限（"能创建用户吗"）| `@RequirePermission` 注解 | Controller 层 |
 | 动态用户权限（"能改这条订单吗"）| `currentUser.hasPermission()` 程序性调用 | Service 层 |
 | 跨模块 API 可见性 | `<Module>Api` 接口 + ArchUnit 编译期 | 模块契约层 |
-| 行级数据权限 | `DataScopeVisitListener`（方案 E）| Repository（jOOQ 查询拦截）|
+| 行级数据权限 | `DataScopeExecuteListener`（方案 E）| Repository（jOOQ 查询拦截）|
 | 系统动作（定时任务/异步/事件）| 无 Controller，无 `@RequirePermission`，通过 `currentUser.isSystem()` 或 `SYSTEM_USER_ID` | 天然适配 |
 
 **每种权限需求有唯一对应的机制，不重叠、不混淆、不遗漏**。
@@ -351,7 +351,7 @@ Sa-Token session 持久化
     ↓
 DSLContext 构建查询 → jOOQ AST
     ↓
-DataScopeVisitListener.visitStart(ctx)
+DataScopeExecuteListener.renderStart(ctx)
     ↓（读 CurrentUser.dataScopeType() / dataScopeDeptIds()，查 DataScopeRegistry）
 注入 where 条件
 ```
@@ -360,7 +360,7 @@ DataScopeVisitListener.visitStart(ctx)
 - 用户的数据范围规则存在 `mb_iam_role.data_scope` 字段
 - 登录时**一次性**展开为具体 `Set<Long> deptIds`，存入 session（后续请求零查询）
 - 业务层**只通过** `CurrentUser.dataScopeType()` / `CurrentUser.dataScopeDeptIds()` 读取（不直接访问 Sa-Token session）
-- `DataScopeVisitListener` 在 jOOQ SQL 构建层自动注入条件，Repository 是普通类**零继承、零数据权限代码**
+- `DataScopeExecuteListener` 在 jOOQ SQL 构建层自动注入条件，Repository 是普通类**零继承、零数据权限代码**
 
 ## 4. 强制敏感配置
 
@@ -463,7 +463,7 @@ v1 token 通过 `Authorization: Bearer` header 传递，不使用 Cookie 存储 
 
 ### 6.2 CurrentUser 接口（在 mb-common.security）
 
-**关键：接口定义放在 `mb-common.security`**，不是 `infra-security`。这是方案 E 的连带决策——让 `infra-jooq` 的 `DataScopeVisitListener` 可以直接依赖 `CurrentUser` 而不破坏 §1.5 的"infra 子模块不互相依赖"约束。
+**关键：接口定义放在 `mb-common.security`**，不是 `infra-security`。这是方案 E 的连带决策——让 `infra-jooq` 的 `DataScopeExecuteListener` 可以直接依赖 `CurrentUser` 而不破坏 §1.5 的"infra 子模块不互相依赖"约束。
 
 ```java
 // mb-common/src/main/java/com/metabuild/common/security/CurrentUser.java
@@ -898,7 +898,7 @@ public class TestSecurityConfig {
 
 <!-- verify: cd server && grep -rn "StpUtil\." --include="*.java" mb-platform mb-business | grep -v "/test/" && echo "FAIL: 业务层出现 StpUtil 引用" || echo "OK" -->
 
-## 7. 数据权限方案 E（VisitListener 单点 + 零基类） [M1+M4]
+## 7. 数据权限方案 E（ExecuteListener 单点 + 零基类） [M1+M4]
 
 ### 7.1 问题（安全级别高）
 
@@ -906,7 +906,7 @@ nxboot 的 `@DataScope` 是 **opt-in 注解**：只有显式标注了 `@DataScop
 
 ### 7.2 决策：方案 E（详见 ADR-0007）
 
-**拦截点只有一个**：`DataScopeVisitListener`（jOOQ 全局 VisitListener）。它在 SQL AST 构建过程中，对**所有**注册过的业务表自动注入 `dept_id IN (...)` 条件。不依赖 Repository 继承、不依赖 Service 主动调用，**是真正的 opt-out 本体**。
+**拦截点只有一个**：`DataScopeExecuteListener`（jOOQ 全局 ExecuteListener）。它在 SQL AST 构建过程中，对**所有**注册过的业务表自动注入 `dept_id IN (...)` 条件。不依赖 Repository 继承、不依赖 Service 主动调用，**是真正的 opt-out 本体**。
 
 **设计铁律（方案 E 四原则）**：
 
@@ -922,7 +922,7 @@ nxboot 的 `@DataScope` 是 **opt-in 注解**：只有显式标注了 `@DataScop
 |---|------|--------|-------|
 | **类型定义** | `DataScope` / `DataScopeType` / `BypassDataScope` / `CurrentUser` 抽象接口 | `mb-common.security` | `CurrentUser` / `DataScope` / `DataScopeType` |
 | **规则查询** | 登录时查角色-部门规则，展开成 `DataScope` 存入 session | `platform-iam.domain.auth` | `AuthService` / `DataScopeLoader` |
-| **SQL 注入** | 运行时拦截 jOOQ 查询，从 `CurrentUser` 读 DataScope，注入 `where` 条件 | `infra-jooq` | `DataScopeRegistry` / `DataScopeVisitListener` / `BypassDataScopeAspect` |
+| **SQL 注入** | 运行时拦截 jOOQ 查询，从 `CurrentUser` 读 DataScope，注入 `where` 条件 | `infra-jooq` | `DataScopeRegistry` / `DataScopeExecuteListener` / `BypassDataScopeAspect` |
 
 ### 7.4 类型定义代码骨架（mb-common.security）
 
@@ -969,7 +969,7 @@ import java.lang.annotation.*;
 /**
  * 显式跳过数据范围拦截的注解。限管理员 / 系统级查询使用。
  *
- * 实现机制见 {@code com.metabuild.infra.jooq.BypassDataScopeAspect}。
+ * 实现机制见 {@code com.metabuild.infra.jooq.datascope.BypassDataScopeAspect}。
  * 使用此注解的方法**必须**在 reason 里说明"为什么可以 bypass"，code review 会检查。
  */
 @Target(ElementType.METHOD)
@@ -982,8 +982,8 @@ public @interface BypassDataScope {
 ### 7.5 SQL 注入代码骨架（infra-jooq）
 
 ```java
-// mb-infra/infra-jooq/src/main/java/com/metabuild/infra/jooq/DataScopeRegistry.java
-package com.metabuild.infra.jooq;
+// mb-infra/infra-jooq/src/main/java/com/metabuild/infra/jooq/datascope/DataScopeRegistry.java
+package com.metabuild.infra.jooq.datascope;
 
 import org.springframework.stereotype.Component;
 import java.util.Map;
@@ -1023,8 +1023,8 @@ public class DataScopeRegistry {
 ```
 
 ```java
-// mb-infra/infra-jooq/src/main/java/com/metabuild/infra/jooq/DataScopeVisitListener.java
-package com.metabuild.infra.jooq;
+// mb-infra/infra-jooq/src/main/java/com/metabuild/infra/jooq/datascope/DataScopeExecuteListener.java
+package com.metabuild.infra.jooq.datascope;
 
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.common.security.DataScopeType;
@@ -1036,7 +1036,7 @@ import org.springframework.stereotype.Component;
 /**
  * 数据权限的唯一拦截点（方案 E）。
  *
- * 作为 jOOQ 全局 VisitListener 注册到 Configuration，在 SQL AST 构建过程中：
+ * 作为 jOOQ 全局 ExecuteListener 注册到 Configuration，在 SQL 渲染阶段：
  * 1. 识别当前访问的表是否在 {@link DataScopeRegistry} 中受保护
  * 2. 如果是，从 {@link CurrentUser} 读取 DataScopeType / deptIds
  * 3. 注入对应的 where 条件（ALL 不注入，SELF 按 created_by，其他按 dept_id IN (...)）
@@ -1044,12 +1044,12 @@ import org.springframework.stereotype.Component;
  * 被 @BypassDataScope 注解的方法调用链整体跳过，由 {@link BypassDataScopeAspect} 配合。
  */
 @Component
-public class DataScopeVisitListener implements VisitListener {
+public class DataScopeExecuteListener implements ExecuteListener {
 
     private final DataScopeRegistry registry;
     private final ObjectProvider<CurrentUser> currentUserProvider;  // 延迟解析，避免启动循环
 
-    public DataScopeVisitListener(
+    public DataScopeExecuteListener(
             DataScopeRegistry registry,
             ObjectProvider<CurrentUser> currentUserProvider) {
         this.registry = registry;
@@ -1057,14 +1057,14 @@ public class DataScopeVisitListener implements VisitListener {
     }
 
     @Override
-    public void visitStart(VisitContext context) {
+    public void renderStart(ExecuteContext context) {
         // [M4 时补: 完整 AST 访问 + Condition 注入逻辑]
         //
         // 设计原则：数据权限只在查询主表（FROM 子句的主表）上注入 WHERE 条件，
         // JOIN 表和子查询中的关联表不单独注入。原因：
         // 1. JOIN 表是主表的附属数据，主表已过滤则结果安全
         // 2. 对 JOIN 表也注入会导致跨部门关联数据丢失（如 dept=1 的订单 owner 是 dept=99 的用户，JOIN 匹配不到）
-        // 3. 大幅降低 VisitListener 实现复杂度（不需要处理 JOIN/子查询/UNION 嵌套）
+        // 3. 大幅降低 ExecuteListener 改写复杂度（不需要处理 JOIN/子查询/UNION 嵌套）
         //
         // 伪代码骨架：
         // if (BypassDataScopeAspect.isBypassed()) return;
@@ -1087,8 +1087,8 @@ public class DataScopeVisitListener implements VisitListener {
 ```
 
 ```java
-// mb-infra/infra-jooq/src/main/java/com/metabuild/infra/jooq/BypassDataScopeAspect.java
-package com.metabuild.infra.jooq;
+// mb-infra/infra-jooq/src/main/java/com/metabuild/infra/jooq/datascope/BypassDataScopeAspect.java
+package com.metabuild.infra.jooq.datascope;
 
 import com.metabuild.common.security.BypassDataScope;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -1243,7 +1243,7 @@ public class DataScopeRule {
 
     /**
      * 业务 Repository 不得使用 DSLContext 的字符串 SQL API（fetch(String) / execute(String) 等）。
-     * 这些 API 会完全绕过 jOOQ 的 VisitListener 机制，导致 DataScopeVisitListener 失效。
+     * 这些 API 会完全绕过 jOOQ 的 ExecuteListener 改写链路，导致 DataScopeExecuteListener 失效。
      *
      * 如果真的需要执行原生 SQL（如 DDL / 性能敏感查询），必须在 infra-jooq 或 mb-admin 里明确声明。
      */
@@ -1252,7 +1252,7 @@ public class DataScopeRule {
         .should().callMethodWhere(JavaCall.Predicates.target(
             CanBeAnnotated.Predicates.annotatedWith("org.jooq.PlainSQL")
         ))
-        .as("业务层禁止使用原始 SQL API（会绕过 DataScopeVisitListener 数据权限拦截）");
+        .as("业务层禁止使用原始 SQL API（会绕过 DataScopeExecuteListener 数据权限拦截）");
 }
 ```
 
@@ -1260,11 +1260,11 @@ public class DataScopeRule {
 
 ### 7.10 方案 E 作为 "jOOQ 横切关注点原生拦截" 的第一个样本
 
-方案 E 把"数据权限"这一横切关注点从业务代码抽到 jOOQ `VisitListener` 单点拦截。这是 meta-build 内部"jOOQ 原生拦截机制吞掉横切关注点"的第一个样本。
+方案 E 把"数据权限"这一横切关注点从业务代码抽到 jOOQ `ExecuteListener` 单点拦截。这是 meta-build 内部"jOOQ 原生拦截机制吞掉横切关注点"的第一个样本。
 
 后续 M4.2（[04-data-persistence.md §8.5-§8.8](04-data-persistence.md)）把**乐观锁** / **审计字段** / **`updated_at` 自动**也全部收敛到 jOOQ 原生拦截（`Settings` + `RecordListener`），砍掉了 nxboot 的 `JooqHelper` 聚合范式。
 
-两次落地共享同一套哲学：**横切关注点用 jOOQ 原生拦截（`VisitListener` / `RecordListener` / `ExecuteListener` / `Settings`），业务层零感知**。详见 ADR-0007 元方法论。
+两次落地共享同一套哲学：**横切关注点用 jOOQ 原生拦截（`ExecuteListener` / `RecordListener` / `ExecuteListener` / `Settings`），业务层零感知**。详见 ADR-0007 元方法论。
 
 ### 7.11 测试策略
 
@@ -1870,7 +1870,7 @@ public class PasswordController {
     @PostMapping("/admin-reset")
     @RequirePermission("iam:user:resetPassword")       // ← 权限在 Controller 层
     @OperationLog(action = "iam.auth.resetPasswordByAdmin")
-    public String resetPasswordByAdmin(@RequestBody @Valid ResetPasswordByAdminCommand cmd) {
+    public String resetPasswordByAdmin(@RequestBody @Valid ResetPasswordCmd cmd) {
         return passwordService.resetPasswordByAdmin(cmd);
     }
 }
@@ -1881,7 +1881,7 @@ Service 层（业务逻辑，无 @RequirePermission）：
 ```java
 // platform-iam/domain/auth/PasswordService.java
 @Transactional
-public String resetPasswordByAdmin(ResetPasswordByAdminCommand cmd) {
+public String resetPasswordByAdmin(ResetPasswordCmd cmd) {
     User user = userRepository.findById(cmd.targetUserId())
         .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
 
@@ -2261,7 +2261,7 @@ public class AuthService {
 
     // 注意：@RequirePermission 和 @OperationLog 都必须放在 Controller 层（N3 §2.5），不放 Service
     @Transactional
-    public String resetPasswordByAdmin(ResetPasswordByAdminCommand cmd) {
+    public String resetPasswordByAdmin(ResetPasswordCmd cmd) {
         User user = userRepository.findById(cmd.targetUserId())
             .orElseThrow(() -> new NotFoundException("iam.user.notFound"));
 

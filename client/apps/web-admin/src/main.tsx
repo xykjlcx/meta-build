@@ -1,5 +1,5 @@
 import { configureApiSdk } from '@mb/api-sdk';
-import type { LoginView } from '@mb/api-sdk';
+import type { LoginVo } from '@mb/api-sdk';
 import {
   DialogContainer,
   GlobalErrorBoundary,
@@ -39,7 +39,10 @@ configureApiSdk({
         body: JSON.stringify({ refreshToken }),
       });
       if (!resp.ok) return null;
-      const result: LoginView = await resp.json();
+      const result: LoginVo = await resp.json();
+      if (!result.accessToken || !result.refreshToken) {
+        return null;
+      }
       localStorage.setItem('mb_access_token', result.accessToken);
       localStorage.setItem('mb_refresh_token', result.refreshToken);
       return result.accessToken;

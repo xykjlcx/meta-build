@@ -1,34 +1,34 @@
 // === 手写类型（保留，不被 orval 替代）===
 export type { PageResult, ProblemDetail } from './types/common';
 export type {
-  LoginCommand,
-  LoginView,
+  CurrentUserVo,
+  LoginCmd,
+  LoginVo,
+  RefreshCmd,
   UserSummary,
-  RefreshCommand,
-  CurrentUserView,
 } from './types/auth';
-export type { MenuNodeDto, CurrentUserMenuView } from './types/menu';
+export type { CurrentUserMenuVo, MenuVo } from './types/menu';
 export type { AppPermission } from './types/permission';
 export { ALL_APP_PERMISSIONS } from './types/permission';
 export type {
   NoticeBatchInput,
   NoticeBatchResult,
   NoticeCreateInput,
-  NoticeDetailView,
+  NoticeDetailVo,
   NoticeExportParams,
   NoticeListParams,
-  NotificationLogView,
+  NotificationLogVo,
   NoticePublishInput,
   NoticeRecipientsParams,
   NoticeTarget,
   NoticeUnreadCount,
   NoticeUpdateInput,
-  NoticeView,
-  RecipientView,
+  NoticeVo,
+  RecipientVo,
 } from './apis/notice-api';
-export type { FileUploadView } from './apis/file-api';
+export type { FileUploadVo } from './apis/file-api';
 export type {
-  WeChatBindingView,
+  WeChatBindingVo,
   WeChatMiniBindInput,
   WeChatMpBindInput,
   WeChatMpOauthState,
@@ -76,11 +76,11 @@ export { getDept, useGetDept } from './generated/endpoints/dept-controller/dept-
 export { getRole, useGetRole } from './generated/endpoints/role-controller/role-controller';
 export { getUser, useGetUser } from './generated/endpoints/user-controller/user-controller';
 export type {
-  DeptView,
+  DeptVo,
   GetRoleParams,
   GetUserParams,
-  RoleView,
-  UserView,
+  RoleVo,
+  UserVo,
 } from './generated/models';
 export {
   useBindWechatMini,

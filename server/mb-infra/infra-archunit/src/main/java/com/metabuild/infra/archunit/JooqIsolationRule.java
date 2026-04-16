@@ -43,7 +43,7 @@ public final class JooqIsolationRule {
 
     /**
      * 规则 #13：NO_RAW_SQL_FETCH（C4）
-     * 业务层禁止使用 jOOQ @PlainSQL 注解标注的 API——这些 API 绕过 DataScopeVisitListener 数据权限拦截。
+     * 业务层禁止使用 jOOQ @PlainSQL 注解标注的 API——这些 API 绕过 DataScopeExecuteListener 数据权限拦截。
      * 类型安全的 DSL 查询由 VisitListener 自动注入 WHERE 条件；@PlainSQL 字符串 SQL 不经过 VisitListener。
      */
     public static final ArchRule NO_PLAIN_SQL_ANNOTATION =
@@ -55,7 +55,7 @@ public final class JooqIsolationRule {
             .should().dependOnClassesThat()
             .haveFullyQualifiedName("org.jooq.PlainSQL")
             .allowEmptyShould(true)  // M4 业务模块落地前保留
-            .because("禁止使用 @PlainSQL 原始字符串 SQL，会绕过 DataScopeVisitListener 数据权限拦截（规则 #13）");
+            .because("禁止使用 @PlainSQL 原始字符串 SQL，会绕过 DataScopeExecuteListener 数据权限拦截（规则 #13）");
 
     /**
      * 规则 #15b：SERVICE_JOOQ_WHITELIST（C8，N3 精化）

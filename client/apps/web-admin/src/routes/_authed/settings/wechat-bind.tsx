@@ -1,4 +1,4 @@
-import { type WeChatBindingView, wechatBindingApi } from '@mb/api-sdk';
+import { type WeChatBindingVo, wechatBindingApi } from '@mb/api-sdk';
 import { requireAuth } from '@mb/app-shell';
 import {
   Badge,
@@ -21,10 +21,10 @@ export const Route = createFileRoute('/_authed/settings/wechat-bind')({
 
 function WechatBindPage() {
   const { t } = useTranslation('notice');
-  const [bindings, setBindings] = useState<WeChatBindingView[]>([]);
+  const [bindings, setBindings] = useState<WeChatBindingVo[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // 查询绑定状态 — 后端返回 WeChatBindingView[] 直接体
+  // 查询绑定状态 — 后端返回 WeChatBindingVo[] 直接体
   const fetchBindings = useCallback(async () => {
     setLoading(true);
     try {

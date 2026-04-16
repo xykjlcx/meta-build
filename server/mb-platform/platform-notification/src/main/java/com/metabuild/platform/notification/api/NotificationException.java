@@ -9,11 +9,19 @@ package com.metabuild.platform.notification.api;
  */
 public class NotificationException extends RuntimeException {
 
-    public NotificationException(String message) {
-        super(message);
+    private final String code;
+
+    public NotificationException(String code) {
+        super(code);
+        this.code = code;
     }
 
-    public NotificationException(String message, Throwable cause) {
-        super(message, cause);
+    public NotificationException(String code, Throwable cause) {
+        super(code, cause);
+        this.code = code;
+    }
+
+    public String getCode() {
+        return code;
     }
 }

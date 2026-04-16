@@ -1,11 +1,11 @@
 import { getClient } from '../config';
 import { deleteFileById, postFile } from '../generated/endpoints/file-controller/file-controller';
-import type { FileUploadView as GeneratedFileUploadView } from '../generated/models';
+import type { FileUploadVo as GeneratedFileUploadVo } from '../generated/models';
 
-export type FileUploadView = GeneratedFileUploadView;
+export type FileUploadVo = GeneratedFileUploadVo;
 
 export const fileApi = {
-  upload(file: File): Promise<FileUploadView> {
+  upload(file: File): Promise<FileUploadVo> {
     return postFile({ file });
   },
   download(fileId: number): Promise<Blob> {

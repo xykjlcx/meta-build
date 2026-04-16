@@ -3,8 +3,10 @@ package com.metabuild.platform.notification.domain.notification;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.id.SnowflakeIdGenerator;
+import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.notification.api.NotificationApi;
+import com.metabuild.platform.notification.api.NotificationErrorCodes;
 import com.metabuild.platform.notification.api.NotificationMessage;
 import com.metabuild.platform.notification.api.cmd.NotificationCreateCmd;
 import com.metabuild.platform.notification.api.vo.NotificationVo;
@@ -16,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 /**
@@ -77,7 +78,7 @@ public class NotificationService implements NotificationApi {
     public void markRead(Long notificationId) {
         // 确认通知存在
         repository.findById(notificationId)
-            .orElseThrow(() -> new NoSuchElementException("通知不存在: " + notificationId));
+            .orElseThrow(() -> new NotFoundException(NotificationErrorCodes.NOTIFICATION_NOT_FOUND, notificationId));
 
         Long userId = currentUser.userId();
         MbNotificationReadRecord readRecord = new MbNotificationReadRecord();
@@ -98,7 +99,7 @@ public class NotificationService implements NotificationApi {
     @Transactional
     public void delete(Long id) {
         repository.findById(id)
-            .orElseThrow(() -> new NoSuchElementException("通知不存在: " + id));
+            .orElseThrow(() -> new NotFoundException(NotificationErrorCodes.NOTIFICATION_NOT_FOUND, id));
         repository.deleteById(id);
     }
 

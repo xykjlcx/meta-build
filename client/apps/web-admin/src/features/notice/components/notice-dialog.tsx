@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import {
-  type NoticeDetailView,
+  type NoticeDetailVo,
   type NoticeTarget,
   noticeQueryKeys,
   useCreateNotice,
@@ -65,7 +65,7 @@ export function NoticeDialog({ open, onOpenChange, noticeId, onSuccess }: Notice
     query: { queryKey: noticeQueryKeys.detail(detailId), enabled: isEditing && open },
   });
 
-  const detail: NoticeDetailView | undefined = detailResponse;
+  const detail: NoticeDetailVo | undefined = detailResponse;
 
   const createMutation = useCreateNotice();
   const updateMutation = useUpdateNotice();
