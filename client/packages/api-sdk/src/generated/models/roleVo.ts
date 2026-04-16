@@ -7,13 +7,16 @@
  */
 
 export interface RoleVo {
-  id?: number;
-  name?: string;
-  code?: string;
-  dataScope?: string;
-  remark?: string;
-  status?: number;
-  sortOrder?: number;
-  createdAt?: string;
-  updatedAt?: string;
+  id: number;
+  name: string;
+  code: string;
+  /** @nullable */
+  dataScope: string | null;
+  /** @nullable */
+  remark: string | null;
+  status: number;
+  /** @nullable */
+  sortOrder: number | null;
+  createdAt: string;
+  updatedAt: string;
 }

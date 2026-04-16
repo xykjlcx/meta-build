@@ -478,7 +478,7 @@ public class ModuleBoundaryRule {
 |---|---|---|---|---|---|
 | 1 | `mb_iam_user` | Flyway SQL | 手写 | `mb-schema/src/main/resources/db/migration/` | 数据库表 |
 | 2 | `MbIamUserRecord` | jOOQ 生成 | codegen | `com.metabuild.schema.tables.records` | **Service 层的数据载体**（不手写）|
-| 3 | `UserVo` | record | 手写 | `com.metabuild.platform.iam.api.dto` | API 响应 DTO（脱敏，带 `from(MbIamUserRecord)` 静态工厂）|
+| 3 | `UserVo` | record | 手写 | `com.metabuild.platform.iam.api.vo` | API 响应 DTO（脱敏，带 `from(MbIamUserRecord)` 静态工厂）|
 | 4 | `UserCreateCmd` | record | 手写 | 同上 | API 创建请求 |
 | 5 | `UserUpdateEmailCmd` | record | 手写 | 同上 | API 更新请求（业务动作命名）|
 | 6 | `UserQry` | record | 手写 | 同上 | API 查询条件 |

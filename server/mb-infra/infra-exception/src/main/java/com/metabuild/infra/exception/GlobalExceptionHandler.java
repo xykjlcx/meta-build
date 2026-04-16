@@ -78,6 +78,24 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * 处理显式参数非法异常（用户输入不满足业务前置条件）。
+     */
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ProblemDetail handleIllegalArgument(IllegalArgumentException ex) {
+        var locale = LocaleContextHolder.getLocale();
+        String fallback = messageSource.getMessage(CommonErrorCodes.VALIDATION, null, CommonErrorCodes.VALIDATION, locale);
+        String detail = ex.getMessage() != null && !ex.getMessage().isBlank() ? ex.getMessage() : fallback;
+
+        var pd = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        pd.setTitle(HttpStatus.BAD_REQUEST.getReasonPhrase());
+        pd.setDetail(detail);
+        pd.setProperty("code", CommonErrorCodes.VALIDATION);
+        pd.setProperty("traceId", MDC.get("traceId"));
+        log.warn("非法参数: {}", detail);
+        return pd;
+    }
+
+    /**
      * 处理 jOOQ 乐观锁冲突（DataChangedException）。
      */
     @ExceptionHandler(org.jooq.exception.DataChangedException.class)

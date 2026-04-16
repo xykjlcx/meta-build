@@ -1,5 +1,8 @@
 package com.metabuild.business.notice.domain.notice;
 
+import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.CommonErrorCodes;
+
 /**
  * 公告状态枚举。
  */
@@ -22,6 +25,6 @@ public enum NoticeStatus {
         for (NoticeStatus s : values()) {
             if (s.code == code) return s;
         }
-        throw new IllegalArgumentException("未知状态码: " + code);
+        throw new BusinessException(CommonErrorCodes.VALIDATION_INVALID_FORMAT, "status");
     }
 }

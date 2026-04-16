@@ -7,8 +7,9 @@
  */
 
 export interface UserSummary {
-  userId?: number;
-  username?: string;
-  deptId?: number;
-  permissions?: string[];
+  userId: number;
+  username: string;
+  /** @nullable */
+  deptId: number | null;
+  permissions: string[];
 }

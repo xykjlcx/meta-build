@@ -85,6 +85,7 @@ public class WeChatBindingService {
         String tokenUrl = String.format(MP_TOKEN_URL, mp.appId(), mp.appSecret(), cmd.code());
         Map<String, Object> tokenResp = restTemplate.getForObject(tokenUrl, Map.class);
         if (tokenResp == null || !tokenResp.containsKey("openid")) {
+            log.warn("公众号 code 换 token 失败: userId={}, response={}", currentUser.userId(), tokenResp);
             throw new BusinessException(NotificationErrorCodes.MP_TOKEN_EXCHANGE_FAILED);
         }
         String accessToken = (String) tokenResp.get("access_token");
@@ -128,6 +129,7 @@ public class WeChatBindingService {
         String sessionUrl = String.format(MINI_SESSION_URL, mini.appId(), mini.appSecret(), cmd.code());
         Map<String, Object> sessionResp = restTemplate.getForObject(sessionUrl, Map.class);
         if (sessionResp == null || !sessionResp.containsKey("openid")) {
+            log.warn("小程序 code 换 session 失败: userId={}, response={}", currentUser.userId(), sessionResp);
             throw new BusinessException(NotificationErrorCodes.MINI_SESSION_EXCHANGE_FAILED);
         }
         String openId = (String) sessionResp.get("openid");

@@ -8,6 +8,6 @@
 import type { MenuVo } from './menuVo';
 
 export interface CurrentUserMenuVo {
-  tree?: MenuVo[];
-  permissions?: string[];
+  tree: MenuVo[];
+  permissions: string[];
 }

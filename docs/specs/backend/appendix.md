@@ -261,7 +261,7 @@
 | **JooqHelper** | `mb-infra/infra-jooq` 中的 jOOQ 操作辅助类，提供 conditionalUpdate、batch 等简化 API |
 | **RecordListener** | jOOQ 原生接口，在 record 的 insert/update/delete 操作前后触发回调。meta-build 用于自动填充审计字段（created_by / updated_by / updated_at / owner_dept_id） |
 | **Clock Bean** | Spring Bean（`java.time.Clock`），统一时间获取入口。生产注入 `Clock.systemUTC()`，测试注入 `Clock.fixed(...)` 实现时间冻结 |
-| **owner_dept_id** | 数据权限归属部门字段，记录数据创建时所属的部门 ID。创建后不可变，不随创建人调岗更新。VisitListener 通过此字段注入 `WHERE owner_dept_id IN (...)` 条件 |
+| **owner_dept_id** | 数据权限归属部门字段，记录数据创建时所属的部门 ID。创建后不可变，不随创建人调岗更新。ExecuteListener 通过此字段注入 `WHERE owner_dept_id IN (...)` 条件 |
 
 ---
 

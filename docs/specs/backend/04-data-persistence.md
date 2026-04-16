@@ -79,7 +79,7 @@ public class IdGeneratorConfig {
 
 - **所有表从 V1 起预留** `tenant_id BIGINT NOT NULL DEFAULT 0`
 - **v1 不实现多租户路由**，所有数据 `tenant_id = 0`
-- **v1.5+ 多租户激活时**：只需在 jOOQ VisitListener 注入 `tenant_id` 条件，不需要 schema migration
+- **v1.5+ 多租户激活时**：只需在 jOOQ ExecuteListener 注入 `tenant_id` 条件，不需要 schema migration
 - **索引约定**: 所有业务复合索引的**第一列必须是 `tenant_id`**（为将来 partition 做准备）
 
 #### Flyway 模板
@@ -460,7 +460,7 @@ public class DSLContextConfig {
     @Bean
     public DSLContext dslContext(
         DataSource dataSource,
-        DataScopeExecuteListener dataScopeVisitListener,
+        DataScopeExecuteListener dataScopeExecuteListener,
         AuditFieldsRecordListener auditFieldsRecordListener,
         SlowQueryListener slowQueryListener
     ) {
@@ -478,7 +478,7 @@ public class DSLContextConfig {
             .set(settings)
             // Listener 链
             .set(new DefaultRecordListenerProvider(auditFieldsRecordListener))  // RecordListener 填 created_by/updated_by
-            .set(new DefaultVisitListenerProvider(dataScopeVisitListener))       // VisitListener 方案 E 数据权限
+            .set(new DefaultExecuteListenerProvider(dataScopeExecuteListener))    // ExecuteListener 方案 E 数据权限
             .set(new DefaultExecuteListenerProvider(slowQueryListener));         // ExecuteListener 慢查询日志
 
         return DSL.using(cfg);
@@ -873,7 +873,7 @@ public class OperationLogCleanupJob {
 #### 8.8.1 为什么不做
 
 - **jOOQ 无原生支持**：jOOQ 官方 issue #2683 计划在 v3.22+ 添加原生软删除，当前版本（3.19+）不可用
-- **自建成本**：自建 `SoftDeleteVisitListener` + `@BypassSoftDelete` 切面等，复杂度约等于方案 E 数据权限，但业务价值不如数据权限高
+- **自建成本**：自建 `SoftDeleteExecuteListener` + `@BypassSoftDelete` 切面等，复杂度约等于方案 E 数据权限，但业务价值不如数据权限高
 - **数据保留的替代方案**：
   - 操作日志（`@OperationLog` 注解）记录所有删除动作 + 入参快照
   - 定期 DB 备份（运维层面）
@@ -892,7 +892,7 @@ public class OperationLogCleanupJob {
 
 如果未来使用者反馈强烈，v1.5 可以：
 - 等 jOOQ 3.22+ 原生软删除落地
-- 或者引入 `SoftDeleteVisitListener`（方案 E 同构）+ `SoftDeleteRegistry`
+- 或者引入 `SoftDeleteExecuteListener`（方案 E 同构）+ `SoftDeleteRegistry`
 
 v1 明确不做。
 

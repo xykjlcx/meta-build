@@ -7,16 +7,22 @@
  */
 
 export interface UserVo {
-  id?: number;
-  username?: string;
-  email?: string;
-  phone?: string;
-  nickname?: string;
-  avatar?: string;
-  deptId?: number;
-  status?: number;
-  mustChangePassword?: boolean;
-  passwordUpdatedAt?: string;
-  createdAt?: string;
-  updatedAt?: string;
+  id: number;
+  username: string;
+  /** @nullable */
+  email: string | null;
+  /** @nullable */
+  phone: string | null;
+  /** @nullable */
+  nickname: string | null;
+  /** @nullable */
+  avatar: string | null;
+  /** @nullable */
+  deptId: number | null;
+  status: number;
+  mustChangePassword: boolean;
+  /** @nullable */
+  passwordUpdatedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

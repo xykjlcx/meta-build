@@ -910,7 +910,7 @@ nxboot 的 `@DataScope` 是 **opt-in 注解**：只有显式标注了 `@DataScop
 
 **设计铁律（方案 E 四原则）**：
 
-1. **没有 `DataScopedRepository` 基类** —— nxboot 的基类是 MyBatis 继承惯性的残留，在 jOOQ 世界里 VisitListener 已经是业界标准答案，基类的所有拦截能力都是 VisitListener 的子集，纯粹冗余（详见 ADR-0007）
+1. **没有 `DataScopedRepository` 基类** —— nxboot 的基类是 MyBatis 继承惯性的残留，在 jOOQ 世界里 ExecuteListener 已经是业界标准答案，基类的所有拦截能力都是 ExecuteListener 的子集，纯粹冗余（详见 ADR-0007）
 2. **没有 `DataScopeContext` ThreadLocal** —— DataScope 的数据真相已经在 `CurrentUser` 里（登录时写入 Sa-Token session），`CurrentUser` 就是单一数据源
 3. **受保护表显式注册** —— 使用者在 `DataScopeConfig` 里集中声明"哪些表要拦截 + 部门字段叫什么"，一眼就能看到 meta-build 项目的数据权限全景
 4. **`@BypassDataScope` 走窄范围 AOP 标记** —— 只持有一个 `boolean` 的 `ThreadLocal`，try-finally 保证清理，比原 `DataScopeContext` 的"全局业务态容器"简洁得多
@@ -1100,7 +1100,7 @@ import org.springframework.stereotype.Component;
  * @BypassDataScope 的 AOP 实现——窄范围 ThreadLocal 标记，try-finally 保证清理。
  *
  * 这是 meta-build 唯一为数据权限专用的 ThreadLocal，且只持有一个 boolean，
- * 不是"业务态容器"。VisitListener 在注入 SQL 前检查 {@link #isBypassed()}。
+ * 不是"业务态容器"。ExecuteListener 在注入 SQL 前检查 {@link #isBypassed()}。
  */
 @Aspect
 @Component
@@ -1108,7 +1108,7 @@ public class BypassDataScopeAspect {
 
     private static final ThreadLocal<Boolean> BYPASS = new ThreadLocal<>();
 
-    /** 供 VisitListener 检查 */
+    /** 供 ExecuteListener 检查 */
     public static boolean isBypassed() {
         return Boolean.TRUE.equals(BYPASS.get());
     }
@@ -1202,7 +1202,7 @@ public class UserRepository {
 
     public Optional<User> findById(Long id) {
         // 就是普通 jOOQ 查询。
-        // mb_iam_user 在 DataScopeRegistry 注册过，VisitListener 会自动在 SELECT 上注入 dept_id 过滤。
+        // mb_iam_user 在 DataScopeRegistry 注册过，ExecuteListener 会自动在 SELECT 上注入 dept_id 过滤。
         return dsl.selectFrom(MB_IAM_USER)
             .where(MB_IAM_USER.ID.eq(id))
             .fetchOptional(this::toDomain);
@@ -1218,7 +1218,7 @@ public class UserRepository {
     @BypassDataScope(reason = "登录流程需要跨部门按用户名查用户")
     public Optional<User> findByUsernameForLogin(String username) {
         // 这个方法调用期间整个 AOP 切面把 bypass 标记置 true，
-        // VisitListener 跳过注入，用于登录等系统级查询
+        // ExecuteListener 跳过注入，用于登录等系统级查询
         return dsl.selectFrom(MB_IAM_USER)
             .where(MB_IAM_USER.USERNAME.eq(username))
             .fetchOptional(this::toDomain);

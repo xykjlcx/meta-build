@@ -472,7 +472,7 @@ platform-<name>/  (或 business-<name>/)
 │   │       └── <Name>Qry.java
 │   ├── domain/                           # 业务逻辑（Service + Repository，不拆 infrastructure）
 │   │   ├── <Name>Service.java            # implements <Name>Api
-│   │   └── <Name>Repository.java         # 普通类（方案 E：数据权限在 jOOQ VisitListener 层拦截，Repository 零继承）
+│   │   └── <Name>Repository.java         # 普通类（方案 E：数据权限在 jOOQ ExecuteListener 层拦截，Repository 零继承）
 │   └── web/                              # Controller
 │       └── <Name>Controller.java         # @RequirePermission
 ├── src/main/resources/

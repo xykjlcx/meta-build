@@ -7,12 +7,14 @@
  */
 
 export interface DeptVo {
-  id?: number;
-  parentId?: number;
-  name?: string;
-  leaderUserId?: number;
-  status?: number;
-  sortOrder?: number;
-  createdAt?: string;
-  children?: DeptVo[];
+  id: number;
+  /** @nullable */
+  parentId: number | null;
+  name: string;
+  /** @nullable */
+  leaderUserId: number | null;
+  status: number;
+  sortOrder: number;
+  createdAt: string;
+  children: DeptVo[];
 }

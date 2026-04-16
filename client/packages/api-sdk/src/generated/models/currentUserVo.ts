@@ -7,10 +7,11 @@
  */
 
 export interface CurrentUserVo {
-  userId?: number;
-  username?: string;
-  deptId?: number;
-  permissions?: string[];
-  roles?: string[];
-  isAdmin?: boolean;
+  userId: number;
+  username: string;
+  /** @nullable */
+  deptId: number | null;
+  permissions: string[];
+  roles: string[];
+  isAdmin: boolean;
 }

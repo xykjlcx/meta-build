@@ -7,13 +7,18 @@
  */
 
 export interface MenuVo {
-  id?: number;
-  parentId?: number;
-  name?: string;
-  permissionCode?: string;
-  menuType?: string;
-  icon?: string;
-  sortOrder?: number;
-  visible?: boolean;
-  children?: MenuVo[];
+  id: number;
+  /** @nullable */
+  parentId: number | null;
+  name: string;
+  /** @nullable */
+  permissionCode: string | null;
+  menuType: string;
+  /** @nullable */
+  icon: string | null;
+  /** @nullable */
+  sortOrder: number | null;
+  /** @nullable */
+  visible: boolean | null;
+  children: MenuVo[];
 }

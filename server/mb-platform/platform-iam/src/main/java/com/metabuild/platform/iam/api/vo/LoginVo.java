@@ -1,5 +1,7 @@
 package com.metabuild.platform.iam.api.vo;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Set;
 
 /**
@@ -9,9 +11,13 @@ import java.util.Set;
  * 这些字段是服务端内部鉴权信息，不应暴露到 API 响应中。
  */
 public record LoginVo(
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     String accessToken,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     String refreshToken,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
     Long expiresInSeconds,
+    @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true)
     UserSummary user
 ) {
 
@@ -19,9 +25,13 @@ public record LoginVo(
      * 登录成功返回的用户摘要（不含数据权限细节）。
      */
     public record UserSummary(
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         Long userId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         String username,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED, nullable = true)
         Long deptId,
+        @Schema(requiredMode = Schema.RequiredMode.REQUIRED)
         Set<String> permissions
     ) {}
 }

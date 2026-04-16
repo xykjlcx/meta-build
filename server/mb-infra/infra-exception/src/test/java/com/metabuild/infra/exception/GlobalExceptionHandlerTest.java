@@ -82,6 +82,17 @@ class GlobalExceptionHandlerTest {
         assertThat(pd.getProperties()).containsEntry("code", "iam.auth.tooManyFailures");
     }
 
+    @Test
+    void handleIllegalArgument_should_return_400() {
+        LocaleContextHolder.setLocale(Locale.US);
+
+        ProblemDetail pd = handler.handleIllegalArgument(new IllegalArgumentException("invalid enum value"));
+
+        assertThat(pd.getStatus()).isEqualTo(400);
+        assertThat(pd.getDetail()).isEqualTo("invalid enum value");
+        assertThat(pd.getProperties()).containsEntry("code", CommonErrorCodes.VALIDATION);
+    }
+
     private static final class DummyController {
         void create(DummyBody body) {
         }

@@ -8,8 +8,9 @@
 import type { UserSummary } from './userSummary';
 
 export interface LoginVo {
-  accessToken?: string;
-  refreshToken?: string;
-  expiresInSeconds?: number;
-  user?: UserSummary;
+  accessToken: string;
+  refreshToken: string;
+  expiresInSeconds: number;
+  /** @nullable */
+  user: UserSummary;
 }
