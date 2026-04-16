@@ -185,13 +185,13 @@ docker compose up -d                                 # 启动 PG(15432) + Redis(
 
 ## Rules 索引
 
-M1 实施期间沉淀的经验规则（`~/.claude/rules/`）：
+M1 实施期间沉淀的经验规则：
 
-- `verify-all-modes.md` — dev/build/lint 三态都要验证
-- `toolchain-compat-check.md` — 工具链组合引入后立刻用真实代码验证
-- `maven-ci-friendly-versions.md` — ${revision} 必须配 flatten-maven-plugin
-- `jooq-codegen-testcontainers.md` — 三插件模式详解
-- `parallel-subagent.md` — 前后端隔离时可并行派 agent
-- `archunit-empty-rules.md` — M1 阶段 allowEmptyShould(true)
-- `testcontainers-version-compat.md` — Testcontainers 与 Docker Desktop 版本兼容
-- `local-pg-port-conflict.md` — 本机 PG 端口冲突处理
+- `verify-all-modes.md` — dev/build/lint 三态都要验证（全局规则）
+- `toolchain-compat-check.md` — 工具链组合引入后立刻用真实代码验证（全局规则）
+- `maven-ci-friendly-versions.md` — ${revision} 必须配 flatten-maven-plugin（全局规则）
+- `jooq-codegen-testcontainers.md` — 三插件模式详解（全局规则）
+- `parallel-subagent.md` — 前后端隔离时可并行派 agent（全局规则）
+- `archunit-empty-rules.md` — M1 阶段 allowEmptyShould(true)（全局规则）
+- `testcontainers-version-compat.md` — Testcontainers 与 Docker Desktop 版本兼容（全局规则）
+- `local-pg-port-conflict.md` — 本机 PG 端口冲突处理（全局规则）

@@ -52,6 +52,7 @@ scope: [后端/前端/全栈/构建/部署/流程]
 | [verify 块纪律](verify-block-discipline.md) | specs, verify, 新增约束 | 0413 verify-docs.sh 覆盖缺口 |
 | [交叉审查 + 残留扫描（文档即上游代码）](cross-review-residual-scan.md) | 批量替换, 重命名, 多 agent 并行 | 0411 命名重构 + 0412 并行修改残留 + 0414 文档残留扫描 + 元模式：文档=AI的prompt |
 | [AI 跨文件引用必须 grep 验证（置信度陷阱）](plan-code-snippets-must-verify.md) | 计划, plan, 方法签名, 实施, 跨文件调用 | 0414 M4 计划 3 处不匹配 → 扩展为 AI 置信度通用规则 |
+| [批量重命名脚本必须可回滚](batch-rename-script-must-be-reversible.md) | 批量重命名, rename script, 批处理脚本, 大规模改名 | 0416 DTO/API 包重命名时，首版脚本把工作树打进半迁移中间态 |
 
 ### 全栈
 | 规则 | triggers | 来源 |
@@ -60,7 +61,9 @@ scope: [后端/前端/全栈/构建/部署/流程]
 | [模板错误会被 AI 批量复制](template-propagation-risk.md) | DDL 模板, 代码骨架, 12 步清单, 代码生成 | 0413 DBA 走查发现 5 个 DDL 缺陷 |
 
 ### 后端
-（M1 编码阶段积累）
+| 规则 | triggers | 来源 |
+|------|----------|------|
+| [ArchUnit 新规则先扫误伤](archunit-rule-rollout-must-scan-false-positives.md) | ArchUnit, false positive, 误伤, 命名规则 | 0416 `ApiNamingRule` 首版误伤内嵌 record，导致 verify 失败 |
 
 ### 前端
 | 规则 | triggers | 来源 |
@@ -70,7 +73,10 @@ scope: [后端/前端/全栈/构建/部署/流程]
 | [Radix 组件禁止空字符串 value](radix-no-empty-value.md) | Select, SelectItem, RadioGroup, Radix, value | 0415 M5 列表页白屏 |
 
 ### 构建与部署
-（M1 CI 搭建后积累）
+| 规则 | triggers | 来源 |
+|------|----------|------|
+| [Maven reactor 命令不能靠猜](maven-reactor-run-pitfall.md) | mvn spring-boot:run, ./mvnw verify, -pl, -am, -rf, --resume-from, reactor, 启动, 验证 | 0416 `mb-admin` 启动验收时，`-pl` 依赖解析失败，`-am` 插件落到聚合根失败；同日修审查时 `verify -rf` 续跑失败 |
+| [正式启动脚本必须保留验证链](startup-script-must-preserve-verify-chain.md) | 启动脚本, run-admin, verify-and-run, skipTests, dev script | 0416 首版启动脚本默认 `package -DskipTests`，与项目“先验证再交付”原则冲突 |
 
 ---
 
@@ -81,6 +87,7 @@ scope: [后端/前端/全栈/构建/部署/流程]
 |------|----------|------|
 | [多视角审查](multi-perspective-review.md) | review, 审查, 定稿, milestone 交付 | 0412 四维审查 + 0413 七角色走查，含两套验证过的角色清单 |
 | [计划必须 Review 后才能实施](plan-review-before-execution.md) | 计划, plan, 实施, execute, writing-plans, 并行, 串行 | 0414 M2+M4 计划审查均发现大量问题 |
+| [契约变更按固定顺序收尾](contract-change-closeout-order.md) | OpenAPI, orval, DTO 重命名, 契约变更, api-sdk | 0416 大规模 DTO 重命名收尾时，靠固定顺序拆解后端 / OpenAPI / 前端 / docs 漂移 |
 
 ---
 

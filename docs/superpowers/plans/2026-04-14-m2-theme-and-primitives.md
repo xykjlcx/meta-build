@@ -1620,7 +1620,7 @@ git commit -m "feat(M2): 质量门禁升级 + CI 集成"
 
 | 规则 | 适用场景 |
 |------|---------|
-| `~/.claude/rules/toolchain-compat-check.md` | 安装 Storybook / Vitest / Radix 后立刻跑验证 |
-| `~/.claude/rules/verify-all-modes.md` | dev + build + lint 三态都要跑 |
-| `.claude/rules/template-propagation-risk.md` | 30 个组件都复制 Button 模式，模板 bug 会传播 |
-| `.claude/rules/cross-review-residual-scan.md` | 批量创建组件后做残留扫描 |
+| `toolchain-compat-check`（全局规则） | 安装 Storybook / Vitest / Radix 后立刻跑验证 |
+| `verify-all-modes`（全局规则） | dev + build + lint 三态都要跑 |
+| `docs/rules/template-propagation-risk.md` | 30 个组件都复制 Button 模式，模板 bug 会传播 |
+| `docs/rules/cross-review-residual-scan.md` | 批量创建组件后做残留扫描 |
