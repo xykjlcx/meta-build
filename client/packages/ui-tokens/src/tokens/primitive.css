@@ -28,11 +28,17 @@
   --color-gray-900: oklch(0.21 0.006 286);
   --color-gray-950: oklch(0.141 0.005 286);
 
-  /* Blue */
-  --color-blue-400: oklch(0.72 0.14 240);
-  --color-blue-500: oklch(0.65 0.15 240);
-  --color-blue-600: oklch(0.6 0.15 240);
-  --color-blue-700: oklch(0.52 0.14 240);
+  /* Blue（对齐 Tailwind v4 官方 blue，hue 259 ± chroma 0.214） */
+  --color-blue-50:  oklch(0.98 0.014 259);
+  --color-blue-100: oklch(0.93 0.04 259);
+  --color-blue-200: oklch(0.87 0.08 259);
+  --color-blue-300: oklch(0.80 0.13 259);
+  --color-blue-400: oklch(0.72 0.17 259);
+  --color-blue-500: oklch(0.62 0.214 259);    /* ≈ #3370ff */
+  --color-blue-600: oklch(0.55 0.21 259);
+  --color-blue-700: oklch(0.48 0.19 259);
+  --color-blue-800: oklch(0.42 0.16 259);
+  --color-blue-900: oklch(0.35 0.12 259);
 
   /* Green */
   --color-green-400: oklch(0.72 0.17 145);
@@ -88,7 +94,7 @@
   --size-content-max-width: 80rem;
 
   /* ========== 字体栈 ========== */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-sans: 'PingFang SC', 'Hiragino Sans GB', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
   --font-heading: var(--font-sans);
 
