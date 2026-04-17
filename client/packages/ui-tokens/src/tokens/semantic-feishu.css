@@ -11,7 +11,7 @@
  *   Dark:  [data-theme-style='feishu'][data-theme-color-mode='dark']
  */
 
-[data-theme-style='feishu'] {
+:root[data-theme-style='feishu'] {
   /* ===== Surface ===== */
   --color-background: var(--color-white);
   --color-foreground: var(--color-gray-800);
@@ -88,19 +88,23 @@
   --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
   --font-heading: var(--font-sans);
 
-  /* ===== W1 结构 token 覆写（扁平 + 浅蓝激活）===== */
-  --nav-tab-active-bg: color-mix(in oklch, var(--color-primary) 12%, transparent);
+  /* ===== W1 结构 token 覆写（扁平 + 浅蓝激活）=====
+   * 注意：此 block 内**故意不使用 color-mix()**。postcss fallback 会把
+   * color-mix 转写为 sRGB 版本 + @supports 的嵌套块，破坏 rule 结构并让后续
+   * declarations 逃逸到 block 外部。直接引 primitive 色板值。
+   */
+  --nav-tab-active-bg: var(--color-blue-100);
   --nav-tab-active-radius: var(--radius-md);
   --nav-tab-active-underline-width: 0;
   --sidebar-item-active-bg: var(--color-accent);
   --sidebar-item-active-fg: var(--color-accent-foreground);
   --sidebar-item-active-font-weight: 600;
-  --sidebar-item-hover-bg: color-mix(in oklch, var(--color-primary) 8%, transparent);
+  --sidebar-item-hover-bg: var(--color-blue-50);
   --card-shadow: none;
   --button-shadow: none;
 }
 
-[data-theme-style='feishu'][data-theme-color-mode='dark'] {
+:root[data-theme-style='feishu'][data-theme-color-mode='dark'] {
   /* Dark block：策略"能用不崩"，不追求 1:1 复刻（飞书本身没有深色主题） */
 
   /* ===== Surface（反转色阶）===== */
@@ -119,8 +123,8 @@
   --color-secondary: var(--color-gray-700);
   --color-secondary-foreground: var(--color-gray-200);
 
-  /* accent 用 color-mix 保留浅蓝底感 */
-  --color-accent: color-mix(in oklch, var(--color-blue-500) 20%, var(--color-gray-900));
+  /* dark accent：用 blue-900 近似 color-mix(blue-500 20%, gray-900)，避免 postcss 对 color-mix 的 @supports fallback 污染 rule 结构 */
+  --color-accent: var(--color-blue-900);
   --color-accent-foreground: var(--color-blue-300);
 
   /* ===== Muted ===== */
@@ -147,7 +151,7 @@
   --color-sidebar-foreground: var(--color-gray-300);
   --color-sidebar-primary: var(--color-blue-400);
   --color-sidebar-primary-foreground: var(--color-white);
-  --color-sidebar-accent: color-mix(in oklch, var(--color-blue-500) 20%, var(--color-gray-900));
+  --color-sidebar-accent: var(--color-blue-900);
   --color-sidebar-accent-foreground: var(--color-blue-300);
   --color-sidebar-border: var(--color-gray-800);
   --color-sidebar-ring: var(--color-blue-400);
@@ -184,13 +188,14 @@
   --font-heading: var(--font-sans);
 
   /* ===== W1 结构 token 覆写（扁平 + 浅蓝激活，dark opacity 稍调）===== */
-  --nav-tab-active-bg: color-mix(in oklch, var(--color-primary) 20%, transparent);
+  /* Dark 同样避免 color-mix 污染 rule 结构；用 primitive 色板 */
+  --nav-tab-active-bg: var(--color-blue-900);
   --nav-tab-active-radius: var(--radius-md);
   --nav-tab-active-underline-width: 0;
   --sidebar-item-active-bg: var(--color-accent);
   --sidebar-item-active-fg: var(--color-accent-foreground);
   --sidebar-item-active-font-weight: 600;
-  --sidebar-item-hover-bg: color-mix(in oklch, var(--color-primary) 15%, transparent);
+  --sidebar-item-hover-bg: var(--color-blue-800);
   --card-shadow: none;
   --button-shadow: none;
 }
