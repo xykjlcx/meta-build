@@ -44,7 +44,7 @@
    ├ inset           │
    │  侧边栏 + 卡片式内容 │
    │                    │
-   ├ mix ├──── routes/orders/index.tsx 不变
+   ├ mix              ├──── routes/orders/index.tsx 不变
    │  模块 Tab + 子侧栏   │
    │                    │
    └ 自定义 preset      │

@@ -188,7 +188,7 @@ client/packages/app-shell/src/
 │   └── basic-layout.tsx       # 无菜单布局
 ├── presets/
 │   ├── inset/                 # 默认后台布局
-│   └── mix/       # 模块切换布局
+│   └── mix/                   # 模块切换布局
 ├── customizer/
 │   └── theme-customizer.tsx   # 运行时定制面板
 └── i18n/
