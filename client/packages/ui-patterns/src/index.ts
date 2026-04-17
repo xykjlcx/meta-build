@@ -6,6 +6,9 @@ export { NxLoading, type NxLoadingProps } from './nx-loading';
 // 批量操作栏
 export { NxBar, type NxBarProps } from './nx-bar';
 
+// 页面标题栏
+export { PageHeader, type PageHeaderProps } from './page-header';
+
 // 数据表格（TanStack Table 封装）
 export { NxTable, type NxTableProps, type NxTablePagination } from './nx-table';
 
@@ -35,3 +38,9 @@ export {
 
 // 树组件
 export { NxTree, type NxTreeProps, type NxTreeNode } from './nx-tree';
+
+// 状态徽章
+export { StatusBadge, type StatusBadgeProps, type StatusTone } from './status-badge';
+
+// 搜索输入框
+export { SearchInput, type SearchInputProps } from './search-input';

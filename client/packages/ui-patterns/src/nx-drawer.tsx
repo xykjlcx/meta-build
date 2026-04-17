@@ -85,12 +85,14 @@ export function NxDrawer<TFormValues extends FieldValues = FieldValues>({
   // 纯展示模式
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent side={side} closeLabel={closeLabel}>
-        <DrawerHeader>
+      <DrawerContent side={side} closeLabel={closeLabel} className="flex flex-col">
+        {/* Header — border-b 分隔，pb-4 覆盖容器 p-6 的底部，横向由容器 p-6 提供 */}
+        <DrawerHeader className="border-b border-border pb-4 pt-0">
           <DrawerTitle>{title}</DrawerTitle>
           {description && <DrawerDescription>{description}</DrawerDescription>}
         </DrawerHeader>
-        <div className="flex-1 overflow-auto px-6">{children}</div>
+        {/* 内容区 — 独立滚动，纵向 padding，横向由容器 p-6 提供 */}
+        <div className="flex-1 overflow-y-auto py-5">{children}</div>
       </DrawerContent>
     </Drawer>
   );
@@ -151,8 +153,9 @@ function NxDrawerForm<TFormValues extends FieldValues>({
   return (
     <>
       <Drawer open={open} onOpenChange={handleOpenChange}>
-        <DrawerContent side={side} closeLabel={closeLabel}>
-          <DrawerHeader>
+        <DrawerContent side={side} closeLabel={closeLabel} className="flex flex-col">
+          {/* Header — border-b 分隔，pb-4 覆盖容器 p-6 的底部，横向由容器 p-6 提供 */}
+          <DrawerHeader className="border-b border-border pb-4 pt-0">
             <DrawerTitle>{title}</DrawerTitle>
             {description && <DrawerDescription>{description}</DrawerDescription>}
           </DrawerHeader>
@@ -163,11 +166,11 @@ function NxDrawerForm<TFormValues extends FieldValues>({
               className="flex flex-1 flex-col overflow-hidden"
               noValidate
             >
-              {/* 内容区域（可滚动） */}
-              <div className="flex-1 space-y-4 overflow-auto px-6">{children}</div>
+              {/* 内容区域（可滚动），纵向独立 padding，横向由容器 p-6 提供 */}
+              <div className="flex-1 space-y-4 overflow-y-auto py-5">{children}</div>
 
-              {/* 底部按钮区域 */}
-              <DrawerFooter>
+              {/* 底部按钮区域 — mt-auto 粘底 + 上边框分隔 */}
+              <DrawerFooter className="mt-auto border-t border-border pt-4 pb-0">
                 {cancelLabel && (
                   <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                     {cancelLabel}

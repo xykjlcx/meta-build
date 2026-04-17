@@ -151,157 +151,169 @@ function NxTable<TData>({
         <div className="flex items-center gap-2">{batchActions}</div>
       )}
 
-      <Table>
-        <TableHeader>
-          {headerGroups.map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header) => {
-                const canSort = header.column.getCanSort();
-                const sorted = header.column.getIsSorted();
+      {/* 飞书感外层容器：rounded border，统一包裹表格 + 分页底栏 */}
+      <div className="overflow-hidden rounded-lg border border-border">
+        <Table>
+          <TableHeader>
+            {headerGroups.map((headerGroup) => (
+              <TableRow key={headerGroup.id} className="h-[2.875rem] hover:bg-transparent">
+                {headerGroup.headers.map((header) => {
+                  const canSort = header.column.getCanSort();
+                  const sorted = header.column.getIsSorted();
 
-                return (
-                  <TableHead
-                    key={header.id}
-                    className={cn(canSort && 'cursor-pointer select-none')}
-                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                    {/* 排序指示符 */}
-                    {sorted === 'asc' && ' ↑'}
-                    {sorted === 'desc' && ' ↓'}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
-        </TableHeader>
-
-        <TableBody>
-          {/* loading 状态：skeleton 行 */}
-          {loading &&
-            Array.from({ length: SKELETON_ROWS }).map((_, rowIdx) => (
-              // biome-ignore lint: 静态 skeleton 行用 index 做 key 是安全的
-              <TableRow key={`skeleton-${rowIdx}`}>
-                {Array.from({ length: colCount }).map((_, colIdx) => (
-                  // biome-ignore lint: 同上
-                  <TableCell key={`skeleton-${rowIdx}-${colIdx}`}>
-                    <Skeleton className="h-4 w-full" />
-                  </TableCell>
-                ))}
+                  return (
+                    <TableHead
+                      key={header.id}
+                      className={cn(
+                        'text-[14px] font-medium text-muted-foreground',
+                        canSort &&
+                          'cursor-pointer select-none transition-colors hover:text-foreground',
+                      )}
+                      onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                      {/* 排序指示符 */}
+                      {sorted === 'asc' && ' ↑'}
+                      {sorted === 'desc' && ' ↓'}
+                    </TableHead>
+                  );
+                })}
               </TableRow>
             ))}
+          </TableHeader>
 
-          {/* 空状态 */}
-          {!loading && rows.length === 0 && (
-            <TableRow>
-              <TableCell colSpan={colCount} className="h-24 text-center text-muted-foreground">
-                {emptyText}
-              </TableCell>
-            </TableRow>
-          )}
+          <TableBody>
+            {/* loading 状态：skeleton 行 */}
+            {loading &&
+              Array.from({ length: SKELETON_ROWS }).map((_, rowIdx) => (
+                // biome-ignore lint: 静态 skeleton 行用 index 做 key 是安全的
+                <TableRow key={`skeleton-${rowIdx}`} className="hover:bg-transparent">
+                  {Array.from({ length: colCount }).map((_, colIdx) => (
+                    // biome-ignore lint: 同上
+                    <TableCell key={`skeleton-${rowIdx}-${colIdx}`}>
+                      <Skeleton className="h-4 w-full" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
 
-          {/* 数据行 */}
-          {!loading &&
-            rows.map((row) => (
-              <TableRow
-                key={row.id}
-                data-state={row.getIsSelected() ? 'selected' : undefined}
-                className={cn(onRowClick && 'cursor-pointer')}
-                onClick={(e) => {
-                  if (!onRowClick) return;
-                  // 排除 checkbox 列的点击
-                  const target = e.target as HTMLElement;
-                  if (target.closest('[data-slot="checkbox"]')) return;
-                  onRowClick(row.original);
-                }}
+            {/* 空状态 */}
+            {!loading && rows.length === 0 && (
+              <TableRow className="hover:bg-transparent">
+                <TableCell colSpan={colCount} className="py-12 text-center">
+                  <div className="space-y-1">
+                    <div className="text-[14px] font-medium text-foreground">{emptyText}</div>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+
+            {/* 数据行 */}
+            {!loading &&
+              rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() ? 'selected' : undefined}
+                  className={cn(
+                    'transition-colors duration-150 hover:bg-secondary',
+                    onRowClick && 'cursor-pointer',
+                  )}
+                  onClick={(e) => {
+                    if (!onRowClick) return;
+                    // 排除 checkbox 列的点击
+                    const target = e.target as HTMLElement;
+                    if (target.closest('[data-slot="checkbox"]')) return;
+                    onRowClick(row.original);
+                  }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+
+        {/* 分页栏 — 紧贴表格底部，与 border 容器一起 */}
+        {pagination && (
+          <div className="flex items-center justify-between border-t border-border px-4 py-3">
+            {paginationInfoTemplate ? (
+              <span className="text-[14px] text-muted-foreground">
+                {paginationInfoTemplate
+                  .replace('{total}', String(pagination.totalElements))
+                  .replace('{page}', String(pagination.page))
+                  .replace('{pages}', String(pagination.totalPages))}
+              </span>
+            ) : (
+              <span />
+            )}
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="sm"
+                {...(!previousLabel && { 'aria-label': 'previous page' })}
+                disabled={pagination.page <= 1}
+                onClick={() =>
+                  onPaginationChange?.({
+                    ...pagination,
+                    page: pagination.page - 1,
+                  })
+                }
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
-
-      {/* 分页栏 */}
-      {pagination && (
-        <div className="flex items-center justify-between px-2">
-          {paginationInfoTemplate ? (
-            <span className="text-sm text-muted-foreground">
-              {paginationInfoTemplate
-                .replace('{total}', String(pagination.totalElements))
-                .replace('{page}', String(pagination.page))
-                .replace('{pages}', String(pagination.totalPages))}
-            </span>
-          ) : (
-            <span />
-          )}
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              {...(!previousLabel && { 'aria-label': 'previous page' })}
-              disabled={pagination.page <= 1}
-              onClick={() =>
-                onPaginationChange?.({
-                  ...pagination,
-                  page: pagination.page - 1,
-                })
-              }
-            >
-              {previousLabel ?? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-              )}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              {...(!nextLabel && { 'aria-label': 'next page' })}
-              disabled={pagination.page >= pagination.totalPages}
-              onClick={() =>
-                onPaginationChange?.({
-                  ...pagination,
-                  page: pagination.page + 1,
-                })
-              }
-            >
-              {nextLabel ?? (
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  aria-hidden="true"
-                >
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              )}
-            </Button>
+                {previousLabel ?? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <polyline points="15 18 9 12 15 6" />
+                  </svg>
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                {...(!nextLabel && { 'aria-label': 'next page' })}
+                disabled={pagination.page >= pagination.totalPages}
+                onClick={() =>
+                  onPaginationChange?.({
+                    ...pagination,
+                    page: pagination.page + 1,
+                  })
+                }
+              >
+                {nextLabel ?? (
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg>
+                )}
+              </Button>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -102,14 +102,17 @@ export function NxFilter<TFilter extends NxFilterValue>({
     <FilterContext.Provider value={{ draft, setField }}>
       <form
         onSubmit={handleApply}
-        className={cn('flex flex-wrap items-end gap-4', className)}
+        className={cn(
+          'flex flex-col gap-3 border-b border-border px-6 py-3.5 md:flex-row md:flex-wrap md:items-end',
+          className,
+        )}
         data-slot="nx-filter"
       >
         {/* 字段区域 */}
         {children}
 
-        {/* 按钮区域 */}
-        <div className="flex items-end gap-2">
+        {/* 按钮区域 — ml-auto 靠右对齐 */}
+        <div className="ml-auto flex items-end gap-2">
           <Button type="button" variant="outline" onClick={handleReset}>
             {resetLabel}
           </Button>
