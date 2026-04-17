@@ -80,7 +80,7 @@ Expected: 看到 `const componentRequired = [ '--button-bg', ..., '--chart-5' ];
 ```ts
     // W1 新增 Sidebar 激活态
     '--sidebar-item-active-fg',
-    '--sidebar-item-active-weight',
+    '--sidebar-item-active-font-weight',
     '--sidebar-item-active-indicator-width',
     '--sidebar-item-active-indicator-color',
     // W1 新增 Nav Tab
@@ -124,7 +124,7 @@ Expected: 退出码非 0，输出列出 15 个 `[FAIL] component 层缺少 N 个
 ```css
   /* W1 新增：Sidebar 激活态（Inset/Mix 共用） */
   --sidebar-item-active-fg: var(--color-primary);
-  --sidebar-item-active-weight: 500;
+  --sidebar-item-active-font-weight: 500;
   --sidebar-item-active-indicator-width: 0;
   --sidebar-item-active-indicator-color: var(--color-primary);
 
@@ -345,7 +345,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 .sidebar-item[data-active='true'] {
   color: var(--sidebar-item-active-fg);
   background: var(--sidebar-item-active-bg);
-  font-weight: var(--sidebar-item-active-weight);
+  font-weight: var(--sidebar-item-active-font-weight);
   box-shadow: inset var(--sidebar-item-active-indicator-width) 0 0 0 var(--sidebar-item-active-indicator-color);
 }
 ```
@@ -763,7 +763,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
   --nav-tab-active-underline-width: 0;
   --sidebar-item-active-bg: var(--color-accent);
   --sidebar-item-active-fg: var(--color-accent-foreground);
-  --sidebar-item-active-weight: 600;
+  --sidebar-item-active-font-weight: 600;
   --card-shadow: none;
   --button-shadow: none;
 }
@@ -822,7 +822,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
   --nav-tab-active-underline-width: 0;
   --sidebar-item-active-bg: var(--color-accent);
   --sidebar-item-active-fg: var(--color-accent-foreground);
-  --sidebar-item-active-weight: 600;
+  --sidebar-item-active-font-weight: 600;
   --card-shadow: none;
   --button-shadow: none;
 }

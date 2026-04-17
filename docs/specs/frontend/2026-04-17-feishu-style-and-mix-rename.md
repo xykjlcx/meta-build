@@ -127,7 +127,7 @@ client/
 
 /* 新增：让激活态的视觉差异全部参数化 */
 --sidebar-item-active-fg: var(--color-primary);
---sidebar-item-active-weight: 500;               /* feishu 覆写为 600 */
+--sidebar-item-active-font-weight: 500;               /* feishu 覆写为 600 */
 --sidebar-item-active-indicator-width: 0;        /* feishu 可覆写为 2px（左侧竖线） */
 --sidebar-item-active-indicator-color: var(--color-primary);
 ```
@@ -252,7 +252,7 @@ const componentRequired = [
   // ... 现有列表
   // W1 新增 Sidebar 激活态
   '--sidebar-item-active-fg',
-  '--sidebar-item-active-weight',
+  '--sidebar-item-active-font-weight',
   '--sidebar-item-active-indicator-width',
   '--sidebar-item-active-indicator-color',
   // W1 新增 Nav Tab
@@ -372,7 +372,7 @@ const componentRequired = [
   --nav-tab-active-underline-width: 0;
   --sidebar-item-active-bg: var(--color-accent);
   --sidebar-item-active-fg: var(--color-accent-foreground);
-  --sidebar-item-active-weight: 600;
+  --sidebar-item-active-font-weight: 600;
   --card-shadow: none;                             /* 飞书整体扁平 */
   --button-shadow: none;
 }
