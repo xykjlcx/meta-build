@@ -62,3 +62,8 @@
   max-width: var(--size-content-max-width);
   margin-inline: auto;
 }
+
+/* Sidebar mode: icon — 让 Inset 布局的 Sidebar 默认进入图标折叠态 */
+[data-theme-sidebar-mode='icon'] {
+  --sidebar-width: var(--sidebar-width-icon, 3rem);
+}

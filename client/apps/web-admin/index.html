@@ -31,6 +31,8 @@
               : null
           const contentLayout = localStorage.getItem('mb_content_layout')
           const validContentLayout = contentLayout === 'centered' ? contentLayout : null
+          const sidebarMode = localStorage.getItem('mb_sidebar_mode')
+          const validSidebarMode = sidebarMode === 'icon' ? sidebarMode : null
 
           if (validStyle) {
             root.dataset.themeStyle = validStyle
@@ -60,6 +62,12 @@
             body.dataset.themeContentLayout = validContentLayout
           } else {
             delete body.dataset.themeContentLayout
+          }
+
+          if (validSidebarMode) {
+            body.dataset.themeSidebarMode = validSidebarMode
+          } else {
+            delete body.dataset.themeSidebarMode
           }
 
           if (!validStyle && legacyTheme) {

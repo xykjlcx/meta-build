@@ -54,6 +54,8 @@
     "radiusLabel": "Radius",
     "contentLayoutLabel": "Content Width",
     "contentLayoutHint": "This setting currently applies only to the Inset layout. Module switcher does not use it yet.",
+    "sidebarModeLabel": "Sidebar Mode",
+    "sidebarModeHint": "Only the Inset layout supports this setting. Module switcher uses its own collapse logic.",
     "summary": "Current Mix",
     "scale": { "default": "Standard", "xs": "Compact", "lg": "Relaxed" },
     "radius": {
@@ -64,7 +66,8 @@
       "lg": "Soft",
       "xl": "Rounded"
     },
-    "contentLayout": { "default": "Fill Container", "centered": "Centered Focus" }
+    "contentLayout": { "default": "Fill Container", "centered": "Centered Focus" },
+    "sidebarMode": { "default": "Expanded", "icon": "Icon" }
   },
   "language": { "switch": "Switch Language" },
   "auth": {

@@ -5,6 +5,7 @@ export type ColorMode = 'light' | 'dark';
 export type ThemeScale = 'default' | 'xs' | 'lg';
 export type ThemeRadius = 'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl';
 export type ContentLayout = 'default' | 'centered';
+export type SidebarMode = 'default' | 'icon';
 type LegacyThemeId = 'default' | 'dark' | 'compact';
 
 const LEGACY_THEME_KEY = 'mb-theme';
@@ -13,6 +14,7 @@ const COLOR_MODE_KEY = 'mb_color_mode';
 const SCALE_KEY = 'mb_scale';
 const RADIUS_KEY = 'mb_radius';
 const CONTENT_LAYOUT_KEY = 'mb_content_layout';
+const SIDEBAR_MODE_KEY = 'mb_sidebar_mode';
 
 function getValidStyleIds(): Set<string> {
   return new Set(styleRegistry.getAllIds());
@@ -20,6 +22,7 @@ function getValidStyleIds(): Set<string> {
 const SCALE_IDS = new Set<ThemeScale>(['default', 'xs', 'lg']);
 const RADIUS_IDS = new Set<ThemeRadius>(['default', 'none', 'sm', 'md', 'lg', 'xl']);
 const CONTENT_LAYOUT_IDS = new Set<ContentLayout>(['default', 'centered']);
+const SIDEBAR_MODE_IDS = new Set<SidebarMode>(['default', 'icon']);
 
 interface StyleContextValue {
   styleId: StyleId;
@@ -32,6 +35,8 @@ interface StyleContextValue {
   setRadius: (radius: ThemeRadius) => void;
   contentLayout: ContentLayout;
   setContentLayout: (contentLayout: ContentLayout) => void;
+  sidebarMode: SidebarMode;
+  setSidebarMode: (sidebarMode: SidebarMode) => void;
   resetCustomizer: () => void;
 }
 
@@ -41,6 +46,7 @@ interface ThemeState {
   scale: ThemeScale;
   radius: ThemeRadius;
   contentLayout: ContentLayout;
+  sidebarMode: SidebarMode;
 }
 
 export const StyleContext = createContext<StyleContextValue | null>(null);
@@ -61,6 +67,10 @@ function isContentLayout(value: string | null | undefined): value is ContentLayo
   return value != null && CONTENT_LAYOUT_IDS.has(value as ContentLayout);
 }
 
+function isSidebarMode(value: string | null | undefined): value is SidebarMode {
+  return value != null && SIDEBAR_MODE_IDS.has(value as SidebarMode);
+}
+
 function mapLegacyThemeToState(theme: LegacyThemeId): ThemeState {
   if (theme === 'dark') {
     return {
@@ -69,6 +79,7 @@ function mapLegacyThemeToState(theme: LegacyThemeId): ThemeState {
       scale: 'default',
       radius: 'default',
       contentLayout: 'default',
+      sidebarMode: 'default',
     };
   }
   if (theme === 'compact') {
@@ -78,6 +89,7 @@ function mapLegacyThemeToState(theme: LegacyThemeId): ThemeState {
       scale: 'xs',
       radius: 'sm',
       contentLayout: 'default',
+      sidebarMode: 'default',
     };
   }
   return {
@@ -86,6 +98,7 @@ function mapLegacyThemeToState(theme: LegacyThemeId): ThemeState {
     scale: 'default',
     radius: 'default',
     contentLayout: 'default',
+    sidebarMode: 'default',
   };
 }
 
@@ -96,6 +109,7 @@ function createDefaultState(defaultStyle: StyleId, defaultColorMode: ColorMode):
     scale: 'default',
     radius: 'default',
     contentLayout: 'default',
+    sidebarMode: 'default',
   } satisfies ThemeState;
 }
 
@@ -106,6 +120,7 @@ function readStateFromStorage(): ThemeState | null {
     const storedScale = window.localStorage.getItem(SCALE_KEY);
     const storedRadius = window.localStorage.getItem(RADIUS_KEY);
     const storedContentLayout = window.localStorage.getItem(CONTENT_LAYOUT_KEY);
+    const storedSidebarMode = window.localStorage.getItem(SIDEBAR_MODE_KEY);
 
     return {
       styleId: storedStyle,
@@ -113,6 +128,7 @@ function readStateFromStorage(): ThemeState | null {
       scale: isThemeScale(storedScale) ? storedScale : 'default',
       radius: isThemeRadius(storedRadius) ? storedRadius : 'default',
       contentLayout: isContentLayout(storedContentLayout) ? storedContentLayout : 'default',
+      sidebarMode: isSidebarMode(storedSidebarMode) ? storedSidebarMode : 'default',
     };
   }
 
@@ -134,6 +150,7 @@ function readStateFromDom(): ThemeState | null {
   const attrScale = document.body.dataset.themeScale;
   const attrRadius = document.body.dataset.themeRadius;
   const attrContentLayout = document.body.dataset.themeContentLayout;
+  const attrSidebarMode = document.body.dataset.themeSidebarMode;
 
   return {
     styleId: attrStyle,
@@ -141,6 +158,7 @@ function readStateFromDom(): ThemeState | null {
     scale: isThemeScale(attrScale) ? attrScale : 'default',
     radius: isThemeRadius(attrRadius) ? attrRadius : 'default',
     contentLayout: isContentLayout(attrContentLayout) ? attrContentLayout : 'default',
+    sidebarMode: isSidebarMode(attrSidebarMode) ? attrSidebarMode : 'default',
   };
 }
 
@@ -181,6 +199,12 @@ function applyBodyAttrs(body: HTMLElement, state: ThemeState): void {
   } else {
     delete body.dataset.themeContentLayout;
   }
+
+  if (state.sidebarMode !== 'default') {
+    body.dataset.themeSidebarMode = state.sidebarMode;
+  } else {
+    delete body.dataset.themeSidebarMode;
+  }
 }
 
 function persistState(state: ThemeState): void {
@@ -207,6 +231,12 @@ function persistState(state: ThemeState): void {
     window.localStorage.setItem(CONTENT_LAYOUT_KEY, state.contentLayout);
   } else {
     window.localStorage.removeItem(CONTENT_LAYOUT_KEY);
+  }
+
+  if (state.sidebarMode !== 'default') {
+    window.localStorage.setItem(SIDEBAR_MODE_KEY, state.sidebarMode);
+  } else {
+    window.localStorage.removeItem(SIDEBAR_MODE_KEY);
   }
 
   // Phase B 起停止写入旧 mb-theme key，只做一次性迁移清理。
@@ -257,59 +287,41 @@ export function StyleProvider({
     () => ({
       styleId: state.styleId,
       setStyle: (styleId) => {
-        setState((prev) => ({
-          styleId,
-          colorMode: prev.colorMode,
-          scale: prev.scale,
-          radius: prev.radius,
-          contentLayout: prev.contentLayout,
-        }));
+        setState((prev) => ({ ...prev, styleId }));
       },
       colorMode: state.colorMode,
       setColorMode: (colorMode) => {
-        setState((prev) => ({
-          styleId: prev.styleId,
-          colorMode,
-          scale: prev.scale,
-          radius: prev.radius,
-          contentLayout: prev.contentLayout,
-        }));
+        setState((prev) => ({ ...prev, colorMode }));
       },
       scale: state.scale,
       setScale: (scale) => {
-        setState((prev) => ({
-          styleId: prev.styleId,
-          colorMode: prev.colorMode,
-          scale,
-          radius: prev.radius,
-          contentLayout: prev.contentLayout,
-        }));
+        setState((prev) => ({ ...prev, scale }));
       },
       radius: state.radius,
       setRadius: (radius) => {
-        setState((prev) => ({
-          styleId: prev.styleId,
-          colorMode: prev.colorMode,
-          scale: prev.scale,
-          radius,
-          contentLayout: prev.contentLayout,
-        }));
+        setState((prev) => ({ ...prev, radius }));
       },
       contentLayout: state.contentLayout,
       setContentLayout: (contentLayout) => {
-        setState((prev) => ({
-          styleId: prev.styleId,
-          colorMode: prev.colorMode,
-          scale: prev.scale,
-          radius: prev.radius,
-          contentLayout,
-        }));
+        setState((prev) => ({ ...prev, contentLayout }));
+      },
+      sidebarMode: state.sidebarMode,
+      setSidebarMode: (sidebarMode) => {
+        setState((prev) => ({ ...prev, sidebarMode }));
       },
       resetCustomizer: () => {
         setState(defaultState);
       },
     }),
-    [defaultState, state.colorMode, state.contentLayout, state.radius, state.scale, state.styleId],
+    [
+      defaultState,
+      state.colorMode,
+      state.contentLayout,
+      state.radius,
+      state.scale,
+      state.sidebarMode,
+      state.styleId,
+    ],
   );
 
   return <StyleContext.Provider value={styleValue}>{children}</StyleContext.Provider>;

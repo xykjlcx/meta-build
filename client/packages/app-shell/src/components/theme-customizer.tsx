@@ -17,7 +17,7 @@ import {
   cn,
 } from '@mb/ui-primitives';
 import { styleRegistry } from '@mb/ui-tokens';
-import { Check, LayoutTemplate, Palette, Settings2, SunMoon } from 'lucide-react';
+import { Check, LayoutTemplate, Palette, PanelLeft, Settings2, SunMoon } from 'lucide-react';
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useLayoutPreset } from '../layouts/use-layout-preset';
@@ -47,6 +47,11 @@ const colorModeOptions = [
   { value: 'dark', labelKey: 'theme.dark' },
 ] as const;
 
+const sidebarModeOptions = [
+  { value: 'default', labelKey: 'theme.sidebarMode.default' },
+  { value: 'icon', labelKey: 'theme.sidebarMode.icon' },
+] as const;
+
 // 布局预设元数据 — 独立于 registry 避免循环依赖
 const layoutPresets = [
   { id: 'inset', nameKey: 'layout.inset', descKey: 'layout.insetDesc' },
@@ -71,10 +76,13 @@ export function ThemeCustomizer() {
     setRadius,
     contentLayout,
     setContentLayout,
+    sidebarMode,
+    setSidebarMode,
     resetCustomizer,
   } = useStyle();
   const selectedStyle = styleRegistry.get(styleId);
   const contentLayoutSupported = presetId === 'inset';
+  const sidebarModeSupported = presetId === 'inset';
 
   return (
     <Popover>
@@ -194,6 +202,23 @@ export function ThemeCustomizer() {
             <p className="text-xs text-muted-foreground">{t('theme.contentLayoutHint')}</p>
           )}
 
+          <ToggleField
+            label={t('theme.sidebarModeLabel')}
+            value={sidebarMode}
+            onValueChange={(value) => setSidebarMode(value as 'default' | 'icon')}
+            options={sidebarModeOptions.map((option) => ({
+              value: option.value,
+              label: t(option.labelKey),
+              className: 'flex-1',
+              disabled: !sidebarModeSupported,
+            }))}
+            icon={PanelLeft}
+          />
+
+          {!sidebarModeSupported && (
+            <p className="text-xs text-muted-foreground">{t('theme.sidebarModeHint')}</p>
+          )}
+
           <div className="rounded-lg border border-border/70 bg-muted/30 px-3 py-2">
             <div className="mb-1 flex items-center gap-2 text-xs font-medium text-foreground/90">
               <Palette className="size-3.5" />
@@ -210,6 +235,7 @@ export function ThemeCustomizer() {
               <SummaryPill>{t(`theme.scale.${scale}`)}</SummaryPill>
               <SummaryPill>{radius === 'none' ? '0' : t(`theme.radius.${radius}`)}</SummaryPill>
               <SummaryPill>{t(`theme.contentLayout.${contentLayout}`)}</SummaryPill>
+              <SummaryPill>{t(`theme.sidebarMode.${sidebarMode}`)}</SummaryPill>
             </div>
           </div>
         </div>
