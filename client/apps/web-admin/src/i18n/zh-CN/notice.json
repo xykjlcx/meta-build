@@ -145,6 +145,7 @@
     "selected": "已选 {{selected}} 条，共 {{total}} 条",
     "total": "共 {{total}} 条",
     "perPage": "每页",
+    "perPageOption": "{{size}} 条 / 页",
     "pageInfo": "第 {{page}} 页，共 {{pages}} 页"
   },
   "upload": {

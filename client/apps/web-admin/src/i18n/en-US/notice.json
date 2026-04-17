@@ -145,6 +145,7 @@
     "selected": "{{selected}} of {{total}} selected",
     "total": "{{total}} total",
     "perPage": "Per page",
+    "perPageOption": "{{size}} / page",
     "pageInfo": "Page {{page}} of {{pages}}"
   },
   "upload": {

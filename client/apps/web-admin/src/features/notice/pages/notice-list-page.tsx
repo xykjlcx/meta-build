@@ -21,15 +21,7 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  Breadcrumb,
-  BreadcrumbItem,
-  BreadcrumbLink,
-  BreadcrumbList,
-  BreadcrumbPage,
-  BreadcrumbSeparator,
   Button,
-  Card,
-  CardContent,
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -366,26 +358,55 @@ export function NoticeListPage() {
 
   // ─── 渲染 ──────────────────────────────────────────
   return (
-    <div className="space-y-4">
-      {/* 面包屑 */}
-      <Breadcrumb>
-        <BreadcrumbList>
-          <BreadcrumbItem>
-            <BreadcrumbLink href="#">{t('breadcrumb.system')}</BreadcrumbLink>
-          </BreadcrumbItem>
-          <BreadcrumbSeparator />
-          <BreadcrumbItem>
-            <BreadcrumbPage>{t('breadcrumb.notice')}</BreadcrumbPage>
-          </BreadcrumbItem>
-        </BreadcrumbList>
-      </Breadcrumb>
+    <div className="space-y-3">
+      {/* 页面标题（对齐飞书列表页：单行标题，无副标题）*/}
+      <h1 className="text-xl font-semibold tracking-tight">{t('title')}</h1>
 
-      {/* 页面 Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
-          <p className="text-sm text-muted-foreground">{t('list.subtitle')}</p>
+      {/* 工具栏：筛选 + 操作按钮同一行（飞书列表页风格，减少垂直空间占用）*/}
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        {/* 左侧筛选区 */}
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* 搜索框 */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              data-testid="notice-search-input"
+              placeholder={t('filter.searchPlaceholder')}
+              className="w-64 pl-9"
+              value={keyword}
+              onChange={(e) => {
+                setKeyword(e.target.value);
+                setPagination((prev) => ({ ...prev, page: 1 }));
+              }}
+            />
+          </div>
+
+          {/* 状态下拉 */}
+          <Select
+            value={statusFilter}
+            onValueChange={(v) => {
+              setStatusFilter(v);
+              setPagination((prev) => ({ ...prev, page: 1 }));
+            }}
+          >
+            <SelectTrigger className="w-36" data-testid="notice-status-filter">
+              <SelectValue placeholder={t('filter.allStatus')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">{t('filter.allStatus')}</SelectItem>
+              <SelectItem value="0">{t('status.draft')}</SelectItem>
+              <SelectItem value="1">{t('status.published')}</SelectItem>
+              <SelectItem value="2">{t('status.revoked')}</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* 重置按钮 */}
+          <Button variant="link" size="sm" onClick={handleReset}>
+            {t('filter.reset')}
+          </Button>
         </div>
+
+        {/* 右侧操作按钮区 */}
         <div className="flex items-center gap-2">
           {user.hasPermission('notice:notice:export') && (
             <Button variant="outline" size="sm" onClick={handleExport}>
@@ -402,113 +423,66 @@ export function NoticeListPage() {
         </div>
       </div>
 
-      {/* 即时筛选栏 */}
-      <div className="flex items-center gap-2 flex-wrap">
-        {/* 搜索框 */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            data-testid="notice-search-input"
-            placeholder={t('filter.searchPlaceholder')}
-            className="w-64 pl-9"
-            value={keyword}
-            onChange={(e) => {
-              setKeyword(e.target.value);
-              setPagination((prev) => ({ ...prev, page: 1 }));
-            }}
-          />
-        </div>
+      {/* 表格 + 分页（无 Card 外框，直接贴 main 白底，对齐飞书列表风格）*/}
+      <div>
+        <NxTable
+          data={notices}
+          columns={columns}
+          getRowId={(row) => String(row.id)}
+          loading={isLoading}
+          emptyText={t('list.empty')}
+          rowSelection={rowSelection}
+          onRowSelectionChange={setRowSelection}
+          onRowClick={(row) => navigate({ to: '/notices/$id', params: { id: String(row.id) } })}
+          className="[&_thead_tr]:bg-muted/50"
+        />
 
-        {/* 状态下拉 */}
-        <Select
-          value={statusFilter}
-          onValueChange={(v) => {
-            setStatusFilter(v);
-            setPagination((prev) => ({ ...prev, page: 1 }));
-          }}
-        >
-          <SelectTrigger className="w-36" data-testid="notice-status-filter">
-            <SelectValue placeholder={t('filter.allStatus')} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="ALL">{t('filter.allStatus')}</SelectItem>
-            <SelectItem value="0">{t('status.draft')}</SelectItem>
-            <SelectItem value="1">{t('status.published')}</SelectItem>
-            <SelectItem value="2">{t('status.revoked')}</SelectItem>
-          </SelectContent>
-        </Select>
-
-        {/* 重置按钮 */}
-        <Button variant="link" size="sm" onClick={handleReset}>
-          {t('filter.reset')}
-        </Button>
-      </div>
-
-      {/* Card 包裹表格 + 分页 */}
-      <Card className="overflow-hidden shadow-none">
-        <CardContent className="p-0">
-          <NxTable
-            data={notices}
-            columns={columns}
-            getRowId={(row) => String(row.id)}
-            loading={isLoading}
-            emptyText={t('list.empty')}
-            rowSelection={rowSelection}
-            onRowSelectionChange={setRowSelection}
-            onRowClick={(row) => navigate({ to: '/notices/$id', params: { id: String(row.id) } })}
-            className="[&_thead_tr]:bg-muted/50"
-          />
-
-          {/* 自定义分页栏 */}
-          <div className="flex items-center justify-between border-t px-4 py-3">
-            <span className="text-sm text-muted-foreground">
-              {selectedIds.length > 0
-                ? t('pagination.selected', { selected: selectedIds.length, total: totalElements })
-                : t('pagination.total', { total: totalElements })}
+        {/* 自定义分页栏 */}
+        <div className="flex items-center justify-between py-3">
+          <span className="text-sm text-muted-foreground">
+            {selectedIds.length > 0
+              ? t('pagination.selected', { selected: selectedIds.length, total: totalElements })
+              : t('pagination.total', { total: totalElements })}
+          </span>
+          <div className="flex items-center gap-3 text-sm">
+            <Select
+              value={String(pagination.size)}
+              onValueChange={(v) => setPagination({ size: Number(v), page: 1 })}
+            >
+              <SelectTrigger size="sm" className="min-w-[6.5rem]">
+                <SelectValue>{t('pagination.perPageOption', { size: pagination.size })}</SelectValue>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="10">{t('pagination.perPageOption', { size: 10 })}</SelectItem>
+                <SelectItem value="20">{t('pagination.perPageOption', { size: 20 })}</SelectItem>
+                <SelectItem value="50">{t('pagination.perPageOption', { size: 50 })}</SelectItem>
+              </SelectContent>
+            </Select>
+            <span className="text-muted-foreground">
+              {t('pagination.pageInfo', {
+                page: pagination.page,
+                pages: totalPages || 1,
+              })}
             </span>
-            <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">{t('pagination.perPage')}</span>
-              <Select
-                value={String(pagination.size)}
-                onValueChange={(v) => setPagination({ size: Number(v), page: 1 })}
-              >
-                <SelectTrigger className="h-8 w-16">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="10">10</SelectItem>
-                  <SelectItem value="20">20</SelectItem>
-                  <SelectItem value="50">50</SelectItem>
-                </SelectContent>
-              </Select>
-              <span className="text-muted-foreground">
-                {t('pagination.pageInfo', {
-                  page: pagination.page,
-                  pages: totalPages || 1,
-                })}
-              </span>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                disabled={pagination.page <= 1}
-                onClick={() => setPagination((p) => ({ ...p, page: p.page - 1 }))}
-              >
-                <ChevronLeft className="size-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                className="size-8"
-                disabled={pagination.page >= totalPages}
-                onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))}
-              >
-                <ChevronRight className="size-4" />
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              disabled={pagination.page <= 1}
+              onClick={() => setPagination((p) => ({ ...p, page: p.page - 1 }))}
+            >
+              <ChevronLeft className="size-4" />
+            </Button>
+            <Button
+              variant="outline"
+              size="icon-sm"
+              disabled={pagination.page >= totalPages}
+              onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))}
+            >
+              <ChevronRight className="size-4" />
+            </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* 批量操作栏 */}
       <NxBar
