@@ -19,31 +19,39 @@
   --color-card-foreground: var(--color-gray-800);
   --color-popover: var(--color-white);
   --color-popover-foreground: var(--color-gray-800);
+  --color-panel: var(--color-gray-50);
 
   /* ===== Primary / Secondary / Accent ===== */
   --color-primary: var(--color-gray-950);
   --color-primary-foreground: var(--color-white);
+  --color-primary-hover: var(--color-gray-800);
   --color-secondary: var(--color-gray-300);
   --color-secondary-foreground: var(--color-gray-800);
   --color-accent: var(--color-gray-200);
   --color-accent-foreground: var(--color-gray-800);
 
-  /* ===== Muted ===== */
+  /* ===== Muted / Text layers ===== */
   --color-muted: var(--color-gray-100);
   --color-muted-foreground: var(--color-gray-500);
+  --color-placeholder: var(--color-gray-500);
+  --color-icon-foreground: var(--color-gray-800);
 
-  /* ===== Semantic status ===== */
+  /* ===== Semantic status + soft variants ===== */
   --color-destructive: var(--color-red-600);
   --color-destructive-foreground: var(--color-white);
+  --color-destructive-soft: oklch(0.94 0.03 25);
   --color-success: var(--color-green-500);
   --color-success-foreground: var(--color-white);
+  --color-success-soft: oklch(0.94 0.06 145);
   --color-warning: var(--color-amber-500);
   --color-warning-foreground: var(--color-gray-800);
+  --color-warning-soft: oklch(0.96 0.05 85);
   --color-info: var(--color-blue-500);
   --color-info-foreground: var(--color-white);
 
   /* ===== Border / Input / Ring ===== */
   --color-border: var(--color-gray-200);
+  --color-border-strong: var(--color-gray-300);
   --color-input: var(--color-gray-300);
   --color-ring: var(--color-gray-800);
 
@@ -58,6 +66,7 @@
   --color-sidebar-accent-foreground: var(--color-gray-950);
   --color-sidebar-border: var(--color-gray-200);
   --color-sidebar-ring: var(--color-gray-800);
+  --color-sidebar-hover: var(--color-gray-200);
 
   /* ===== 圆角（派生自 primitive 的 --radius）===== */
   --radius-sm: calc(var(--radius) - 4px);
@@ -67,6 +76,9 @@
 
   /* ===== 尺寸（引用 primitive）===== */
   --size-control-height: var(--size-control-h-md);
+  --size-control-height-sm: 2rem;
+  --size-control-height-md: 2.25rem;
+  --size-control-height-lg: 2.75rem;
   --size-header-height: 3.5rem;
   --size-sidebar-width: 16rem;
   --size-sidebar-width-collapsed: 4rem;
@@ -77,6 +89,9 @@
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+  --shadow-floating: 0 2px 8px -2px rgb(0 0 0 / 0.12);
+  --shadow-modal: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+  --shadow-selected: 0 0 0 2px var(--color-ring);
 
   /* ===== 动效 ===== */
   --duration-fast: 150ms;
@@ -84,6 +99,7 @@
   --duration-slow: 400ms;
   --easing-in: cubic-bezier(0.4, 0, 1, 1);
   --easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-productive: cubic-bezier(0.2, 0, 0, 1);
 
   /* ===== 字体 ===== */
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -99,31 +115,39 @@
   --color-card-foreground: var(--color-gray-200);
   --color-popover: var(--color-gray-950);
   --color-popover-foreground: var(--color-gray-200);
+  --color-panel: var(--color-gray-900);
 
   /* ===== Primary / Secondary / Accent ===== */
   --color-primary: var(--color-gray-50);
   --color-primary-foreground: var(--color-gray-900);
+  --color-primary-hover: var(--color-gray-200);
   --color-secondary: var(--color-gray-500);
   --color-secondary-foreground: var(--color-gray-200);
   --color-accent: var(--color-gray-900);
   --color-accent-foreground: var(--color-gray-200);
 
-  /* ===== Muted ===== */
+  /* ===== Muted / Text layers ===== */
   --color-muted: var(--color-gray-900);
   --color-muted-foreground: var(--color-gray-400);
+  --color-placeholder: var(--color-gray-500);
+  --color-icon-foreground: var(--color-gray-200);
 
-  /* ===== Semantic status ===== */
+  /* ===== Semantic status + soft variants ===== */
   --color-destructive: var(--color-red-500);
   --color-destructive-foreground: var(--color-white);
+  --color-destructive-soft: oklch(0.3 0.08 25);
   --color-success: var(--color-green-600);
   --color-success-foreground: var(--color-white);
+  --color-success-soft: oklch(0.3 0.08 145);
   --color-warning: var(--color-amber-400);
   --color-warning-foreground: var(--color-gray-950);
+  --color-warning-soft: oklch(0.32 0.08 85);
   --color-info: var(--color-blue-600);
   --color-info-foreground: var(--color-white);
 
   /* ===== Border / Input / Ring ===== */
   --color-border: var(--color-gray-800);
+  --color-border-strong: var(--color-gray-700);
   --color-input: var(--color-gray-700);
   --color-ring: var(--color-gray-200);
 
@@ -136,6 +160,7 @@
   --color-sidebar-accent-foreground: var(--color-gray-200);
   --color-sidebar-border: var(--color-gray-800);
   --color-sidebar-ring: var(--color-gray-200);
+  --color-sidebar-hover: var(--color-gray-800);
 
   /* ===== 圆角 ===== */
   --radius-sm: calc(var(--radius) - 4px);
@@ -145,6 +170,9 @@
 
   /* ===== 尺寸 ===== */
   --size-control-height: var(--size-control-h-md);
+  --size-control-height-sm: 2rem;
+  --size-control-height-md: 2.25rem;
+  --size-control-height-lg: 2.75rem;
   --size-header-height: 3.5rem;
   --size-sidebar-width: 16rem;
   --size-sidebar-width-collapsed: 4rem;
@@ -155,6 +183,9 @@
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
   --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+  --shadow-floating: 0 2px 8px -2px rgb(0 0 0 / 0.4);
+  --shadow-modal: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -2px rgb(0 0 0 / 0.4);
+  --shadow-selected: 0 0 0 2px var(--color-ring);
 
   /* ===== 动效 ===== */
   --duration-fast: 150ms;
@@ -162,6 +193,7 @@
   --duration-slow: 400ms;
   --easing-in: cubic-bezier(0.4, 0, 1, 1);
   --easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-productive: cubic-bezier(0.2, 0, 0, 1);
 
   /* ===== 字体 ===== */
   --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
