@@ -41,10 +41,31 @@
   --sidebar-item-active-bg: var(--color-sidebar-accent);
   --sidebar-margin-left: 0;
 
+  /* W1 新增：Sidebar 激活态（Inset/Mix 共用） */
+  --sidebar-item-active-fg: var(--color-primary);
+  --sidebar-item-active-weight: 500;
+  --sidebar-item-active-indicator-width: 0;
+  --sidebar-item-active-indicator-color: var(--color-primary);
+
+  /* W1 新增：Sidebar collapsed 宽度 */
+  --sidebar-collapsed-width: var(--size-sidebar-width-collapsed);
+
   /* ========== Header ========== */
   --header-bg: var(--color-background);
   --header-height: var(--size-header-height);
   --header-border: var(--color-border);
+
+  /* ========== Nav Tab（W1 新增；顶部导航 tab；Mix Layout 使用；Inset 若未来加也可用）========== */
+  --nav-tab-fg: var(--color-muted-foreground);
+  --nav-tab-hover-fg: var(--color-foreground);
+  --nav-tab-active-fg: var(--color-primary);
+  --nav-tab-active-bg: transparent;
+  --nav-tab-active-radius: 0;
+  --nav-tab-active-underline-width: 2px;
+  --nav-tab-active-underline-color: var(--color-primary);
+  --nav-tab-height: var(--size-control-h-md);
+  --nav-tab-padding-x: 0.25rem;
+  --nav-tab-gap: 1.5rem;
 
   /* ========== Chart ==========
    * 引用 primitive 的 chart 色板（灰阶 + 一丝冷蓝，对齐参考站）。
