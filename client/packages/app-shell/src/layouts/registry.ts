@@ -1,5 +1,5 @@
 import { InsetLayout } from '../presets/inset';
-import { ModuleSwitcherLayout } from '../presets/module-switcher';
+import { MixLayout } from '../presets/mix';
 import type { LayoutPresetDef } from './types';
 
 class LayoutRegistry {
@@ -65,10 +65,10 @@ export const layoutRegistry = new LayoutRegistry('inset', [
     component: InsetLayout,
   },
   {
-    id: 'module-switcher',
-    name: 'layout.moduleSwitcher',
-    description: 'layout.module-switcherDesc',
-    component: ModuleSwitcherLayout,
+    id: 'mix',
+    name: 'layout.mix',
+    description: 'layout.mixDesc',
+    component: MixLayout,
   },
 ]);
 

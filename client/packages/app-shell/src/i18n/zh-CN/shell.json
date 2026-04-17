@@ -31,17 +31,17 @@
   "layout": {
     "inset": "Inset 壳",
     "insetDesc": "默认后台布局，内容区卡片化，适合管理系统。",
-    "moduleSwitcher": "Module Switcher",
-    "module-switcherDesc": "顶部模块切换 + 子侧栏结构，适合多模块 SaaS。"
+    "mix": "Mix（顶栏+侧栏）",
+    "mixDesc": "顶部模块切换 + 子侧栏结构，适合多模块 SaaS。"
   },
-  "moduleSwitcher": {
+  "mix": {
     "title": "模块工作区",
     "tagline": "多模块工作台壳层",
     "searchPlaceholder": "搜索模块、菜单或最近访问",
     "moduleFallback": "模块总览",
     "moduleSidebarHint": "当前模块的二级导航",
     "workspaceLabel": "工作区",
-    "presetLabel": "Module Switcher",
+    "presetLabel": "Mix",
     "desktopHint": "当前是第二套正式 preset，用于多模块 SaaS 导航。",
     "sidebarMode": "侧栏模式",
     "sidebarExpanded": "展开",
@@ -63,9 +63,9 @@
     "scaleLabel": "密度尺度",
     "radiusLabel": "圆角节奏",
     "contentLayoutLabel": "内容宽度",
-    "contentLayoutHint": "当前只有 Inset 布局会应用这个设置，module-switcher 暂不生效。",
+    "contentLayoutHint": "当前只有 Inset 布局会应用这个设置，Mix 暂不生效。",
     "sidebarModeLabel": "侧栏模式",
-    "sidebarModeHint": "当前只有 Inset 布局支持侧栏模式切换，module-switcher 有独立的折叠逻辑。",
+    "sidebarModeHint": "当前只有 Inset 布局支持侧栏模式切换，Mix 有独立的折叠逻辑。",
     "summary": "当前组合",
     "scale": { "default": "标准", "xs": "紧凑", "lg": "宽松" },
     "radius": {

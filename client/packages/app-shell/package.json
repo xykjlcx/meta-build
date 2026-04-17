@@ -13,7 +13,7 @@
     "./menu": "./src/menu/index.ts",
     "./layouts": "./src/layouts/index.ts",
     "./presets/inset": "./src/presets/inset/index.ts",
-    "./presets/module-switcher": "./src/presets/module-switcher/index.ts",
+    "./presets/mix": "./src/presets/mix/index.ts",
     "./error": "./src/error/index.ts",
     "./feedback": "./src/feedback/index.ts",
     "./data": "./src/data/index.ts",

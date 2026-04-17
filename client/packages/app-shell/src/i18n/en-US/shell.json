@@ -31,17 +31,17 @@
   "layout": {
     "inset": "Inset Shell",
     "insetDesc": "Card-like default admin shell for everyday backoffice pages.",
-    "moduleSwitcher": "Module Switcher",
-    "module-switcherDesc": "Header-level module tabs with a secondary sidebar for multi-product SaaS."
+    "mix": "Mix (Top + Side)",
+    "mixDesc": "Header-level module tabs with a secondary sidebar for multi-product SaaS."
   },
-  "moduleSwitcher": {
+  "mix": {
     "title": "Module Workspace",
     "tagline": "Multi-module shell preset",
     "searchPlaceholder": "Search modules, menus, or recent destinations",
     "moduleFallback": "Workspace Overview",
     "moduleSidebarHint": "Secondary navigation for the active module",
     "workspaceLabel": "Workspace",
-    "presetLabel": "Module Switcher",
+    "presetLabel": "Mix",
     "desktopHint": "This is the second official preset, aimed at multi-module SaaS navigation.",
     "sidebarMode": "Sidebar Mode",
     "sidebarExpanded": "Expanded",
@@ -63,9 +63,9 @@
     "scaleLabel": "Density",
     "radiusLabel": "Radius",
     "contentLayoutLabel": "Content Width",
-    "contentLayoutHint": "This setting currently applies only to the Inset layout. Module switcher does not use it yet.",
+    "contentLayoutHint": "This setting currently applies only to the Inset layout. Mix does not use it yet.",
     "sidebarModeLabel": "Sidebar Mode",
-    "sidebarModeHint": "Only the Inset layout supports this setting. Module switcher uses its own collapse logic.",
+    "sidebarModeHint": "Only the Inset layout supports this setting. Mix uses its own collapse logic.",
     "summary": "Current Mix",
     "scale": { "default": "Standard", "xs": "Compact", "lg": "Relaxed" },
     "radius": {

@@ -20,7 +20,7 @@ import type { MenuNode } from '../../menu';
 const MODULE_SWITCHER_SIDEBAR_WIDTH = '15rem';
 const MODULE_SWITCHER_SIDEBAR_COLLAPSED = '3.125rem';
 
-export function ModuleSwitcherLayout({
+export function MixLayout({
   children,
   menuTree,
   currentUser,
@@ -32,11 +32,11 @@ export function ModuleSwitcherLayout({
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const { modules, activeModule, activeModuleId, resolvedSidebarNodes, setActiveModuleId } =
-    useModuleSwitcherModules(menuTree);
+    useMixModules(menuTree);
 
   return (
     <div className="min-h-screen bg-muted text-foreground">
-      <ModuleSwitcherHeader
+      <MixHeader
         modules={modules}
         activeModuleId={activeModuleId}
         currentUserName={currentUser.username}
@@ -57,7 +57,7 @@ export function ModuleSwitcherLayout({
           />
         )}
 
-        <ModuleSwitcherSidebar
+        <MixSidebar
           activeModule={activeModule}
           nodes={resolvedSidebarNodes}
           collapsed={collapsed}
@@ -68,18 +68,18 @@ export function ModuleSwitcherLayout({
 
         <div className="min-w-0 flex-1 bg-muted">
           <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm text-muted-foreground lg:px-6">
-            <span>{activeModule?.name ?? t('moduleSwitcher.moduleFallback')}</span>
+            <span>{activeModule?.name ?? t('mix.moduleFallback')}</span>
             <ChevronRight className="size-4" />
-            <span>{t('moduleSwitcher.workspaceLabel')}</span>
+            <span>{t('mix.workspaceLabel')}</span>
           </div>
 
           <main className="min-w-0 p-4 lg:p-6">
             <div className="mb-6">
               <div className="text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
-                {t('moduleSwitcher.presetLabel')}
+                {t('mix.presetLabel')}
               </div>
               <h1 className="mt-1 text-2xl font-semibold text-foreground">
-                {activeModule?.name ?? t('moduleSwitcher.title')}
+                {activeModule?.name ?? t('mix.title')}
               </h1>
             </div>
             {children}
@@ -90,7 +90,7 @@ export function ModuleSwitcherLayout({
   );
 }
 
-function useModuleSwitcherModules(menuTree: MenuNode[]) {
+function useMixModules(menuTree: MenuNode[]) {
   const modules = useMemo(
     () => menuTree.filter((node) => node.visible !== false && node.menuType !== 'BUTTON'),
     [menuTree],
@@ -127,7 +127,7 @@ function useModuleSwitcherModules(menuTree: MenuNode[]) {
   };
 }
 
-function ModuleSwitcherHeader({
+function MixHeader({
   modules,
   activeModuleId,
   currentUserName,
@@ -221,7 +221,7 @@ function ModuleSwitcherHeader({
   );
 }
 
-function ModuleSwitcherSidebar({
+function MixSidebar({
   activeModule,
   nodes,
   collapsed,
@@ -273,10 +273,10 @@ function ModuleSwitcherSidebar({
           {!collapsed && (
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold text-foreground">
-                {activeModule?.name ?? t('moduleSwitcher.moduleFallback')}
+                {activeModule?.name ?? t('mix.moduleFallback')}
               </div>
               <div className="truncate text-xs text-muted-foreground">
-                {t('moduleSwitcher.moduleSidebarHint')}
+                {t('mix.moduleSidebarHint')}
               </div>
             </div>
           )}
