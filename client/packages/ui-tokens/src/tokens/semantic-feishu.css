@@ -188,6 +188,7 @@
   --font-heading: var(--font-sans);
 
   /* ===== W1 结构 token 覆写（扁平 + 浅蓝激活，dark opacity 稍调）===== */
+
   /* Dark 同样避免 color-mix 污染 rule 结构；用 primitive 色板 */
   --nav-tab-active-bg: var(--color-blue-900);
   --nav-tab-active-radius: var(--radius-md);
