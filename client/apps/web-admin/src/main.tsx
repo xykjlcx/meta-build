@@ -18,15 +18,6 @@ import { registerBusinessResources } from './i18n/register';
 import { createAppRouter } from './router';
 import './styles.css';
 
-// __MB_STYLE_IDS__ 曝露给 index.html inline script 用于 localStorage style 值白名单校验；
-// 扩展新 style 时需同步维护这里和 index.html 的 fallback 数组（治理方案推迟到 M6）。
-declare global {
-  interface Window {
-    __MB_STYLE_IDS__?: string[];
-  }
-}
-window.__MB_STYLE_IDS__ = ['classic', 'feishu'];
-
 // Phase 1: 同步初始化（React 渲染前）
 registerBusinessResources();
 
