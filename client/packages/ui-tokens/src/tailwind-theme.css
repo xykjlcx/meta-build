@@ -8,7 +8,8 @@
  *      [data-theme-style='xxx'] selector 在 semantic-*.css 中覆盖真实值。
  *
  * 注意：Tailwind v4 的 @theme 里的变量必须有**真实 CSS 值**才会生成对应 utility。
- * 用 `initial` 会导致 utility 完全不生成。
+ * 用 `initial` 会导致 utility 完全不生成。这里的值必须与 semantic-classic.css（light）
+ * 最终解析值一致（色值精度允差 ±2%）。
  *
  * 具体 token 运行时值请见：
  *   - tokens/primitive.css      （原始色板 / 刻度 / 字体 / 阴影 / 动效）
@@ -23,34 +24,34 @@
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.274 0.006 286);
   --color-primary: oklch(0.141 0.005 286);
-  --color-primary-foreground: oklch(0.985 0 0);
-  --color-secondary: oklch(0.872 0.008 286);
+  --color-primary-foreground: oklch(1 0 0);
+  --color-secondary: oklch(0.872 0.006 286);
   --color-secondary-foreground: oklch(0.274 0.006 286);
   --color-muted: oklch(0.967 0.001 286);
-  --color-muted-foreground: oklch(0.552 0.016 286);
-  --color-accent: oklch(0.92 0.005 286);
+  --color-muted-foreground: oklch(0.552 0.013 286);
+  --color-accent: oklch(0.92 0.004 286);
   --color-accent-foreground: oklch(0.274 0.006 286);
   --color-destructive: oklch(0.577 0.245 27.325);
-  --color-destructive-foreground: oklch(0.985 0 0);
+  --color-destructive-foreground: oklch(1 0 0);
   --color-success: oklch(0.62 0.19 145);
-  --color-success-foreground: oklch(0.985 0 0);
+  --color-success-foreground: oklch(1 0 0);
   --color-warning: oklch(0.75 0.18 85);
   --color-warning-foreground: oklch(0.274 0.006 286);
   --color-info: oklch(0.65 0.15 240);
-  --color-info-foreground: oklch(0.985 0 0);
+  --color-info-foreground: oklch(1 0 0);
   --color-card: oklch(1 0 0);
   --color-card-foreground: oklch(0.274 0.006 286);
   --color-popover: oklch(1 0 0);
   --color-popover-foreground: oklch(0.274 0.006 286);
-  --color-border: oklch(0.92 0.005 286);
-  --color-input: oklch(0.872 0.008 286);
+  --color-border: oklch(0.92 0.004 286);
+  --color-input: oklch(0.872 0.006 286);
   --color-ring: oklch(0.274 0.006 286);
-  --color-sidebar: oklch(0.968 0.003 286);
-  --color-sidebar-foreground: oklch(0.552 0.015 286);
+  --color-sidebar: oklch(0.97 0.003 250);
+  --color-sidebar-foreground: oklch(0.552 0.013 286);
   --color-sidebar-primary: oklch(0.141 0.005 286);
-  --color-sidebar-primary-foreground: oklch(0.985 0 0);
-  --color-sidebar-accent: oklch(0.92 0.005 286);
+  --color-sidebar-primary-foreground: oklch(1 0 0);
+  --color-sidebar-accent: oklch(0.92 0.004 286);
   --color-sidebar-accent-foreground: oklch(0.141 0.005 286);
-  --color-sidebar-border: oklch(0.92 0.005 286);
+  --color-sidebar-border: oklch(0.92 0.004 286);
   --color-sidebar-ring: oklch(0.274 0.006 286);
 }

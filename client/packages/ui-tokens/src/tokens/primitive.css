@@ -4,22 +4,26 @@
  *
  * 注意：仍然放在 @theme 中，让 Tailwind v4 识别并生成 utility class
  * （如 bg-gray-500 / rounded-lg / shadow-md 等）。
+ *
+ * 色板对齐参考：shadcnuikit.com/dashboard/default（zinc 冷灰 hue ~286°，
+ * 参考站使用 lab 色空间，我们用 oklch 对齐相同感知明度与极低 chroma）。
  */
 @theme {
   /* ========== 色板 ========== */
+
   /* 纯色 */
   --color-white: oklch(1 0 0);
   --color-black: oklch(0 0 0);
 
-  /* Gray 10 阶（zinc 冷灰色调，hue ~286） */
+  /* Gray 10 阶（zinc 冷灰色调，hue ~286°；chroma 极低，贴近参考站的"近乎纯灰") */
   --color-gray-50: oklch(0.985 0 0);
   --color-gray-100: oklch(0.967 0.001 286);
-  --color-gray-200: oklch(0.92 0.005 286);
-  --color-gray-300: oklch(0.872 0.008 286);
-  --color-gray-400: oklch(0.705 0.012 286);
-  --color-gray-500: oklch(0.552 0.016 286);
-  --color-gray-600: oklch(0.442 0.015 286);
-  --color-gray-700: oklch(0.37 0.012 286);
+  --color-gray-200: oklch(0.92 0.004 286);
+  --color-gray-300: oklch(0.872 0.006 286);
+  --color-gray-400: oklch(0.705 0.01 286);
+  --color-gray-500: oklch(0.552 0.013 286);
+  --color-gray-600: oklch(0.434 0.012 286);
+  --color-gray-700: oklch(0.37 0.01 286);
   --color-gray-800: oklch(0.274 0.006 286);
   --color-gray-900: oklch(0.21 0.006 286);
   --color-gray-950: oklch(0.141 0.005 286);
@@ -48,9 +52,20 @@
   --color-amber-600: oklch(0.68 0.17 85);
   --color-amber-700: oklch(0.6 0.16 85);
 
-  /* ========== Radius 刻度 ========== */
-  /* 注意：customizer.css 中 [data-theme-radius='xxx'] 会覆盖 sm/md/lg/xl */
-  --radius: 0.625rem;
+  /* ========== Chart 色板（primitive）==========
+   * 对齐 shadcnuikit.com 的 --chart-1~5，灰阶 + 一丝冷蓝，用于数据可视化。
+   * component.css 的 --chart-* 直接消费这里的值。
+   */
+  --color-chart-1: oklch(0.141 0.005 286); /* near black */
+  --color-chart-2: oklch(0.35 0.04 250); /* warm blue-gray */
+  --color-chart-3: oklch(0.21 0.008 286); /* dark neutral */
+  --color-chart-4: oklch(0.6 0.04 250); /* medium blue-gray */
+  --color-chart-5: oklch(0.78 0.015 286); /* light neutral */
+
+  /* ========== Radius 刻度 ==========
+   * 基值 0.5rem 对齐参考站默认；customizer.css 中 [data-theme-radius='xxx'] 会覆盖 sm/md/lg/xl。
+   */
+  --radius: 0.5rem;
   --radius-none: 0;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
@@ -59,6 +74,7 @@
   --radius-full: 9999px;
 
   /* ========== 尺寸刻度 ========== */
+
   /* 控件高度三档（customizer 可切换场景，这里是默认值） */
   --size-control-h-sm: 1.75rem;
   --size-control-h-md: 2.25rem;

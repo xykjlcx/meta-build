@@ -46,10 +46,12 @@
   --header-height: var(--size-header-height);
   --header-border: var(--color-border);
 
-  /* ========== Chart ========== */
-  --chart-1: var(--color-blue-500);
-  --chart-2: var(--color-green-500);
-  --chart-3: var(--color-amber-500);
-  --chart-4: var(--color-red-500);
-  --chart-5: var(--color-gray-500);
+  /* ========== Chart ==========
+   * 引用 primitive 的 chart 色板（灰阶 + 一丝冷蓝，对齐参考站）。
+   */
+  --chart-1: var(--color-chart-1);
+  --chart-2: var(--color-chart-2);
+  --chart-3: var(--color-chart-3);
+  --chart-4: var(--color-chart-4);
+  --chart-5: var(--color-chart-5);
 }
