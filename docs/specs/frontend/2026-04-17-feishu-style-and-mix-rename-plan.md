@@ -2,7 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 >
-> **更新日志**：2026-04-17 后 `registerStyle` 公共 API 已内部化（见 commit 43528836），本文档示例已同步为 `styleRegistry.register()`。
+> **更新日志**：
+> - 2026-04-17 后 `registerStyle` 公共 API 已内部化（见 commit 43528836），本文档示例已同步为 `styleRegistry.register()`。
+> - **2026-04-18 命名变更**：本文档所用 `feishu` style 命名在 2026-04-18 改名为 `lark-console`（见 ADR-0020）。**本历史实施文档保留原始 feishu 命名不变**，以便追溯实施过程。
 
 **Goal:** 新增 `feishu` style + 把 `module-switcher` layout 重命名为 `mix` 并让其样式完全 token 驱动，验证 Style × Layout × Component Token 三层正交架构。
 

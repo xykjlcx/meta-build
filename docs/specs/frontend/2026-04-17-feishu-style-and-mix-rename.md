@@ -5,7 +5,9 @@
 > 关联 ADR：ADR-0019（待创建）— 正交三层契约（Layout × Style × Component Token）的正式落地
 > 工作量估算：≈3.5 天（W1 1.5d + W2 1.2d + W3 0.7d）
 >
-> **更新日志**：2026-04-17 后 `registerStyle` 公共 API 已内部化（见 commit 43528836），本文档示例已同步为 `styleRegistry.register()`。注册只需调用 `style-registry.ts` 末尾的 `styleRegistry.register({...})`，无需从公共 API 导入 `registerStyle`。
+> **更新日志**：
+> - 2026-04-17 后 `registerStyle` 公共 API 已内部化（见 commit 43528836），本文档示例已同步为 `styleRegistry.register()`。注册只需调用 `style-registry.ts` 末尾的 `styleRegistry.register({...})`，无需从公共 API 导入 `registerStyle`。
+> - **2026-04-18 命名变更**：本文档所用 `feishu` style 命名在 2026-04-18 改名为 `lark-console`（见 ADR-0020），`semantic-feishu.css` 改名为 `semantic-lark-console.css`，style id 改为 `'lark-console'`，display name 改为 `'飞书控制台'`。**本历史文档保留原始 feishu 命名不变**，以便追溯实施过程。
 
 ---
 

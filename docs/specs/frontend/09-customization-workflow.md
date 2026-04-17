@@ -100,9 +100,9 @@ meta-build 是 **纯脚手架模式**（决策 5）：使用者通过 GitHub "Us
 
 ```
 client/packages/ui-tokens/src/tokens/
-├── semantic-classic.css   # canonical style（light + dark 两套颜色）
-├── semantic-feishu.css    # feishu style（light + dark）
-└── ...                    # 其他 style 文件
+├── semantic-classic.css       # canonical style（light + dark 两套颜色）
+├── semantic-lark-console.css  # lark-console style（飞书管理后台风格，light + dark）
+└── ...                        # 其他 style 文件
 ```
 
 **改坏了的检测机制**（4 道防线）：
@@ -527,14 +527,14 @@ pnpm -C client lint  # 包含 stylelint
 
 ### 6.3 加新主题的端到端验证
 
-**目标**：使用者加一套完全不同的主题（例如"feishu"飞书风），验证换主题不会破坏任何业务功能。
+**目标**：使用者加一套完全不同的主题（例如"lark-console"飞书管理后台风格），验证换主题不会破坏任何业务功能。
 
 **步骤**：
 
 1. 按 [02 §9](./02-ui-tokens-theme.md#9-使用者扩展新主题的步骤-m2) 加新主题文件
 2. 跑 `pnpm -C client check:theme` 验证完整性
 3. 在 Style Registry 注册新风格
-4. 启动 dev server，在 ThemeCustomizer 的风格下拉框选择 `feishu`
+4. 启动 dev server，在 ThemeCustomizer 的风格下拉框选择 `lark-console`
 5. **断言**：
    - 所有页面的主色变成飞书蓝
    - 所有按钮 / 表格 / 表单 / 弹窗的圆角和尺寸符合飞书风格

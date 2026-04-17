@@ -164,6 +164,8 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | [0016](docs/adr/0016-前端主题系统从theme切换到style加color-mode与customizer.md) | **前端主题系统从 Theme 切换到 Style + ColorMode + Customizer** | 已采纳 |
 | [0017](docs/adr/0017-app-shell从固定布局切换到layout-resolver加preset-registry.md) | **App Shell 从固定布局切换到 Layout Resolver + Preset Registry** | 已采纳 |
 | [0018](docs/adr/0018-废弃compact主题改为style加customizer维度组合.md) | **废弃 Compact 主题，改为 Style + Customizer 维度组合** | 已采纳 |
+| [0019](docs/adr/0019-正交三层契约与mix-rename和primitive-blue修正.md) | **正交三层 token 契约（Layout × Style × Component）+ mix rename + primitive blue 修正** | 已采纳 |
+| [0020](docs/adr/0020-feishu-rename-to-lark-console-and-token-expansion.md) | **feishu → lark-console 重命名 + semantic token 扩展 54 → 70** | 已采纳 |
 
 **新增 ADR 的时机**：任何翻转既有决策、引入新架构概念、或修订规划文档的行为，都应该先写 ADR 再改代码/specs。
 
