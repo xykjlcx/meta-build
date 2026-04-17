@@ -4,11 +4,14 @@ import { ANONYMOUS, type CurrentUser } from './types';
 
 export function toCurrentUser(dto: CurrentUserVo): CurrentUser {
   const permissions = new Set(dto.permissions) as ReadonlySet<string> as CurrentUser['permissions'];
+  // 后端 CurrentUserVo 当前不含 email；前端保持 null，UI 层用 fallback
+  const email = (dto as CurrentUserVo & { email?: string | null }).email ?? null;
   return {
     isAuthenticated: true,
     userId: dto.userId,
     username: dto.username,
     deptId: dto.deptId,
+    email,
     permissions,
     hasPermission: (code) => permissions.has(code),
     hasAnyPermission: (...codes) => codes.some((c) => permissions.has(c)),

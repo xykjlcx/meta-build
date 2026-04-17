@@ -5,7 +5,12 @@
     "close": "Close Navigation",
     "tagline": "Customizable admin shell",
     "operatorFallback": "Meta-Build",
-    "operatorRole": "Workspace Operator"
+    "operatorRole": "Workspace Operator",
+    "workspace": "Workspace",
+    "settings": "Settings",
+    "logout": "Sign out",
+    "emailFallback": "No email on file",
+    "userMenu": "User menu"
   },
   "header": {
     "profile": "Profile",

@@ -15,6 +15,15 @@ export interface MenuNode {
   sortOrder: number | null;
   visible: boolean | null;
   children: MenuNode[];
+
+  /** 菜单项图标的背景方块色（hex / rgb 字符串，用于 campus 风格彩色方块） */
+  iconBg?: string;
+
+  /** 菜单项图标的背景方块色，引用 CSS token 名（如 "--color-orange-500"） */
+  iconBgColor?: string;
+
+  /** 菜单项右侧角标（数字或字符串） */
+  badge?: string | number;
 }
 
 export interface UserMenuPayload {

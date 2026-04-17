@@ -5,7 +5,12 @@
     "close": "关闭导航",
     "tagline": "可定制管理后台壳",
     "operatorFallback": "Meta-Build",
-    "operatorRole": "工作区操作员"
+    "operatorRole": "工作区操作员",
+    "workspace": "工作区",
+    "settings": "设置",
+    "logout": "退出登录",
+    "emailFallback": "未设置邮箱",
+    "userMenu": "用户菜单"
   },
   "header": {
     "profile": "个人信息",
