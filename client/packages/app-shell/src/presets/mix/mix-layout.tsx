@@ -29,7 +29,6 @@ import {
   User,
   X,
 } from 'lucide-react';
-import type { ElementType } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
@@ -90,15 +89,19 @@ export function MixLayout({ children, menuTree, currentUser, notificationSlot }:
             onSelectModule={setActiveModuleId}
           />
 
-          {/* 主内容区 */}
-          <div className="min-w-0 flex-1 bg-background">
-            <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm text-muted-foreground lg:px-6">
+          {/* 主内容区容器：外框 bg-sidebar 灰，包住面包屑 + main；main 用 rounded-tl + bg-card 浮出白卡片 */}
+          <div className="flex min-w-0 flex-1 flex-col bg-sidebar">
+            {/* 面包屑栏：bg-sidebar 与 sidebar 同色，文字用 foreground 近黑（飞书实测 rgb(31,35,41)）*/}
+            <div className="flex items-center gap-2 px-4 py-3 text-sm text-foreground lg:px-6">
               <span>{activeModule?.name ?? t('mix.moduleFallback')}</span>
-              <ChevronRight className="size-4" />
+              <ChevronRight className="size-4 text-muted-foreground" />
               <span>{t('mix.workspaceLabel')}</span>
             </div>
 
-            <main className="min-w-0 p-4 lg:p-6">{children}</main>
+            {/* main：悬浮卡片 —— 四角 rounded-lg / 右下留 8px 间距露灰底 / 左上贴边与面包屑衔接 */}
+            <main className="mr-2 mb-2 min-w-0 flex-1 rounded-lg bg-card p-4 lg:p-6">
+              {children}
+            </main>
           </div>
         </div>
       </div>
@@ -194,8 +197,8 @@ function MixHeader({
           className="hidden shrink-0 items-center gap-2.5 lg:flex"
           style={{ width: 'var(--sidebar-width)', paddingRight: '1rem' }}
         >
-          {/* Logo：正方形圆角 block，前景色底 + 背景色字 */}
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
+          {/* Logo：正方形圆角 block，主题色底 + 主题前景色字（lark-console=蓝 / classic=黑，跟随 style 自动切换）*/}
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary text-primary-foreground">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -218,30 +221,31 @@ function MixHeader({
           </span>
         </div>
 
-        {/* 中区：模块 Tab 导航（桌面端） */}
+        {/* 中区：模块 Tab 导航（桌面端，shrink-0 不撑开，让搜索占据剩余）*/}
         <nav
-          className="hidden min-w-0 flex-1 items-stretch overflow-x-auto lg:flex"
+          className="hidden shrink-0 items-stretch overflow-x-auto lg:flex"
           style={{ gap: 'var(--nav-tab-gap)' }}
         >
           {modules.map((node) => {
             const active = node.id === activeModuleId;
+            const Icon = resolveMenuIcon(node.icon);
             return (
               <button
                 key={node.id}
                 type="button"
                 onClick={() => onSelectModule(node.id)}
                 data-active={active ? 'true' : 'false'}
-                className="nav-tab text-[14px] font-medium"
+                className="nav-tab inline-flex items-center gap-1.5 text-[14px] font-medium"
               >
+                <Icon className="size-4" aria-hidden="true" />
                 {node.name}
               </button>
             );
           })}
         </nav>
 
-        {/* 右区：搜索 + 通知 + 设置 + 九宫格 + 用户 */}
-        <div className="ml-auto flex shrink-0 items-center gap-1">
-          {/* 搜索框：桌面端显示完整搜索输入框 */}
+        {/* 搜索区：桌面端占据中间剩余宽度（对齐飞书中央 544 宽、36 高搜索位）*/}
+        <div className="hidden min-w-0 flex-1 justify-center px-4 lg:flex">
           <SearchInput
             placeholder={t('search.placeholder')}
             shortcut="⌘K"
@@ -249,9 +253,12 @@ function MixHeader({
             onClick={() =>
               toast(t('search.comingSoon'), { description: t('search.comingSoonDesc') })
             }
-            className="hidden w-56 cursor-pointer lg:flex"
+            className="w-full max-w-[544px] cursor-pointer [&_input]:h-9"
           />
+        </div>
 
+        {/* 右区：通知 + 设置 + 九宫格 + 用户 */}
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           {/* 通知插槽 */}
           {notificationSlot}
 
@@ -273,8 +280,8 @@ function MixHeader({
             <DarkModeToggle />
           </div>
 
-          {/* 竖分割线 */}
-          <div className="mx-1 hidden h-5 w-px bg-border md:block" />
+          {/* 竖分割线：h-6 = 24px 对齐飞书实测 */}
+          <div className="mx-1 hidden h-6 w-px bg-border md:block" />
 
           {/* 九宫格切换器 */}
           <MixSubsystemSwitcher />
@@ -312,9 +319,10 @@ function MixUserMenu({
           aria-label={t('sidebar.userMenu')}
           className="hidden items-center gap-2 rounded-md px-2 py-1 transition-colors duration-[var(--duration-fast)] hover:bg-secondary md:flex"
         >
-          <Avatar size="sm">
+          {/* 头像 32×32 圆形（对齐飞书实测）*/}
+          <Avatar>
             <AvatarFallback>
-              <User className="size-3.5" />
+              <User className="size-4" />
             </AvatarFallback>
           </Avatar>
           <div className="hidden text-left lg:block">
@@ -449,16 +457,17 @@ function MixSidebar({
     <aside
       className={cn(
         // bg-sidebar：lark-console 下 = #f2f3f5，和 page bg 同色，sidebar 融入背景
-        'fixed inset-y-(--size-header-height) left-0 z-40 flex border-r border-border bg-sidebar transition-[transform,width] duration-200 ease-out lg:static lg:translate-x-0',
+        // 无 border-r / 无 ml：main 容器已是 bg-sidebar 灰，aside 贴左与之连片，右下浮出白卡片
+        'fixed inset-y-(--size-header-height) left-0 z-40 flex bg-sidebar transition-[transform,width] duration-200 ease-out lg:static lg:translate-x-0',
         mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       )}
       style={{ width: sidebarWidth }}
     >
       <div className="flex h-full w-full flex-col">
-        {/* Sidebar 顶部：模块名 + 移动端关闭按钮 */}
+        {/* Sidebar 顶部：仅移动端显示（模块名 + 关闭按钮）；desktop 对齐飞书直接从主导航区开始 */}
         <div
           className={cn(
-            'flex items-center justify-between',
+            'flex items-center justify-between lg:hidden',
             collapsed ? 'px-2 py-3 justify-center' : 'px-4 py-3',
           )}
         >
@@ -475,7 +484,6 @@ function MixSidebar({
             size="icon-sm"
             onClick={onCloseMobile}
             aria-label={t('sidebar.close')}
-            className="lg:hidden"
           >
             <X className="size-4" />
           </Button>
@@ -499,8 +507,8 @@ function MixSidebar({
                     data-active={isActive ? 'true' : 'false'}
                     className={cn('sidebar-item w-full text-left text-[14px]')}
                   >
-                    <span className="flex w-4 shrink-0 items-center justify-center">
-                      <Icon className="size-4" />
+                    <span className="flex w-5 shrink-0 items-center justify-center">
+                      <Icon className="size-5" />
                     </span>
                     <span className="min-w-0 flex-1 truncate">{mod.name}</span>
                   </button>
@@ -510,11 +518,11 @@ function MixSidebar({
           </nav>
         )}
 
-        {/* 主导航区 */}
-        <nav className="flex-1 overflow-y-auto py-2" aria-label={activeModule?.name}>
-          <div className="space-y-0.5 px-2">
+        {/* 主导航区（对齐飞书：items 堆叠无间距，容器无侧边 padding）*/}
+        <nav className="flex-1 overflow-y-auto pt-3 pb-2" aria-label={activeModule?.name}>
+          <div className="space-y-0">
             {nodes.map((node) => (
-              <ModuleNavItem
+              <MenuItem
                 key={node.id}
                 node={node}
                 depth={0}
@@ -532,25 +540,36 @@ function MixSidebar({
           </div>
         </nav>
 
-        {/* 底部：折叠 / 展开按钮 */}
-        <div className="border-t border-border p-2">
+        {/* 底部"收起导航"按钮（对齐飞书：无 border-t / 高度 48 / iconWrap 36×48 与 menu item 对齐）*/}
+        <div className="pb-2">
           <button
             type="button"
             onClick={onToggleCollapsed}
             aria-label={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
             title={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
             className={cn(
-              'flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-[14px] text-muted-foreground transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-foreground',
-              collapsed && 'justify-center px-0',
+              'flex h-12 w-full items-center text-[14px] text-muted-foreground transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-foreground',
+              collapsed && 'justify-center',
             )}
           >
-            <PanelLeft
+            <span
               className={cn(
-                'size-4 shrink-0 transition-transform duration-200',
-                collapsed && 'rotate-180',
+                'flex h-12 shrink-0 items-center justify-center',
+                collapsed ? 'w-full' : 'ml-1.5 w-9',
               )}
-            />
-            {!collapsed && <span>{t('sidebar.collapse')}</span>}
+            >
+              <PanelLeft
+                className={cn(
+                  'size-5 transition-transform duration-200',
+                  collapsed && 'rotate-180',
+                )}
+              />
+            </span>
+            {!collapsed && (
+              <span className="flex h-12 min-w-0 flex-1 items-center">
+                {t('sidebar.collapse')}
+              </span>
+            )}
           </button>
         </div>
       </div>
@@ -558,65 +577,43 @@ function MixSidebar({
   );
 }
 
-// ─── 激活态左边蓝条（可复用的小 span）─────────────────────
+// ─── MenuItem（一二级同构，对齐飞书管理后台真实结构）──────────
+//
+// 飞书 DOM 结构（2026-04-18 Agent Browser 实测）：
+//   <a|div> padding=0 height=48                      ← 外层无 padding，无 gap
+//     <div class="_1sO9DpVG"> 36×48 margin-left:6    ← iconWrap 固定尺寸
+//       <img> 24×24 居中                              ← icon 仅一级渲染
+//     <div class="nc9sYMTs"> flex-1 height=48 relative ← textWrap 紧贴 iconWrap
+//       <div> 文字
+//       <img> chevron: absolute right:7 top:0 14×14   ← 仅有子菜单的一级
+//
+// 关键哲学：
+// - 一二级同构：iconWrap 始终占 36×48，二级不渲染 icon 但保留空占位 → 自动对齐一级 text 起点
+// - 无 gap：iconWrap 紧贴 textWrap，靠 iconWrap 固定宽度制造视觉留白（6px 左 + 6px 右）
+// - 无 border-l 缩进：二级通过空 iconWrap 天然缩进，不需要竖条
+// - chevron 绝对定位于 textWrap 内：不占据 flex 布局空间
+// - 激活态：透明背景 + icon/text 变蓝 + 500 字重，没有左蓝条（nxboot-v2 是自加优化）
+//
+// 历史注：曾有 ActiveIndicator（3px 左蓝条）、CollapsedNavItem / ModuleNavItem /
+// TopNavItem / SubNavItem 4 个分立组件，2026-04-18 对标飞书真实 DOM 后合并为此单一 MenuItem。
 
-/** 3px 宽左侧蓝条，激活 nav item 的视觉锚点 */
-function ActiveIndicator({ offset = 0 }: { offset?: number }) {
-  return (
-    <span
-      className="absolute top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-sm bg-[var(--sidebar-item-active-fg)]"
-      style={{ left: offset === 0 ? 0 : `-${offset}rem` }}
-    />
-  );
-}
-
-// ─── 折叠态单条目（只显示图标 + Tooltip）────────────────────
-
-function CollapsedNavItem({
-  node,
-  isActiveLeaf,
-  hasChildren,
-  Icon,
-}: {
+type MenuItemProps = {
   node: MenuNode;
-  isActiveLeaf: boolean;
-  hasChildren: boolean;
-  Icon: ElementType;
-}) {
-  return (
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <button
-          type="button"
-          data-active={isActiveLeaf && !hasChildren ? 'true' : 'false'}
-          className="sidebar-item relative w-full justify-center px-0 text-[14px]"
-        >
-          {isActiveLeaf && !hasChildren && <ActiveIndicator />}
-          <Icon className="size-4" />
-        </button>
-      </TooltipTrigger>
-      <TooltipContent side="right">{node.name}</TooltipContent>
-    </Tooltip>
-  );
-}
-
-// ─── ModuleNavItem ────────────────────────────────────────
-
-type NavItemSharedProps = {
+  depth: number;
   collapsed: boolean;
   activeLeafId: number | null;
   expandedIds: Record<number, boolean>;
   onToggleExpanded: (id: number) => void;
 };
 
-function ModuleNavItem({
+function MenuItem({
   node,
   depth,
   collapsed,
   activeLeafId,
   expandedIds,
   onToggleExpanded,
-}: { node: MenuNode; depth: number } & NavItemSharedProps) {
+}: MenuItemProps) {
   if (!isDisplayNode(node)) return null;
 
   const children = getDisplayChildren(node);
@@ -624,184 +621,84 @@ function ModuleNavItem({
   const isExpanded = expandedIds[node.id] ?? true;
   const isActiveLeaf = node.id === activeLeafId;
   const Icon = resolveMenuIcon(node.icon);
+  const showIcon = depth === 0;
+  const isActiveItem = isActiveLeaf && !hasChildren;
 
-  // 折叠态：图标 only + Tooltip
+  // 折叠态（仅顶层渲染，子级完全隐藏）
   if (collapsed) {
+    if (depth > 0) return null;
     return (
-      <CollapsedNavItem
-        node={node}
-        isActiveLeaf={isActiveLeaf}
-        hasChildren={hasChildren}
-        Icon={Icon}
-      />
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            data-active={isActiveItem ? 'true' : 'false'}
+            className="sidebar-item relative w-full justify-center px-0 text-[14px]"
+          >
+            <Icon className="size-[1.375rem]" strokeWidth={1.75} />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent side="right">{node.name}</TooltipContent>
+      </Tooltip>
     );
   }
 
-  // 子菜单项（depth > 0）
-  if (depth > 0) {
-    return (
-      <SubNavItem
-        node={node}
-        childNodes={children}
-        hasChildren={hasChildren}
-        isExpanded={isExpanded}
-        isActiveLeaf={isActiveLeaf}
-        depth={depth}
-        collapsed={collapsed}
-        activeLeafId={activeLeafId}
-        expandedIds={expandedIds}
-        onToggleExpanded={onToggleExpanded}
-      />
-    );
-  }
-
-  // 顶层项：有子菜单展开/折叠，无子菜单为叶子
-  return (
-    <TopNavItem
-      node={node}
-      childNodes={children}
-      hasChildren={hasChildren}
-      isExpanded={isExpanded}
-      isActiveLeaf={isActiveLeaf}
-      Icon={Icon}
-      collapsed={collapsed}
-      activeLeafId={activeLeafId}
-      expandedIds={expandedIds}
-      onToggleExpanded={onToggleExpanded}
-    />
-  );
-}
-
-// ─── TopNavItem（depth === 0）────────────────────────────
-
-function TopNavItem({
-  node,
-  childNodes,
-  hasChildren,
-  isExpanded,
-  isActiveLeaf,
-  Icon,
-  collapsed,
-  activeLeafId,
-  expandedIds,
-  onToggleExpanded,
-}: {
-  node: MenuNode;
-  childNodes: MenuNode[];
-  hasChildren: boolean;
-  isExpanded: boolean;
-  isActiveLeaf: boolean;
-  Icon: ElementType;
-} & NavItemSharedProps) {
-  if (hasChildren) {
-    return (
-      <div>
-        <button
-          type="button"
-          onClick={() => onToggleExpanded(node.id)}
-          className="flex h-11 w-full items-center gap-3 rounded-md px-4 text-[14px] text-[var(--sidebar-fg,var(--color-sidebar-foreground))] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)]"
-        >
-          <span className="flex w-4 shrink-0 items-center justify-center">
-            <Icon className="size-4" />
-          </span>
-          <span className="min-w-0 flex-1 truncate">{node.name}</span>
-          <ChevronDown
-            className={cn(
-              'size-3.5 shrink-0 text-muted-foreground transition-transform duration-200',
-              isExpanded ? 'rotate-0' : '-rotate-90',
-            )}
-          />
-        </button>
-        {isExpanded && (
-          <div className="ml-6 border-l border-border pl-2">
-            <div className="space-y-0.5 py-1">
-              {childNodes.map((child) => (
-                <ModuleNavItem
-                  key={child.id}
-                  node={child}
-                  depth={1}
-                  collapsed={collapsed}
-                  activeLeafId={activeLeafId}
-                  expandedIds={expandedIds}
-                  onToggleExpanded={onToggleExpanded}
-                />
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  // 无子菜单的顶层叶子节点
-  return (
-    <button
-      type="button"
-      data-active={isActiveLeaf ? 'true' : 'false'}
-      className="relative flex h-11 w-full items-center gap-3 rounded-md px-4 text-[14px] text-[var(--sidebar-fg,var(--color-sidebar-foreground))] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)] data-[active=true]:bg-[var(--sidebar-item-active-bg)] data-[active=true]:font-medium data-[active=true]:text-[var(--sidebar-item-active-fg)]"
-    >
-      {isActiveLeaf && <ActiveIndicator />}
-      <span className="flex w-4 shrink-0 items-center justify-center">
-        <Icon className="size-4" />
-      </span>
-      <span className="min-w-0 flex-1 truncate">{node.name}</span>
-    </button>
-  );
-}
-
-// ─── SubNavItem（depth > 0）──────────────────────────────
-
-function SubNavItem({
-  node,
-  childNodes,
-  hasChildren,
-  isExpanded,
-  isActiveLeaf,
-  depth,
-  collapsed,
-  activeLeafId,
-  expandedIds,
-  onToggleExpanded,
-}: {
-  node: MenuNode;
-  childNodes: MenuNode[];
-  hasChildren: boolean;
-  isExpanded: boolean;
-  isActiveLeaf: boolean;
-  depth: number;
-} & NavItemSharedProps) {
   return (
     <div>
       <button
         type="button"
-        data-active={isActiveLeaf && !hasChildren ? 'true' : 'false'}
-        className="relative flex h-[2.375rem] w-full items-center gap-2 rounded-md px-3 text-[13px] text-muted-foreground transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-foreground data-[active=true]:font-medium data-[active=true]:text-[var(--sidebar-item-active-fg)]"
+        onClick={() => hasChildren && onToggleExpanded(node.id)}
+        data-active={isActiveItem ? 'true' : 'false'}
+        className={cn(
+          // 外层 padding=0 / gap=0：iconWrap 的 ml 和固定宽度自然撑出留白（对齐飞书）
+          'flex h-12 w-full items-center text-[14px] text-[var(--sidebar-fg,var(--color-sidebar-foreground))] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)]',
+          isActiveItem && 'font-medium',
+        )}
       >
-        {isActiveLeaf && !hasChildren && <ActiveIndicator offset={0.5625} />}
-        <span className="min-w-0 flex-1 truncate">{node.name}</span>
-        {hasChildren &&
-          (isExpanded ? (
-            <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
-          ) : (
-            <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
-          ))}
+        {/* iconWrap: 36×48 with ml:6 —— 飞书的"锚点块"，即使二级空占位也保留 */}
+        <span className="ml-1.5 flex h-12 w-9 shrink-0 items-center justify-center">
+          {showIcon && Icon && (
+            <Icon
+              className={cn(
+                'size-6',
+                isActiveItem && 'text-[var(--sidebar-item-active-fg)]',
+              )}
+              strokeWidth={1.75}
+            />
+          )}
+        </span>
+        {/* textWrap: flex-1 h-12 relative —— 紧贴 iconWrap，chevron 在其内部绝对定位 */}
+        <span
+          className={cn(
+            'relative flex h-12 min-w-0 flex-1 items-center pr-7',
+            isActiveItem && 'text-[var(--sidebar-item-active-fg)]',
+          )}
+        >
+          <span className="truncate">{node.name}</span>
+          {hasChildren && (
+            <ChevronDown
+              className={cn(
+                'absolute right-[7px] top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground transition-transform duration-200',
+                !isExpanded && '-rotate-90',
+              )}
+            />
+          )}
+        </span>
       </button>
 
       {hasChildren && isExpanded && (
-        <div className="ml-4 border-l border-border pl-2">
-          <div className="space-y-0.5 py-0.5">
-            {childNodes.map((child) => (
-              <ModuleNavItem
-                key={child.id}
-                node={child}
-                depth={depth + 1}
-                collapsed={collapsed}
-                activeLeafId={activeLeafId}
-                expandedIds={expandedIds}
-                onToggleExpanded={onToggleExpanded}
-              />
-            ))}
-          </div>
+        <div>
+          {children.map((child) => (
+            <MenuItem
+              key={child.id}
+              node={child}
+              depth={depth + 1}
+              collapsed={collapsed}
+              activeLeafId={activeLeafId}
+              expandedIds={expandedIds}
+              onToggleExpanded={onToggleExpanded}
+            />
+          ))}
         </div>
       )}
     </div>
