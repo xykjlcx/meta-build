@@ -151,8 +151,9 @@ function NxTable<TData>({
         <div className="flex items-center gap-2">{batchActions}</div>
       )}
 
-      {/* 飞书感外层容器：rounded border，统一包裹表格 + 分页底栏 */}
-      <div className="overflow-hidden rounded-lg border border-border">
+      {/* 飞书感外层容器：rounded border，统一包裹表格 + 分页底栏
+       * 圆角消费 --card-radius（classic: 12px，lark-console: 4px），与 Card 保持一致 */}
+      <div className="overflow-hidden rounded-[var(--card-radius)] border border-border">
         <Table>
           <TableHeader>
             {headerGroups.map((headerGroup) => (

@@ -44,7 +44,8 @@ function SearchIcon({ className }: { className?: string }) {
  * SearchInput — 搜索输入框
  *
  * Input + 左置放大镜图标的组合组件，兼容 classic 和 lark-console 两种 Style。
- * 默认使用 `bg-muted`（灰底），focus 时变 `bg-card`（白底）+ 显示边框。
+ * 照抄 nxboot-v2 的飞书风实现：默认 `bg-muted`（在 lark-console 下 = page bg 同色，隐身），
+ * focus 时变 `bg-card`（白底）+ 显示蓝边框。hover 切到 `bg-muted/80` 略加深。
  *
  * @example
  * <SearchInput placeholder="搜索..." onChange={(e) => setQ(e.target.value)} />
@@ -63,7 +64,7 @@ export function SearchInput({ className, shortcut, ...props }: SearchInputProps)
       <Input
         type="search"
         className={cn(
-          // 去掉默认边框和阴影，使用 muted 背景
+          // 去掉默认边框和阴影，使用 muted 背景（lark-console 下 = page bg 同色）
           'border-0 bg-muted pl-8.5 shadow-none',
           // hover 状态略微加深
           'hover:bg-muted/80',
