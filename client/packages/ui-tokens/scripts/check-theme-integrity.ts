@@ -153,11 +153,12 @@ if (!existsSync(componentPath)) {
     '--chart-3',
     '--chart-4',
     '--chart-5',
-    // W1 新增 Sidebar 激活态
+    // W1 新增 Sidebar 激活态 + collapsed width（对应 component.css 里的顺序）
     '--sidebar-item-active-fg',
-    '--sidebar-item-active-weight',
+    '--sidebar-item-active-font-weight',
     '--sidebar-item-active-indicator-width',
     '--sidebar-item-active-indicator-color',
+    '--sidebar-collapsed-width',
     // W1 新增 Nav Tab
     '--nav-tab-fg',
     '--nav-tab-hover-fg',
@@ -169,8 +170,6 @@ if (!existsSync(componentPath)) {
     '--nav-tab-height',
     '--nav-tab-padding-x',
     '--nav-tab-gap',
-    // W1 新增 Sidebar collapsed width
-    '--sidebar-collapsed-width',
   ];
   const componentMissing = componentRequired.filter((name) => !componentContent.includes(name));
   if (componentMissing.length > 0) {
