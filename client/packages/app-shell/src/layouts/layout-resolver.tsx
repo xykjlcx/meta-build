@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useCurrentUser } from '../auth';
 import { useMenu } from '../menu';
 import { LayoutPresetProvider } from './layout-preset-provider';
-import { layoutRegistry } from './registry';
+import { layoutRegistry } from './registry-core';
 import { useLayoutPreset } from './use-layout-preset';
 
 interface LayoutResolverProps {

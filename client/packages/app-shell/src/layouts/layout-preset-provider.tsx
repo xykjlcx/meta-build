@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useMemo, useState } from 'react';
 import { LayoutPresetContext, type LayoutPresetContextValue } from './layout-preset-context';
-import { layoutRegistry } from './registry';
+import { layoutRegistry } from './registry-core';
 
 const STORAGE_KEY = 'mb_layout_preset';
 
