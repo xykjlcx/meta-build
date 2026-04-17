@@ -1,10 +1,12 @@
 /**
- * Style Registry —— 运行期可扩展的 style 注册表。
+ * Style Registry —— 内部 style 注册表。
  *
- * P0 重构：从硬编码 union + readonly 数组，改为 Map + registerStyle API。
- * - 使用者在自己包里 `registerStyle({...})` 即可新增 style，无需修改 ui-tokens 源码
- * - 保留数组风格的兼容 API（iterator / length / map），避免破坏 check-theme-integrity、
- *   app-shell 等现有消费代码
+ * 扩展新 style 的唯一官方方式（见 docs/specs/frontend/02-ui-tokens-theme.md）：
+ * 1. 在 packages/ui-tokens/src/tokens/semantic-<id>.css 定义 54 × 2 mode 的 token 覆写
+ * 2. 在 packages/ui-tokens/src/styles/index.css 追加 @import
+ * 3. 在本文件里 styleRegistry.register({...}) 追加注册
+ *
+ * 三步必须同步，缺一即为扩展契约断裂（UI 可选但视觉不变）。
  */
 
 export type StyleId = string;
@@ -103,11 +105,3 @@ styleRegistry.register({
   color: '#3370ff',
   cssFile: './tokens/semantic-feishu.css',
 });
-
-/**
- * 公开 API：注册一个新 style。
- * 使用方应在应用启动时（router 初始化前）调用，以便 StyleSwitcher 能读到。
- */
-export function registerStyle(meta: StyleMeta): () => void {
-  return styleRegistry.register(meta);
-}

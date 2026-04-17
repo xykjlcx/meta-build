@@ -18,10 +18,8 @@ import { registerBusinessResources } from './i18n/register';
 import { createAppRouter } from './router';
 import './styles.css';
 
-// 将当前已注册的 style ID 白名单曝露给 index.html inline script，
-// 用于 localStorage 校验（避免读到非法值时出错）。
-// 注意：应用自定义 style 应在此行之前（或此文件顶部）通过 registerStyle() 注册，
-// 本行要在所有 registerStyle 调用之后、React 挂载之前同步执行。
+// __MB_STYLE_IDS__ 曝露给 index.html inline script 用于 localStorage style 值白名单校验；
+// 扩展新 style 时需同步维护这里和 index.html 的 fallback 数组（治理方案推迟到 M6）。
 declare global {
   interface Window {
     __MB_STYLE_IDS__?: string[];

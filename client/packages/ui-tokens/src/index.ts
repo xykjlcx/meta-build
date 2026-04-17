@@ -72,7 +72,6 @@ export const TOTAL_TOKENS = 54;
 
 export {
   StyleRegistry,
-  registerStyle,
   styleRegistry,
   type StyleId,
   type StyleMeta,
