@@ -24,7 +24,7 @@ M3 以来，L4 壳层把认证后页面的布局直接写死为：
 同时，壳层重设计已经明确需要至少两种认证后布局：
 
 - `inset`
-- `module-switcher`
+- `mix`
 
 继续把它们作为零散组件直接暴露，会让“布局即契约”的边界越来越模糊。
 
@@ -53,7 +53,7 @@ M3 以来，L4 壳层把认证后页面的布局直接写死为：
 4. **布局边界**
    - `BasicLayout` 继续保留，作为无菜单/登录页布局
    - `InsetLayout` 成为新的认证后默认布局
-   - `ModuleSwitcherLayout` 作为第二个正式 preset
+   - `MixLayout` 作为第二个正式 preset
 
 5. **迁移期兼容**
    - `SidebarLayout` / `TopLayout` 在迁移期允许保留为 compatibility wrapper 或 deprecated export

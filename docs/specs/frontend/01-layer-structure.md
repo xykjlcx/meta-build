@@ -186,7 +186,7 @@ client/
 │   │       │   └── basic-layout.tsx
 │   │       ├── presets/
 │   │       │   ├── inset/
-│   │       │   └── module-switcher/
+│   │       │   └── mix/
 │   │       ├── auth/
 │   │       │   ├── use-current-user.ts        # 认证读门面（对应后端 CurrentUser）
 │   │       │   ├── use-auth.ts                # 认证写门面（对应后端 AuthFacade）
