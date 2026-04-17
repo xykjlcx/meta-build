@@ -56,8 +56,8 @@ M2-M5 阶段前端主题系统采用 `default / dark / compact` 三个平铺 the
 
 ### DOM 约定
 
-- `<html data-style="classic">`
-- `<html data-mode="dark">`
+- `<html data-theme-style="classic">`
+- `<html data-theme-color-mode="dark">`
 - `<body data-theme-scale="xs">`
 - `<body data-theme-radius="sm">`
 - `<body data-theme-content-layout="centered">`
