@@ -95,7 +95,9 @@ function openMobileDrawer() {
   // 折叠态下 sidebar 底部的展开按钮也叫 '展开侧边栏'，故用 getAllByRole 取 header 里的第一个
   const hamburgers = screen.getAllByRole('button', { name: '展开侧边栏' });
   // header 汉堡按钮始终是 DOM 里第一个同名按钮
-  fireEvent.click(hamburgers[0]!);
+  const first = hamburgers[0];
+  if (!first) throw new Error('hamburger button not found');
+  fireEvent.click(first);
 }
 
 // ---- 每个测试前清理 localStorage ----
@@ -131,7 +133,7 @@ describe('MixLayout 移动端抽屉', () => {
     expect(secondModule).toBeDefined();
 
     await act(async () => {
-      fireEvent.click(secondModule!);
+      if (secondModule) fireEvent.click(secondModule);
     });
 
     // 第 2 个模块的子菜单「用户列表」、「角色管理」应该在侧栏中可见
@@ -147,7 +149,8 @@ describe('MixLayout 移动端抽屉', () => {
     const moduleButtons = switcherNav.querySelectorAll('button');
 
     await act(async () => {
-      fireEvent.click(moduleButtons[1]!);
+      const btn = moduleButtons[1];
+      if (btn) fireEvent.click(btn);
     });
 
     // 抽屉仍然存在于 DOM，且模块切换器仍可见
@@ -170,7 +173,7 @@ describe('MixLayout 移动端抽屉', () => {
     // 对应 MixSidebar 中的逻辑：mobileOpen ? 'var(--sidebar-width)' : collapsed ? '...' : '...'
     const aside = document.querySelector('aside');
     expect(aside).not.toBeNull();
-    expect(aside!.style.width).toBe('var(--sidebar-width)');
+    expect(aside?.style.width).toBe('var(--sidebar-width)');
   });
 });
 

@@ -46,7 +46,17 @@
     "desktopHint": "This is the second official preset, aimed at multi-module SaaS navigation.",
     "sidebarMode": "Sidebar Mode",
     "sidebarExpanded": "Expanded",
-    "sidebarCollapsed": "Collapsed"
+    "sidebarCollapsed": "Collapsed",
+    "notificationLabel": "Notifications",
+    "subsystemSwitcher": "Switch System",
+    "subsystemLabel": {
+      "dashboard": "Dashboard",
+      "users": "Users",
+      "permissions": "Permissions",
+      "settings": "Settings",
+      "analytics": "Analytics",
+      "apps": "App Center"
+    }
   },
   "theme": {
     "switch": "Switch Theme",

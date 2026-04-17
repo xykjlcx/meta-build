@@ -46,7 +46,17 @@
     "desktopHint": "当前是第二套正式 preset，用于多模块 SaaS 导航。",
     "sidebarMode": "侧栏模式",
     "sidebarExpanded": "展开",
-    "sidebarCollapsed": "折叠"
+    "sidebarCollapsed": "折叠",
+    "notificationLabel": "通知",
+    "subsystemSwitcher": "切换子系统",
+    "subsystemLabel": {
+      "dashboard": "工作台",
+      "users": "用户管理",
+      "permissions": "权限管理",
+      "settings": "系统设置",
+      "analytics": "数据看板",
+      "apps": "应用中心"
+    }
   },
   "theme": {
     "switch": "切换主题",

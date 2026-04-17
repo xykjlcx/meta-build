@@ -1,3 +1,4 @@
+import { SearchInput } from '@mb/ui-patterns';
 import {
   Avatar,
   AvatarFallback,
@@ -7,13 +8,17 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
   cn,
 } from '@mb/ui-primitives';
 import {
+  Bell,
   ChevronDown,
   ChevronRight,
   Languages,
-  LayoutGrid,
   LogOut,
   Menu,
   MoreVertical,
@@ -24,13 +29,12 @@ import {
   User,
   X,
 } from 'lucide-react';
+import type { ElementType } from 'react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAuth } from '../../auth';
 import { DarkModeToggle } from '../../components/dark-mode-toggle';
-import { GlobalSearchPlaceholder } from '../../components/global-search-placeholder';
-import { LanguageSwitcher } from '../../components/language-switcher';
 import { ThemeCustomizer } from '../../components/theme-customizer';
 import { useLanguage } from '../../i18n';
 import type { ShellLayoutProps } from '../../layouts/types';
@@ -38,6 +42,7 @@ import { resolveMenuIcon } from '../../menu';
 import type { MenuNode } from '../../menu';
 import { findFirstLeafId, getDisplayChildren, isDisplayNode } from '../../menu/menu-utils';
 import { useStyle } from '../../theme';
+import { MixSubsystemSwitcher } from './mix-subsystem-switcher';
 
 export function MixLayout({ children, menuTree, currentUser, notificationSlot }: ShellLayoutProps) {
   const { t } = useTranslation('shell');
@@ -49,63 +54,59 @@ export function MixLayout({ children, menuTree, currentUser, notificationSlot }:
     useMixModules(menuTree);
 
   return (
-    <div className="min-h-screen bg-muted text-foreground">
-      <MixHeader
-        modules={modules}
-        activeModuleId={activeModuleId}
-        currentUser={currentUser}
-        notificationSlot={notificationSlot}
-        isLoggingOut={isLoggingOut}
-        onLogout={() => logout()}
-        onOpenMobileNav={() => setMobileOpen(true)}
-        onSelectModule={setActiveModuleId}
-      />
-
-      <div className="flex min-h-[calc(100vh-var(--size-header-height))] bg-muted">
-        {mobileOpen && (
-          <button
-            type="button"
-            aria-label={t('sidebar.close')}
-            className="fixed inset-0 z-30 bg-black/24 lg:hidden"
-            onClick={() => setMobileOpen(false)}
-          />
-        )}
-
-        <MixSidebar
-          activeModule={activeModule}
-          nodes={resolvedSidebarNodes}
+    <TooltipProvider>
+      <div className="min-h-screen bg-background text-foreground">
+        <MixHeader
           modules={modules}
           activeModuleId={activeModuleId}
-          collapsed={collapsed}
-          mobileOpen={mobileOpen}
-          onCloseMobile={() => setMobileOpen(false)}
-          onToggleCollapsed={() => setCollapsed((prev) => !prev)}
+          currentUser={currentUser}
+          notificationSlot={notificationSlot}
+          isLoggingOut={isLoggingOut}
+          onLogout={() => logout()}
+          onOpenMobileNav={() => setMobileOpen(true)}
           onSelectModule={setActiveModuleId}
         />
 
-        <div className="min-w-0 flex-1 bg-muted">
-          <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm text-muted-foreground lg:px-6">
-            <span>{activeModule?.name ?? t('mix.moduleFallback')}</span>
-            <ChevronRight className="size-4" />
-            <span>{t('mix.workspaceLabel')}</span>
-          </div>
+        <div className="flex min-h-[calc(100vh-var(--size-header-height))]">
+          {/* 移动端遮罩 */}
+          {mobileOpen && (
+            <button
+              type="button"
+              aria-label={t('sidebar.close')}
+              className="fixed inset-0 z-30 bg-black/24 lg:hidden"
+              onClick={() => setMobileOpen(false)}
+            />
+          )}
 
-          <main className="min-w-0 p-4 lg:p-6">
-            <div className="mb-6">
-              <div className="text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
-                {t('mix.presetLabel')}
-              </div>
-              <h1 className="mt-1 text-2xl font-semibold text-foreground">
-                {activeModule?.name ?? t('mix.title')}
-              </h1>
+          <MixSidebar
+            activeModule={activeModule}
+            nodes={resolvedSidebarNodes}
+            modules={modules}
+            activeModuleId={activeModuleId}
+            collapsed={collapsed}
+            mobileOpen={mobileOpen}
+            onCloseMobile={() => setMobileOpen(false)}
+            onToggleCollapsed={() => setCollapsed((prev) => !prev)}
+            onSelectModule={setActiveModuleId}
+          />
+
+          {/* 主内容区 */}
+          <div className="min-w-0 flex-1 bg-background">
+            <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm text-muted-foreground lg:px-6">
+              <span>{activeModule?.name ?? t('mix.moduleFallback')}</span>
+              <ChevronRight className="size-4" />
+              <span>{t('mix.workspaceLabel')}</span>
             </div>
-            {children}
-          </main>
+
+            <main className="min-w-0 p-4 lg:p-6">{children}</main>
+          </div>
         </div>
       </div>
-    </div>
+    </TooltipProvider>
   );
 }
+
+// ─── useMixModules hook ───────────────────────────────────
 
 function useMixModules(menuTree: MenuNode[]) {
   const modules = useMemo(
@@ -144,6 +145,8 @@ function useMixModules(menuTree: MenuNode[]) {
   };
 }
 
+// ─── MixHeader ────────────────────────────────────────────
+
 function MixHeader({
   modules,
   activeModuleId,
@@ -166,44 +169,69 @@ function MixHeader({
   const { t } = useTranslation('shell');
 
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-background">
-      <div className="flex h-(--size-header-height) items-center gap-4 px-4 lg:px-6">
+    <header className="sticky top-0 z-20 border-b-0 bg-card">
+      <div
+        className="flex items-center"
+        style={{
+          height: 'var(--size-header-height)',
+          paddingLeft: '1.25rem',
+          paddingRight: '1.25rem',
+        }}
+      >
         {/* 移动端汉堡按钮 */}
         <Button
           variant="ghost"
           size="icon-sm"
           onClick={onOpenMobileNav}
           aria-label={t('sidebar.expand')}
-          className="lg:hidden"
+          className="mr-2 lg:hidden"
         >
           <Menu className="size-4" />
         </Button>
 
-        {/* Logo + 品牌名 */}
-        <div className="flex min-w-0 shrink-0 items-center gap-3">
-          <div className="flex size-8 items-center justify-center rounded-md bg-foreground text-background">
-            <LayoutGrid className="size-4" />
+        {/* 左区：品牌 logo + 应用名，宽度对齐 sidebar */}
+        <div
+          className="hidden shrink-0 items-center gap-2.5 lg:flex"
+          style={{ width: 'var(--sidebar-width)', paddingRight: '1rem' }}
+        >
+          {/* Logo：正方形圆角 block，前景色底 + 背景色字 */}
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-md bg-foreground text-background">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="size-4"
+              aria-hidden="true"
+            >
+              <rect width="7" height="7" x="3" y="3" rx="1" />
+              <rect width="7" height="7" x="14" y="3" rx="1" />
+              <rect width="7" height="7" x="3" y="14" rx="1" />
+              <rect width="7" height="7" x="14" y="14" rx="1" />
+            </svg>
           </div>
-          <div className="min-w-0">
-            <div className="truncate text-sm font-semibold text-foreground">Meta Build</div>
-          </div>
+          <span className="truncate text-[16px] font-semibold tracking-[-0.01em] text-foreground">
+            Meta Build
+          </span>
         </div>
 
-        {/* 桌面端模块 Tab 导航 */}
+        {/* 中区：模块 Tab 导航（桌面端） */}
         <nav
           className="hidden min-w-0 flex-1 items-stretch overflow-x-auto lg:flex"
           style={{ gap: 'var(--nav-tab-gap)' }}
         >
           {modules.map((node) => {
             const active = node.id === activeModuleId;
-
             return (
               <button
                 key={node.id}
                 type="button"
                 onClick={() => onSelectModule(node.id)}
                 data-active={active ? 'true' : 'false'}
-                className="nav-tab text-sm font-medium"
+                className="nav-tab text-[14px] font-medium"
               >
                 {node.name}
               </button>
@@ -211,21 +239,47 @@ function MixHeader({
           })}
         </nav>
 
-        {/* 右侧控件区 */}
-        <div className="ml-auto flex shrink-0 items-center gap-1.5">
-          {/* 桌面端搜索框 */}
-          <GlobalSearchPlaceholder className="hidden md:inline-flex" />
+        {/* 右区：搜索 + 通知 + 设置 + 九宫格 + 用户 */}
+        <div className="ml-auto flex shrink-0 items-center gap-1">
+          {/* 搜索框：桌面端显示完整搜索输入框 */}
+          <SearchInput
+            placeholder={t('search.placeholder')}
+            shortcut="⌘K"
+            readOnly
+            onClick={() =>
+              toast(t('search.comingSoon'), { description: t('search.comingSoonDesc') })
+            }
+            className="hidden w-56 cursor-pointer lg:flex"
+          />
 
+          {/* 通知插槽 */}
           {notificationSlot}
 
-          {/* 桌面端控件组 */}
-          <div className="hidden items-center gap-1 md:flex">
-            <LanguageSwitcher />
+          {/* 通知铃铛（无 notificationSlot 时 fallback） */}
+          {!notificationSlot && (
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              aria-label={t('mix.notificationLabel')}
+              className="hidden md:inline-flex"
+            >
+              <Bell className="size-[1.125rem] text-[var(--color-icon-foreground)]" />
+            </Button>
+          )}
+
+          {/* 设置图标 */}
+          <div className="hidden items-center gap-0.5 md:flex">
             <ThemeCustomizer />
             <DarkModeToggle />
           </div>
 
-          {/* 桌面端 Avatar + DropdownMenu */}
+          {/* 竖分割线 */}
+          <div className="mx-1 hidden h-5 w-px bg-border md:block" />
+
+          {/* 九宫格切换器 */}
+          <MixSubsystemSwitcher />
+
+          {/* 用户头像 + DropdownMenu（桌面） */}
           <MixUserMenu currentUser={currentUser} isLoggingOut={isLoggingOut} onLogout={onLogout} />
 
           {/* 移动端 overflow 菜单 */}
@@ -236,10 +290,8 @@ function MixHeader({
   );
 }
 
-/**
- * 桌面端 Avatar + DropdownMenu（Settings + Logout）
- * 仅在 md: 以上显示。不从公共层提取——这是 mix 自己的最简版本。
- */
+// ─── MixUserMenu ──────────────────────────────────────────
+
 function MixUserMenu({
   currentUser,
   isLoggingOut,
@@ -258,14 +310,16 @@ function MixUserMenu({
         <button
           type="button"
           aria-label={t('sidebar.userMenu')}
-          className="hidden items-center gap-2 rounded-full border border-border/70 bg-background px-2.5 py-1.5 md:flex"
+          className="hidden items-center gap-2 rounded-md px-2 py-1 transition-colors duration-[var(--duration-fast)] hover:bg-secondary md:flex"
         >
           <Avatar size="sm">
             <AvatarFallback>
               <User className="size-3.5" />
             </AvatarFallback>
           </Avatar>
-          <span className="max-w-24 truncate text-sm font-medium">{displayName}</span>
+          <div className="hidden text-left lg:block">
+            <div className="max-w-24 truncate text-[14px] text-foreground">{displayName}</div>
+          </div>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="min-w-44">
@@ -283,13 +337,8 @@ function MixUserMenu({
   );
 }
 
-/**
- * 移动端（<768px）overflow 菜单。
- * - Toggle Dark：直接切换 colorMode
- * - Switch Language：循环切换已支持语言
- * - Customize Theme：弹 toast 提示
- * - Logout：直接触发
- */
+// ─── MixMobileOverflowMenu ────────────────────────────────
+
 function MixMobileOverflowMenu({
   onLogout,
   isLoggingOut,
@@ -346,6 +395,8 @@ function MixMobileOverflowMenu({
   );
 }
 
+// ─── MixSidebar ───────────────────────────────────────────
+
 function MixSidebar({
   activeModule,
   nodes,
@@ -378,18 +429,16 @@ function MixSidebar({
 
     setExpandedIds((prev) => {
       const next = { ...prev };
-
       for (const node of nodes) {
         if (node.menuType === 'DIRECTORY' && next[node.id] === undefined) {
           next[node.id] = true;
         }
       }
-
       return next;
     });
   }, [nodes]);
 
-  // 移动端抽屉宽度始终用完整宽度，忽略桌面态折叠状态（I8 修复）
+  // 移动端抽屉宽度始终用完整宽度，忽略桌面态折叠状态
   const sidebarWidth = mobileOpen
     ? 'var(--sidebar-width)'
     : collapsed
@@ -399,20 +448,24 @@ function MixSidebar({
   return (
     <aside
       className={cn(
-        'fixed inset-y-(--size-header-height) left-0 z-40 flex border-r border-border bg-muted transition-[transform,width] duration-200 ease-out lg:static lg:translate-x-0',
+        // bg-sidebar：lark-console 下 = #f2f3f5，和 page bg 同色，sidebar 融入背景
+        'fixed inset-y-(--size-header-height) left-0 z-40 flex border-r border-border bg-sidebar transition-[transform,width] duration-200 ease-out lg:static lg:translate-x-0',
         mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       )}
       style={{ width: sidebarWidth }}
     >
       <div className="flex h-full w-full flex-col">
-        <div className="flex items-center justify-between px-3 py-3">
+        {/* Sidebar 顶部：模块名 + 移动端关闭按钮 */}
+        <div
+          className={cn(
+            'flex items-center justify-between',
+            collapsed ? 'px-2 py-3 justify-center' : 'px-4 py-3',
+          )}
+        >
           {!collapsed && (
-            <div className="min-w-0">
-              <div className="truncate text-sm font-semibold text-foreground">
+            <div className="min-w-0 flex-1">
+              <div className="truncate text-[14px] font-semibold text-foreground">
                 {activeModule?.name ?? t('mix.moduleFallback')}
-              </div>
-              <div className="truncate text-xs text-muted-foreground">
-                {t('mix.moduleSidebarHint')}
               </div>
             </div>
           )}
@@ -428,7 +481,7 @@ function MixSidebar({
           </Button>
         </div>
 
-        {/* 移动端模块切换器（C1 修复）：桌面态隐藏，移动端抽屉顶部显示所有顶层模块 */}
+        {/* 移动端模块切换器：桌面态隐藏，移动端抽屉顶部显示所有顶层模块 */}
         {modules.length > 1 && (
           <nav
             className="lg:hidden border-b border-border px-2 pb-2"
@@ -444,12 +497,9 @@ function MixSidebar({
                     type="button"
                     onClick={() => onSelectModule(mod.id)}
                     data-active={isActive ? 'true' : 'false'}
-                    className={cn(
-                      'sidebar-item w-full text-left text-sm',
-                      isActive && 'bg-background text-foreground font-medium',
-                    )}
+                    className={cn('sidebar-item w-full text-left text-[14px]')}
                   >
-                    <span className="w-4 shrink-0 inline-flex items-center justify-center">
+                    <span className="flex w-4 shrink-0 items-center justify-center">
                       <Icon className="size-4" />
                     </span>
                     <span className="min-w-0 flex-1 truncate">{mod.name}</span>
@@ -460,8 +510,9 @@ function MixSidebar({
           </nav>
         )}
 
-        <nav className="flex-1 overflow-y-auto px-2 pb-3 pt-2">
-          <div className="space-y-1">
+        {/* 主导航区 */}
+        <nav className="flex-1 overflow-y-auto py-2" aria-label={activeModule?.name}>
+          <div className="space-y-0.5 px-2">
             {nodes.map((node) => (
               <ModuleNavItem
                 key={node.id}
@@ -481,25 +532,82 @@ function MixSidebar({
           </div>
         </nav>
 
-        <div className="border-t border-border p-3">
+        {/* 底部：折叠 / 展开按钮 */}
+        <div className="border-t border-border p-2">
           <button
             type="button"
             onClick={onToggleCollapsed}
             aria-label={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
             title={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
             className={cn(
-              'flex w-full items-center rounded-md px-2 py-2 text-sm text-foreground/75 transition-colors hover:bg-background hover:text-foreground',
+              'flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-[14px] text-muted-foreground transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-foreground',
               collapsed && 'justify-center px-0',
             )}
           >
-            <PanelLeft className="size-4 shrink-0" />
-            {!collapsed && <span className="ml-2">{t('sidebar.collapse')}</span>}
+            <PanelLeft
+              className={cn(
+                'size-4 shrink-0 transition-transform duration-200',
+                collapsed && 'rotate-180',
+              )}
+            />
+            {!collapsed && <span>{t('sidebar.collapse')}</span>}
           </button>
         </div>
       </div>
     </aside>
   );
 }
+
+// ─── 激活态左边蓝条（可复用的小 span）─────────────────────
+
+/** 3px 宽左侧蓝条，激活 nav item 的视觉锚点 */
+function ActiveIndicator({ offset = 0 }: { offset?: number }) {
+  return (
+    <span
+      className="absolute top-1/2 h-5 w-[3px] -translate-y-1/2 rounded-r-sm bg-[var(--sidebar-item-active-fg)]"
+      style={{ left: offset === 0 ? 0 : `-${offset}rem` }}
+    />
+  );
+}
+
+// ─── 折叠态单条目（只显示图标 + Tooltip）────────────────────
+
+function CollapsedNavItem({
+  node,
+  isActiveLeaf,
+  hasChildren,
+  Icon,
+}: {
+  node: MenuNode;
+  isActiveLeaf: boolean;
+  hasChildren: boolean;
+  Icon: ElementType;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          data-active={isActiveLeaf && !hasChildren ? 'true' : 'false'}
+          className="sidebar-item relative w-full justify-center px-0 text-[14px]"
+        >
+          {isActiveLeaf && !hasChildren && <ActiveIndicator />}
+          <Icon className="size-4" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="right">{node.name}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+// ─── ModuleNavItem ────────────────────────────────────────
+
+type NavItemSharedProps = {
+  collapsed: boolean;
+  activeLeafId: number | null;
+  expandedIds: Record<number, boolean>;
+  onToggleExpanded: (id: number) => void;
+};
 
 function ModuleNavItem({
   node,
@@ -508,69 +616,192 @@ function ModuleNavItem({
   activeLeafId,
   expandedIds,
   onToggleExpanded,
-}: {
-  node: MenuNode;
-  depth: number;
-  collapsed: boolean;
-  activeLeafId: number | null;
-  expandedIds: Record<number, boolean>;
-  onToggleExpanded: (id: number) => void;
-}) {
-  if (!isDisplayNode(node)) {
-    return null;
-  }
+}: { node: MenuNode; depth: number } & NavItemSharedProps) {
+  if (!isDisplayNode(node)) return null;
 
   const children = getDisplayChildren(node);
   const hasChildren = children.length > 0;
   const isExpanded = expandedIds[node.id] ?? true;
   const isActiveLeaf = node.id === activeLeafId;
-
-  // resolveMenuIcon 永远非空（未匹配时 fallback 到 FileText）
   const Icon = resolveMenuIcon(node.icon);
 
+  // 折叠态：图标 only + Tooltip
+  if (collapsed) {
+    return (
+      <CollapsedNavItem
+        node={node}
+        isActiveLeaf={isActiveLeaf}
+        hasChildren={hasChildren}
+        Icon={Icon}
+      />
+    );
+  }
+
+  // 子菜单项（depth > 0）
+  if (depth > 0) {
+    return (
+      <SubNavItem
+        node={node}
+        childNodes={children}
+        hasChildren={hasChildren}
+        isExpanded={isExpanded}
+        isActiveLeaf={isActiveLeaf}
+        depth={depth}
+        collapsed={collapsed}
+        activeLeafId={activeLeafId}
+        expandedIds={expandedIds}
+        onToggleExpanded={onToggleExpanded}
+      />
+    );
+  }
+
+  // 顶层项：有子菜单展开/折叠，无子菜单为叶子
+  return (
+    <TopNavItem
+      node={node}
+      childNodes={children}
+      hasChildren={hasChildren}
+      isExpanded={isExpanded}
+      isActiveLeaf={isActiveLeaf}
+      Icon={Icon}
+      collapsed={collapsed}
+      activeLeafId={activeLeafId}
+      expandedIds={expandedIds}
+      onToggleExpanded={onToggleExpanded}
+    />
+  );
+}
+
+// ─── TopNavItem（depth === 0）────────────────────────────
+
+function TopNavItem({
+  node,
+  childNodes,
+  hasChildren,
+  isExpanded,
+  isActiveLeaf,
+  Icon,
+  collapsed,
+  activeLeafId,
+  expandedIds,
+  onToggleExpanded,
+}: {
+  node: MenuNode;
+  childNodes: MenuNode[];
+  hasChildren: boolean;
+  isExpanded: boolean;
+  isActiveLeaf: boolean;
+  Icon: ElementType;
+} & NavItemSharedProps) {
+  if (hasChildren) {
+    return (
+      <div>
+        <button
+          type="button"
+          onClick={() => onToggleExpanded(node.id)}
+          className="flex h-11 w-full items-center gap-3 rounded-md px-4 text-[14px] text-[var(--sidebar-fg,var(--color-sidebar-foreground))] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)]"
+        >
+          <span className="flex w-4 shrink-0 items-center justify-center">
+            <Icon className="size-4" />
+          </span>
+          <span className="min-w-0 flex-1 truncate">{node.name}</span>
+          <ChevronDown
+            className={cn(
+              'size-3.5 shrink-0 text-muted-foreground transition-transform duration-200',
+              isExpanded ? 'rotate-0' : '-rotate-90',
+            )}
+          />
+        </button>
+        {isExpanded && (
+          <div className="ml-6 border-l border-border pl-2">
+            <div className="space-y-0.5 py-1">
+              {childNodes.map((child) => (
+                <ModuleNavItem
+                  key={child.id}
+                  node={child}
+                  depth={1}
+                  collapsed={collapsed}
+                  activeLeafId={activeLeafId}
+                  expandedIds={expandedIds}
+                  onToggleExpanded={onToggleExpanded}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // 无子菜单的顶层叶子节点
+  return (
+    <button
+      type="button"
+      data-active={isActiveLeaf ? 'true' : 'false'}
+      className="relative flex h-11 w-full items-center gap-3 rounded-md px-4 text-[14px] text-[var(--sidebar-fg,var(--color-sidebar-foreground))] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)] data-[active=true]:bg-[var(--sidebar-item-active-bg)] data-[active=true]:font-medium data-[active=true]:text-[var(--sidebar-item-active-fg)]"
+    >
+      {isActiveLeaf && <ActiveIndicator />}
+      <span className="flex w-4 shrink-0 items-center justify-center">
+        <Icon className="size-4" />
+      </span>
+      <span className="min-w-0 flex-1 truncate">{node.name}</span>
+    </button>
+  );
+}
+
+// ─── SubNavItem（depth > 0）──────────────────────────────
+
+function SubNavItem({
+  node,
+  childNodes,
+  hasChildren,
+  isExpanded,
+  isActiveLeaf,
+  depth,
+  collapsed,
+  activeLeafId,
+  expandedIds,
+  onToggleExpanded,
+}: {
+  node: MenuNode;
+  childNodes: MenuNode[];
+  hasChildren: boolean;
+  isExpanded: boolean;
+  isActiveLeaf: boolean;
+  depth: number;
+} & NavItemSharedProps) {
   return (
     <div>
       <button
         type="button"
-        onClick={() => {
-          if (hasChildren) onToggleExpanded(node.id);
-        }}
-        title={collapsed ? node.name : undefined}
         data-active={isActiveLeaf && !hasChildren ? 'true' : 'false'}
-        className={cn('sidebar-item w-full text-left text-sm', collapsed && 'justify-center px-0')}
-        style={{ paddingLeft: collapsed ? undefined : `${0.75 + depth * 0.75}rem` }}
+        className="relative flex h-[2.375rem] w-full items-center gap-2 rounded-md px-3 text-[13px] text-muted-foreground transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-foreground data-[active=true]:font-medium data-[active=true]:text-[var(--sidebar-item-active-fg)]"
       >
-        {collapsed ? (
-          <Icon className="size-4" />
-        ) : (
-          <>
-            <span className="w-4 shrink-0 inline-flex items-center justify-center">
-              <Icon className="size-4" />
-            </span>
-            <span className="min-w-0 flex-1 truncate">{node.name}</span>
-            {hasChildren &&
-              (isExpanded ? (
-                <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
-              ) : (
-                <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
-              ))}
-          </>
-        )}
+        {isActiveLeaf && !hasChildren && <ActiveIndicator offset={0.5625} />}
+        <span className="min-w-0 flex-1 truncate">{node.name}</span>
+        {hasChildren &&
+          (isExpanded ? (
+            <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
+          ) : (
+            <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
+          ))}
       </button>
 
-      {hasChildren && isExpanded && !collapsed && (
-        <div className="mt-1 space-y-1">
-          {children.map((child) => (
-            <ModuleNavItem
-              key={child.id}
-              node={child}
-              depth={depth + 1}
-              collapsed={collapsed}
-              activeLeafId={activeLeafId}
-              expandedIds={expandedIds}
-              onToggleExpanded={onToggleExpanded}
-            />
-          ))}
+      {hasChildren && isExpanded && (
+        <div className="ml-4 border-l border-border pl-2">
+          <div className="space-y-0.5 py-0.5">
+            {childNodes.map((child) => (
+              <ModuleNavItem
+                key={child.id}
+                node={child}
+                depth={depth + 1}
+                collapsed={collapsed}
+                activeLeafId={activeLeafId}
+                expandedIds={expandedIds}
+                onToggleExpanded={onToggleExpanded}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
