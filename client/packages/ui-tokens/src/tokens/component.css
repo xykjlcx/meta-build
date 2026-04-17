@@ -76,3 +76,54 @@
   --chart-4: var(--color-chart-4);
   --chart-5: var(--color-chart-5);
 }
+
+/* ========== Class-based rules（W1 新增，消费上面的 component tokens）========== */
+.nav-tab {
+  color: var(--nav-tab-fg);
+  height: var(--nav-tab-height);
+  padding-left: var(--nav-tab-padding-x);
+  padding-right: var(--nav-tab-padding-x);
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border-bottom: 0 solid transparent;
+  border-radius: 0;
+  transition:
+    color var(--duration-fast) var(--easing-out),
+    background var(--duration-fast) var(--easing-out);
+}
+
+.nav-tab:hover { color: var(--nav-tab-hover-fg); }
+
+.nav-tab[data-active='true'] {
+  color: var(--nav-tab-active-fg);
+  background: var(--nav-tab-active-bg);
+  border-radius: var(--nav-tab-active-radius);
+  border-bottom: var(--nav-tab-active-underline-width) solid var(--nav-tab-active-underline-color);
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  color: var(--sidebar-fg);
+  background: transparent;
+  font-weight: 400;
+  transition:
+    background var(--duration-fast) var(--easing-out),
+    color var(--duration-fast) var(--easing-out);
+  box-shadow: inset var(--sidebar-item-active-indicator-width) 0 0 0 transparent;
+}
+
+.sidebar-item:hover {
+  background: color-mix(in oklch, var(--sidebar-fg) 8%, transparent);
+}
+
+.sidebar-item[data-active='true'] {
+  color: var(--sidebar-item-active-fg);
+  background: var(--sidebar-item-active-bg);
+  font-weight: var(--sidebar-item-active-font-weight);
+  box-shadow: inset var(--sidebar-item-active-indicator-width) 0 0 0 var(--sidebar-item-active-indicator-color);
+}
