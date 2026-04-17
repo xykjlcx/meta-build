@@ -141,6 +141,48 @@ Phase D 后，旧兼容壳已从源码导出中移除：
 
 布局仍通过 TanStack Router 的布局路由装配（详见 [06 §2.4](./06-routing-and-data.md#24-布局路由-_authedtsx-骨架)），L5 业务路由继续零样板。
 
+### 3.5 扩展新 layout preset
+
+使用者可通过 `@mb/app-shell` 公开导出的 `registerLayout()` 注册自定义 preset。四步流程：
+
+#### 步骤 1：实现 preset 组件
+
+在应用或独立包中实现符合 `ShellLayoutProps` 的 React 组件。参考 `client/packages/app-shell/src/presets/inset/inset-layout.tsx`（最小完整实现）。
+
+必须消费的 props：`children`、`menuTree`、`currentUser`、`notificationSlot`。
+可选 props（`heroSlot` / `sidebarHeaderSlot` / `sidebarFooterSlot` / `sidebarAboveFooterSlot`）根据 preset 形态选择性渲染。
+
+#### 步骤 2：声明支持的 Customizer 维度
+
+通过 `LayoutPresetDef.supportedDimensions` 声明支持哪些 Customizer 维度（目前仅 `'contentLayout'` / `'sidebarMode'` 两个）。未声明的维度在 ThemeCustomizer UI 里对该 preset 自动 disabled。
+
+`inset` 声明了 `['contentLayout', 'sidebarMode']`；`mix` 自带二级结构不消费这两个维度，声明 `[]`。
+
+#### 步骤 3：注册
+
+在应用入口（`main.tsx`，`RouterProvider` 之前）调用：
+
+```typescript
+import { registerLayout } from '@mb/app-shell';
+import { MyLayout } from './presets/my-layout';
+
+registerLayout({
+  id: 'my-layout',
+  name: 'layout.myLayout',           // i18n key
+  description: 'layout.myLayoutDesc',
+  component: MyLayout,
+  supportedDimensions: ['contentLayout'],
+});
+```
+
+#### 步骤 4：补 i18n
+
+在 `apps/web-admin/src/i18n/zh-CN/shell.json` 和 `en-US/shell.json` 添加 `layout.myLayout` / `layout.myLayoutDesc` key。
+
+注册后 ThemeCustomizer 的 preset 下拉自动出现新选项（因为 UI 读 `layoutRegistry.list()`，动态渲染）。
+
+> **注意**：内置 preset（`inset` / `mix`）由 `packages/app-shell/src/layouts/registry.ts` 在模块加载时注册。使用者的自定义 preset 需要在应用入口显式注册，不能依赖 side-effect import 顺序。
+
 ---
 
 ## 4. 全局 Provider 树 [M3]
@@ -453,7 +495,7 @@ import { authApi } from "@mb/api-sdk";  // ✅ routes/auth/** 是登录态的建
 Header 不再是独立的全局组件，而是由各 layout preset 自管（见 §4 Layout Resolver 章节）。每个 preset（InsetLayout / MixLayout 等）内部各自实现 header，不对外暴露独立的 `Header` 组件，但所有 preset 的 header 都必须包含以下元素（通过 app-shell 提供的通用组件组装）：
 
 - **品牌链接**：`<Link to="/">`，显示 `t('brand.name')`（InsetLayout 默认；MixLayout 可能用模块切换代替）
-- **面包屑**（仅限 InsetLayout）：`<BreadcrumbNav />`，从 `@mb/app-shell` 导出
+- **面包屑**（仅限 InsetLayout）：`<BreadcrumbNav />`，从 `@mb/app-shell` 导出。**当前阶段注意**：`BreadcrumbNav` 作为 app-shell 提供的底座组件已导出，但当前 M3/M4 阶段业务页面（如 Notice 模块）仍用原始 `<Breadcrumb>` 组件手撸面包屑。统一接入方案（如通过 TanStack Router meta 自动生成）推迟到 M6。在此之前业务页面可二选一：(1) 手撸原始 `<Breadcrumb>`（当前做法）；(2) 手动传 `items` 给 `<BreadcrumbNav />`
 - **全局搜索占位**：`<GlobalSearchPlaceholder />`（M3 placeholder，真实搜索在 v1.5+）
 - **Dark 模式切换**：`<DarkModeToggle />`
 - **语言切换**：`<LanguageSwitcher />`
@@ -1176,12 +1218,10 @@ packages/app-shell/
     ├── index.ts                        # 总导出
     ├── auth/
     │   ├── index.ts
+    │   ├── types.ts
     │   ├── use-current-user.ts         # §5.1
     │   ├── use-auth.ts                 # §5.2
     │   └── require-auth.ts             # §5.3 工厂（详见 06 §3）
-    ├── router/
-    │   ├── index.ts
-    │   └── context.ts                  # RouterContext 类型定义
     ├── data/
     │   ├── index.ts
     │   └── query-client.ts             # createQueryClient（详见 06 §5）
@@ -1192,6 +1232,8 @@ packages/app-shell/
     ├── i18n/
     │   ├── index.ts
     │   ├── i18n-instance.ts            # §7.1
+    │   ├── i18n-provider.tsx
+    │   ├── types.ts
     │   ├── use-language.ts             # §7.4
     │   ├── zh-CN/                      # §7.7 类型声明已收敛到 L5（apps/web-admin/src/i18n/i18next.d.ts）
     │   │   ├── shell.json              # §7.2
@@ -1203,35 +1245,43 @@ packages/app-shell/
     │   ├── index.ts
     │   ├── use-menu.ts                 # 详见 07-menu-permission §8
     │   ├── types.ts
-    │   └── icon-map.ts                 # 详见 07-menu-permission §8.4
+    │   └── icon-resolver.ts            # 详见 07-menu-permission §8.4（实际文件名 icon-resolver.ts）
     ├── layouts/
     │   ├── index.ts
     │   ├── layout-resolver.tsx         # §3.1
-    │   ├── registry.ts                 # §3.2
+    │   ├── layout-preset-context.ts
     │   ├── layout-preset-provider.tsx
+    │   ├── registry-core.ts            # LayoutRegistry class（无循环依赖）
+    │   ├── registry-core.test.ts
+    │   ├── registry.ts                 # §3.2 side-effect 入口（注册默认 preset）
+    │   ├── types.ts                    # ShellLayoutProps / LayoutPresetDef
+    │   ├── use-layout-preset.ts
     │   └── basic-layout.tsx            # §3.4
     ├── presets/
     │   ├── inset/
     │   │   ├── index.ts
-    │   │   ├── inset-layout.tsx
-    │   │   ├── inset-header.tsx
-    │   │   └── inset-sidebar.tsx
+    │   │   └── inset-layout.tsx        # header + sidebar 合并在单文件（无独立 inset-header/inset-sidebar）
     │   └── mix/
     │       ├── index.ts
-    │       ├── mix-layout.tsx
-    │       ├── global-header.tsx
-    │       ├── module-tabs.tsx
-    │       └── module-sidebar.tsx
-    ├── customizer/
-    │   ├── theme-customizer.tsx
-    │   └── use-customizer-settings.ts
-    ├── components/
-    │   ├── breadcrumb.tsx
-    │   └── language-switcher.tsx       # §6.5
+    │       └── mix-layout.tsx          # header + tabs + sidebar 合并在单文件
+    ├── components/                     # 通用 header 组件（由各 preset 自行组合）
+    │   ├── breadcrumb-nav.tsx          # BreadcrumbNav（见 §6.1 当前阶段注意）
+    │   ├── dark-mode-toggle.tsx
+    │   ├── global-search-placeholder.tsx
+    │   ├── language-switcher.tsx       # §6.5
+    │   ├── notification-badge.tsx
+    │   └── theme-customizer.tsx        # ThemeCustomizer（在 components/ 下，无独立 customizer/ 目录）
+    ├── sse/
+    │   ├── index.ts
+    │   ├── event-bus.ts
+    │   ├── use-sse-connection.ts
+    │   └── use-sse-subscription.ts
     ├── feedback/
+    │   ├── index.ts
     │   ├── toast-container.tsx         # §6.3
     │   └── dialog-container.tsx        # §6.3
     └── error/
+        ├── index.ts
         ├── global-error-boundary.tsx   # §4.2
         ├── global-error-page.tsx
         └── global-not-found-page.tsx   # §6.4

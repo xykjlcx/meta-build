@@ -128,7 +128,7 @@ client/
 | # | 必须 | 详见 |
 |---|------|------|
 | 1 | L2 / L3 组件必须有 Storybook 故事（每个 variant 一个；M2 必做） | [10-quality-gates.md §3.1](./10-quality-gates.md) + [03-ui-primitives.md §5](./03-ui-primitives.md) |
-| 2 | 所有主题必须定义全部 46 个语义 token（主题完整性脚本校验） | [10-quality-gates.md §3.2](./10-quality-gates.md) + [02-ui-tokens-theme.md §8](./02-ui-tokens-theme.md) |
+| 2 | 所有主题必须定义全部 54 个语义 token（主题完整性脚本校验） | [10-quality-gates.md §3.2](./10-quality-gates.md) + [02-ui-tokens-theme.md §8](./02-ui-tokens-theme.md) |
 | 3 | L5 路由必须声明权限（`requireAuth({ permission: 'xxx.yyy' })` 或 `@PermitAll`） | [10-quality-gates.md §3.3](./10-quality-gates.md) + [06-routing-and-data.md §3](./06-routing-and-data.md) |
 | 4 | L5 业务代码必须通过 `@mb/api-sdk` 调后端（禁止手写 fetch / axios） | [10-quality-gates.md §3.4](./10-quality-gates.md) + [08-contract-client.md §3](./08-contract-client.md) |
 | 5 | L2-L5 组件样式必须通过 Tailwind 语义 class 消费主题 | [10-quality-gates.md §3.5](./10-quality-gates.md) + [03-ui-primitives.md §4.4](./03-ui-primitives.md) |

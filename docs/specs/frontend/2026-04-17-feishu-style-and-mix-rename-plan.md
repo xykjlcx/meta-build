@@ -1,6 +1,8 @@
 # Feishu Style + Mix Layout Rename Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+>
+> **更新日志**：2026-04-17 后 `registerStyle` 公共 API 已内部化（见 commit 43528836），本文档示例已同步为 `styleRegistry.register()`。
 
 **Goal:** 新增 `feishu` style + 把 `module-switcher` layout 重命名为 `mix` 并让其样式完全 token 驱动，验证 Style × Layout × Component Token 三层正交架构。
 
@@ -25,7 +27,7 @@ packages/ui-tokens/
 │   ├── index.css                   MODIFY  W3  加 @import '../tokens/semantic-feishu.css'
 │   ├── feishu.md                   CREATE  W2  DESIGN.md 9 章样板
 │   └── shadcn-classic.md           MODIFY  W2  第 63 行 blue 值记录更新
-├── src/index.ts                    MODIFY  W3  registerStyle('feishu')
+├── src/style-registry.ts           MODIFY  W3  styleRegistry.register({ id: 'feishu', ... })
 └── scripts/check-theme-integrity.ts MODIFY  W1  componentRequired 扩展 15 个新 tokens
 
 packages/app-shell/
@@ -703,7 +705,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 
 ## Task 7 · W2 创建 semantic-feishu.css（light + dark + W1 结构 token 覆写）
 
-**目的**：新 style 的 54 + 15 个 token 覆写齐全；`check:theme` 为 feishu 校验 PASS（注意此时 feishu 还没 registerStyle，所以不被校验——校验要等 W3 Task 9 完成后才真正发生）。
+**目的**：新 style 的 54 + 15 个 token 覆写齐全；`check:theme` 为 feishu 校验 PASS（注意此时 feishu 还没 `styleRegistry.register`，所以不被校验——校验要等 W3 Task 9 完成后才真正发生）。
 
 **Files:**
 - Create: `client/packages/ui-tokens/src/tokens/semantic-feishu.css`
@@ -860,7 +862,7 @@ Run: `grep -A 80 "TOKEN_NAMES" client/packages/ui-tokens/src/index.ts | head -80
 
 拿到完整清单后，确保 light + dark 两个 block 内每个 token 都有值。**不允许用 "..." 省略**——check:theme 会强制校验。
 
-- [ ] **Step 3: 暂不跑 check:theme**（feishu 此时没 registerStyle，校验不会走到它）
+- [ ] **Step 3: 暂不跑 check:theme**（feishu 此时没 styleRegistry.register，校验不会走到它）
 
 手动 grep 检查自己补全没：
 ```bash
@@ -983,12 +985,14 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 
 顺序铁律：primitive → semantic-* → component。
 
-- [ ] **Step 2: 更新 `ui-tokens/src/index.ts` 追加 registerStyle**
+- [ ] **Step 2: 更新 `ui-tokens/src/style-registry.ts` 追加 styleRegistry.register**
 
-找到 `styleRegistry.register({ id: 'classic', ... })` 那段（style-registry.ts 文件），或在 `index.ts` 导出之外的合适位置追加：
+> **注意**：`registerStyle` 公共 API 已内部化（commit 43528836）。直接操作 `styleRegistry.register()`，不要 import `registerStyle`。
+
+在 `ui-tokens/src/style-registry.ts` 的 `styleRegistry.register({ id: 'classic', ... })` 之后追加：
 
 ```ts
-// 在 ui-tokens/src/style-registry.ts 的 `styleRegistry.register({ id: 'classic', ... })` 之后追加：
+// 注意：不要在 src/index.ts 里 import semantic-feishu.css —— CSS 入口走 styles/index.css
 styleRegistry.register({
   id: 'feishu',
   displayName: '飞书',
@@ -1225,7 +1229,7 @@ Task 7 (semantic-feishu.css)
    ↓
 Task 8 (feishu.md DESIGN)
    ↓
-Task 9 (注册 styles/index.css + registerStyle + white-list)
+Task 9 (注册 styles/index.css + styleRegistry.register + white-list)
    ↓
 Task 10 (4 组合视觉回归 + handoff)
 ```

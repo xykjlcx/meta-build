@@ -4,6 +4,8 @@
 > 状态：Design（待实施）
 > 关联 ADR：ADR-0019（待创建）— 正交三层契约（Layout × Style × Component Token）的正式落地
 > 工作量估算：≈3.5 天（W1 1.5d + W2 1.2d + W3 0.7d）
+>
+> **更新日志**：2026-04-17 后 `registerStyle` 公共 API 已内部化（见 commit 43528836），本文档示例已同步为 `styleRegistry.register()`。注册只需调用 `style-registry.ts` 末尾的 `styleRegistry.register({...})`，无需从公共 API 导入 `registerStyle`。
 
 ---
 
@@ -67,7 +69,7 @@ client/
 │   │   ├── src/styles/
 │   │   │   ├── shadcn-classic.md       ← 不动
 │   │   │   └── feishu.md               ← W2 新建：DESIGN.md 9 章样板
-│   │   └── src/index.ts                ← W3 改：import semantic-feishu.css + registerStyle('feishu')
+│   │   └── src/style-registry.ts      ← W3 改：追加 styleRegistry.register({ id: 'feishu', ... })
 │   │
 │   └── app-shell/
 │       ├── src/presets/
@@ -434,11 +436,14 @@ const componentRequired = [
 
 **导入顺序铁律**：`primitive → semantic-* → component`，保证 semantic 使用到的 primitive 变量已定义、component 使用到的 semantic 变量已定义。
 
-#### 6.1.2 `packages/ui-tokens/src/index.ts`（JS 注册）
+#### 6.1.2 `packages/ui-tokens/src/style-registry.ts`（JS 注册）
+
+在文件末尾 `styleRegistry.register({ id: 'classic', ... })` 之后追加：
 
 ```ts
 // 注意：不要在 src/index.ts 里 import semantic-feishu.css —— CSS 入口走 styles/index.css
-registerStyle({
+// registerStyle 公共 API 已内部化（commit 43528836），使用 styleRegistry.register() 直接注册
+styleRegistry.register({
   id: 'feishu',
   displayName: '飞书',
   description: '对标飞书管理后台的品牌主题（扁平 + 浅蓝激活）',
@@ -464,7 +469,7 @@ window.__MB_STYLE_IDS__ = ['classic', 'feishu'];
 #### 6.1.4 ThemeCustomizer 与 Storybook preview
 
 - `ThemeCustomizer`（`app-shell/src/components/theme-customizer.tsx:147`）调用 `styleRegistry.getAll()`（**不是 `.list()`**——那是 LayoutRegistry 的方法，别搞混），**无需改动**
-- Storybook preview 有两处：`client/packages/ui-primitives/.storybook/preview.tsx` + `client/packages/ui-patterns/.storybook/preview.tsx`。都调用 `styleRegistry.getAll()` 动态读列表，**无需改动**——只要 6.1.1 的 CSS 入口改了、6.1.2 的 registerStyle 跑了，两个 storybook 的 toolbar switcher 会自动出现"飞书"选项。
+- Storybook preview 有两处：`client/packages/ui-primitives/.storybook/preview.tsx` + `client/packages/ui-patterns/.storybook/preview.tsx`。都调用 `styleRegistry.getAll()` 动态读列表，**无需改动**——只要 6.1.1 的 CSS 入口改了、6.1.2 的 `styleRegistry.register('feishu')` 在 `style-registry.ts` 里加了，两个 storybook 的 toolbar switcher 会自动出现"飞书"选项。
 
 ### 6.2 验证矩阵
 
@@ -522,7 +527,7 @@ pnpm check:business-words
 
 `apps/web-admin/index.html` 的 inline script 先于 module script 执行。用户 localStorage 存 `mb_style='feishu'` 时，首屏会先显示 classic，然后 React 挂载后闪变 feishu。
 
-**成因**：feishu 的 `registerStyle` 是 ui-tokens 被 import 时同步执行，但 import 发生在 module script 里，晚于 inline script。inline script 无法直接访问 `styleRegistry`（它是 ES module export，需要 `import`）。
+**成因**：feishu 的 `styleRegistry.register(...)` 是 `style-registry.ts` 被 import 时同步执行，但 import 发生在 module script 里，晚于 inline script。inline script 无法直接访问 `styleRegistry`（它是 ES module export，需要 `import`）。
 
 **缓解**：inline script 改读 `window.__MB_STYLE_IDS__` 这份**静态白名单**（由 `main.tsx` 和 `index.html` 双维护），这样 inline script 能在 React 挂载前就判断 localStorage `mb_style` 值是否合法、并设置正确的 `data-theme-style`。但 CSS 文件的加载仍跟 module script 同批次，所以首屏仍会看到 `classic` 样式闪一下再切到 feishu。
 
@@ -583,7 +588,7 @@ pnpm check:business-words
 | Token 表达策略 | 值类 + 结构类都走 CSS var | JSX 保持静态；semantic-*.css 覆写单一来源；无 attr selector 特化 |
 | Icon 兜底 | **与 Inset 一致用 `resolveMenuIcon` 的 `FileText` fallback**，不做首字母 fallback | `resolveMenuIcon` 永远返回组件（Codex 对抗审查发现），首字母三元是死代码 |
 | Sidebar 宽度 | Mix 和 Inset **共用** `--sidebar-width` / `--sidebar-collapsed-width` | 消除 mix 内部 15rem / 3.125rem 硬编码；未来想分化可新开 `--sidebar-width-mix` |
-| CSS 入口 | semantic-feishu.css 在 **`styles/index.css`** 里 @import，不在 `src/index.ts` 里 JS import | `styles/index.css` 是 web-admin + storybook 的真正 CSS 入口；JS 侧只做 `registerStyle` meta 登记 |
+| CSS 入口 | semantic-feishu.css 在 **`styles/index.css`** 里 @import，不在 `src/index.ts` 里 JS import | `styles/index.css` 是 web-admin + storybook 的真正 CSS 入口；JS 侧在 `style-registry.ts` 里 `styleRegistry.register(...)` 做 meta 登记 |
 | localStorage key | Layout 用 `mb_layout_preset`（现状），Style 用 `mb_style`，ColorMode 用 `mb_color_mode` | 不是 `mb_layout`——事实为准 |
 | 旧 id 兼容 | 不双写 | 项目零外部用户；自然回落已存在 |
 

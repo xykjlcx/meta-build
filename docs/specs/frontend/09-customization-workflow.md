@@ -81,7 +81,7 @@ meta-build 是 **纯脚手架模式**（决策 5）：使用者通过 GitHub "Us
 
 | # | 层 | 定制对象 | 改哪个文件 | AI 认知负担 | 改坏了的检测机制 | 影响范围 |
 |---|---|---------|-----------|-----------|---------------|---------|
-| 1 | L1 | 主题（色彩 / 圆角 / 密度 / 阴影 / 字体） | `client/packages/ui-tokens/src/themes/*.css` | **低** | 主题完整性脚本 + Tailwind IntelliSense + stylelint 禁硬编码 | 全站样式（所有用 token 的组件） |
+| 1 | L1 | 主题（色彩 / 圆角 / 密度 / 阴影 / 字体） | `client/packages/ui-tokens/src/tokens/semantic-*.css` | **低** | 主题完整性脚本 + Tailwind IntelliSense + stylelint 禁硬编码 | 全站样式（所有用 token 的组件） |
 | 2 | L2 | 原子组件（Button / Input / Dialog / Table / 等 30 个） | `client/packages/ui-primitives/src/{button,input,dialog}.tsx` | **中** | TS strict + Storybook 故事 + Vitest 单测 + L2 i18n 禁用规则 | 所有上层使用者（L3 / L4 / L5） |
 | 3 | L3 | 业务组件（NxTable / NxForm / NxFilter / NxDrawer / NxBar / NxLoading / ApiSelect） | `client/packages/ui-patterns/src/nx-table.tsx` 等 7 个 | **高**（懂 TanStack Table / RHF / Zod） | TS strict + Storybook 故事 + Vitest + 业务语义扫描 + 使用方 e2e | 所有用到该业务组件的页面 |
 | 4 | L4 | 壳（布局 / Provider / 全局 UI / i18n 配置） | `client/packages/app-shell/src/{layouts,providers,header,sidebar}/*.tsx` | **高**（懂路由 + 菜单 + 主题 + i18n） | TS strict + Playwright E2E + i18n 完整性脚本 | 所有用这个布局的页面 |
@@ -94,14 +94,15 @@ meta-build 是 **纯脚手架模式**（决策 5）：使用者通过 GitHub "Us
 
 ### 3.1 路径 1：L1 主题定制 [M1+M2]
 
-**改的对象**：CSS 变量（color / radius / size / shadow / motion / font，共 46 个语义 token）。
+**改的对象**：CSS 变量（color / radius / size / shadow / motion / font，共 54 个语义 token）。
 
 **改的文件**：
 
 ```
-client/packages/ui-tokens/src/themes/
-├── classic.css      # canonical style（light + dark 两套颜色）
-└── ...              # 其他 style 文件
+client/packages/ui-tokens/src/tokens/
+├── semantic-classic.css   # canonical style（light + dark 两套颜色）
+├── semantic-feishu.css    # feishu style（light + dark）
+└── ...                    # 其他 style 文件
 ```
 
 **改坏了的检测机制**（4 道防线）：
@@ -109,7 +110,7 @@ client/packages/ui-tokens/src/themes/
 | 防线 | 工具 | 触发时机 | 拦截内容 |
 |------|------|---------|---------|
 | 1 | stylelint | Vite build / CI | 主题 CSS 文件中出现非 `--<group>-<name>` 命名（违反扁平命名约定，[02 §4.1](./02-ui-tokens-theme.md#41-命名格式)） |
-| 2 | 主题完整性脚本 | `pnpm check:theme` / CI | 任一主题缺少参考主题中的 token / 多出参考主题之外的 token / 命名不扁平（实现详见 [02 §8.2](./02-ui-tokens-theme.md#82-脚本骨架)） |
+| 2 | 主题完整性脚本 | `pnpm check:theme` / CI | 任一主题缺少参考主题中的 token / 多出参考主题之外的 token / 命名不扁平（实现详见 [02 §8.2](./02-ui-tokens-theme.md#82-脚本结构)） |
 | 3 | Tailwind IntelliSense | IDE 实时 | 在组件里写 `bg-` 时 IDE 自动补全所有 token，写 `bg-[#ff0000]` IDE 不补全（视觉提示） |
 | 4 | stylelint 禁硬编码 | Vite build / CI | 组件里出现 `bg-[#xxx]` / `bg-red-500` / `rounded-[Npx]` / `style={{ color }}` 一律报错 |
 
