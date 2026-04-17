@@ -44,11 +44,15 @@ class LayoutRegistry {
     return id != null && this.presets.has(id);
   }
 
-  /** 注册一个新的布局预设，重复 id 会覆盖，返回 unregister 函数 */
+  /** 注册一个新的布局预设，重复 id 会覆盖，返回 unregister 函数；disposer 只撤销自己注册的版本 */
   register(preset: LayoutPresetDef): () => void {
+    const prev = this.presets.get(preset.id);
     this.presets.set(preset.id, preset);
     return () => {
-      this.unregister(preset.id);
+      if (this.presets.get(preset.id) === preset) {
+        if (prev) this.presets.set(preset.id, prev);
+        else this.presets.delete(preset.id);
+      }
     };
   }
 

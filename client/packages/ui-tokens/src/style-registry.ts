@@ -22,12 +22,16 @@ class StyleRegistry implements Iterable<StyleMeta> {
 
   /**
    * 注册一个 style。返回注销函数，HMR / 测试中可以调用。
-   * 重复 id 会覆盖。
+   * 重复 id 会覆盖；disposer 只撤销自己注册的版本，不影响后来的覆盖注册。
    */
   register(meta: StyleMeta): () => void {
+    const prev = this.store.get(meta.id);
     this.store.set(meta.id, meta);
     return () => {
-      this.store.delete(meta.id);
+      if (this.store.get(meta.id) === meta) {
+        if (prev) this.store.set(meta.id, prev);
+        else this.store.delete(meta.id);
+      }
     };
   }
 
