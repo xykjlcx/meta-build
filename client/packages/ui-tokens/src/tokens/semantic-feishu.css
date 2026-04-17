@@ -112,11 +112,13 @@
   --color-popover-foreground: var(--color-gray-200);
 
   /* ===== Primary / Secondary / Accent ===== */
+
   /* primary 提亮到 blue-400 保证深色下对比度 */
   --color-primary: var(--color-blue-400);
   --color-primary-foreground: var(--color-white);
   --color-secondary: var(--color-gray-700);
   --color-secondary-foreground: var(--color-gray-200);
+
   /* accent 用 color-mix 保留浅蓝底感 */
   --color-accent: color-mix(in oklch, var(--color-blue-500) 20%, var(--color-gray-900));
   --color-accent-foreground: var(--color-blue-300);

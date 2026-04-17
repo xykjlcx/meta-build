@@ -14,7 +14,7 @@
           const legacyTheme = localStorage.getItem('mb-theme')
           const style = localStorage.getItem('mb_style')
           // 白名单优先读取 main.tsx 注入的 __MB_STYLE_IDS__，兜底 classic
-          const allowedIds = window.__MB_STYLE_IDS__ ?? ['classic']
+          const allowedIds = window.__MB_STYLE_IDS__ ?? ['classic', 'feishu']
           const validStyle = style && allowedIds.includes(style) ? style : null
           const mode = localStorage.getItem('mb_color_mode')
           const validMode = mode === 'dark' ? mode : null

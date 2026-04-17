@@ -10,7 +10,6 @@ import {
   getAccessToken,
   i18n,
 } from '@mb/app-shell';
-import { styleRegistry } from '@mb/ui-tokens';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
@@ -28,7 +27,7 @@ declare global {
     __MB_STYLE_IDS__?: string[];
   }
 }
-window.__MB_STYLE_IDS__ = styleRegistry.getAllIds();
+window.__MB_STYLE_IDS__ = ['classic', 'feishu'];
 
 // Phase 1: 同步初始化（React 渲染前）
 registerBusinessResources();

@@ -91,6 +91,15 @@ styleRegistry.register({
   cssFile: './tokens/semantic-classic.css',
 });
 
+// 注册 feishu style
+styleRegistry.register({
+  id: 'feishu',
+  displayName: '飞书',
+  description: '对标飞书管理后台的品牌主题（扁平 + 浅蓝激活）',
+  color: '#3370ff',
+  cssFile: './tokens/semantic-feishu.css',
+});
+
 /**
  * 公开 API：注册一个新 style。
  * 使用方应在应用启动时（router 初始化前）调用，以便 StyleSwitcher 能读到。
