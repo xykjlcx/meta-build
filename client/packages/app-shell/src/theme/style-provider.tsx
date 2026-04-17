@@ -262,6 +262,11 @@ function applyState(state: ThemeState): void {
   }
 }
 
+/** 非法 id 归一化：返回合法的 styleId，无效值回落到 'classic' */
+function normalizeStyleId(id: StyleId): StyleId {
+  return styleRegistry.has(id) ? id : 'classic';
+}
+
 export function StyleProvider({
   children,
   defaultStyle = 'classic',
@@ -271,12 +276,14 @@ export function StyleProvider({
   defaultStyle?: StyleId;
   defaultColorMode?: ColorMode;
 }) {
+  // defaultStyle 如果非法也归一化到 'classic'
+  const safeDefaultStyle = normalizeStyleId(defaultStyle);
   const defaultState = useMemo(
-    () => createDefaultState(defaultStyle, defaultColorMode),
-    [defaultColorMode, defaultStyle],
+    () => createDefaultState(safeDefaultStyle, defaultColorMode),
+    [defaultColorMode, safeDefaultStyle],
   );
   const [state, setState] = useState<ThemeState>(() =>
-    readInitialState(defaultStyle, defaultColorMode),
+    readInitialState(safeDefaultStyle, defaultColorMode),
   );
 
   useEffect(() => {
@@ -287,7 +294,8 @@ export function StyleProvider({
     () => ({
       styleId: state.styleId,
       setStyle: (styleId) => {
-        setState((prev) => ({ ...prev, styleId }));
+        // 非法 id 归一化到 'classic'，防止外部 JS 或 AI 注入无效值（M2 修复）
+        setState((prev) => ({ ...prev, styleId: normalizeStyleId(styleId) }));
       },
       colorMode: state.colorMode,
       setColorMode: (colorMode) => {
