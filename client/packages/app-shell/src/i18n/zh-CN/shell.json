@@ -40,6 +40,7 @@
     "searchPlaceholder": "搜索模块、菜单或最近访问",
     "moduleFallback": "模块总览",
     "moduleSidebarHint": "当前模块的二级导航",
+    "moduleSwitcherLabel": "切换模块",
     "workspaceLabel": "工作区",
     "presetLabel": "Mix",
     "desktopHint": "当前是第二套正式 preset，用于多模块 SaaS 导航。",

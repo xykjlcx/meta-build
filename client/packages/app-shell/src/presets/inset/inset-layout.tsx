@@ -53,6 +53,7 @@ import { useLanguage } from '../../i18n';
 import type { ShellLayoutProps } from '../../layouts/types';
 import { resolveMenuIcon } from '../../menu';
 import type { MenuNode } from '../../menu';
+import { findFirstLeafId, getDisplayChildren, isDisplayNode } from '../../menu/menu-utils';
 import { useStyle } from '../../theme';
 
 // Sidebar 宽度对齐 shadcnuikit.com/dashboard/default（256px）
@@ -555,23 +556,4 @@ function InsetMenuNode({
       )}
     </SidebarMenuSubItem>
   );
-}
-
-function isDisplayNode(node: MenuNode) {
-  return node.visible !== false && node.menuType !== 'BUTTON';
-}
-
-function getDisplayChildren(node: MenuNode) {
-  return node.children.filter(isDisplayNode);
-}
-
-function findFirstLeafId(nodes: MenuNode[]): number | null {
-  for (const node of nodes) {
-    if (!isDisplayNode(node)) continue;
-    const children = getDisplayChildren(node);
-    if (children.length === 0) return node.id;
-    const leafId = findFirstLeafId(children);
-    if (leafId) return leafId;
-  }
-  return null;
 }

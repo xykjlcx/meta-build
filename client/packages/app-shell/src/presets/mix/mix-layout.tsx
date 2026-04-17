@@ -36,6 +36,7 @@ import { useLanguage } from '../../i18n';
 import type { ShellLayoutProps } from '../../layouts/types';
 import { resolveMenuIcon } from '../../menu';
 import type { MenuNode } from '../../menu';
+import { findFirstLeafId, getDisplayChildren, isDisplayNode } from '../../menu/menu-utils';
 import { useStyle } from '../../theme';
 
 export function MixLayout({ children, menuTree, currentUser, notificationSlot }: ShellLayoutProps) {
@@ -73,10 +74,13 @@ export function MixLayout({ children, menuTree, currentUser, notificationSlot }:
         <MixSidebar
           activeModule={activeModule}
           nodes={resolvedSidebarNodes}
+          modules={modules}
+          activeModuleId={activeModuleId}
           collapsed={collapsed}
           mobileOpen={mobileOpen}
           onCloseMobile={() => setMobileOpen(false)}
           onToggleCollapsed={() => setCollapsed((prev) => !prev)}
+          onSelectModule={setActiveModuleId}
         />
 
         <div className="min-w-0 flex-1 bg-muted">
@@ -345,17 +349,23 @@ function MixMobileOverflowMenu({
 function MixSidebar({
   activeModule,
   nodes,
+  modules,
+  activeModuleId,
   collapsed,
   mobileOpen,
   onCloseMobile,
   onToggleCollapsed,
+  onSelectModule,
 }: {
   activeModule: MenuNode | null;
   nodes: MenuNode[];
+  modules: MenuNode[];
+  activeModuleId: number | null;
   collapsed: boolean;
   mobileOpen: boolean;
   onCloseMobile: () => void;
   onToggleCollapsed: () => void;
+  onSelectModule: (id: number) => void;
 }) {
   const { t } = useTranslation('shell');
   const [expandedIds, setExpandedIds] = useState<Record<number, boolean>>({});
@@ -379,15 +389,20 @@ function MixSidebar({
     });
   }, [nodes]);
 
+  // 移动端抽屉宽度始终用完整宽度，忽略桌面态折叠状态（I8 修复）
+  const sidebarWidth = mobileOpen
+    ? 'var(--sidebar-width)'
+    : collapsed
+      ? 'var(--sidebar-collapsed-width)'
+      : 'var(--sidebar-width)';
+
   return (
     <aside
       className={cn(
         'fixed inset-y-(--size-header-height) left-0 z-40 flex border-r border-border bg-muted transition-[transform,width] duration-200 ease-out lg:static lg:translate-x-0',
         mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       )}
-      style={{
-        width: collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
-      }}
+      style={{ width: sidebarWidth }}
     >
       <div className="flex h-full w-full flex-col">
         <div className="flex items-center justify-between px-3 py-3">
@@ -413,7 +428,39 @@ function MixSidebar({
           </Button>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-2 pb-3">
+        {/* 移动端模块切换器（C1 修复）：桌面态隐藏，移动端抽屉顶部显示所有顶层模块 */}
+        {modules.length > 1 && (
+          <nav
+            className="lg:hidden border-b border-border px-2 pb-2"
+            aria-label={t('mix.moduleSwitcherLabel')}
+          >
+            <div className="space-y-0.5">
+              {modules.map((mod) => {
+                const Icon = resolveMenuIcon(mod.icon);
+                const isActive = mod.id === activeModuleId;
+                return (
+                  <button
+                    key={mod.id}
+                    type="button"
+                    onClick={() => onSelectModule(mod.id)}
+                    data-active={isActive ? 'true' : 'false'}
+                    className={cn(
+                      'sidebar-item w-full text-left text-sm',
+                      isActive && 'bg-background text-foreground font-medium',
+                    )}
+                  >
+                    <span className="w-4 shrink-0 inline-flex items-center justify-center">
+                      <Icon className="size-4" />
+                    </span>
+                    <span className="min-w-0 flex-1 truncate">{mod.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
+        )}
+
+        <nav className="flex-1 overflow-y-auto px-2 pb-3 pt-2">
           <div className="space-y-1">
             {nodes.map((node) => (
               <ModuleNavItem
@@ -528,32 +575,4 @@ function ModuleNavItem({
       )}
     </div>
   );
-}
-
-function isDisplayNode(node: MenuNode) {
-  return node.visible !== false && node.menuType !== 'BUTTON';
-}
-
-function getDisplayChildren(node: MenuNode) {
-  return node.children.filter(isDisplayNode);
-}
-
-function findFirstLeafId(nodes: MenuNode[]): number | null {
-  for (const node of nodes) {
-    if (!isDisplayNode(node)) {
-      continue;
-    }
-
-    const children = getDisplayChildren(node);
-    if (children.length === 0) {
-      return node.id;
-    }
-
-    const leafId = findFirstLeafId(children);
-    if (leafId) {
-      return leafId;
-    }
-  }
-
-  return null;
 }

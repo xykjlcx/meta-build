@@ -40,6 +40,7 @@
     "searchPlaceholder": "Search modules, menus, or recent destinations",
     "moduleFallback": "Workspace Overview",
     "moduleSidebarHint": "Secondary navigation for the active module",
+    "moduleSwitcherLabel": "Switch Module",
     "workspaceLabel": "Workspace",
     "presetLabel": "Mix",
     "desktopHint": "This is the second official preset, aimed at multi-module SaaS navigation.",
