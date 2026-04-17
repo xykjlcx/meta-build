@@ -17,12 +17,14 @@ describe('Button', () => {
 
   it('应该应用 outline variant', () => {
     render(<Button variant="outline">描边</Button>);
-    expect(screen.getByRole('button').className).toContain('border-input');
+    // 改用 border-strong token 后，class 名为 border-[var(--color-border-strong)]
+    expect(screen.getByRole('button').className).toContain('border-[var(--color-border-strong)]');
   });
 
   it('应该应用 sm 尺寸', () => {
     render(<Button size="sm">小按钮</Button>);
-    expect(screen.getByRole('button').className).toContain('h-8');
+    // 改用 control-height token 后，class 名为 h-[var(--size-control-height-sm)]
+    expect(screen.getByRole('button').className).toContain('h-[var(--size-control-height-sm)]');
   });
 
   it('应该转发 ref', () => {

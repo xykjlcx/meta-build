@@ -17,6 +17,11 @@ const badgeVariants = cva(
           'border-border text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         ghost: '[a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
         link: 'text-primary underline-offset-4 [a&]:hover:underline',
+        // soft 风格：背景用软色，文字用语义色，边框用透明或浅色
+        'destructive-soft':
+          'bg-[var(--color-destructive-soft)] text-destructive border-destructive/20',
+        'success-soft': 'bg-[var(--color-success-soft)] text-success border-success/20',
+        'warning-soft': 'bg-[var(--color-warning-soft)] text-warning border-warning/20',
       },
     },
     defaultVariants: {
