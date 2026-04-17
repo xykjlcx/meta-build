@@ -71,6 +71,9 @@ scope: [后端/前端/全栈/构建/部署/流程]
 | [优先用 orval hooks，手写 API 必须交叉验证](orval-hooks-over-handwritten.md) | customInstance, api-sdk, fetch, 手写, API, endpoint | 0415 M5 微信绑定页 3 个 API 路径全错 |
 | [新增页面必须同步补全 MSW mock handler](msw-handler-sync.md) | MSW, mock, handler, 前端页面, dev server, 401 | 0415 M5 登录后 401 循环 |
 | [Radix 组件禁止空字符串 value](radix-no-empty-value.md) | Select, SelectItem, RadioGroup, Radix, value | 0415 M5 列表页白屏 |
+| [CSS 多层 token 覆写中的 specificity 陷阱](css-selector-specificity-in-layered-tokens.md) | CSS specificity, token 覆写, semantic CSS, :root, data-theme-style, 覆写失效, feishu, 主题 | 0417 feishu W1 结构 token light 模式覆写失效，被 component 层 :root 静默覆盖 |
+| [注册表 disposer 必须用版本栈语义](registry-disposer-semantics.md) | registry, disposer, register, dispose, 注册表, 覆盖注册, 乱序, StyleRegistry, LayoutRegistry, HMR | 0417 StyleRegistry/LayoutRegistry disposer 误删同名覆盖；乱序 dispose 场景需版本栈 |
+| [color-mix() 在 semantic CSS 中可能破坏 rule 结构](postcss-color-mix-rule-structure-risk.md) | color-mix, oklch, postcss, autoprefixer, semantic CSS, hover token, 覆写无效, rule 结构, @supports | 0417 feishu semantic CSS 的 color-mix+var 被 postcss 转写破坏 block 结构，规则逃逸到全局 |
 
 ### 构建与部署
 | 规则 | triggers | 来源 |
