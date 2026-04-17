@@ -18,7 +18,7 @@ const preview: Preview = {
       toolbar: {
         title: 'Style',
         icon: 'paintbrush',
-        items: styleRegistry.map((style) => ({
+        items: styleRegistry.getAll().map((style) => ({
           value: style.id,
           title: style.displayName,
         })),
@@ -44,12 +44,12 @@ const preview: Preview = {
   },
   decorators: [
     (Story, context) => {
-      document.documentElement.dataset.style = context.globals.style ?? 'classic';
+      document.documentElement.dataset.themeStyle = context.globals.style ?? 'classic';
 
       if (context.globals.colorMode === 'dark') {
-        document.documentElement.dataset.mode = 'dark';
+        document.documentElement.dataset.themeColorMode = 'dark';
       } else {
-        delete document.documentElement.dataset.mode;
+        delete document.documentElement.dataset.themeColorMode;
       }
 
       delete document.documentElement.dataset.theme;

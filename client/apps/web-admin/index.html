@@ -13,7 +13,9 @@
           const body = document.body
           const legacyTheme = localStorage.getItem('mb-theme')
           const style = localStorage.getItem('mb_style')
-          const validStyle = style === 'classic' ? style : null
+          // 白名单优先读取 main.tsx 注入的 __MB_STYLE_IDS__，兜底 classic
+          const allowedIds = window.__MB_STYLE_IDS__ ?? ['classic']
+          const validStyle = style && allowedIds.includes(style) ? style : null
           const mode = localStorage.getItem('mb_color_mode')
           const validMode = mode === 'dark' ? mode : null
           const scale = localStorage.getItem('mb_scale')
@@ -31,15 +33,15 @@
           const validContentLayout = contentLayout === 'centered' ? contentLayout : null
 
           if (validStyle) {
-            root.dataset.style = validStyle
+            root.dataset.themeStyle = validStyle
           } else {
-            root.dataset.style = 'classic'
+            root.dataset.themeStyle = 'classic'
           }
 
           if (validMode === 'dark') {
-            root.dataset.mode = 'dark'
+            root.dataset.themeColorMode = 'dark'
           } else {
-            delete root.dataset.mode
+            delete root.dataset.themeColorMode
           }
 
           if (validScale) {
@@ -62,8 +64,8 @@
 
           if (!validStyle && legacyTheme) {
             if (legacyTheme === 'dark') {
-              root.dataset.style = 'classic'
-              root.dataset.mode = 'dark'
+              root.dataset.themeStyle = 'classic'
+              root.dataset.themeColorMode = 'dark'
               delete body.dataset.themeScale
               delete body.dataset.themeRadius
               localStorage.setItem('mb_style', 'classic')
@@ -71,8 +73,8 @@
               localStorage.removeItem('mb_scale')
               localStorage.removeItem('mb_radius')
             } else if (legacyTheme === 'compact') {
-              root.dataset.style = 'classic'
-              delete root.dataset.mode
+              root.dataset.themeStyle = 'classic'
+              delete root.dataset.themeColorMode
               body.dataset.themeScale = 'xs'
               body.dataset.themeRadius = 'sm'
               localStorage.setItem('mb_style', 'classic')
@@ -80,8 +82,8 @@
               localStorage.setItem('mb_scale', 'xs')
               localStorage.setItem('mb_radius', 'sm')
             } else {
-              root.dataset.style = 'classic'
-              delete root.dataset.mode
+              root.dataset.themeStyle = 'classic'
+              delete root.dataset.themeColorMode
               delete body.dataset.themeScale
               delete body.dataset.themeRadius
               localStorage.setItem('mb_style', 'classic')
@@ -93,7 +95,7 @@
             localStorage.removeItem('mb-theme')
           }
         } catch {
-          document.documentElement.dataset.style = 'classic'
+          document.documentElement.dataset.themeStyle = 'classic'
         }
       })()
     </script>

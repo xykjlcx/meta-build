@@ -40,6 +40,7 @@ export {
   LayoutResolver,
   LayoutPresetProvider,
   layoutRegistry,
+  registerLayout,
   useLayoutPreset,
 } from './layouts';
 

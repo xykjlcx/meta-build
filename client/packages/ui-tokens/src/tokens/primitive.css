@@ -1,0 +1,91 @@
+/* Layer 1 — Primitive tokens
+ * 所有 style 共用的原始 token（色板 / 尺寸刻度 / 字体栈 / 阴影 / 动效）。
+ * 这些是不会被 theme 覆盖的原子基底，semantic 层按需引用。
+ *
+ * 注意：仍然放在 @theme 中，让 Tailwind v4 识别并生成 utility class
+ * （如 bg-gray-500 / rounded-lg / shadow-md 等）。
+ */
+@theme {
+  /* ========== 色板 ========== */
+  /* 纯色 */
+  --color-white: oklch(1 0 0);
+  --color-black: oklch(0 0 0);
+
+  /* Gray 10 阶（zinc 冷灰色调，hue ~286） */
+  --color-gray-50: oklch(0.985 0 0);
+  --color-gray-100: oklch(0.967 0.001 286);
+  --color-gray-200: oklch(0.92 0.005 286);
+  --color-gray-300: oklch(0.872 0.008 286);
+  --color-gray-400: oklch(0.705 0.012 286);
+  --color-gray-500: oklch(0.552 0.016 286);
+  --color-gray-600: oklch(0.442 0.015 286);
+  --color-gray-700: oklch(0.37 0.012 286);
+  --color-gray-800: oklch(0.274 0.006 286);
+  --color-gray-900: oklch(0.21 0.006 286);
+  --color-gray-950: oklch(0.141 0.005 286);
+
+  /* Blue */
+  --color-blue-400: oklch(0.72 0.14 240);
+  --color-blue-500: oklch(0.65 0.15 240);
+  --color-blue-600: oklch(0.6 0.15 240);
+  --color-blue-700: oklch(0.52 0.14 240);
+
+  /* Green */
+  --color-green-400: oklch(0.72 0.17 145);
+  --color-green-500: oklch(0.62 0.19 145);
+  --color-green-600: oklch(0.55 0.17 145);
+  --color-green-700: oklch(0.48 0.16 145);
+
+  /* Red */
+  --color-red-400: oklch(0.7 0.2 27);
+  --color-red-500: oklch(0.62 0.235 27.325);
+  --color-red-600: oklch(0.577 0.245 27.325);
+  --color-red-700: oklch(0.5 0.22 27);
+
+  /* Amber */
+  --color-amber-400: oklch(0.82 0.17 85);
+  --color-amber-500: oklch(0.75 0.18 85);
+  --color-amber-600: oklch(0.68 0.17 85);
+  --color-amber-700: oklch(0.6 0.16 85);
+
+  /* ========== Radius 刻度 ========== */
+  /* 注意：customizer.css 中 [data-theme-radius='xxx'] 会覆盖 sm/md/lg/xl */
+  --radius: 0.625rem;
+  --radius-none: 0;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-full: 9999px;
+
+  /* ========== 尺寸刻度 ========== */
+  /* 控件高度三档（customizer 可切换场景，这里是默认值） */
+  --size-control-h-sm: 1.75rem;
+  --size-control-h-md: 2.25rem;
+  --size-control-h-lg: 2.5rem;
+
+  /* 全局布局尺寸 — 默认值（customizer 的 scale 维度会覆盖） */
+  --size-control-height: 2.25rem;
+  --size-header-height: 3.5rem;
+  --size-sidebar-width: 16rem;
+  --size-sidebar-width-collapsed: 4rem;
+  --size-content-max-width: 80rem;
+
+  /* ========== 字体栈 ========== */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
+  --font-heading: var(--font-sans);
+
+  /* ========== 阴影刻度（light 默认；dark 由 semantic 层覆盖） ========== */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+  /* ========== Duration / Easing ========== */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
+}

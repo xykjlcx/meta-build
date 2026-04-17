@@ -1,6 +1,11 @@
-/* Classic 风格 — 对齐 shadcnuikit.com zinc 调色板 */
+/* Layer 2 — Semantic tokens for Classic style
+ * 对齐 shadcnuikit.com zinc 调色板（hue ~286°）
+ * Selector 命名：
+ *   Light: [data-theme-style='classic']
+ *   Dark:  [data-theme-style='classic'][data-theme-color-mode='dark']
+ */
 
-[data-style='classic'] {
+[data-theme-style='classic'] {
   /* 语义色 — zinc 冷灰色调（hue ~286°） */
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.274 0.006 286);
@@ -38,7 +43,7 @@
   --color-sidebar-border: oklch(0.92 0.005 286);
   --color-sidebar-ring: oklch(0.274 0.006 286);
 
-  /* 圆角 — calc 派生，继承 @theme 中的 --radius */
+  /* 圆角 — calc 派生，继承 primitive 中的 --radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -70,7 +75,7 @@
   --font-heading: var(--font-sans);
 }
 
-[data-style='classic'][data-mode='dark'] {
+[data-theme-style='classic'][data-theme-color-mode='dark'] {
   /* 语义色 — zinc 暗色 */
   --color-background: oklch(0.141 0.004 286);
   --color-foreground: oklch(0.92 0.005 286);
@@ -108,7 +113,7 @@
   --color-sidebar-border: oklch(0.274 0.007 286);
   --color-sidebar-ring: oklch(0.92 0.005 286);
 
-  /* 圆角 — calc 派生，继承 @theme 中的 --radius */
+  /* 圆角 — calc 派生，继承 primitive 中的 --radius */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

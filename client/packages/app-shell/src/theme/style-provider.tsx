@@ -14,7 +14,9 @@ const SCALE_KEY = 'mb_scale';
 const RADIUS_KEY = 'mb_radius';
 const CONTENT_LAYOUT_KEY = 'mb_content_layout';
 
-const STYLE_IDS = new Set<StyleId>(styleRegistry.map((style) => style.id));
+function getValidStyleIds(): Set<string> {
+  return new Set(styleRegistry.getAllIds());
+}
 const SCALE_IDS = new Set<ThemeScale>(['default', 'xs', 'lg']);
 const RADIUS_IDS = new Set<ThemeRadius>(['default', 'none', 'sm', 'md', 'lg', 'xl']);
 const CONTENT_LAYOUT_IDS = new Set<ContentLayout>(['default', 'centered']);
@@ -44,7 +46,7 @@ interface ThemeState {
 export const StyleContext = createContext<StyleContextValue | null>(null);
 
 function isStyleId(value: string | null | undefined): value is StyleId {
-  return value != null && STYLE_IDS.has(value as StyleId);
+  return value != null && getValidStyleIds().has(value);
 }
 
 function isThemeScale(value: string | null | undefined): value is ThemeScale {
@@ -123,12 +125,12 @@ function readStateFromStorage(): ThemeState | null {
 }
 
 function readStateFromDom(): ThemeState | null {
-  const attrStyle = document.documentElement.dataset.style;
+  const attrStyle = document.documentElement.dataset.themeStyle;
   if (!isStyleId(attrStyle)) {
     return null;
   }
 
-  const attrMode = document.documentElement.dataset.mode;
+  const attrMode = document.documentElement.dataset.themeColorMode;
   const attrScale = document.body.dataset.themeScale;
   const attrRadius = document.body.dataset.themeRadius;
   const attrContentLayout = document.body.dataset.themeContentLayout;
@@ -214,11 +216,11 @@ function persistState(state: ThemeState): void {
 function applyState(state: ThemeState): void {
   const root = document.documentElement;
   const body = document.body;
-  root.dataset.style = state.styleId;
+  root.dataset.themeStyle = state.styleId;
   if (state.colorMode === 'dark') {
-    root.dataset.mode = 'dark';
+    root.dataset.themeColorMode = 'dark';
   } else {
-    delete root.dataset.mode;
+    delete root.dataset.themeColorMode;
   }
 
   applyBodyAttrs(body, state);

@@ -1,0 +1,55 @@
+/* Layer 3 — Component tokens
+ * 组件级 token：颜色引 semantic（会随主题变化），尺寸引 primitive（锁定值）。
+ * 默认覆盖所有 style；如需特定 style 下覆盖，可以新增 [data-theme-style='xxx'] selector。
+ */
+:root {
+  /* ========== Button ========== */
+  --button-bg: var(--color-primary);
+  --button-fg: var(--color-primary-foreground);
+  --button-height: var(--size-control-h-md);
+  --button-radius: var(--radius-md);
+  --button-padding-x: 1rem;
+  --button-shadow: var(--shadow-sm);
+
+  /* ========== Input ========== */
+  --input-bg: var(--color-background);
+  --input-border: var(--color-input);
+  --input-height: var(--size-control-h-md);
+  --input-radius: var(--radius-md);
+
+  /* ========== Card ========== */
+  --card-bg: var(--color-card);
+  --card-border: var(--color-border);
+  --card-radius: var(--radius-lg);
+  --card-shadow: var(--shadow-sm);
+
+  /* ========== Table ========== */
+  --table-header-bg: var(--color-muted);
+  --table-row-bg: var(--color-background);
+  --table-border: var(--color-border);
+  --table-row-height: var(--size-control-h-lg);
+
+  /* ========== Form ========== */
+  --form-field-gap: 1rem;
+  --form-label-fg: var(--color-foreground);
+
+  /* ========== Sidebar ========== */
+  --sidebar-bg: var(--color-sidebar);
+  --sidebar-fg: var(--color-sidebar-foreground);
+  --sidebar-width: var(--size-sidebar-width);
+  --sidebar-item-height: var(--size-control-h-md);
+  --sidebar-item-active-bg: var(--color-sidebar-accent);
+  --sidebar-margin-left: 0;
+
+  /* ========== Header ========== */
+  --header-bg: var(--color-background);
+  --header-height: var(--size-header-height);
+  --header-border: var(--color-border);
+
+  /* ========== Chart ========== */
+  --chart-1: var(--color-blue-500);
+  --chart-2: var(--color-green-500);
+  --chart-3: var(--color-amber-500);
+  --chart-4: var(--color-red-500);
+  --chart-5: var(--color-gray-500);
+}

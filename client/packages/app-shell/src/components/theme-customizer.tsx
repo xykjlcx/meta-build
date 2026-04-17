@@ -73,7 +73,7 @@ export function ThemeCustomizer() {
     setContentLayout,
     resetCustomizer,
   } = useStyle();
-  const selectedStyle = styleRegistry.find((style) => style.id === styleId);
+  const selectedStyle = styleRegistry.get(styleId);
   const contentLayoutSupported = presetId === 'inset';
 
   return (
@@ -136,7 +136,7 @@ export function ThemeCustomizer() {
             label={t('theme.styleLabel')}
             value={styleId}
             onValueChange={(value) => setStyle(value as StyleId)}
-            options={styleRegistry.map((style) => ({
+            options={styleRegistry.getAll().map((style) => ({
               value: style.id,
               label: style.displayName,
             }))}

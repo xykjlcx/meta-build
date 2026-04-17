@@ -70,4 +70,10 @@ export const TOKEN_NAMES = {
 
 export const TOTAL_TOKENS = 54;
 
-export { styleRegistry, type StyleId, type StyleMeta } from './style-registry';
+export {
+  StyleRegistry,
+  registerStyle,
+  styleRegistry,
+  type StyleId,
+  type StyleMeta,
+} from './style-registry';

@@ -39,6 +39,22 @@ class LayoutRegistry {
   has(id: string | null | undefined): boolean {
     return id != null && this.presets.has(id);
   }
+
+  /** 注册一个新的布局预设，重复 id 会覆盖，返回 unregister 函数 */
+  register(preset: LayoutPresetDef): () => void {
+    this.presets.set(preset.id, preset);
+    return () => {
+      this.unregister(preset.id);
+    };
+  }
+
+  unregister(id: string): void {
+    this.presets.delete(id);
+  }
+
+  getAllIds(): string[] {
+    return Array.from(this.presets.keys());
+  }
 }
 
 export const layoutRegistry = new LayoutRegistry('inset', [
@@ -49,3 +65,11 @@ export const layoutRegistry = new LayoutRegistry('inset', [
     component: ModuleSwitcherLayout,
   },
 ]);
+
+/**
+ * 公开 API：注册一个新布局预设。
+ * 使用方应在应用启动时（router 初始化前）调用。
+ */
+export function registerLayout(preset: LayoutPresetDef): () => void {
+  return layoutRegistry.register(preset);
+}

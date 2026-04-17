@@ -1,7 +1,25 @@
+/* Tailwind v4 @theme 入口
+ *
+ * 职责：
+ *   1. 重置 Tailwind 默认色板（--color-*: initial），避免 text-red-500 等内置 class
+ *      和我们的 semantic 命名冲突。primitive.css 会重新注册我们自己的色板。
+ *   2. 声明 semantic color token 的**默认值**（对齐 classic light），让 Tailwind v4
+ *      识别并生成 bg-primary / text-foreground 等 utility class。运行时由
+ *      [data-theme-style='xxx'] selector 在 semantic-*.css 中覆盖真实值。
+ *
+ * 注意：Tailwind v4 的 @theme 里的变量必须有**真实 CSS 值**才会生成对应 utility。
+ * 用 `initial` 会导致 utility 完全不生成。
+ *
+ * 具体 token 运行时值请见：
+ *   - tokens/primitive.css      （原始色板 / 刻度 / 字体 / 阴影 / 动效）
+ *   - tokens/semantic-classic.css （classic 主题的 54 个 semantic token，覆盖这里的默认）
+ *   - tokens/component.css      （组件级 token）
+ */
 @theme {
+  /* 清空 Tailwind 默认色板，避免命名冲突。primitive.css 会重新注册。 */
   --color-*: initial;
 
-  /* 默认色值 — 与 classic light 一致（zinc 冷灰色调） */
+  /* ====== Semantic color tokens（默认值 = classic light，运行时被 selector 覆盖） ====== */
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.274 0.006 286);
   --color-primary: oklch(0.141 0.005 286);
@@ -35,32 +53,4 @@
   --color-sidebar-accent-foreground: oklch(0.141 0.005 286);
   --color-sidebar-border: oklch(0.92 0.005 286);
   --color-sidebar-ring: oklch(0.274 0.006 286);
-
-  /* 圆角 — calc 派生，shadcn 标准模式 */
-  --radius: 0.625rem;
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-
-  --size-control-height: 2.25rem;
-  --size-header-height: 3.5rem;
-  --size-sidebar-width: 16rem;
-  --size-sidebar-width-collapsed: 4rem;
-  --size-content-max-width: 80rem;
-
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 400ms;
-  --easing-in: cubic-bezier(0.4, 0, 1, 1);
-  --easing-out: cubic-bezier(0, 0, 0.2, 1);
-
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
-  --font-heading: var(--font-sans);
 }

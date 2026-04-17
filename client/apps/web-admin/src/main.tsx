@@ -10,6 +10,7 @@ import {
   getAccessToken,
   i18n,
 } from '@mb/app-shell';
+import { styleRegistry } from '@mb/ui-tokens';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
 import { StrictMode } from 'react';
@@ -17,6 +18,17 @@ import { createRoot } from 'react-dom/client';
 import { registerBusinessResources } from './i18n/register';
 import { createAppRouter } from './router';
 import './styles.css';
+
+// 将当前已注册的 style ID 白名单曝露给 index.html inline script，
+// 用于 localStorage 校验（避免读到非法值时出错）。
+// 注意：应用自定义 style 应在此行之前（或此文件顶部）通过 registerStyle() 注册，
+// 本行要在所有 registerStyle 调用之后、React 挂载之前同步执行。
+declare global {
+  interface Window {
+    __MB_STYLE_IDS__?: string[];
+  }
+}
+window.__MB_STYLE_IDS__ = styleRegistry.getAllIds();
 
 // Phase 1: 同步初始化（React 渲染前）
 registerBusinessResources();

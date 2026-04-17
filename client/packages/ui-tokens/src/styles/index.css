@@ -1,1 +1,7 @@
-@import './classic.css';
+/* Token 三层总入口
+ * 导入顺序必须是 primitive → semantic-* → component，
+ * 保证下游引用的变量在本文件里已经定义。
+ */
+@import '../tokens/primitive.css';
+@import '../tokens/semantic-classic.css';
+@import '../tokens/component.css';

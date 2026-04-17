@@ -1,9 +1,14 @@
 /**
- * style 完整性校验脚本
- * 检查所有 style CSS block 是否包含完全一致的核心变量集合，
- * 并验证变量命名符合 flat naming 规范。
+ * Token 三层完整性校验脚本
+ *
+ * 检查内容：
+ *   1. Primitive 层（tokens/primitive.css）：必须存在，包含必需的原始 token
+ *   2. Semantic 层（tokens/semantic-*.css）：每个注册的 style 都必须提供完整的
+ *      54 个 semantic token（light + dark 两组 block），命名符合规范
+ *   3. Component 层（tokens/component.css）：必须存在，包含各组件必需的 token
+ *   4. 以 classic.light 为基准，其他 block 的 token 集合必须一致
  */
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -45,8 +50,120 @@ function filterCoreVariables(vars: string[]): string[] {
   return vars.filter((name) => CORE_VARIABLES.has(name));
 }
 
-const blocks: ParsedBlock[] = [];
 let hasError = false;
+
+// ===== Primitive 层校验 =====
+const primitivePath = resolve(srcDir, 'tokens/primitive.css');
+if (!existsSync(primitivePath)) {
+  console.error(`[FAIL] 缺少 primitive 层: ${primitivePath}`);
+  hasError = true;
+} else {
+  const primitiveContent = readFileSync(primitivePath, 'utf-8');
+  const primitiveRequired = [
+    // Gray 10 阶
+    '--color-gray-50',
+    '--color-gray-100',
+    '--color-gray-200',
+    '--color-gray-300',
+    '--color-gray-400',
+    '--color-gray-500',
+    '--color-gray-600',
+    '--color-gray-700',
+    '--color-gray-800',
+    '--color-gray-900',
+    '--color-gray-950',
+    // Accent 色板（至少 500/600）
+    '--color-blue-500',
+    '--color-blue-600',
+    '--color-green-500',
+    '--color-green-600',
+    '--color-red-500',
+    '--color-red-600',
+    '--color-amber-500',
+    '--color-amber-600',
+    // Radius 刻度
+    '--radius-none',
+    '--radius-sm',
+    '--radius-md',
+    '--radius-lg',
+    '--radius-xl',
+    '--radius-full',
+    // Size 刻度
+    '--size-control-h-sm',
+    '--size-control-h-md',
+    '--size-control-h-lg',
+    // 字体栈
+    '--font-sans',
+    '--font-mono',
+    '--font-heading',
+  ];
+  const primitiveMissing = primitiveRequired.filter((name) => !primitiveContent.includes(name));
+  if (primitiveMissing.length > 0) {
+    console.error(`[FAIL] primitive 层缺少 ${primitiveMissing.length} 个必需 token:`);
+    for (const name of primitiveMissing) console.error(`  - ${name}`);
+    hasError = true;
+  }
+}
+
+// ===== Component 层校验 =====
+const componentPath = resolve(srcDir, 'tokens/component.css');
+if (!existsSync(componentPath)) {
+  console.error(`[FAIL] 缺少 component 层: ${componentPath}`);
+  hasError = true;
+} else {
+  const componentContent = readFileSync(componentPath, 'utf-8');
+  const componentRequired = [
+    // Button
+    '--button-bg',
+    '--button-fg',
+    '--button-height',
+    '--button-radius',
+    // Input
+    '--input-bg',
+    '--input-border',
+    '--input-height',
+    '--input-radius',
+    // Card
+    '--card-bg',
+    '--card-border',
+    '--card-radius',
+    '--card-shadow',
+    // Table
+    '--table-header-bg',
+    '--table-row-bg',
+    '--table-border',
+    '--table-row-height',
+    // Form
+    '--form-field-gap',
+    '--form-label-fg',
+    // Sidebar
+    '--sidebar-bg',
+    '--sidebar-fg',
+    '--sidebar-width',
+    '--sidebar-item-height',
+    '--sidebar-item-active-bg',
+    '--sidebar-margin-left',
+    // Header
+    '--header-bg',
+    '--header-height',
+    '--header-border',
+    // Chart
+    '--chart-1',
+    '--chart-2',
+    '--chart-3',
+    '--chart-4',
+    '--chart-5',
+  ];
+  const componentMissing = componentRequired.filter((name) => !componentContent.includes(name));
+  if (componentMissing.length > 0) {
+    console.error(`[FAIL] component 层缺少 ${componentMissing.length} 个必需 token:`);
+    for (const name of componentMissing) console.error(`  - ${name}`);
+    hasError = true;
+  }
+}
+
+// ===== Semantic 层校验 =====
+const blocks: ParsedBlock[] = [];
 
 for (const style of styleRegistry) {
   const cssPath = resolve(srcDir, style.cssFile);
@@ -59,8 +176,8 @@ for (const style of styleRegistry) {
     continue;
   }
 
-  const lightSelector = `[data-style='${style.id}']`;
-  const darkSelector = `[data-style='${style.id}'][data-mode='dark']`;
+  const lightSelector = `[data-theme-style='${style.id}']`;
+  const darkSelector = `[data-theme-style='${style.id}'][data-theme-color-mode='dark']`;
 
   const lightBlock = extractBlock(content, lightSelector);
   const darkBlock = extractBlock(content, darkSelector);
@@ -150,5 +267,5 @@ if (hasError) {
 }
 
 process.stdout.write(
-  `[PASS] ${styleRegistry.length} 个 style，${blocks.length} 个 style block，每个 block ${referenceVars.length} 个变量，命名规范全部通过\n`,
+  `[PASS] 三层 token 完整性通过：${styleRegistry.length} 个 style，${blocks.length} 个 semantic block，每个 ${referenceVars.length} 个变量；primitive + component 层必需 token 全部存在\n`,
 );
