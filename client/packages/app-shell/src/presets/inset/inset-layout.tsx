@@ -30,20 +30,30 @@ import {
   ChevronDown,
   ChevronRight,
   ChevronsUpDown,
+  Languages,
   LayoutGrid,
   LogOut,
   MoreHorizontal,
+  MoreVertical,
+  Search,
   Settings,
+  Settings2,
+  SunMoon,
   User,
 } from 'lucide-react';
 import { type CSSProperties, type ReactNode, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { type CurrentUser, useAuth } from '../../auth';
+import { DarkModeToggle } from '../../components/dark-mode-toggle';
+import { GlobalSearchPlaceholder } from '../../components/global-search-placeholder';
 import { LanguageSwitcher } from '../../components/language-switcher';
 import { ThemeCustomizer } from '../../components/theme-customizer';
+import { useLanguage } from '../../i18n';
 import type { ShellLayoutProps } from '../../layouts/types';
 import { resolveMenuIcon } from '../../menu';
 import type { MenuNode } from '../../menu';
+import { useStyle } from '../../theme';
 
 // Sidebar 宽度对齐 shadcnuikit.com/dashboard/default（256px）
 const INSET_SIDEBAR_VARS = {
@@ -286,12 +296,29 @@ function InsetHeader({
     <header className="sticky top-0 z-50 flex h-(--size-header-height) shrink-0 items-center gap-2 border-b bg-background/40 px-4 backdrop-blur-md md:rounded-t-xl">
       <SidebarTrigger className="-ml-1" />
       <Separator orientation="vertical" className="mr-2 data-[orientation=vertical]:h-4" />
-      <span className="text-sm text-muted-foreground">{t('header.workspace')}</span>
+
+      {/* 中间搜索区 — 桌面端宽搜索框 */}
+      <GlobalSearchPlaceholder className="hidden md:inline-flex" />
+      {/* 移动端：仅图标 */}
+      <Button
+        variant="ghost"
+        size="icon-sm"
+        className="md:hidden"
+        aria-label={t('search.open')}
+        onClick={() => toast(t('search.comingSoon'), { description: t('search.comingSoonDesc') })}
+      >
+        <Search className="size-4" />
+      </Button>
 
       <div className="ml-auto flex shrink-0 items-center gap-1">
         {notificationSlot}
-        <LanguageSwitcher />
-        <ThemeCustomizer />
+
+        {/* 桌面端完整元素 */}
+        <div className="hidden items-center gap-1 md:flex">
+          <LanguageSwitcher />
+          <ThemeCustomizer />
+          <DarkModeToggle />
+        </div>
 
         <Separator
           orientation="vertical"
@@ -304,17 +331,85 @@ function InsetHeader({
           </AvatarFallback>
         </Avatar>
 
+        {/* 桌面端 Logout */}
         <Button
           variant="ghost"
           size="icon-sm"
           onClick={onLogout}
           disabled={isLoggingOut}
           aria-label={t('header.logout')}
+          className="hidden md:inline-flex"
         >
           <LogOut className="size-4" />
         </Button>
+
+        {/* 移动端 overflow menu */}
+        <MobileOverflowMenu onLogout={onLogout} isLoggingOut={isLoggingOut} />
       </div>
     </header>
+  );
+}
+
+/**
+ * 移动端（<768px）overflow 菜单。
+ * - Toggle Dark：直接切换 colorMode（与 DarkModeToggle 共用 StyleProvider 状态）
+ * - Switch Language：循环切换已支持语言（简化方案：桌面端 LanguageSwitcher 是 popover，不能嵌套）
+ * - Customize Theme：弹 toast 提示到桌面端使用（ThemeCustomizer 的面板较复杂）
+ * - Logout：直接触发
+ */
+function MobileOverflowMenu({
+  onLogout,
+  isLoggingOut,
+}: {
+  onLogout: () => void;
+  isLoggingOut: boolean;
+}) {
+  const { t } = useTranslation('shell');
+  const { colorMode, setColorMode } = useStyle();
+  const { language, setLanguage, supportedLanguages } = useLanguage();
+
+  function cycleLanguage() {
+    const keys = Object.keys(supportedLanguages) as (typeof language)[];
+    if (keys.length === 0) return;
+    const idx = keys.indexOf(language);
+    const next = keys[(idx + 1) % keys.length] ?? keys[0];
+    if (next) setLanguage(next);
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label={t('header.moreOptions')}
+          className="md:hidden"
+        >
+          <MoreVertical className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={() => cycleLanguage()}>
+          <Languages className="mr-2 size-4" />
+          {t('language.switch')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setColorMode(colorMode === 'dark' ? 'light' : 'dark')}>
+          <SunMoon className="mr-2 size-4" />
+          {t('header.toggleDark')}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={() => toast(t('theme.customize'), { description: t('search.comingSoonDesc') })}
+        >
+          <Settings2 className="mr-2 size-4" />
+          {t('theme.customize')}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={onLogout} disabled={isLoggingOut}>
+          <LogOut className="mr-2 size-4" />
+          {t('header.logout')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

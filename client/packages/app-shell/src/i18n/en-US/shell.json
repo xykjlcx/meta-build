@@ -16,7 +16,17 @@
     "profile": "Profile",
     "logout": "Logout",
     "workspace": "AI Workspace",
-    "operatorRole": "Operator"
+    "operatorRole": "Operator",
+    "switchToDark": "Switch to dark mode",
+    "switchToLight": "Switch to light mode",
+    "toggleDark": "Toggle dark mode",
+    "moreOptions": "More options"
+  },
+  "search": {
+    "placeholder": "Search features, pages, or menus...",
+    "comingSoon": "Global search coming soon",
+    "comingSoonDesc": "Stay tuned",
+    "open": "Open search"
   },
   "layout": {
     "inset": "Inset Shell",

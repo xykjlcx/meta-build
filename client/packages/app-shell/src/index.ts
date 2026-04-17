@@ -47,6 +47,8 @@ export {
 // components
 export { BreadcrumbNav, type BreadcrumbEntry } from './components/breadcrumb-nav';
 export { ThemeCustomizer } from './components/theme-customizer';
+export { DarkModeToggle } from './components/dark-mode-toggle';
+export { GlobalSearchPlaceholder } from './components/global-search-placeholder';
 export {
   NotificationBadge,
   type NotificationBadgeProps,
