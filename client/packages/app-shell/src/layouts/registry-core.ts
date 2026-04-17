@@ -9,8 +9,10 @@ import type { LayoutPresetDef } from './types';
  * 默认 preset 注册由 registry.ts（side-effect 入口）完成，
  * 应用启动时通过 import '@mb/app-shell/layouts/registry' 触发一次即可。
  */
-class LayoutRegistry {
+export class LayoutRegistry {
   private readonly presets = new Map<string, LayoutPresetDef>();
+  /** 版本栈：记录每个 id 的注册历史，支持乱序 dispose */
+  private readonly history = new Map<string, LayoutPresetDef[]>();
   private readonly defaultId: string;
 
   constructor(defaultId: string) {
@@ -44,14 +46,27 @@ class LayoutRegistry {
     return id != null && this.presets.has(id);
   }
 
-  /** 注册一个新的布局预设，重复 id 会覆盖，返回 unregister 函数；disposer 只撤销自己注册的版本 */
+  /**
+   * 注册一个新的布局预设，重复 id 会覆盖，返回 unregister 函数。
+   * 采用版本栈语义：乱序 dispose 时自动从栈中移除该版本，
+   * 栈顶始终是当前生效版本，全部 dispose 后自动删除。
+   */
   register(preset: LayoutPresetDef): () => void {
-    const prev = this.presets.get(preset.id);
+    const stack = this.history.get(preset.id) ?? [];
+    stack.push(preset);
+    this.history.set(preset.id, stack);
     this.presets.set(preset.id, preset);
     return () => {
-      if (this.presets.get(preset.id) === preset) {
-        if (prev) this.presets.set(preset.id, prev);
-        else this.presets.delete(preset.id);
+      const s = this.history.get(preset.id);
+      if (!s) return;
+      const idx = s.lastIndexOf(preset);
+      if (idx === -1) return;
+      s.splice(idx, 1);
+      if (s.length === 0) {
+        this.history.delete(preset.id);
+        this.presets.delete(preset.id);
+      } else {
+        this.presets.set(preset.id, s[s.length - 1] as LayoutPresetDef);
       }
     };
   }

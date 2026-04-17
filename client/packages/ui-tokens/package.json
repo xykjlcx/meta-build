@@ -13,10 +13,12 @@
     "./base-reset.css": "./src/base-reset.css"
   },
   "scripts": {
-    "check:theme": "tsx scripts/check-theme-integrity.ts"
+    "check:theme": "tsx scripts/check-theme-integrity.ts",
+    "test": "vitest run"
   },
   "devDependencies": {
     "tsx": "^4.19.0",
-    "typescript": "^5.6.0"
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
   }
 }

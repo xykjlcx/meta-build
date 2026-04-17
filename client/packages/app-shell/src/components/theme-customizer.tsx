@@ -75,8 +75,10 @@ export function ThemeCustomizer() {
     resetCustomizer,
   } = useStyle();
   const selectedStyle = styleRegistry.get(styleId);
-  const contentLayoutSupported = presetId === 'inset';
-  const sidebarModeSupported = presetId === 'inset';
+  const currentPreset = layoutRegistry.get(presetId);
+  const contentLayoutSupported =
+    currentPreset.supportedDimensions?.includes('contentLayout') ?? false;
+  const sidebarModeSupported = currentPreset.supportedDimensions?.includes('sidebarMode') ?? false;
 
   return (
     <Popover>

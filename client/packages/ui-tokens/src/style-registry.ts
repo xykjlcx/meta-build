@@ -21,18 +21,30 @@ export interface StyleMeta {
 
 class StyleRegistry implements Iterable<StyleMeta> {
   private readonly store = new Map<string, StyleMeta>();
+  /** 版本栈：记录每个 id 的注册历史，支持乱序 dispose */
+  private readonly history = new Map<string, StyleMeta[]>();
 
   /**
    * 注册一个 style。返回注销函数，HMR / 测试中可以调用。
-   * 重复 id 会覆盖；disposer 只撤销自己注册的版本，不影响后来的覆盖注册。
+   * 采用版本栈语义：乱序 dispose 时自动从栈中移除该版本，
+   * 栈顶始终是当前生效版本，全部 dispose 后自动删除。
    */
   register(meta: StyleMeta): () => void {
-    const prev = this.store.get(meta.id);
+    const stack = this.history.get(meta.id) ?? [];
+    stack.push(meta);
+    this.history.set(meta.id, stack);
     this.store.set(meta.id, meta);
     return () => {
-      if (this.store.get(meta.id) === meta) {
-        if (prev) this.store.set(meta.id, prev);
-        else this.store.delete(meta.id);
+      const s = this.history.get(meta.id);
+      if (!s) return;
+      const idx = s.lastIndexOf(meta);
+      if (idx === -1) return;
+      s.splice(idx, 1);
+      if (s.length === 0) {
+        this.history.delete(meta.id);
+        this.store.delete(meta.id);
+      } else {
+        this.store.set(meta.id, s[s.length - 1] as StyleMeta);
       }
     };
   }

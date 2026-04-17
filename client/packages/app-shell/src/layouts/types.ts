@@ -24,10 +24,16 @@ export interface ShellLayoutProps {
 
 export interface LayoutPresetDef {
   /** 唯一标识（customizer 下拉的 value） */
-  id: string;
+  readonly id: string;
   /** 可 i18n 的 name key（例：'layout.inset'）或直接展示名 */
-  name: string;
+  readonly name: string;
   /** 可 i18n 的描述 key（例：'layout.insetDesc'）；customizer 下拉 description 展示 */
-  description?: string;
-  component: ComponentType<ShellLayoutProps>;
+  readonly description?: string;
+  readonly component: ComponentType<ShellLayoutProps>;
+  /**
+   * 该 preset 支持的 Customizer 维度。
+   * 未声明的维度在 UI 里 disabled。
+   * 第三方通过 registerLayout() 注册时可按需声明。
+   */
+  readonly supportedDimensions?: ReadonlyArray<'contentLayout' | 'sidebarMode'>;
 }

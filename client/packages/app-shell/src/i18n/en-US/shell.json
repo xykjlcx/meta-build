@@ -64,9 +64,9 @@
     "scaleLabel": "Density",
     "radiusLabel": "Radius",
     "contentLayoutLabel": "Content Width",
-    "contentLayoutHint": "This setting currently applies only to the Inset layout. Mix does not use it yet.",
+    "contentLayoutHint": "Not supported by current layout",
     "sidebarModeLabel": "Sidebar Mode",
-    "sidebarModeHint": "Only the Inset layout supports this setting. Mix uses its own collapse logic.",
+    "sidebarModeHint": "Not supported by current layout",
     "summary": "Current Mix",
     "scale": { "default": "Standard", "xs": "Compact", "lg": "Relaxed" },
     "radius": {

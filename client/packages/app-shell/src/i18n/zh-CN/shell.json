@@ -64,9 +64,9 @@
     "scaleLabel": "密度尺度",
     "radiusLabel": "圆角节奏",
     "contentLayoutLabel": "内容宽度",
-    "contentLayoutHint": "当前只有 Inset 布局会应用这个设置，Mix 暂不生效。",
+    "contentLayoutHint": "当前布局不支持此维度",
     "sidebarModeLabel": "侧栏模式",
-    "sidebarModeHint": "当前只有 Inset 布局支持侧栏模式切换，Mix 有独立的折叠逻辑。",
+    "sidebarModeHint": "当前布局不支持此维度",
     "summary": "当前组合",
     "scale": { "default": "标准", "xs": "紧凑", "lg": "宽松" },
     "radius": {

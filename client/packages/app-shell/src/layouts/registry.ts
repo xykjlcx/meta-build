@@ -17,6 +17,8 @@ layoutRegistry.register({
   name: 'layout.inset',
   description: 'layout.insetDesc',
   component: InsetLayout,
+  // Inset 布局支持内容宽度和侧栏模式两个 Customizer 维度
+  supportedDimensions: ['contentLayout', 'sidebarMode'],
 });
 
 layoutRegistry.register({
@@ -24,6 +26,8 @@ layoutRegistry.register({
   name: 'layout.mix',
   description: 'layout.mixDesc',
   component: MixLayout,
+  // Mix 布局有自己的一级 tab + 二级 sidebar，暂不消费这两个 Customizer 维度
+  supportedDimensions: [],
 });
 
 // 全量 re-export，保持对旧 import path 的向后兼容
