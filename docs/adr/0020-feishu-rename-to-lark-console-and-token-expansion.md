@@ -132,3 +132,84 @@ ADR-0019 落地了正交三层 token 契约，同时实施了 `feishu` style 的
 - 更新的规范：[02-ui-tokens-theme.md](../specs/frontend/02-ui-tokens-theme.md)（token 清单 54 → 70）
 - 风格文档：[styles/lark-console.md](../../client/packages/ui-tokens/src/styles/lark-console.md)
 - 历史实施文档：[2026-04-17-feishu-style-and-mix-rename.md](../specs/frontend/2026-04-17-feishu-style-and-mix-rename.md)（保留 feishu 历史命名，顶部加更新日志说明）
+
+## 2026-04-18 夜间激活态精调（已经过两轮迭代）
+
+本 ADR 采纳后当日晚间对 `mix × lark-console` 的激活态做了两轮迭代，最终落地方案**对齐 nxboot-v2 飞书实现**。保留这段历史让未来读者能追溯决策过程。
+
+### 第一轮（短暂存在，已撤销）：下划线 tab + 灰底 sidebar
+
+基于"用户贴图 = 真实飞书"的假设，把 Tab 改为"2px 蓝色下划线 + 加粗"，Sidebar accent 改为 gray-200。**但用真实飞书管理后台截图（`g05t3iydj2i.feishu.cn/admin`）对标后发现：**
+
+- 真实飞书的 Tab 其实是**浅蓝 pill**（接近 nxboot-v2 实现），不是下划线
+- 真实飞书的 Sidebar 激活也有**浅蓝色彩倾向**，不是纯灰底
+
+第一轮方案的假设错了，立即撤销。
+
+### 第二轮（最终方案）：对齐 nxboot-v2 飞书实现
+
+直接参考 `/Users/ocean/Studio/05-codex/04-nxboot-v2/apps/admin-console/src/` 的实现，全量对齐：
+
+**Sidebar 激活态：无背景色 + 左 3px 蓝条 + 蓝字 + 蓝 icon**
+
+| Token | 值 | 对齐 nxboot-v2 |
+|---|---|---|
+| `--color-sidebar-accent` | `transparent` | nxboot-v2 `active && 'text-sidebar-accent'` 不改背景 |
+| `--color-sidebar-accent-foreground` | `var(--color-blue-500)` / `blue-400`(dark) | = `--sidebar-accent: #3370ff` |
+| `--sidebar-item-active-bg` | 引用 sidebar-accent (= transparent) | 显式无背景 |
+| `--sidebar-item-active-font-weight` | `500` (font-medium) | nxboot-v2 `font-medium` |
+
+组件层：`MixSidebar` 里 icon **不切断继承**，让它随父 button 激活文字色一起染蓝。左 3px 蓝条由 `ActiveIndicator` 组件绘制（原本就已实现）。
+
+**Tab 激活态：浅蓝 pill + 蓝字**
+
+| Token | 值 | 对齐 nxboot-v2 |
+|---|---|---|
+| `--nav-tab-active-bg` | `var(--color-blue-100)` (light) / `blue-900` (dark) | = nxboot-v2 `primary-light: #edf1ff` |
+| `--nav-tab-active-radius` | `var(--radius-sm)` (0.25rem) | = nxboot-v2 `rounded-sm` |
+| `--nav-tab-active-underline-width` | `0` | nxboot-v2 无下划线 |
+
+组件层：tab className 保持 `font-medium`（nxboot-v2 激活不额外加粗）。
+
+**SearchInput：回到 bg-muted（和 page bg 同色融合）**
+
+nxboot-v2 search-input 用 `bg-secondary`（= page bg 同色），默认态隐身，靠 focus 的白底 + 蓝 ring 区分。meta-build 的 `bg-muted` 在 lark-console 下等价，保持一致。
+
+### 决策延续性与经验
+
+- 这次精调不新增/删除 token，不翻转 ADR-0020 的 70 token 体系
+- 第一轮错走"下划线路线"的教训：**不要用用户贴的单张对比图代替真实目标的完整观察**。对标"飞书风格"时，先拉真实飞书截图或直接看 nxboot-v2 这个成熟仿品的源码，再下判断
+- ADR-0007 元方法论（继承遗产前先问原生哲学）的反向应用：nxboot-v2 本身就是按飞书原生哲学做的，直接学它是最短路径
+
+## 2026-04-18 深夜 · 第三轮全量对齐（v3，基于 computed style 实测）
+
+v2 完成后对比仍有明显差距。用 Agent Browser 直接连接真实飞书管理后台（`g05t3iydj2i.feishu.cn/admin`），通过 `getComputedStyle` 逐元素采集真实 CSS 值，发现 v2 基于 nxboot-v2 源码推断出来的设计还有 9 处偏差。完整对比报告见 `docs/handoff/feishu-vs-metabuild-gap-analysis.md`。
+
+### 9 项全量修正
+
+| # | 维度 | v2 | v3（飞书实测） | 修复位置 |
+|---|---|---|---|---|
+| 1 | Card 圆角 | 12px (rounded-xl) | **4px** | `--card-radius` token，Card/NxTable 消费 |
+| 2 | Sidebar 左 3px 蓝条 | 有（ActiveIndicator 组件） | **无** | 删除 ActiveIndicator 所有调用 |
+| 3 | Sidebar item 高度 | 44px (h-11) | **48px** | mix-layout TopNavItem → h-12 |
+| 4 | Top Tab 高度 | 32px (control-h-md) | **36px** | `--nav-tab-height: 2.25rem` |
+| 5 | Top Tab padding | 0.25rem 字面（仅 x） | **7px 12px** | 新 `--nav-tab-padding-y`，x 覆写 0.75rem |
+| 6 | Tab 激活背景 | 不透明 blue-100 | **rgba(51,112,255,0.08)** | 直接字面 rgba 值 |
+| 7 | Aside 左留白 | 贴边 (x=0) | **x=8px** | aside `lg:ml-2` |
+| 8 | Card padding-y | 24px (py-6) | **20px** | `--card-padding-y` token |
+| 9 | notice-list gap | 16px (space-y-4) | **12px** | notice-list-page 单页改 space-y-3 |
+
+### 新增 token（仍在 70 个 token 数量内，**未扩编**）
+
+v3 通过**让现有 token 被实际消费**而不是新增 token 完成修正：
+- `--card-radius`：原本已在 component.css 定义但 Card 组件没消费（用 `rounded-xl` 写死），v3 改 Card.tsx 消费这个 token
+- `--card-padding-y`：新增的组件级 token（不计入 semantic 70 个），默认 1.5rem，lark-console 覆 1.25rem
+- `--nav-tab-padding-y`：新增组件级 token，默认 0，lark-console 覆 0.4375rem
+- 这三个都是 component 层 token，不算在 semantic 70 token 清单里
+
+### 决策延续性与经验
+
+- v3 不翻转 ADR-0020 的任何宏观决策（70 semantic token / mix × lark-console 主战场 / Inset × Classic 保留原味等）
+- **最关键的教训固化为规则**：对标外部 UI 时**必须用 Agent Browser 拉 computed style**，不能凭截图目测、不能完全依赖二手仿品（即使是 nxboot-v2 这样好的仿品也有原作者的"视觉改良夹带"）
+- nxboot-v2 可作为参考**结构**（DOM 组织、class 命名），但**数值**必须以真实飞书实测为准
+- 这条规则应升级为 MUST：见 `docs/rules/`（后续补入）

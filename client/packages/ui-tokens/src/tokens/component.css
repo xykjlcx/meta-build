@@ -20,7 +20,8 @@
   /* ========== Card ========== */
   --card-bg: var(--color-card);
   --card-border: var(--color-border);
-  --card-radius: var(--radius-lg);
+  --card-radius: 0.75rem;                        /* = rounded-xl 的 12px，对齐 shadcn 原版 */
+  --card-padding-y: 1.5rem;                      /* = py-6，shadcn 原版 */
   --card-shadow: var(--shadow-sm);
 
   /* ========== Table ========== */
@@ -66,6 +67,7 @@
   --nav-tab-active-underline-color: var(--color-primary);
   --nav-tab-height: var(--size-control-h-md);
   --nav-tab-padding-x: 0.25rem;
+  --nav-tab-padding-y: 0;
   --nav-tab-gap: 1.5rem;
 
   /* ========== Chart ==========
@@ -82,8 +84,7 @@
 .nav-tab {
   color: var(--nav-tab-fg);
   height: var(--nav-tab-height);
-  padding-left: var(--nav-tab-padding-x);
-  padding-right: var(--nav-tab-padding-x);
+  padding: var(--nav-tab-padding-y) var(--nav-tab-padding-x);
   display: inline-flex;
   align-items: center;
   background: transparent;
