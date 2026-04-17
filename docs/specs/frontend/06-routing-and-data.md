@@ -134,7 +134,7 @@ function RootComponent() {
 ```typescript
 // apps/web-admin/src/routes/_authed/_authed.tsx
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { SidebarLayout } from "@mb/app-shell/layouts";
+import { LayoutResolver } from "@mb/app-shell/layouts";
 import { authApi } from "@mb/api-sdk";
 
 export const Route = createFileRoute("/_authed")({
@@ -156,14 +156,14 @@ export const Route = createFileRoute("/_authed")({
 
 function AuthedLayout() {
   return (
-    <SidebarLayout>
+    <LayoutResolver>
       <Outlet />
-    </SidebarLayout>
+    </LayoutResolver>
   );
 }
 ```
 
-**Why 布局路由**：把 `ensureQueryData` 认证守卫 / `<SidebarLayout>` 写在一个地方，子路由（`orders` / `customers` / `settings`）零样板代码就能享受统一布局和登录态守卫。子路由的 `requireAuth({ permission })` 只做权限检查，不再负责登录态判断。
+**Why 布局路由**：把 `ensureQueryData` 认证守卫 / `<LayoutResolver>` 写在一个地方，子路由（`orders` / `customers` / `settings`）零样板代码就能享受统一布局和登录态守卫。子路由的 `requireAuth({ permission })` 只做权限检查，不再负责登录态判断。
 
 ---
 

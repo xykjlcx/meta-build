@@ -285,7 +285,7 @@ export function NoticeListPage() {
           return (
             <div className="flex items-center gap-2">
               {/* 未读指示点 */}
-              {isUnread && <span className="size-1.5 shrink-0 rounded-full bg-blue-500" />}
+              {isUnread && <span className="size-1.5 shrink-0 rounded-full bg-primary" />}
               <Link
                 to="/notices/$id"
                 params={{ id: String(notice.id) }}
@@ -324,7 +324,7 @@ export function NoticeListPage() {
           return (
             <div className="flex items-center gap-2">
               <div className="h-1.5 w-16 overflow-hidden rounded-full bg-muted">
-                <div className="h-full rounded-full bg-green-500" style={{ width: `${pct}%` }} />
+                <div className="h-full rounded-full bg-primary" style={{ width: `${pct}%` }} />
               </div>
               <span className="text-xs text-muted-foreground">{pct}%</span>
             </div>
@@ -366,7 +366,7 @@ export function NoticeListPage() {
 
   // ─── 渲染 ──────────────────────────────────────────
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       {/* 面包屑 */}
       <Breadcrumb>
         <BreadcrumbList>
@@ -403,7 +403,7 @@ export function NoticeListPage() {
       </div>
 
       {/* 即时筛选栏 */}
-      <div className="flex items-center gap-3 flex-wrap">
+      <div className="flex items-center gap-2 flex-wrap">
         {/* 搜索框 */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
@@ -445,7 +445,7 @@ export function NoticeListPage() {
       </div>
 
       {/* Card 包裹表格 + 分页 */}
-      <Card>
+      <Card className="overflow-hidden shadow-none">
         <CardContent className="p-0">
           <NxTable
             data={notices}

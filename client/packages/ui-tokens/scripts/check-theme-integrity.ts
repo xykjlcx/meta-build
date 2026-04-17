@@ -1,27 +1,32 @@
 /**
- * 主题完整性校验脚本
- * 检查所有主题 CSS 文件是否包含完全一致的变量集合，
+ * style 完整性校验脚本
+ * 检查所有 style CSS block 是否包含完全一致的核心变量集合，
  * 并验证变量命名符合 flat naming 规范。
  */
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { TOTAL_TOKENS } from '../src/index';
-import { themeRegistry } from '../src/theme-registry';
+import { TOKEN_NAMES, TOTAL_TOKENS } from '../src/index';
+import { styleRegistry } from '../src/style-registry';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const srcDir = resolve(__dirname, '../src');
 
-// 命名规范：--<category>-<name>(-<suffix>)*
 const NAMING_PATTERN = /^--[a-z]+(-[a-z0-9]+)+$/;
+const CORE_VARIABLES = new Set<string>(Object.values(TOKEN_NAMES));
 
-/**
- * 从 CSS 文件中提取所有 --xxx 变量名
- */
+interface ParsedBlock {
+  id: string;
+  variables: string[];
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 function extractVariables(cssContent: string): string[] {
   const vars: string[] = [];
-  // 匹配 --xxx-yyy: value 格式的声明
   const regex = /^\s*(--[a-z][a-z0-9-]*)\s*:/gm;
   for (let match = regex.exec(cssContent); match !== null; match = regex.exec(cssContent)) {
     const name = match[1];
@@ -30,83 +35,111 @@ function extractVariables(cssContent: string): string[] {
   return vars;
 }
 
+function extractBlock(cssContent: string, selector: string): string | null {
+  const pattern = new RegExp(`${escapeRegex(selector)}\\s*\\{([\\s\\S]*?)\\}`, 'm');
+  const match = pattern.exec(cssContent);
+  return match?.[1]?.trim() ?? null;
+}
+
+function filterCoreVariables(vars: string[]): string[] {
+  return vars.filter((name) => CORE_VARIABLES.has(name));
+}
+
+const blocks: ParsedBlock[] = [];
 let hasError = false;
 
-// 收集所有主题的变量
-const themeVarsMap = new Map<string, string[]>();
-
-for (const theme of themeRegistry) {
-  const cssPath = resolve(srcDir, theme.cssFile);
-  let content: string;
+for (const style of styleRegistry) {
+  const cssPath = resolve(srcDir, style.cssFile);
+  let content = '';
   try {
     content = readFileSync(cssPath, 'utf-8');
   } catch {
-    console.error(`[FAIL] 无法读取主题文件: ${theme.id} -> ${cssPath}`);
+    console.error(`[FAIL] 无法读取 style 文件: ${style.id} -> ${cssPath}`);
     hasError = true;
     continue;
   }
 
-  const vars = extractVariables(content);
-  themeVarsMap.set(theme.id, vars);
+  const lightSelector = `[data-style='${style.id}']`;
+  const darkSelector = `[data-style='${style.id}'][data-mode='dark']`;
 
-  // 检查命名规范
-  const namingViolations = vars.filter((v) => !NAMING_PATTERN.test(v));
+  const lightBlock = extractBlock(content, lightSelector);
+  const darkBlock = extractBlock(content, darkSelector);
+
+  if (!lightBlock) {
+    console.error(`[FAIL] ${style.id}: 缺少 light block ${lightSelector}`);
+    hasError = true;
+    continue;
+  }
+
+  if (!darkBlock) {
+    console.error(`[FAIL] ${style.id}: 缺少 dark block ${darkSelector}`);
+    hasError = true;
+    continue;
+  }
+
+  blocks.push({
+    id: `${style.id}.light`,
+    variables: filterCoreVariables(extractVariables(lightBlock)),
+  });
+  blocks.push({
+    id: `${style.id}.dark`,
+    variables: filterCoreVariables(extractVariables(darkBlock)),
+  });
+
+  const allVariables = extractVariables(content);
+  const namingViolations = allVariables.filter((name) => !NAMING_PATTERN.test(name));
   if (namingViolations.length > 0) {
-    console.error(`[FAIL] ${theme.id}: 命名违规 ${namingViolations.length} 个:`);
-    for (const v of namingViolations) {
-      console.error(`  - ${v}`);
+    console.error(`[FAIL] ${style.id}: 命名违规 ${namingViolations.length} 个:`);
+    for (const name of namingViolations) {
+      console.error(`  - ${name}`);
     }
     hasError = true;
   }
 }
 
-// 以 default 为基准比较
-const referenceId = 'default';
-const referenceVars = themeVarsMap.get(referenceId);
+const referenceId = 'classic.light';
+const referenceVars = blocks.find((block) => block.id === referenceId)?.variables;
 
 if (!referenceVars) {
-  console.error(`[FAIL] 基准主题 "${referenceId}" 不存在或无法解析`);
+  console.error(`[FAIL] 基准 block "${referenceId}" 不存在或无法解析`);
   process.exit(1);
 }
 
-// 断言基准主题的 token 数量与 TOTAL_TOKENS 一致，防止全局漏删
 if (referenceVars.length !== TOTAL_TOKENS) {
   console.error(
-    `[FAIL] 基准主题 "${referenceId}" 包含 ${referenceVars.length} 个变量，预期 ${TOTAL_TOKENS} 个`,
+    `[FAIL] 基准 block "${referenceId}" 包含 ${referenceVars.length} 个变量，预期 ${TOTAL_TOKENS} 个`,
   );
   hasError = true;
 }
 
 const referenceSet = new Set(referenceVars);
 
-for (const [themeId, vars] of themeVarsMap) {
-  if (themeId === referenceId) continue;
+for (const block of blocks) {
+  if (block.id === referenceId) continue;
 
-  const currentSet = new Set(vars);
-
-  // 缺失的变量
-  const missing = referenceVars.filter((v) => !currentSet.has(v));
+  const currentSet = new Set(block.variables);
+  const missing = referenceVars.filter((variable) => !currentSet.has(variable));
   if (missing.length > 0) {
-    console.error(`[FAIL] ${themeId}: 缺少 ${missing.length} 个变量（相对 ${referenceId}）:`);
-    for (const v of missing) {
-      console.error(`  - ${v}`);
+    console.error(`[FAIL] ${block.id}: 缺少 ${missing.length} 个变量（相对 ${referenceId}）:`);
+    for (const variable of missing) {
+      console.error(`  - ${variable}`);
     }
     hasError = true;
   }
 
-  // 多余的变量
-  const extra = vars.filter((v) => !referenceSet.has(v));
+  const extra = block.variables.filter((variable) => !referenceSet.has(variable));
   if (extra.length > 0) {
-    console.error(`[FAIL] ${themeId}: 多出 ${extra.length} 个变量（相对 ${referenceId}）:`);
-    for (const v of extra) {
-      console.error(`  - ${v}`);
+    console.error(`[FAIL] ${block.id}: 多出 ${extra.length} 个变量（相对 ${referenceId}）:`);
+    for (const variable of extra) {
+      console.error(`  - ${variable}`);
     }
     hasError = true;
   }
 
-  // 变量数量
-  if (vars.length !== referenceVars.length) {
-    console.error(`[FAIL] ${themeId}: 变量数量 ${vars.length}，期望 ${referenceVars.length}`);
+  if (block.variables.length !== referenceVars.length) {
+    console.error(
+      `[FAIL] ${block.id}: 变量数量 ${block.variables.length}，期望 ${referenceVars.length}`,
+    );
     hasError = true;
   }
 }
@@ -116,9 +149,6 @@ if (hasError) {
   process.exit(1);
 }
 
-// biome 禁止 console.log，用 process.stdout 输出成功信息
-const themeCount = themeVarsMap.size;
-const varCount = referenceVars.length;
 process.stdout.write(
-  `[PASS] ${themeCount} 个主题，每个主题 ${varCount} 个变量，命名规范全部通过\n`,
+  `[PASS] ${styleRegistry.length} 个 style，${blocks.length} 个 style block，每个 block ${referenceVars.length} 个变量，命名规范全部通过\n`,
 );

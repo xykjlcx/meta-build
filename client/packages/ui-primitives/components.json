@@ -11,7 +11,9 @@
   },
   "iconLibrary": "lucide",
   "aliases": {
-    "components": "@mb/ui-primitives",
-    "utils": "@mb/ui-primitives/lib/utils"
+    "components": "./src",
+    "ui": "./src",
+    "hooks": "./src/hooks",
+    "utils": "./src/lib/utils"
   }
 }

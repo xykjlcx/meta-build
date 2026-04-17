@@ -1,0 +1,575 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - link [ref=e8] [cursor=pointer]:
+      - /url: /admin/index
+    - generic [ref=e10]:
+      - link "企业管理" [ref=e11] [cursor=pointer]:
+        - /url: /admin/index
+        - img [ref=e12]
+        - text: 企业管理
+      - generic [ref=e13] [cursor=pointer]:
+        - img [ref=e1089]
+        - text: 产品设置
+        - img [ref=e15]
+    - generic [ref=e20]:
+      - img [ref=e172]
+      - generic [ref=e174]:
+        - generic [ref=e175]: 搜索功能导航、组织数据、角色详情等
+        - textbox "搜索功能导航、组织数据、角色详情等" [ref=e176]
+      - img [ref=e28]
+    - generic [ref=e30]:
+      - button [ref=e31] [cursor=pointer]:
+        - img [ref=e33]
+      - button [ref=e37] [cursor=pointer]:
+        - img [ref=e38]
+      - button [ref=e39] [cursor=pointer]:
+        - img [ref=e42]
+      - link [ref=e45] [cursor=pointer]:
+        - /url: https://www.feishu.cn/hc/zh-cn/categories/360001917053-%E4%BC%81%E4%B8%9A%E7%AE%A1%E7%90%86?from=in_admin
+        - img [ref=e48]
+      - button [ref=e54] [cursor=pointer]:
+        - img [ref=e56]
+      - generic [ref=e179] [cursor=pointer]:
+        - generic [ref=e181]:
+          - generic [ref=e182]: 昕越科技
+          - generic [ref=e185]: 创建人
+        - img [ref=e187]
+  - generic [ref=e60]:
+    - complementary [ref=e189]:
+      - generic [ref=e192]:
+        - link "企业概览" [ref=e1090] [cursor=pointer]:
+          - /url: /admin/index
+          - img [ref=e1092]
+          - generic:
+            - generic: 企业概览
+        - generic [ref=e1095]:
+          - generic [ref=e1096] [cursor=pointer]:
+            - img [ref=e1098]
+            - generic:
+              - generic: 组织架构
+              - img
+          - generic:
+            - link "成员与部门" [ref=e1102] [cursor=pointer]:
+              - /url: /admin/contacts/departmentanduser
+              - generic:
+                - generic: 成员与部门
+            - link "角色管理" [ref=e1106] [cursor=pointer]:
+              - /url: /admin/contacts/role
+              - generic:
+                - generic: 角色管理
+            - link "单位管理" [ref=e1110] [cursor=pointer]:
+              - /url: /admin/contacts/unit
+              - generic:
+                - generic: 单位管理
+            - link "用户组管理" [ref=e1114] [cursor=pointer]:
+              - /url: /admin/contacts/group
+              - generic:
+                - generic: 用户组管理
+            - link "字段管理" [ref=e1118] [cursor=pointer]:
+              - /url: /admin/contacts/employee-field-new
+              - generic:
+                - generic: 字段管理
+            - link "人事企业版配置" [ref=e1122] [cursor=pointer]:
+              - /url: /admin/contacts/corehr
+              - generic:
+                - generic: 人事企业版配置
+        - generic [ref=e1126]:
+          - generic [ref=e1127] [cursor=pointer]:
+            - img [ref=e1129]
+            - generic:
+              - generic: 对外协作
+              - img
+          - link "关联组织" [ref=e1133] [cursor=pointer]:
+            - /url: /admin/relate/organizationlist
+            - generic:
+              - generic: 关联组织
+        - generic [ref=e1137]:
+          - generic [ref=e1138] [cursor=pointer]:
+            - img [ref=e1140]
+            - generic:
+              - generic: 会议室
+              - img
+          - generic:
+            - link "会议室管理" [ref=e1144] [cursor=pointer]:
+              - /url: /admin/meetingrooms/resource
+              - generic:
+                - generic: 会议室管理
+            - link "设备与运维" [ref=e1148] [cursor=pointer]:
+              - /url: /admin/meetingrooms/devices
+              - generic:
+                - generic: 设备与运维
+        - generic [ref=e1152]:
+          - generic [ref=e1153] [cursor=pointer]:
+            - img [ref=e1155]
+            - generic:
+              - generic: 工作台
+              - img
+          - generic:
+            - link "应用审核" [ref=e1159] [cursor=pointer]:
+              - /url: /admin/appCenter/audit
+              - generic:
+                - generic: 应用审核
+            - link "应用管理" [ref=e1163] [cursor=pointer]:
+              - /url: /admin/appCenter/manage
+              - generic:
+                - generic: 应用管理
+            - link "工作台设置" [ref=e1167] [cursor=pointer]:
+              - /url: /admin/appCenter/configuration
+              - generic:
+                - generic: 工作台设置
+            - link "定制工作台 增值版本" [ref=e1171] [cursor=pointer]:
+              - /url: /admin/appcenter/portal
+              - generic:
+                - generic: 定制工作台
+                - generic:
+                  - generic: 增值版本
+            - generic [ref=e1177]:
+              - generic [ref=e1178] [cursor=pointer]:
+                - generic:
+                  - generic: API 用量情况
+                  - img
+              - link "基础 API 调用次数" [ref=e1183] [cursor=pointer]:
+                - /url: /admin/appcenter/basic-api-calls
+                - generic:
+                  - generic: 基础 API 调用次数
+        - generic [ref=e1187]:
+          - generic [ref=e1188] [cursor=pointer]:
+            - img [ref=e1190]
+            - generic:
+              - generic: 费用中心
+              - img
+          - generic:
+            - link "我的产品" [ref=e1194] [cursor=pointer]:
+              - /url: /admin/billing/subscriptions
+              - generic:
+                - generic: 我的产品
+            - link "权益数据" [ref=e1198] [cursor=pointer]:
+              - /url: /admin/billing/equity-data
+              - generic:
+                - generic: 权益数据
+            - link "订单列表" [ref=e1202] [cursor=pointer]:
+              - /url: /admin/billing/bills
+              - generic:
+                - generic: 订单列表
+            - link "发票管理" [ref=e1206] [cursor=pointer]:
+              - /url: /admin/billing/invoice
+              - generic:
+                - generic: 发票管理
+            - link "账户管理" [ref=e1210] [cursor=pointer]:
+              - /url: /admin/billing/accounts
+              - generic:
+                - generic: 账户管理
+        - generic [ref=e1214]:
+          - generic [ref=e1215] [cursor=pointer]:
+            - img [ref=e1217]
+            - generic:
+              - generic: AI 使用管理
+              - img
+          - generic:
+            - link "用量概览" [ref=e1221] [cursor=pointer]:
+              - /url: /admin/aibilling/usage-overview
+              - generic:
+                - generic: 用量概览
+            - link "用量详情" [ref=e1225] [cursor=pointer]:
+              - /url: /admin/aibilling/usage-detail
+              - generic:
+                - generic: 用量详情
+            - link "用量日志" [ref=e1229] [cursor=pointer]:
+              - /url: /admin/aibilling/usage-log
+              - generic:
+                - generic: 用量日志
+            - link "限额管理" [ref=e1233] [cursor=pointer]:
+              - /url: /admin/aibilling/quota-manage
+              - generic:
+                - generic: 限额管理
+        - generic [ref=e1237]:
+          - generic [ref=e1238] [cursor=pointer]:
+            - img [ref=e1240]
+            - generic:
+              - generic: 存储空间
+              - img
+          - generic:
+            - link "容量概览" [ref=e1244] [cursor=pointer]:
+              - /url: /admin/drive/quota/usage
+              - generic:
+                - generic: 容量概览
+            - link "存储清理" [ref=e1248] [cursor=pointer]:
+              - /url: /admin/drive/quota/clean
+              - generic:
+                - generic: 存储清理
+            - link "上限管理" [ref=e1252] [cursor=pointer]:
+              - /url: /admin/drive/quota/limit
+              - generic:
+                - generic: 上限管理
+        - generic [ref=e1256]:
+          - generic [ref=e1257] [cursor=pointer]:
+            - img [ref=e1259]
+            - generic:
+              - generic: 安全
+              - img
+          - generic:
+            - generic [ref=e1263]:
+              - generic [ref=e1264] [cursor=pointer]:
+                - generic:
+                  - generic: 策略中心
+                  - img
+              - link "策略管理" [ref=e1269] [cursor=pointer]:
+                - /url: /admin/security/policy-center/policy-manage
+                - generic:
+                  - generic: 策略管理
+            - generic [ref=e1273]:
+              - generic [ref=e1274] [cursor=pointer]:
+                - generic:
+                  - generic: 安全中心
+                  - img
+              - generic:
+                - link "安全概览" [ref=e1279] [cursor=pointer]:
+                  - /url: /admin/security/security-center/dashboard
+                  - generic:
+                    - generic: 安全概览
+                - link "成员异常" [ref=e1283] [cursor=pointer]:
+                  - /url: /admin/security/security-center/employee-alert
+                  - generic:
+                    - generic: 成员异常
+                - link "文档异常" [ref=e1287] [cursor=pointer]:
+                  - /url: /admin/security/security-center/document-alert
+                  - generic:
+                    - generic: 文档异常
+            - link "成员权限" [ref=e1291] [cursor=pointer]:
+              - /url: /admin/security/permission
+              - generic:
+                - generic: 成员权限
+            - link "账号安全" [ref=e1295] [cursor=pointer]:
+              - /url: /admin/security/accounts-security
+              - generic:
+                - generic: 账号安全
+            - link "终端安全" [ref=e1299] [cursor=pointer]:
+              - /url: /admin/security/terminal-security
+              - generic:
+                - generic: 终端安全
+            - link "网络安全" [ref=e1303] [cursor=pointer]:
+              - /url: /admin/security/network-security
+              - generic:
+                - generic: 网络安全
+            - link "链接安全" [ref=e1307] [cursor=pointer]:
+              - /url: /admin/security/url-security/overview
+              - generic:
+                - generic: 链接安全
+            - link "数据保护" [ref=e1311] [cursor=pointer]:
+              - /url: /admin/security/data-security
+              - generic:
+                - generic: 数据保护
+            - link "部署与加密" [ref=e1315] [cursor=pointer]:
+              - /url: /admin/security/organization-trust
+              - generic:
+                - generic: 部署与加密
+        - generic [ref=e1319]:
+          - generic [ref=e1320] [cursor=pointer]:
+            - img [ref=e1322]
+            - generic:
+              - generic: 合规
+              - img
+          - generic:
+            - link "日志审计" [ref=e1326] [cursor=pointer]:
+              - /url: /admin/security/compliance/internal-risk-control
+              - generic:
+                - generic: 日志审计
+            - link "权限审计" [ref=e1330] [cursor=pointer]:
+              - /url: /admin/security/compliance/authz
+              - generic:
+                - generic: 权限审计
+            - link "数据保险箱" [ref=e1334] [cursor=pointer]:
+              - /url: /admin/security/compliance/vault
+              - generic:
+                - generic: 数据保险箱
+            - link "内容合规" [ref=e1338] [cursor=pointer]:
+              - /url: /admin/security/compliance/content-compliance
+              - generic:
+                - generic: 内容合规
+            - link "隐私设置" [ref=e1342] [cursor=pointer]:
+              - /url: /admin/security/compliance/privacy-settings
+              - generic:
+                - generic: 隐私设置
+        - generic [ref=e1346]:
+          - generic [ref=e1347] [cursor=pointer]:
+            - img [ref=e1349]
+            - generic:
+              - generic: 数据报表
+              - img
+          - generic:
+            - link "数据概览" [ref=e1353] [cursor=pointer]:
+              - /url: /admin/data-analysis/overview
+              - generic:
+                - generic: 数据概览
+            - link "成员活跃数据" [ref=e1357] [cursor=pointer]:
+              - /url: /admin/data-analysis/member-active
+              - generic:
+                - generic: 成员活跃数据
+            - generic [ref=e1361]:
+              - generic [ref=e1362] [cursor=pointer]:
+                - generic:
+                  - generic: 功能使用情况
+                  - img
+              - generic:
+                - link "消息" [ref=e1367] [cursor=pointer]:
+                  - /url: /admin/data-analysis/application/im
+                  - generic:
+                    - generic: 消息
+                - link "云文档" [ref=e1371] [cursor=pointer]:
+                  - /url: /admin/data-analysis/application/space
+                  - generic:
+                    - generic: 云文档
+                - link "日历" [ref=e1375] [cursor=pointer]:
+                  - /url: /admin/data-analysis/application/calendar
+                  - generic:
+                    - generic: 日历
+                - link "邮箱" [ref=e1379] [cursor=pointer]:
+                  - /url: /admin/data-analysis/application/email
+                  - generic:
+                    - generic: 邮箱
+                - link "任务" [ref=e1383] [cursor=pointer]:
+                  - /url: /admin/data-analysis/application/todo
+                  - generic:
+                    - generic: 任务
+                - link "视频会议" [ref=e1387] [cursor=pointer]:
+                  - /url: /admin/data-analysis/application/vc
+                  - generic:
+                    - generic: 视频会议
+                - link "服务台" [ref=e1391] [cursor=pointer]:
+                  - /url: /admin/data-analysis/application/helpdesk
+                  - generic:
+                    - generic: 服务台
+                - link "知识库 增值版本" [ref=e1395] [cursor=pointer]:
+                  - /url: /admin/data-analysis/application/wiki
+                  - generic:
+                    - generic: 知识库
+                    - generic:
+                      - generic: 增值版本
+            - link "应用使用数据 增值版本" [ref=e1401] [cursor=pointer]:
+              - /url: /admin/data-analysis/app-usage
+              - generic:
+                - generic: 应用使用数据
+                - generic:
+                  - generic: 增值版本
+        - generic [ref=e1407]:
+          - generic [ref=e1408] [cursor=pointer]:
+            - img [ref=e1410]
+            - generic:
+              - generic: 企业文化
+              - img
+          - generic:
+            - link "品牌配置" [ref=e1414] [cursor=pointer]:
+              - /url: /admin/customization/brand-config
+              - generic:
+                - generic: 品牌配置
+            - link "功能配置" [ref=e1418] [cursor=pointer]:
+              - /url: /admin/customization/feature-config
+              - generic:
+                - generic: 功能配置
+        - generic [ref=e1422]:
+          - generic [ref=e1423] [cursor=pointer]:
+            - img [ref=e1425]
+            - generic:
+              - generic: 企业设置
+              - img
+          - generic:
+            - link "企业信息" [ref=e1429] [cursor=pointer]:
+              - /url: /admin/enterprise/info
+              - generic:
+                - generic: 企业信息
+            - link "管理员权限" [ref=e1433] [cursor=pointer]:
+              - /url: /admin/enterprise/auth
+              - generic:
+                - generic: 管理员权限
+            - link "组织架构数据同步" [ref=e1437] [cursor=pointer]:
+              - /url: /admin/enterprise/sync
+              - generic:
+                - generic: 组织架构数据同步
+            - link "数据迁移" [ref=e1441] [cursor=pointer]:
+              - /url: /admin/enterprise/data-governance
+              - generic:
+                - generic: 数据迁移
+            - link "风险控制" [ref=e1445] [cursor=pointer]:
+              - /url: /admin/enterprise/risk-control
+              - generic:
+                - generic: 风险控制
+            - link "版本升级提醒" [ref=e1449] [cursor=pointer]:
+              - /url: /admin/enterprise/version-manage
+              - generic:
+                - generic: 版本升级提醒
+      - generic [ref=e556] [cursor=pointer]:
+        - img [ref=e1764]
+        - generic: 收起导航
+    - generic [ref=e1455]:
+      - generic [ref=e1456]:
+        - generic [ref=e1457]:
+          - img [ref=e1458]
+          - generic [ref=e1459]:
+            - generic [ref=e1460]:
+              - img [ref=e1462] [cursor=pointer]
+              - generic [ref=e1463]:
+                - generic [ref=e1464]:
+                  - generic [ref=e1465] [cursor=pointer]: 昕越科技
+                  - generic [ref=e1468] [cursor=pointer]: 未认证
+                - generic [ref=e1470]:
+                  - generic [ref=e1471]: "企业编号 : FM4BG629BGE"
+                  - generic [ref=e1472]:
+                    - text: ｜
+                    - generic [ref=e1473]: 认证立享群成员/云文档储存空间/参会人/邮箱扩容
+                  - button "立即认证" [ref=e1474] [cursor=pointer]:
+                    - text: 立即认证
+                    - img [ref=e1476]
+            - generic [ref=e1479]:
+              - generic [ref=e1480] [cursor=pointer]:
+                - generic [ref=e1482]: 组织总人数
+                - generic [ref=e1484]: "1"
+              - generic [ref=e1485] [cursor=pointer]:
+                - generic [ref=e1487]: 部门数
+                - generic [ref=e1489]: "0"
+              - generic [ref=e1490] [cursor=pointer]:
+                - generic [ref=e1492]: 超级管理员
+                - generic [ref=e1494]: "1"
+              - generic [ref=e1495] [cursor=pointer]:
+                - generic [ref=e1497]: 子管理员
+                - generic [ref=e1499]: "1"
+            - generic [ref=e1502]:
+              - generic [ref=e1503]:
+                - generic [ref=e1504]:
+                  - img [ref=e1505]
+                  - generic [ref=e1506]:
+                    - img [ref=e1507]
+                    - generic [ref=e1508]: 飞书基础免费版
+                - img [ref=e1509]
+              - generic [ref=e1510]: 升级版本，享更多专属权益及服务
+              - generic [ref=e1511]:
+                - button "升级咨询" [ref=e1512] [cursor=pointer]:
+                  - img [ref=e1515]
+                  - text: 升级咨询
+                - button "立即升级" [ref=e1517] [cursor=pointer]
+        - generic [ref=e1518]:
+          - generic [ref=e1519]: 快捷入口
+          - generic [ref=e1520]:
+            - generic [ref=e1530] [cursor=pointer]: 成员与部门
+            - generic [ref=e1546] [cursor=pointer]: 应用管理
+            - generic [ref=e1554] [cursor=pointer]: 管理员权限
+            - generic [ref=e1562] [cursor=pointer]: 权益数据
+            - generic [ref=e1576] [cursor=pointer]: 应用审核
+            - generic [ref=e1584] [cursor=pointer]: 企业信息
+        - generic [ref=e1585]:
+          - button "功能使用情况" [ref=e1587] [cursor=pointer]:
+            - generic [ref=e1588]: 功能使用情况
+            - img [ref=e1589]
+          - generic [ref=e1590]:
+            - generic [ref=e1591] [cursor=pointer]:
+              - generic [ref=e1592]: 昨日活跃人数
+              - generic [ref=e1593]: "1"
+            - generic [ref=e1594] [cursor=pointer]:
+              - generic [ref=e1595]: 昨日活跃率
+              - generic [ref=e1596]: 100.00%
+          - generic [ref=e1600]:
+            - generic [ref=e1601]: 功能使用趋势
+            - generic [ref=e1602]: 截止日期：2026/04/15
+      - generic [ref=e1608]:
+        - generic [ref=e1609]:
+          - generic [ref=e1610]:
+            - img [ref=e1613]
+            - generic [ref=e1623]:
+              - generic [ref=e1624]: 你好，我是企业管理小助手
+              - generic [ref=e1625]: 请完成以下待处理事项
+          - generic [ref=e1626]:
+            - generic [ref=e1629]: 数字资产预警
+            - generic [ref=e1630]:
+              - generic [ref=e1631]:
+                - generic [ref=e1632]: 权益用量
+                - generic [ref=e1633] [cursor=pointer]:
+                  - img [ref=e1634]
+                  - generic [ref=e1635]:
+                    - generic [ref=e1636]:
+                      - generic [ref=e1638]: AI 通用额度
+                      - generic [ref=e1639]:
+                        - button "详情" [ref=e1640]
+                        - button "充值" [ref=e1642]
+                    - generic [ref=e1643]: 0.00 点 / 0.00 点
+                    - generic [ref=e1645]: 已用尽
+                - generic [ref=e1646] [cursor=pointer]:
+                  - img [ref=e1647]
+                  - generic [ref=e1648]:
+                    - generic [ref=e1649]:
+                      - generic [ref=e1651]: 智能会议纪要专用额度
+                      - button "详情" [ref=e1653]
+                    - generic [ref=e1654]: 0 篇 / 0 篇
+                    - generic [ref=e1656]: 已用尽
+                - generic [ref=e1657] [cursor=pointer]:
+                  - img [ref=e1658]
+                  - generic [ref=e1659]:
+                    - generic [ref=e1660]:
+                      - generic [ref=e1662]: 飞书 aily 专用额度
+                      - button "详情" [ref=e1664]
+                    - generic [ref=e1665]: 0.00 额度 / 0.00 额度
+                    - generic [ref=e1667]: 已用尽
+                - generic [ref=e1668] [cursor=pointer]:
+                  - img [ref=e1669]
+                  - generic [ref=e1670]:
+                    - generic [ref=e1671]:
+                      - generic [ref=e1673]: 自定义管理员角色个数
+                      - button "查看详情" [ref=e1675]
+                    - generic [ref=e1676]: 1 / 1
+              - generic [ref=e1679] [cursor=pointer]:
+                - generic [ref=e1680]: 展开更多( 2 )
+                - img [ref=e1682]
+        - generic [ref=e1684]:
+          - button "应用管理" [ref=e1686] [cursor=pointer]:
+            - text: 应用管理
+            - img [ref=e1687]
+          - generic [ref=e1689]:
+            - generic [ref=e1690]:
+              - generic [ref=e1691]:
+                - img [ref=e1693]
+                - generic [ref=e1694]:
+                  - generic [ref=e1695]:
+                    - generic [ref=e1696]: 审批
+                    - generic [ref=e1697]:
+                      - button "前往应用后台" [ref=e1699] [cursor=pointer]
+                      - button "配置" [ref=e1701] [cursor=pointer]
+                  - generic [ref=e1702]: 简单、高效、开放的审批工具
+              - generic [ref=e1703]:
+                - img [ref=e1705]
+                - generic [ref=e1706]:
+                  - generic [ref=e1707]:
+                    - generic [ref=e1708]: 假勤
+                    - generic [ref=e1709]:
+                      - button "前往应用后台" [ref=e1711] [cursor=pointer]
+                      - button "配置" [ref=e1713] [cursor=pointer]
+                  - generic [ref=e1714]: 原「打卡」应用，实现高效考勤管理
+              - generic [ref=e1715]:
+                - img [ref=e1717]
+                - generic [ref=e1718]:
+                  - generic [ref=e1719]:
+                    - generic [ref=e1720]: 飞书机器人
+                    - generic [ref=e1721]:
+                      - button [ref=e1723] [cursor=pointer]
+                      - button "配置" [ref=e1725] [cursor=pointer]
+                  - generic [ref=e1726]: 飞书机器人
+            - list [ref=e1728]:
+              - listitem "上一页" [ref=e1729]:
+                - button [disabled] [ref=e1730]:
+                  - img [ref=e1732]
+              - listitem "1" [ref=e1734] [cursor=pointer]:
+                - generic [ref=e1735]: "1"
+              - listitem "2" [ref=e1736] [cursor=pointer]:
+                - generic [ref=e1737]: "2"
+              - listitem "3" [ref=e1738] [cursor=pointer]:
+                - generic [ref=e1739]: "3"
+              - listitem "4" [ref=e1740] [cursor=pointer]:
+                - generic [ref=e1741]: "4"
+              - listitem "5" [ref=e1742] [cursor=pointer]:
+                - generic [ref=e1743]: "5"
+              - listitem "向后 5 页" [ref=e1744] [cursor=pointer]:
+                - generic [ref=e1746]:
+                  - img [ref=e1748]
+                  - img [ref=e1753]
+              - listitem "10" [ref=e1755] [cursor=pointer]:
+                - generic [ref=e1756]: "10"
+              - listitem "下一页" [ref=e1757] [cursor=pointer]:
+                - button [ref=e1758]:
+                  - img [ref=e1760]

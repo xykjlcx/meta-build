@@ -1,44 +1,47 @@
 @theme {
   --color-*: initial;
 
+  /* 默认色值 — 与 classic light 一致（zinc 冷灰色调） */
   --color-background: oklch(1 0 0);
-  --color-foreground: oklch(0.145 0 0);
-  --color-primary: oklch(0.205 0 0);
+  --color-foreground: oklch(0.274 0.006 286);
+  --color-primary: oklch(0.141 0.005 286);
   --color-primary-foreground: oklch(0.985 0 0);
-  --color-secondary: oklch(0.97 0 0);
-  --color-secondary-foreground: oklch(0.205 0 0);
-  --color-muted: oklch(0.97 0 0);
-  --color-muted-foreground: oklch(0.556 0 0);
-  --color-accent: oklch(0.97 0 0);
-  --color-accent-foreground: oklch(0.205 0 0);
+  --color-secondary: oklch(0.872 0.008 286);
+  --color-secondary-foreground: oklch(0.274 0.006 286);
+  --color-muted: oklch(0.967 0.001 286);
+  --color-muted-foreground: oklch(0.552 0.016 286);
+  --color-accent: oklch(0.92 0.005 286);
+  --color-accent-foreground: oklch(0.274 0.006 286);
   --color-destructive: oklch(0.577 0.245 27.325);
   --color-destructive-foreground: oklch(0.985 0 0);
   --color-success: oklch(0.62 0.19 145);
   --color-success-foreground: oklch(0.985 0 0);
   --color-warning: oklch(0.75 0.18 85);
-  --color-warning-foreground: oklch(0.205 0 0);
+  --color-warning-foreground: oklch(0.274 0.006 286);
   --color-info: oklch(0.65 0.15 240);
   --color-info-foreground: oklch(0.985 0 0);
   --color-card: oklch(1 0 0);
-  --color-card-foreground: oklch(0.145 0 0);
+  --color-card-foreground: oklch(0.274 0.006 286);
   --color-popover: oklch(1 0 0);
-  --color-popover-foreground: oklch(0.145 0 0);
-  --color-border: oklch(0.922 0 0);
-  --color-input: oklch(0.922 0 0);
-  --color-ring: oklch(0.708 0 0);
-  --color-sidebar: var(--color-sidebar);
-  --color-sidebar-foreground: var(--color-sidebar-foreground);
-  --color-sidebar-primary: var(--color-sidebar-primary);
-  --color-sidebar-primary-foreground: var(--color-sidebar-primary-foreground);
-  --color-sidebar-accent: var(--color-sidebar-accent);
-  --color-sidebar-accent-foreground: var(--color-sidebar-accent-foreground);
-  --color-sidebar-border: var(--color-sidebar-border);
-  --color-sidebar-ring: var(--color-sidebar-ring);
+  --color-popover-foreground: oklch(0.274 0.006 286);
+  --color-border: oklch(0.92 0.005 286);
+  --color-input: oklch(0.872 0.008 286);
+  --color-ring: oklch(0.274 0.006 286);
+  --color-sidebar: oklch(0.968 0.003 286);
+  --color-sidebar-foreground: oklch(0.552 0.015 286);
+  --color-sidebar-primary: oklch(0.141 0.005 286);
+  --color-sidebar-primary-foreground: oklch(0.985 0 0);
+  --color-sidebar-accent: oklch(0.92 0.005 286);
+  --color-sidebar-accent-foreground: oklch(0.141 0.005 286);
+  --color-sidebar-border: oklch(0.92 0.005 286);
+  --color-sidebar-ring: oklch(0.274 0.006 286);
 
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
+  /* 圆角 — calc 派生，shadcn 标准模式 */
+  --radius: 0.625rem;
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 
   --size-control-height: 2.25rem;
   --size-header-height: 3.5rem;

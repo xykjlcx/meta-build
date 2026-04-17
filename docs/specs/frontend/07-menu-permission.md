@@ -33,6 +33,17 @@ meta-build 的菜单/权限体系采用 **路由树 + 菜单树双树架构**—
 | `[M4]` | 后端 `mb_iam_route_tree` / `mb_iam_menu` / `mb_iam_role_menu` 表 + 启动时 upsert 同步 + `MenuApi` Controller |
 | `[M3+M4]` | 前后端联调（菜单管理 UI + 孤儿灰化 + 权限点 CI 校验） |
 
+### 1.4 Shell v2 的阶段边界
+
+2026-04-16 的 App Shell v2 重设计**不包含**“菜单点击即路由跳转”的运行时契约扩展。原因不是否定双树，而是当前真实 `MenuVo` 运行时接口仍未暴露 `path` / `routeRef` 摘要，前端无法仅靠现有 API 做稳定导航。
+
+因此分两阶段推进：
+
+| 阶段 | 范围 |
+|------|------|
+| **本轮（Shell v2）** | 布局重设计、Layout Resolver、ThemeCustomizer；菜单继续按现有 `useMenu()` 数据做展示 |
+| **后续（二期）** | 前后端联动扩展 `CurrentUserMenuVo` 运行时字段，把 `path` 或足够的 route 摘要安全暴露到前端，再补齐点击导航和 Breadcrumb 真数据 |
+
 ---
 
 ## 2. 单表方案的否决（brainstorming 的教训）

@@ -1,0 +1,141 @@
+/* Classic 风格 — 对齐 shadcnuikit.com zinc 调色板 */
+
+[data-style='classic'] {
+  /* 语义色 — zinc 冷灰色调（hue ~286°） */
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.274 0.006 286);
+  --color-primary: oklch(0.141 0.005 286);
+  --color-primary-foreground: oklch(0.985 0 0);
+  --color-secondary: oklch(0.872 0.008 286);
+  --color-secondary-foreground: oklch(0.274 0.006 286);
+  --color-muted: oklch(0.967 0.001 286);
+  --color-muted-foreground: oklch(0.552 0.016 286);
+  --color-accent: oklch(0.92 0.005 286);
+  --color-accent-foreground: oklch(0.274 0.006 286);
+  --color-destructive: oklch(0.577 0.245 27.325);
+  --color-destructive-foreground: oklch(0.985 0 0);
+  --color-success: oklch(0.62 0.19 145);
+  --color-success-foreground: oklch(0.985 0 0);
+  --color-warning: oklch(0.75 0.18 85);
+  --color-warning-foreground: oklch(0.274 0.006 286);
+  --color-info: oklch(0.65 0.15 240);
+  --color-info-foreground: oklch(0.985 0 0);
+  --color-card: oklch(1 0 0);
+  --color-card-foreground: oklch(0.274 0.006 286);
+  --color-popover: oklch(1 0 0);
+  --color-popover-foreground: oklch(0.274 0.006 286);
+  --color-border: oklch(0.92 0.005 286);
+  --color-input: oklch(0.872 0.008 286);
+  --color-ring: oklch(0.274 0.006 286);
+
+  /* Sidebar — 冷灰色调 */
+  --color-sidebar: oklch(0.968 0.003 286);
+  --color-sidebar-foreground: oklch(0.552 0.015 286);
+  --color-sidebar-primary: oklch(0.141 0.005 286);
+  --color-sidebar-primary-foreground: oklch(0.985 0 0);
+  --color-sidebar-accent: oklch(0.92 0.005 286);
+  --color-sidebar-accent-foreground: oklch(0.141 0.005 286);
+  --color-sidebar-border: oklch(0.92 0.005 286);
+  --color-sidebar-ring: oklch(0.274 0.006 286);
+
+  /* 圆角 — calc 派生，继承 @theme 中的 --radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* 尺寸 */
+  --size-control-height: 2.25rem;
+  --size-header-height: 3.5rem;
+  --size-sidebar-width: 16rem;
+  --size-sidebar-width-collapsed: 4rem;
+  --size-content-max-width: 80rem;
+
+  /* 阴影 */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
+
+  /* 动效 */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* 字体 */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
+  --font-heading: var(--font-sans);
+}
+
+[data-style='classic'][data-mode='dark'] {
+  /* 语义色 — zinc 暗色 */
+  --color-background: oklch(0.141 0.004 286);
+  --color-foreground: oklch(0.92 0.005 286);
+  --color-primary: oklch(0.985 0.001 286);
+  --color-primary-foreground: oklch(0.21 0.006 286);
+  --color-secondary: oklch(0.552 0.015 286);
+  --color-secondary-foreground: oklch(0.92 0.005 286);
+  --color-muted: oklch(0.21 0.006 286);
+  --color-muted-foreground: oklch(0.705 0.012 286);
+  --color-accent: oklch(0.21 0.006 286);
+  --color-accent-foreground: oklch(0.92 0.005 286);
+  --color-destructive: oklch(0.702 0.189 22.23);
+  --color-destructive-foreground: oklch(0.985 0 0);
+  --color-success: oklch(0.55 0.17 145);
+  --color-success-foreground: oklch(0.985 0 0);
+  --color-warning: oklch(0.7 0.16 85);
+  --color-warning-foreground: oklch(0.141 0.004 286);
+  --color-info: oklch(0.6 0.13 240);
+  --color-info-foreground: oklch(0.985 0 0);
+  --color-card: oklch(0.141 0.004 286);
+  --color-card-foreground: oklch(0.92 0.005 286);
+  --color-popover: oklch(0.141 0.004 286);
+  --color-popover-foreground: oklch(0.92 0.005 286);
+  --color-border: oklch(0.274 0.007 286);
+  --color-input: oklch(0.37 0.012 286);
+  --color-ring: oklch(0.92 0.005 286);
+
+  /* Sidebar — 暗色 */
+  --color-sidebar: oklch(0.21 0.006 286);
+  --color-sidebar-foreground: oklch(0.92 0.005 286);
+  --color-sidebar-primary: oklch(0.985 0.001 286);
+  --color-sidebar-primary-foreground: oklch(0.21 0.006 286);
+  --color-sidebar-accent: oklch(0.274 0.007 286);
+  --color-sidebar-accent-foreground: oklch(0.92 0.005 286);
+  --color-sidebar-border: oklch(0.274 0.007 286);
+  --color-sidebar-ring: oklch(0.92 0.005 286);
+
+  /* 圆角 — calc 派生，继承 @theme 中的 --radius */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* 尺寸 */
+  --size-control-height: 2.25rem;
+  --size-header-height: 3.5rem;
+  --size-sidebar-width: 16rem;
+  --size-sidebar-width-collapsed: 4rem;
+  --size-content-max-width: 80rem;
+
+  /* 阴影（暗色加深） */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
+
+  /* 动效 */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-out: cubic-bezier(0, 0, 0.2, 1);
+
+  /* 字体 */
+  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
+  --font-heading: var(--font-sans);
+}

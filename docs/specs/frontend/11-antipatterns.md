@@ -45,7 +45,7 @@ export function StatusBadge({ status }: { status: string }) {
 
 ### 2.2 后果
 
-- **千人千面承诺破裂**：使用者切换主题（`data-theme="brand-blue"`）时硬编码颜色不跟随，UI 出现"半旧半新"撕裂
+- **千人千面承诺破裂**：使用者切换风格（`data-style="brand-blue"`）或深色模式时硬编码颜色不跟随，UI 出现“半旧半新”撕裂
 - **暗色模式失效**：硬编码 `#ffffff` 文字在暗色背景上看不见
 - **WCAG AA 对比度无法保证**：绕过语义层后自动化对比度校验失效
 - **主题升级路径锁死**：未来想做运维可视化主题编辑器时硬编码颜色无法被运行时覆盖
@@ -86,7 +86,7 @@ export function StatusBadge({ status }: { status: 'paid' | 'pending' | 'canceled
 |------|---------|
 | Biome 自定义规则 | `bg-[#xxx]` / `bg-red-500` 等 Tailwind 调色板 class |
 | stylelint | `style={{ color: '#xxx' }}` + 任意 hex/rgb/hsl 值 |
-| 主题完整性脚本 | 启动时校验所有主题定义了 46 个语义 token |
+| 主题完整性脚本 | 启动时校验所有 style block 定义了完整的语义 token |
 
 ```json
 // .stylelintrc.json（关键规则）
@@ -468,8 +468,8 @@ export const buttonVariants = cva('inline-flex items-center', {
 **方法一：改主题（80% 场景推荐）**
 
 ```css
-/* packages/ui-tokens/themes/brand-blue.css */
-[data-theme="brand-blue"] {
+/* packages/ui-tokens/styles/brand-blue.css */
+[data-style="brand-blue"] {
   --color-primary: #0066ff;
   --color-primary-foreground: #ffffff;
   /* 其他 46 个语义 token */
@@ -478,7 +478,7 @@ export const buttonVariants = cva('inline-flex items-center', {
 
 ```tsx
 // apps/web-admin/src/main.tsx
-document.documentElement.setAttribute('data-theme', 'brand-blue');
+document.documentElement.setAttribute('data-style', 'brand-blue');
 ```
 
 完成！所有 `<Button variant="primary">` 自动跟随。
@@ -711,7 +711,7 @@ check();
 ### 10.3 正确做法
 
 ```css
-/* packages/ui-tokens/themes/default.css */
+/* packages/ui-tokens/styles/classic.css */
 :root {
   --color-background: #ffffff;
   --color-foreground: #0a0a0a;
@@ -1069,7 +1069,7 @@ module.exports = {
 |----------------------|-----------------------|
 | `<Form.Item label="姓名" required>` | `<FormField name="username">` + 文案 props 显式传入 |
 | `<Table columns={cols} dataSource={data} />` 配置式 | `<NxTable>` 组合式 + TanStack Table 抽象 |
-| 全局 ConfigProvider + theme 对象 | `data-theme` 属性 + CSS Variables |
+| 全局 ConfigProvider + theme 对象 | `data-style` / `data-mode` 属性 + CSS Variables |
 | 业务字段名走 antd locale 包 | 按业务模块 namespace 走 react-i18next |
 | `Form.Item` 自带 errorMessage 显示 | `<FormMessage />` 子组件，使用方控制呈现 |
 

@@ -19,10 +19,10 @@ meta-build 前端 = **给 AI 执行的不可动摇的契约 + 千人千面的定
 | 文件 | 关注点 | 何时读 |
 |------|-------|-------|
 | [01-layer-structure.md](./01-layer-structure.md) | 5 层 package 结构 + 依赖方向 + 脚手架定位 + 每层白名单 | **从这里开始** / 加新 package / 调依赖方向 |
-| [02-ui-tokens-theme.md](./02-ui-tokens-theme.md) | L1 CSS Variables + Theme + 扁平命名 + 完整性校验脚本 | 改主题 / 加新主题 / 调整语义 token |
+| [02-ui-tokens-theme.md](./02-ui-tokens-theme.md) | L1 CSS Variables + Style Registry + ColorMode + Customizer CSS 维度 + 完整性校验脚本 | 改主题 / 加新风格 / 调整语义 token |
 | [03-ui-primitives.md](./03-ui-primitives.md) | L2 42 原子组件 + Radix 隔离哲学 + Storybook 规范 | 改原子组件 / 加新 variant |
 | [04-ui-patterns.md](./04-ui-patterns.md) | L3 8 业务组件 API + TanStack Table/RHF 隔离 | 改业务组件 / 加新复合组件 |
-| [05-app-shell.md](./05-app-shell.md) | L4 布局 + Provider + 认证门面 + 完整 i18n 工程 | 改布局 / 改 i18n / 改全局 UI |
+| [05-app-shell.md](./05-app-shell.md) | L4 Layout Resolver + Preset Registry + Provider + 认证门面 + 完整 i18n 工程 | 改布局 / 改 i18n / 改全局 UI |
 | [06-routing-and-data.md](./06-routing-and-data.md) | TanStack Router 文件路由 + TanStack Query + 路由守卫 | 加新路由 / 调数据加载 |
 | [07-menu-permission.md](./07-menu-permission.md) | **双树权限架构**（路由树 + 菜单树） | **改权限 / 改菜单运维 UI** |
 | [08-contract-client.md](./08-contract-client.md) | @mb/api-sdk 消费 + 契约驱动链路 + 请求拦截器 | 调 API / 调错误处理 |
@@ -40,7 +40,7 @@ meta-build 前端 = **给 AI 执行的不可动摇的契约 + 千人千面的定
 | # | 决策 | 结论 |
 |---|------|------|
 | 1 | 分层 | **5 层 pnpm workspace**：`@mb/ui-tokens` → `@mb/ui-primitives` → `@mb/ui-patterns` → `@mb/app-shell` → `apps/web-admin`。物理隔离每层的第三方依赖 |
-| 2 | 主题工程模型 | **纯 CSS Variables Only**。CSS 文件本身是源数据，扁平命名（`--color-primary` 不用嵌套），无 TS→CSS 编译步骤，100% 对齐 shadcn 生态 |
+| 2 | 主题工程模型 | **纯 CSS Variables Only + Style/Mode 正交维度**。CSS 文件本身是源数据，扁平命名（`--color-primary` 不用嵌套），Style / ColorMode / Customizer CSS 维度分离，无 TS→CSS 编译步骤 |
 | 3 | 脚手架 vs 框架 | **纯脚手架模式**。git 模板仓库；L1-L5 全部源码都是使用者资产；使用者 fork 后默认不升级；不做 CLI、不发布 npm |
 | 4 | 契约密度 | **务实方案**：依赖方向 + TS strict + Biome + stylelint + dependency-cruiser + 主题/i18n 校验脚本；全部现成工具（~180 行自写配置） |
 | 5 | 权限/菜单架构 | **双树设计**：路由树（代码扫描产物，只读）+ 菜单树（运维自由组织，引用路由树）。架构层面解耦代码结构和菜单呈现 |
@@ -63,7 +63,7 @@ meta-build 前端 = **给 AI 执行的不可动摇的契约 + 千人千面的定
 ```
 client/
 ├── packages/
-│   ├── ui-tokens/          # L1 设计令牌 + Theme Registry（纯 CSS Variables）
+│   ├── ui-tokens/          # L1 设计令牌 + Style Registry（纯 CSS Variables）
 │   ├── ui-primitives/      # L2 42 原子组件（隔离 Radix/shadcn）
 │   ├── ui-patterns/        # L3 8 业务组件（隔离 TanStack Table/RHF）
 │   ├── app-shell/          # L4 布局 + Provider + 认证门面 + i18n 机制
@@ -141,7 +141,9 @@ client/
 
 | ADR | 主题 | 状态 |
 |-----|------|------|
-| — | 前端暂无独立 ADR | **双树权限架构** 的 ADR 将在 M0 spec 定稿后单独讨论是否补写（memory 已记录决策和"禁止退化为单表"的承诺）|
+| [0016](../../adr/0016-前端主题系统从theme切换到style加color-mode与customizer.md) | 前端主题系统从 Theme 切换到 Style + ColorMode + Customizer | 已采纳 |
+| [0017](../../adr/0017-app-shell从固定布局切换到layout-resolver加preset-registry.md) | App Shell 从固定布局切换到 Layout Resolver + Preset Registry | 已采纳 |
+| [0018](../../adr/0018-废弃compact主题改为style加customizer维度组合.md) | 废弃 Compact 主题，改为 Style + Customizer 维度组合 | 已采纳 |
 
 后端 ADR 见 [docs/adr/](../../adr/)（目前 0001-0012 全部为后端决策）。
 

@@ -43,7 +43,7 @@
 | milestone | 新增启用的工具 | 新增检查的硬约束 |
 |-----------|-------------|---------------|
 | **M1**（脚手架 + 基础设施） | TS / Biome / stylelint / dependency-cruiser / `.env.example` 一致性 | MUST NOT #2 #3 #5 #6 #7；RECOMMENDED #8；MUST #7 |
-| **M2**（L1 + L2 + Theme + i18n 基础） | Vitest / Storybook / 主题完整性脚本 / i18n 完整性脚本 | RECOMMENDED #1；MUST NOT #4；MUST #1 #2 #5 #6 |
+| **M2**（L1 + L2 + Style/Mode + i18n 基础） | Vitest / Storybook / 主题完整性脚本 / i18n 完整性脚本 | RECOMMENDED #1；MUST NOT #4；MUST #1 #2 #5 #6 |
 | **M3**（L3 + L4 + L5 + Routing） | Playwright | MUST #3 #4 |
 
 ---
@@ -315,22 +315,22 @@ import { useCurrentUser } from '@mb/app-shell';  // ❌
 
 ```css
 /* 禁止：嵌套复数命名 */
-:root[data-theme="default"] {
+:root[data-style="classic"] {
   --colors-primary-500: oklch(60% 0.15 240);  /* ❌ */
 }
 
 /* 禁止：点分段命名 */
-:root[data-theme="default"] {
+:root[data-style="classic"] {
   --color.primary.foreground: #fff;  /* ❌ */
 }
 
 /* 禁止：camelCase */
-:root[data-theme="default"] {
+:root[data-style="classic"] {
   --sizes-controlHeight: 40px;  /* ❌ */
 }
 
 /* 禁止：斜杠 */
-:root[data-theme="default"] {
+:root[data-style="classic"] {
   --radius/md: 8px;  /* ❌ */
 }
 ```
@@ -338,7 +338,7 @@ import { useCurrentUser } from '@mb/app-shell';  // ❌
 **正确写法**：
 
 ```css
-:root[data-theme="default"] {
+:root[data-style="classic"] {
   --color-primary: oklch(60% 0.15 240);
   --color-primary-foreground: #fff;
   --size-control-height: 40px;
@@ -948,10 +948,10 @@ pnpm -C client/packages/ui-primitives storybook:build
 
 **职责**：
 
-1. 读 Theme Registry 取所有主题的 id 和 cssFile 路径
-2. 解析每个主题 CSS 文件，提取所有 `--xxx` 变量名
+1. 读 Style Registry 取所有 style 的 id 和 cssFile 路径
+2. 解析每个 style CSS 文件，提取所有 `--xxx` 变量名
 3. 校验每个变量名符合扁平命名 `^--[a-z]+(-[a-z0-9]+)+$`
-4. 对比每个主题相比参考主题（`default`）的缺失变量和多余变量
+4. 对比每个 style block 相比参考块（`classic light`）的缺失变量和多余变量
 5. 任一校验失败即 `process.exit(1)`
 
 **启用命令**：`pnpm -C client check:theme`

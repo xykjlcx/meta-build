@@ -1,7 +1,66 @@
 {
-  "sidebar": { "collapse": "Collapse Sidebar", "expand": "Expand Sidebar" },
-  "header": { "profile": "Profile", "logout": "Logout" },
-  "theme": { "switch": "Switch Theme", "default": "Default", "dark": "Dark", "compact": "Compact" },
+  "sidebar": {
+    "collapse": "Collapse Sidebar",
+    "expand": "Expand Sidebar",
+    "close": "Close Navigation",
+    "tagline": "Customizable admin shell",
+    "operatorFallback": "Meta-Build",
+    "operatorRole": "Workspace Operator"
+  },
+  "header": {
+    "profile": "Profile",
+    "logout": "Logout",
+    "workspace": "AI Workspace",
+    "operatorRole": "Operator"
+  },
+  "layout": {
+    "inset": "Inset Shell",
+    "insetDesc": "Card-like default admin shell for everyday backoffice pages.",
+    "moduleSwitcher": "Module Switcher",
+    "module-switcherDesc": "Header-level module tabs with a secondary sidebar for multi-product SaaS."
+  },
+  "moduleSwitcher": {
+    "title": "Module Workspace",
+    "tagline": "Multi-module shell preset",
+    "searchPlaceholder": "Search modules, menus, or recent destinations",
+    "moduleFallback": "Workspace Overview",
+    "moduleSidebarHint": "Secondary navigation for the active module",
+    "workspaceLabel": "Workspace",
+    "presetLabel": "Module Switcher",
+    "desktopHint": "This is the second official preset, aimed at multi-module SaaS navigation.",
+    "sidebarMode": "Sidebar Mode",
+    "sidebarExpanded": "Expanded",
+    "sidebarCollapsed": "Collapsed"
+  },
+  "theme": {
+    "switch": "Switch Theme",
+    "customize": "Customize",
+    "description": "Tune the shell first, then shape the product pages.",
+    "reset": "Reset",
+    "active": "Active",
+    "layoutLabel": "Layout Preset",
+    "default": "Default",
+    "dark": "Dark",
+    "compact": "Compact",
+    "light": "Light",
+    "styleLabel": "Base Style",
+    "modeLabel": "Color Mode",
+    "scaleLabel": "Density",
+    "radiusLabel": "Radius",
+    "contentLayoutLabel": "Content Width",
+    "contentLayoutHint": "This setting currently applies only to the Inset layout. Module switcher does not use it yet.",
+    "summary": "Current Mix",
+    "scale": { "default": "Standard", "xs": "Compact", "lg": "Relaxed" },
+    "radius": {
+      "default": "System Default",
+      "none": "Sharp",
+      "sm": "Tight",
+      "md": "Balanced",
+      "lg": "Soft",
+      "xl": "Rounded"
+    },
+    "contentLayout": { "default": "Fill Container", "centered": "Centered Focus" }
+  },
   "language": { "switch": "Switch Language" },
   "auth": {
     "username": "Username",

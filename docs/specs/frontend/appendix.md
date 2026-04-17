@@ -35,8 +35,8 @@
 | **CSS Variables Only** | meta-build 主题的工程模型：CSS 文件本身是源数据，无 TS/JSON 编译步骤，100% 对齐 shadcn 生态 | [02-ui-tokens-theme.md §2](./02-ui-tokens-theme.md) |
 | **扁平命名** | CSS 变量的命名规则：`--color-primary` 而不是 `--colors-primary-500`；为未来可能升级到 JSON 源保留平滑路径 | [02-ui-tokens-theme.md §4](./02-ui-tokens-theme.md) |
 | **语义 token** | 46 个面向语义的 CSS 变量（colors / radii / sizes / shadows / motion / fonts），每个主题必须定义全部 | [02-ui-tokens-theme.md §3](./02-ui-tokens-theme.md) |
-| **Theme Registry** | `@mb/ui-tokens` 提供的主题注册表（TypeScript 常量），列出所有合法主题 ID：`['default', 'dark', 'compact']` | [02-ui-tokens-theme.md §5.4](./02-ui-tokens-theme.md) |
-| **data-theme 切换** | 主题切换机制：`document.documentElement.dataset.theme = 'dark'`；CSS 变量通过 `[data-theme="dark"]` 选择器覆盖 | [02-ui-tokens-theme.md §5.1](./02-ui-tokens-theme.md) |
+| **Style Registry** | `@mb/ui-tokens` 提供的风格注册表（TypeScript 常量），列出所有合法 style ID，如 `['classic']` | [02-ui-tokens-theme.md §5.4](./02-ui-tokens-theme.md) |
+| **data-style / data-mode 切换** | 主题切换机制：`document.documentElement.dataset.style = 'classic'` + `document.documentElement.dataset.mode = 'dark'`；CSS 变量通过 `[data-style]` 和 `[data-mode]` 选择器覆盖 | [02-ui-tokens-theme.md §5.2](./02-ui-tokens-theme.md) |
 | **主题完整性脚本** | `scripts/check-theme-integrity.ts`（~90 行 TypeScript 脚本），CI 时校验每个主题定义了全部 46 个语义 token，缺一则失败 | [02-ui-tokens-theme.md §8](./02-ui-tokens-theme.md) |
 
 ### L2 / L3 组件概念
@@ -53,8 +53,8 @@
 
 | 术语 | 定义 | 详见 |
 |---|---|---|
-| **Provider 树** | L4 app-shell 的全局 Provider 严格 6 层顺序：ErrorBoundary → QueryClientProvider → I18nProvider → ThemeProvider → RouterProvider → Toast/Dialog 容器 | [05-app-shell.md §4.1](./05-app-shell.md) |
-| **布局预设** | L4 提供的 3 种布局：SidebarLayout（侧边栏 + 头部）/ TopLayout（顶部导航）/ BasicLayout（登录页无菜单）| [05-app-shell.md §3](./05-app-shell.md) |
+| **Provider 树** | L4 app-shell 的全局 Provider 严格 6 层顺序：ErrorBoundary → QueryClientProvider → I18nProvider → StyleProvider → RouterProvider → Toast/Dialog 容器 | [05-app-shell.md §4.1](./05-app-shell.md) |
+| **布局预设** | L4 的认证后布局由 `LayoutResolver + Preset Registry` 统一装配，canonical preset 为 `inset` / `module-switcher`；`BasicLayout` 保留给无菜单页面 | [05-app-shell.md §3](./05-app-shell.md) |
 | **按层分布的字典** | i18n 字典按层归属使用方：L4 持框架字典（`shell` / `common`），L5 持业务字典（`order.json` / `customer.json` ...），一个业务模块一个 namespace 一个 JSON 文件 | [05-app-shell.md §7.2](./05-app-shell.md) |
 | **数据库数据不 i18n** | MUST #6 的边界：代码中的静态文案必须走 `t()`；**但**数据库存储的文案（菜单 name / 字典选项 / 业务数据）永不走 i18n，直接渲染 | [05-app-shell.md §7.10](./05-app-shell.md) |
 | **Accept-Language 自动同步** | `@mb/api-sdk` 拦截器自动把 `i18n.language` 填到 HTTP 请求 header，前端切换语言后下一次 API 请求自动协商 | [05-app-shell.md §7.6](./05-app-shell.md) + [08-contract-client.md §4.3](./08-contract-client.md) |

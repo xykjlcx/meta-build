@@ -2,6 +2,7 @@
 module.exports = {
   extends: ['stylelint-config-standard'],
   plugins: ['stylelint-declaration-strict-value'],
+  ignoreFiles: ['**/storybook-static/**', '**/dist/**'],
   rules: {
     // 扁平命名：--<group>-<name>
     'custom-property-pattern': [
@@ -27,7 +28,12 @@ module.exports = {
     'import-notation': null,
     // Tailwind v4 的 @theme / @source / @import "tailwindcss" 是合法的
     // @source 用于声明 monorepo workspace 的 content 路径(见 apps/web-admin/src/styles.css)
-    'at-rule-no-unknown': [true, { ignoreAtRules: ['theme', 'tailwind', 'source'] }],
+    'at-rule-no-unknown': [
+      true,
+      { ignoreAtRules: ['theme', 'tailwind', 'source', 'custom-variant'] },
+    ],
+    // Tailwind v4 的 @import 可以出现在 @custom-variant 之后
+    'no-invalid-position-at-import-rule': null,
     // @theme 块内按分组用空行分隔，不报错
     'custom-property-empty-line-before': null,
   },

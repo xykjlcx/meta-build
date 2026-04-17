@@ -263,8 +263,9 @@ section "9. 主题关键词在 02-ui-tokens-theme.md"
 theme_keywords=(
     "--color-primary"
     "--radius"
-    "data-theme"
-    "Tailwind preset"
+    "data-style"
+    "data-mode"
+    "Style Registry"
     "完整性校验"
     "CSS Variables"
     "扁平命名"
@@ -275,6 +276,63 @@ for kw in "${theme_keywords[@]}"; do
         ok "02-ui-tokens-theme.md 包含 $kw"
     else
         fail "02-ui-tokens-theme.md 缺少 $kw"
+    fi
+done
+
+# shell-redesign-spec.md 已在 Phase D 删除，不允许回流到 canonical 目录
+shell_redesign_spec="docs/specs/frontend/shell-redesign-spec.md"
+if [ -f "$shell_redesign_spec" ]; then
+    fail "shell-redesign-spec.md 不应再存在于 docs/specs/frontend/"
+else
+    ok "shell-redesign-spec.md 已从 canonical 目录移除"
+fi
+
+# === 9B. 旧概念残留扫描（canonical 入口应零匹配） ===
+section "9B. 旧概念残留扫描（canonical 入口应零匹配）"
+
+old_concept_files=(
+    "docs/specs/frontend/README.md"
+    "docs/specs/frontend/01-layer-structure.md"
+    "docs/specs/frontend/02-ui-tokens-theme.md"
+    "docs/specs/frontend/06-routing-and-data.md"
+    "docs/specs/frontend/07-menu-permission.md"
+    "docs/specs/frontend/09-customization-workflow.md"
+    "docs/specs/frontend/10-quality-gates.md"
+    "docs/specs/frontend/appendix.md"
+)
+
+bad_old_concepts=$(rg -n '\bThemeProvider\b|\buseTheme\b|\bthemeRegistry\b|Theme Registry|\bThemeSwitcher\b|\binitTheme\s*\(|data-theme=' "${old_concept_files[@]}" 2>/dev/null || true)
+if [ -n "$bad_old_concepts" ]; then
+    fail "发现旧主题概念残留（ThemeProvider/useTheme/themeRegistry 等）："
+    echo "$bad_old_concepts"
+else
+    ok "canonical 入口无旧主题概念残留"
+fi
+
+bad_old_layout_concepts=$(rg -n '\bSidebarLayout\b|\bTopLayout\b' "${old_concept_files[@]}" 2>/dev/null || true)
+if [ -n "$bad_old_layout_concepts" ]; then
+    fail "发现旧布局概念残留（SidebarLayout/TopLayout）："
+    echo "$bad_old_layout_concepts"
+else
+    ok "canonical 入口无旧布局概念残留"
+fi
+
+# === 9C. v2 核心概念守护（05-app-shell.md） ===
+section "9C. v2 核心概念守护（05-app-shell.md）"
+
+shell_v2_keywords=(
+    "LayoutResolver"
+    "Preset Registry"
+    "StyleProvider"
+    "inset"
+    "module-switcher"
+)
+
+for kw in "${shell_v2_keywords[@]}"; do
+    if grep -qF -- "$kw" docs/specs/frontend/05-app-shell.md 2>/dev/null; then
+        ok "05-app-shell.md 包含 $kw"
+    else
+        fail "05-app-shell.md 缺少 $kw"
     fi
 done
 

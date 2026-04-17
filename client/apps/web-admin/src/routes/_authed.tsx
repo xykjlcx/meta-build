@@ -1,5 +1,5 @@
 import { authApi, noticeApi } from '@mb/api-sdk';
-import { NotificationBadge, SidebarLayout, toCurrentUser, useSseConnection } from '@mb/app-shell';
+import { LayoutResolver, NotificationBadge, toCurrentUser, useSseConnection } from '@mb/app-shell';
 import { Outlet, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useCallback } from 'react';
 import { SseHandlers } from '../features/notice/components/sse-handlers';
@@ -37,7 +37,7 @@ function AuthedLayout() {
   }, []);
 
   return (
-    <SidebarLayout
+    <LayoutResolver
       notificationSlot={
         <NotificationBadge
           queryFn={unreadQueryFn}
@@ -48,6 +48,6 @@ function AuthedLayout() {
     >
       <SseHandlers />
       <Outlet />
-    </SidebarLayout>
+    </LayoutResolver>
   );
 }

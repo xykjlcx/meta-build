@@ -11,12 +11,15 @@ export * from './radio-group';
 export * from './switch';
 export * from './slider';
 export * from './select';
+export * from './toggle';
+export * from './toggle-group';
 export * from './combobox';
 export * from './date-picker';
 export * from './calendar';
 
 // 反馈类
 export * from './dialog';
+export * from './sheet';
 export * from './alert-dialog';
 export * from './drawer';
 export * from './tooltip';
@@ -30,6 +33,7 @@ export * from './breadcrumb';
 export * from './dropdown-menu';
 export * from './navigation-menu';
 export * from './command';
+export * from './sidebar';
 
 // 展示类
 export * from './card';

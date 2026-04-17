@@ -1,0 +1,92 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - img "logo" [ref=e6] [cursor=pointer]
+    - generic [ref=e7]:
+      - generic [ref=e8]:
+        - generic [ref=e9]:
+          - generic:
+            - generic [ref=e116]:
+              - generic [ref=e118]:
+                - generic [ref=e119]: 扫码登录
+                - generic [ref=e120]: 请使用飞书移动端扫描二维码
+              - generic [ref=e121]:
+                - generic [ref=e125] [cursor=pointer]:
+                  - img [ref=e127]
+                  - generic [ref=e129]: 刷新二维码
+                - img [ref=e132]
+              - link "切换至Lark登录" [ref=e135] [cursor=pointer]:
+                - /url: https://www.larksuite.com/accounts/cross_login/auth?app_id=13&origin_web_did=afd6b93cdfefd2cc4e69f42e366172b7&redirect_uri=https%3A%2F%2Fg05t3iydj2i.feishu.cn%2Fadmin%2Findex
+              - generic [ref=e136]: 扫码成功
+            - generic [ref=e138]:
+              - generic [ref=e141]: 欢迎使用飞书
+              - generic [ref=e143]:
+                - generic [ref=e144]:
+                  - generic [ref=e145]:
+                    - generic [ref=e146] [cursor=pointer]: 手机号
+                    - generic [ref=e147] [cursor=pointer]: 邮箱
+                  - generic [ref=e151]:
+                    - textbox [ref=e153]: "+86"
+                    - textbox "请输入你的手机号" [active] [ref=e156]: "1580"
+                - button "下一步" [disabled] [ref=e157]
+                - generic [ref=e159]:
+                  - checkbox "我已阅读并同意 服务协议 和 隐私政策" [ref=e161] [cursor=pointer]
+                  - generic [ref=e164] [cursor=pointer]:
+                    - text: 我已阅读并同意
+                    - link "服务协议" [ref=e166]:
+                      - /url: https://www.feishu.cn/zh-CN/terms
+                    - text: 和
+                    - link "隐私政策" [ref=e168]:
+                      - /url: https://www.feishu.cn/zh-CN/privacy
+                - link "切换至Lark登录" [ref=e170] [cursor=pointer]:
+                  - /url: https://www.larksuite.com/accounts/cross_login/auth?app_id=13&origin_web_did=afd6b93cdfefd2cc4e69f42e366172b7&redirect_uri=https%3A%2F%2Fg05t3iydj2i.feishu.cn%2Fadmin%2Findex
+              - generic [ref=e172]:
+                - generic [ref=e175]: 更多登录方式
+                - button "使用 SSO 登录" [ref=e177] [cursor=pointer]: 使用 SSO 登录
+        - img [ref=e183] [cursor=pointer]
+      - generic [ref=e188]:
+        - text: 还没有账号？
+        - button "立即注册" [ref=e189] [cursor=pointer]
+    - generic [ref=e10]:
+      - generic [ref=e15] [cursor=pointer]: 简体中文
+      - generic:
+        - list:
+          - listitem [ref=e17] [cursor=pointer]:
+            - generic [ref=e18]: 简体中文
+          - listitem [ref=e20] [cursor=pointer]:
+            - generic [ref=e21]: 繁體中文（中國香港）
+          - listitem [ref=e22] [cursor=pointer]:
+            - generic [ref=e23]: 繁體中文（中國台灣）
+          - listitem [ref=e24] [cursor=pointer]:
+            - generic [ref=e25]: English
+          - listitem [ref=e26] [cursor=pointer]:
+            - generic [ref=e27]: 日本語
+          - listitem [ref=e28] [cursor=pointer]:
+            - generic [ref=e29]: Bahasa Indonesia
+          - listitem [ref=e30] [cursor=pointer]:
+            - generic [ref=e31]: Bahasa Melayu
+          - listitem [ref=e32] [cursor=pointer]:
+            - generic [ref=e33]: Deutsch
+          - listitem [ref=e34] [cursor=pointer]:
+            - generic [ref=e35]: Español
+          - listitem [ref=e36] [cursor=pointer]:
+            - generic [ref=e37]: Français
+          - listitem [ref=e38] [cursor=pointer]:
+            - generic [ref=e39]: Italiano
+          - listitem [ref=e40] [cursor=pointer]:
+            - generic [ref=e41]: Português (Brasil)
+          - listitem [ref=e42] [cursor=pointer]:
+            - generic [ref=e43]: Русский
+          - listitem [ref=e44] [cursor=pointer]:
+            - generic [ref=e45]: Tiếng Việt
+          - listitem [ref=e46] [cursor=pointer]:
+            - generic [ref=e47]: ภาษาไทย
+          - listitem [ref=e48] [cursor=pointer]:
+            - generic [ref=e49]: 한국어
+  - generic [ref=e50]:
+    - generic [ref=e52]:
+      - img "pic" [ref=e53]
+      - button "animation" [ref=e55]:
+        - img [ref=e56]
+    - generic [ref=e107]:
+      - generic [ref=e108]: 先进团队 先用飞书
+      - generic [ref=e109]: 字节跳动旗下 AI 工作平台

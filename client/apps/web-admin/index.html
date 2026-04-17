@@ -6,6 +6,97 @@
     <title>Meta-Build Admin</title>
   </head>
   <body>
+    <script>
+      ;(() => {
+        try {
+          const root = document.documentElement
+          const body = document.body
+          const legacyTheme = localStorage.getItem('mb-theme')
+          const style = localStorage.getItem('mb_style')
+          const validStyle = style === 'classic' ? style : null
+          const mode = localStorage.getItem('mb_color_mode')
+          const validMode = mode === 'dark' ? mode : null
+          const scale = localStorage.getItem('mb_scale')
+          const validScale = scale === 'xs' || scale === 'lg' ? scale : null
+          const radius = localStorage.getItem('mb_radius')
+          const validRadius =
+            radius === 'none' ||
+            radius === 'sm' ||
+            radius === 'md' ||
+            radius === 'lg' ||
+            radius === 'xl'
+              ? radius
+              : null
+          const contentLayout = localStorage.getItem('mb_content_layout')
+          const validContentLayout = contentLayout === 'centered' ? contentLayout : null
+
+          if (validStyle) {
+            root.dataset.style = validStyle
+          } else {
+            root.dataset.style = 'classic'
+          }
+
+          if (validMode === 'dark') {
+            root.dataset.mode = 'dark'
+          } else {
+            delete root.dataset.mode
+          }
+
+          if (validScale) {
+            body.dataset.themeScale = validScale
+          } else {
+            delete body.dataset.themeScale
+          }
+
+          if (validRadius) {
+            body.dataset.themeRadius = validRadius
+          } else {
+            delete body.dataset.themeRadius
+          }
+
+          if (validContentLayout) {
+            body.dataset.themeContentLayout = validContentLayout
+          } else {
+            delete body.dataset.themeContentLayout
+          }
+
+          if (!validStyle && legacyTheme) {
+            if (legacyTheme === 'dark') {
+              root.dataset.style = 'classic'
+              root.dataset.mode = 'dark'
+              delete body.dataset.themeScale
+              delete body.dataset.themeRadius
+              localStorage.setItem('mb_style', 'classic')
+              localStorage.setItem('mb_color_mode', 'dark')
+              localStorage.removeItem('mb_scale')
+              localStorage.removeItem('mb_radius')
+            } else if (legacyTheme === 'compact') {
+              root.dataset.style = 'classic'
+              delete root.dataset.mode
+              body.dataset.themeScale = 'xs'
+              body.dataset.themeRadius = 'sm'
+              localStorage.setItem('mb_style', 'classic')
+              localStorage.removeItem('mb_color_mode')
+              localStorage.setItem('mb_scale', 'xs')
+              localStorage.setItem('mb_radius', 'sm')
+            } else {
+              root.dataset.style = 'classic'
+              delete root.dataset.mode
+              delete body.dataset.themeScale
+              delete body.dataset.themeRadius
+              localStorage.setItem('mb_style', 'classic')
+              localStorage.removeItem('mb_color_mode')
+              localStorage.removeItem('mb_scale')
+              localStorage.removeItem('mb_radius')
+            }
+
+            localStorage.removeItem('mb-theme')
+          }
+        } catch {
+          document.documentElement.dataset.style = 'classic'
+        }
+      })()
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

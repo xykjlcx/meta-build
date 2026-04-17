@@ -3,26 +3,35 @@ import { useTranslation } from 'react-i18next';
 import { NOTICE_STATUS, type NoticeStatusValue } from '../constants';
 
 interface StatusConfig {
-  variant: 'secondary' | 'default' | 'destructive';
-  className?: string;
+  variant: 'outline' | 'secondary';
+  dotColor: string;
   labelKey: 'status.draft' | 'status.published' | 'status.revoked';
 }
 
 const STATUS_CONFIG: Record<NoticeStatusValue, StatusConfig> = {
-  [NOTICE_STATUS.DRAFT]: { variant: 'secondary', labelKey: 'status.draft' },
+  [NOTICE_STATUS.DRAFT]: {
+    variant: 'outline',
+    dotColor: 'bg-muted-foreground',
+    labelKey: 'status.draft',
+  },
   [NOTICE_STATUS.PUBLISHED]: {
-    variant: 'default',
-    className: 'bg-green-100 text-green-800 hover:bg-green-100 border-green-200',
+    variant: 'outline',
+    dotColor: 'bg-emerald-500',
     labelKey: 'status.published',
   },
-  [NOTICE_STATUS.REVOKED]: { variant: 'destructive', labelKey: 'status.revoked' },
+  [NOTICE_STATUS.REVOKED]: {
+    variant: 'secondary',
+    dotColor: 'bg-muted-foreground',
+    labelKey: 'status.revoked',
+  },
 };
 
 export function NoticeStatusBadge({ status }: { status: NoticeStatusValue }) {
   const { t } = useTranslation('notice');
   const config = STATUS_CONFIG[status] ?? STATUS_CONFIG[NOTICE_STATUS.DRAFT];
   return (
-    <Badge variant={config.variant} className={config.className}>
+    <Badge variant={config.variant}>
+      <span className={`size-1.5 rounded-full ${config.dotColor}`} />
       {t(config.labelKey)}
     </Badge>
   );

@@ -1,0 +1,72 @@
+import { j as s } from './jsx-runtime-BjG_zV1W.js';
+const a = [
+    {
+      id: 'classic',
+      displayName: '经典',
+      description: '中性基调，适合作为管理后台默认风格',
+      color: '#0f172a',
+      cssFile: './styles/classic.css',
+    },
+  ],
+  d = [
+    {
+      id: 'default',
+      displayName: '默认',
+      description: '中性基调，适合大部分场景',
+      cssFile: './themes/default.css',
+    },
+    {
+      id: 'dark',
+      displayName: '暗色',
+      description: '深色背景，适合长时间工作',
+      cssFile: './themes/dark.css',
+    },
+    {
+      id: 'compact',
+      displayName: '高密度',
+      description: '紧凑布局，适合数据密集场景',
+      cssFile: './themes/compact.css',
+    },
+  ];
+new Set(d.map((e) => e.id));
+const i = {
+  parameters: { layout: 'centered' },
+  globalTypes: {
+    style: {
+      description: '风格底座',
+      toolbar: {
+        title: 'Style',
+        icon: 'paintbrush',
+        items: a.map((e) => ({ value: e.id, title: e.displayName })),
+        dynamicTitle: !0,
+      },
+    },
+    colorMode: {
+      description: '明暗模式',
+      toolbar: {
+        title: 'Mode',
+        icon: 'mirror',
+        items: [
+          { value: 'light', title: '浅色' },
+          { value: 'dark', title: '暗色' },
+        ],
+        dynamicTitle: !0,
+      },
+    },
+  },
+  initialGlobals: { style: 'classic', colorMode: 'light' },
+  decorators: [
+    (e, t) => (
+      (document.documentElement.dataset.style = t.globals.style ?? 'classic'),
+      t.globals.colorMode === 'dark'
+        ? (document.documentElement.dataset.mode = 'dark')
+        : delete document.documentElement.dataset.mode,
+      delete document.documentElement.dataset.theme,
+      delete document.body.dataset.themeScale,
+      delete document.body.dataset.themeRadius,
+      delete document.body.dataset.themeContentLayout,
+      s.jsx(e, {})
+    ),
+  ],
+};
+export { i as default };

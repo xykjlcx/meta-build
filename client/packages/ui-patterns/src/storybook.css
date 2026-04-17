@@ -1,4 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@mb/ui-tokens/tailwind-theme.css";
-@import "@mb/ui-tokens/themes/index.css";
+@import "@mb/ui-tokens/styles/index.css";
+@import "@mb/ui-tokens/customizer.css";
+@import "@mb/ui-tokens/base-reset.css";

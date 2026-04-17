@@ -1,13 +1,18 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 @import "@mb/ui-tokens/tailwind-theme.css";
-@import "@mb/ui-tokens/themes/index.css";
+@import "@mb/ui-tokens/styles/index.css";
+@import "@mb/ui-tokens/customizer.css";
+
+@custom-variant dark (&:where([data-mode="dark"], [data-mode="dark"] *));
 
 /* Tailwind v4 默认只扫描当前项目目录，monorepo 的 workspace 包需要显式声明 */
 @source "../../../packages/ui-primitives/src";
 @source "../../../packages/ui-patterns/src";
 @source "../../../packages/app-shell/src";
 @source "../../../packages/api-sdk/src";
+
+@import "@mb/ui-tokens/base-reset.css";
 
 body {
   margin: 0;

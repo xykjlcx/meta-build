@@ -1,3 +1,6 @@
 export { BasicLayout } from './basic-layout';
-export { SidebarLayout } from './sidebar-layout';
-export { TopLayout } from './top-layout';
+export { LayoutResolver } from './layout-resolver';
+export { LayoutPresetProvider } from './layout-preset-provider';
+export { layoutRegistry } from './registry';
+export type { LayoutPresetDef, ShellLayoutProps } from './types';
+export { useLayoutPreset } from './use-layout-preset';

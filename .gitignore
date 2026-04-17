@@ -70,6 +70,9 @@ redis-data/
 .claude/worktrees/
 # superpowers using-git-worktrees skill 推荐路径
 .worktrees/
+# AI skills 插件（本地开发工具，不入库）
+.claude/skills/
+.agents/skills/
 
 # ===== 其他 OS =====
 Thumbs.db

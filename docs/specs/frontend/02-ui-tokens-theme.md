@@ -1,6 +1,6 @@
 # 02 - L1 设计令牌与主题工程
 
-> **关注点**：L1 `@mb/ui-tokens` + 纯 CSS Variables Only 哲学 + 46 个语义 token + 扁平命名 + Theme Registry + 主题完整性校验脚本 + Tailwind v4 CSS-first 配置 + 使用者扩展新主题。
+> **关注点**：L1 `@mb/ui-tokens` + 纯 CSS Variables Only 哲学 + 46 个核心语义 token + 扁平命名 + Style Registry + ColorMode + Customizer CSS 维度 + 主题完整性校验脚本 + Tailwind v4 CSS-first 配置 + 使用者扩展新风格。
 >
 > **本文件吸收**：brainstorming 决策 4（主题工程模型 = 纯 CSS Variables Only + 扁平命名）+ 千人千面硬约束中的 RECOMMENDED #1（硬编码颜色）/ MUST NOT #7（非扁平命名）+ MUST #2（所有主题必须定义全部 token）。
 
@@ -12,13 +12,13 @@
 
 | 维度 | 决策 |
 |------|------|
-| 主题源数据 | **纯 CSS 文件**（`packages/ui-tokens/src/themes/*.css`） |
+| 主题源数据 | **纯 CSS 文件**（`packages/ui-tokens/src/styles/*.css` + `customizer.css`） |
 | 命名约定 | **扁平命名**（`--color-primary` / `--radius-md`，禁用嵌套或点分段） |
-| 切换机制 | `document.documentElement.dataset.theme = 'dark'` + `localStorage` 持久化 |
+| 运行时模型 | **Style + ColorMode + Customizer CSS 维度**：`data-style` / `data-mode` / `body data-*` |
 | Token 总数 | 46 个语义 token，分 6 组（colors / radii / sizes / shadows / motion / fonts） |
 | 完整性保障 | 自写 ~50 行 TypeScript 校验脚本，CI 硬失败 |
 | Tailwind 集成 | Tailwind CSS v4 的 `@theme` 指令 CSS-first 配置，L2-L5 共享同一份主题 CSS |
-| 初始主题数量 | **3 套**：default（中性基调）/ dark（暗色）/ compact（高密度） |
+| 初始风格数量 | **1 套 canonical style**：`classic`；浅色/深色由 `ColorMode` 切换，`compact` 废弃并迁移到 Customizer 组合 |
 
 ### 1.2 决策依据汇总
 
@@ -230,355 +230,158 @@ JSON 源会是 `{ "color": { "primary": "#0ea5e9", "primary-foreground": "#fff" 
 
 ---
 
-## 5. 主题切换机制 [M2]
+## 5. 运行时主题模型 [M2+M3]
 
-### 5.1 data-theme 属性切换
+### 5.1 Style + ColorMode + Customizer 维度
 
-主题切换通过 **设置 `<html>` 元素的 `data-theme` 属性** 实现：
+v2 canonical 模型不再使用单一 `theme` 字符串，而拆成 4 个正交维度：
+
+| 维度 | DOM 载体 | 存储 key | 职责 |
+|------|---------|---------|------|
+| `style` | `<html data-style="classic">` | `mb_style` | 视觉风格预设 |
+| `colorMode` | `<html data-mode="dark">` | `mb_color_mode` | 浅色 / 深色 |
+| `scale` | `<body data-theme-scale="xs">` | `mb_scale` | 密度 / 字号 / 基础间距 |
+| `radius` | `<body data-theme-radius="sm">` | `mb_radius` | 全局圆角基准 |
+
+`contentLayout` 等运行时壳层偏好属于 Customizer CSS 维度，与 style 解耦，不进入 `StyleRegistry`。
+
+### 5.2 DOM 属性切换
+
+颜色相关变量挂在 `<html>`：
 
 ```html
-<!-- 默认主题 -->
-<html data-theme="default">
+<html data-style="classic">
   <body>...</body>
 </html>
 
-<!-- 切换到暗色 -->
-<html data-theme="dark">
+<html data-style="classic" data-mode="dark">
   <body>...</body>
 </html>
 ```
 
-每个主题 CSS 文件用 `[data-theme="..."]` 选择器定义自己的变量值：
+Customzier CSS 维度挂在 `<body>`：
 
-```css
-/* packages/ui-tokens/src/themes/default.css */
-[data-theme='default'] {
-  --color-background: oklch(1 0 0);
-  --color-foreground: oklch(0.145 0 0);
-  /* ... 全部 46 个变量 ... */
-}
-
-/* packages/ui-tokens/src/themes/dark.css */
-[data-theme='dark'] {
-  --color-background: oklch(0.145 0 0);
-  --color-foreground: oklch(0.985 0 0);
-  /* ... 全部 46 个变量 ... */
-}
+```html
+<body
+  data-theme-scale="xs"
+  data-theme-radius="sm"
+  data-theme-content-layout="centered"
+>
+  ...
+</body>
 ```
 
-### 5.2 切换函数
+### 5.3 首帧初始化
 
-`packages/ui-tokens/src/apply-theme.ts`：
+React mount 前由 `index.html` 内联脚本同步恢复 `<html>` / `<body>` 的 data attribute，防止首帧闪烁；React 运行后由 `StyleProvider` 接管。
 
-```typescript
-import type { ThemeId } from './theme-registry';
+这一步是 v2 对旧“React mount 前主题初始化函数”的替代，不再要求应用入口显式调用 L1 初始化函数。
 
-const STORAGE_KEY = 'mb-theme';
+### 5.4 Style Registry
 
-/** 设置当前主题，并持久化到 localStorage */
-export function applyTheme(themeId: ThemeId): void {
-  document.documentElement.dataset.theme = themeId;
-  try {
-    window.localStorage.setItem(STORAGE_KEY, themeId);
-  } catch {
-    // localStorage 不可用（隐私模式 / SSR），忽略
-  }
-}
-
-/** 从 localStorage 恢复主题；无则返回默认主题 */
-export function loadTheme(): ThemeId {
-  try {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored && isValidTheme(stored)) {
-      return stored;
-    }
-  } catch {
-    // ignore
-  }
-  return 'default';
-}
-
-/** 验证字符串是否是已注册的主题 ID */
-export function isValidTheme(value: string): value is ThemeId {
-  return value === 'default' || value === 'dark' || value === 'compact';
-}
-
-/** 应用启动时调用：从 localStorage 恢复并应用 */
-export function initTheme(): void {
-  applyTheme(loadTheme());
-}
-```
-
-### 5.3 初始化时机
-
-在 `apps/web-admin/src/main.tsx` 应用启动时调用：
+`packages/ui-tokens/src/style-registry.ts`：
 
 ```typescript
-import { initTheme } from '@mb/ui-tokens';
-import { StrictMode } from 'react';
-import { createRoot } from 'react-dom/client';
-import { App } from './app';
+export type StyleId = 'classic';
 
-// 在 React 渲染前应用主题，避免闪烁
-initTheme();
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
-```
-
-React 运行后由 `ThemeProvider` 接管主题切换交互，详见 05-app-shell.md §4-§5。
-
-### 5.4 Theme Registry
-
-`packages/ui-tokens/src/theme-registry.ts`——主题元数据集中登记：
-
-```typescript
-/** 已注册的主题 ID 联合类型 */
-export type ThemeId = 'default' | 'dark' | 'compact';
-
-export interface ThemeMeta {
-  readonly id: ThemeId;
+export interface StyleMeta {
+  readonly id: StyleId;
   readonly displayName: string;
   readonly description: string;
+  readonly color: string;
   readonly cssFile: string;
 }
 
-/** 所有已注册主题的元数据 */
-export const themeRegistry: readonly ThemeMeta[] = [
+export const styleRegistry: readonly StyleMeta[] = [
   {
-    id: 'default',
-    displayName: '默认',
-    description: '中性基调，适合大部分场景',
-    cssFile: './themes/default.css',
-  },
-  {
-    id: 'dark',
-    displayName: '暗色',
-    description: '深色背景，适合长时间工作',
-    cssFile: './themes/dark.css',
-  },
-  {
-    id: 'compact',
-    displayName: '高密度',
-    description: '紧凑布局，适合数据密集场景',
-    cssFile: './themes/compact.css',
+    id: 'classic',
+    displayName: '经典',
+    description: '中性基调，适合作为管理后台默认风格',
+    color: '#0f172a',
+    cssFile: './styles/classic.css',
   },
 ] as const;
 ```
 
+### 5.5 兼容迁移
+
+迁移期仍需读取旧 `mb-theme` 一次：
+
+| 旧值 | 新值 |
+|------|------|
+| `default` | `mb_style=classic` |
+| `dark` | `mb_style=classic` + `mb_color_mode=dark` |
+| `compact` | `mb_style=classic` + `mb_scale=xs` + `mb_radius=sm` |
+
+迁移完成后应删除旧 `mb-theme`，不再把 `compact` 视为独立主题。
+
 ---
 
-## 6. 初始 3 套主题 [M2]
+## 6. 初始风格与迁移 [M2+M3]
 
-### 6.1 default 主题（中性基调，参考主题）
+### 6.1 canonical style：classic
 
-`packages/ui-tokens/src/themes/default.css`：
+`packages/ui-tokens/src/styles/classic.css` 同时定义 light + dark 两套颜色变量：
 
 ```css
-[data-theme='default'] {
-  /* ============ 颜色 ============ */
+[data-style='classic'] {
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.145 0 0);
-  --color-primary: oklch(0.205 0 0);
-  --color-primary-foreground: oklch(0.985 0 0);
-  --color-secondary: oklch(0.97 0 0);
-  --color-secondary-foreground: oklch(0.205 0 0);
-  --color-muted: oklch(0.97 0 0);
-  --color-muted-foreground: oklch(0.556 0 0);
-  --color-accent: oklch(0.97 0 0);
-  --color-accent-foreground: oklch(0.205 0 0);
-  --color-destructive: oklch(0.577 0.245 27.325);
-  --color-destructive-foreground: oklch(0.985 0 0);
-  --color-success: oklch(0.62 0.19 145);
-  --color-success-foreground: oklch(0.985 0 0);
-  --color-warning: oklch(0.75 0.18 85);
-  --color-warning-foreground: oklch(0.205 0 0);
-  --color-info: oklch(0.65 0.15 240);
-  --color-info-foreground: oklch(0.985 0 0);
-  --color-card: oklch(1 0 0);
-  --color-card-foreground: oklch(0.145 0 0);
-  --color-popover: oklch(1 0 0);
-  --color-popover-foreground: oklch(0.145 0 0);
-  --color-border: oklch(0.922 0 0);
-  --color-input: oklch(0.922 0 0);
-  --color-ring: oklch(0.708 0 0);
-
-  /* ============ 圆角 ============ */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-
-  /* ============ 尺寸 ============ */
-  --size-control-height: 2.25rem;
-  --size-header-height: 3.5rem;
-  --size-sidebar-width: 16rem;
-  --size-sidebar-width-collapsed: 4rem;
-  --size-content-max-width: 80rem;
-
-  /* ============ 阴影 ============ */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-
-  /* ============ 动效 ============ */
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 400ms;
-  --easing-in: cubic-bezier(0.4, 0, 1, 1);
-  --easing-out: cubic-bezier(0, 0, 0.2, 1);
-
-  /* ============ 字体 ============ */
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
-  --font-heading: var(--font-sans);
+  /* ... 全部语义变量 ... */
 }
-```
 
-### 6.2 dark 主题（暗色）
-
-`packages/ui-tokens/src/themes/dark.css`（只展示与 default 不同的部分；圆角 / 尺寸 / 阴影 / 动效 / 字体保持一致，但**仍然必须重复声明全部 46 个变量**）：
-
-```css
-[data-theme='dark'] {
-  /* ============ 颜色（暗色反转）============ */
+[data-style='classic'][data-mode='dark'] {
   --color-background: oklch(0.145 0 0);
   --color-foreground: oklch(0.985 0 0);
-  --color-primary: oklch(0.985 0 0);
-  --color-primary-foreground: oklch(0.205 0 0);
-  --color-secondary: oklch(0.269 0 0);
-  --color-secondary-foreground: oklch(0.985 0 0);
-  --color-muted: oklch(0.269 0 0);
-  --color-muted-foreground: oklch(0.708 0 0);
-  --color-accent: oklch(0.269 0 0);
-  --color-accent-foreground: oklch(0.985 0 0);
-  --color-destructive: oklch(0.704 0.191 22.216);
-  --color-destructive-foreground: oklch(0.985 0 0);
-  --color-success: oklch(0.55 0.17 145);
-  --color-success-foreground: oklch(0.985 0 0);
-  --color-warning: oklch(0.70 0.16 85);
-  --color-warning-foreground: oklch(0.145 0 0);
-  --color-info: oklch(0.60 0.13 240);
-  --color-info-foreground: oklch(0.985 0 0);
-  --color-card: oklch(0.205 0 0);
-  --color-card-foreground: oklch(0.985 0 0);
-  --color-popover: oklch(0.205 0 0);
-  --color-popover-foreground: oklch(0.985 0 0);
-  --color-border: oklch(1 0 0 / 10%);
-  --color-input: oklch(1 0 0 / 15%);
-  --color-ring: oklch(0.556 0 0);
-
-  /* 圆角 / 尺寸 / 阴影 / 动效 / 字体 与 default 相同，但完整性脚本要求全部声明 */
-  --radius-sm: 0.25rem;
-  --radius-md: 0.5rem;
-  --radius-lg: 0.75rem;
-  --radius-xl: 1rem;
-
-  --size-control-height: 2.25rem;
-  --size-header-height: 3.5rem;
-  --size-sidebar-width: 16rem;
-  --size-sidebar-width-collapsed: 4rem;
-  --size-content-max-width: 80rem;
-
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.6);
-
-  --duration-fast: 150ms;
-  --duration-normal: 250ms;
-  --duration-slow: 400ms;
-  --easing-in: cubic-bezier(0.4, 0, 1, 1);
-  --easing-out: cubic-bezier(0, 0, 0.2, 1);
-
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
-  --font-heading: var(--font-sans);
+  /* ... 全部语义变量 ... */
 }
 ```
 
-### 6.3 compact 主题（高密度）
+### 6.2 Customizer CSS 维度
 
-`packages/ui-tokens/src/themes/compact.css`（与 default 颜色相同，但**尺寸更紧凑**）：
+`packages/ui-tokens/src/customizer.css` 专门承载运行时可调的 CSS 维度：
 
 ```css
-[data-theme='compact'] {
-  /* 颜色与 default 相同 */
-  --color-background: oklch(1 0 0);
-  --color-foreground: oklch(0.145 0 0);
-  --color-primary: oklch(0.205 0 0);
-  --color-primary-foreground: oklch(0.985 0 0);
-  --color-secondary: oklch(0.97 0 0);
-  --color-secondary-foreground: oklch(0.205 0 0);
-  --color-muted: oklch(0.97 0 0);
-  --color-muted-foreground: oklch(0.556 0 0);
-  --color-accent: oklch(0.97 0 0);
-  --color-accent-foreground: oklch(0.205 0 0);
-  --color-destructive: oklch(0.577 0.245 27.325);
-  --color-destructive-foreground: oklch(0.985 0 0);
-  --color-success: oklch(0.62 0.19 145);
-  --color-success-foreground: oklch(0.985 0 0);
-  --color-warning: oklch(0.75 0.18 85);
-  --color-warning-foreground: oklch(0.205 0 0);
-  --color-info: oklch(0.65 0.15 240);
-  --color-info-foreground: oklch(0.985 0 0);
-  --color-card: oklch(1 0 0);
-  --color-card-foreground: oklch(0.145 0 0);
-  --color-popover: oklch(1 0 0);
-  --color-popover-foreground: oklch(0.145 0 0);
-  --color-border: oklch(0.922 0 0);
-  --color-input: oklch(0.922 0 0);
-  --color-ring: oklch(0.708 0 0);
+[data-theme-scale='xs'] {
+  --text-base: 0.875rem;
+  --spacing: 0.222222rem;
+}
 
-  /* 圆角更小 */
-  --radius-sm: 0.125rem;
-  --radius-md: 0.25rem;
-  --radius-lg: 0.5rem;
-  --radius-xl: 0.75rem;
+[data-theme-radius='sm'] {
+  --radius: 0.3rem;
+}
 
-  /* 尺寸更紧凑 */
-  --size-control-height: 1.75rem;
-  --size-header-height: 2.75rem;
-  --size-sidebar-width: 13rem;
-  --size-sidebar-width-collapsed: 3rem;
-  --size-content-max-width: 80rem;
-
-  /* 阴影 / 动效 / 字体 与 default 相同 */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-
-  --duration-fast: 100ms;
-  --duration-normal: 180ms;
-  --duration-slow: 300ms;
-  --easing-in: cubic-bezier(0.4, 0, 1, 1);
-  --easing-out: cubic-bezier(0, 0, 0.2, 1);
-
-  --font-sans: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: ui-monospace, 'Cascadia Code', 'Source Code Pro', monospace;
-  --font-heading: var(--font-sans);
+[data-theme-content-layout='centered'] .content-wrapper {
+  max-width: var(--size-content-max-width);
+  margin-inline: auto;
 }
 ```
 
-### 6.4 主题入口聚合
+这些规则不属于 style 预设，不应写进 `classic.css`。
 
-`packages/ui-tokens/src/themes/index.css`（被 L5 应用入口 import 一次即可）：
+### 6.3 Compact 废弃策略
+
+`compact` 在 v2 中废弃，不再保留为独立 style。原因见 [ADR-0018](../../adr/0018-废弃compact主题改为style加customizer维度组合.md)。
+
+本次重构只承诺 best-effort 迁移：
+
+- `compact` → `classic + scale=xs + radius=sm`
+- 不追求完整复刻旧 compact 的全部尺寸和动效差异
+
+### 6.4 风格入口聚合
+
+`packages/ui-tokens/src/styles/index.css`：
 
 ```css
-@import './default.css';
-@import './dark.css';
-@import './compact.css';
+@import './classic.css';
 ```
 
-L5 入口文件 `apps/web-admin/src/main.tsx` 顶部：
+L5 入口 CSS：
 
-```typescript
-import '@mb/ui-tokens/themes/index.css';
+```css
+@import '@mb/ui-tokens/tailwind-theme.css';
+@import '@mb/ui-tokens/styles/index.css';
+@import '@mb/ui-tokens/customizer.css';
 ```
 
 ---
@@ -680,7 +483,8 @@ Tailwind CSS v4 采用 CSS-first 配置，不再需要 `tailwind.config.ts` 中�
 ```css
 /* apps/web-admin/src/styles.css */
 @import "@mb/ui-tokens/src/tailwind-theme.css";
-@import "@mb/ui-tokens/src/themes/index.css";
+@import "@mb/ui-tokens/src/styles/index.css";
+@import "@mb/ui-tokens/src/customizer.css";
 
 /* 应用级自定义样式（如有） */
 ```
@@ -730,9 +534,9 @@ const variant = 'primary';
 
 | 检查项 | 失败行为 |
 |-------|---------|
-| 所有主题 CSS 文件都存在（对应 Theme Registry 登记的 `cssFile`）| 抛错 + 列出缺失文件 |
-| 每个主题都定义了**全部 46 个**语义 token（以 default 为参考）| 抛错 + 列出每个主题缺少的变量 |
-| 每个主题没有定义参考主题之外的多余变量（防 typo）| 抛错 + 列出多余变量 |
+| 所有风格 CSS 文件都存在（对应 Style Registry 登记的 `cssFile`）| 抛错 + 列出缺失文件 |
+| 每个 style block 都定义了**全部核心语义 token**（以 `classic light` 为参考）| 抛错 + 列出每个 block 缺少的变量 |
+| 每个 style block 没有定义参考块之外的多余变量（防 typo）| 抛错 + 列出多余变量 |
 | 所有变量名符合扁平命名（`--<group>-<name>` 格式，禁止嵌套或点分段）| 抛错 + 列出违规变量 |
 
 ### 8.2 脚本骨架
@@ -742,10 +546,10 @@ const variant = 'primary';
 ```typescript
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import { themeRegistry } from '../src/theme-registry';
+import { styleRegistry } from '../src/style-registry';
 
 const PACKAGE_ROOT = resolve(__dirname, '..');
-const REFERENCE_THEME = 'default';
+const REFERENCE_THEME = 'classic';
 const FLAT_NAME_PATTERN = /^--[a-z]+(-[a-z0-9]+)+$/;
 
 interface ParsedTheme {
@@ -775,8 +579,8 @@ function checkFlatNaming(name: string): boolean {
 function main(): void {
   const errors: string[] = [];
 
-  // 1. 加载所有主题
-  const themes = themeRegistry.map((meta) => {
+  // 1. 加载所有 style 文件
+  const themes = styleRegistry.map((meta) => {
     const cssPath = resolve(PACKAGE_ROOT, 'src', meta.cssFile);
     return parseTheme(meta.id, cssPath);
   });
@@ -784,7 +588,7 @@ function main(): void {
   // 2. 找参考主题
   const reference = themes.find((t) => t.id === REFERENCE_THEME);
   if (!reference) {
-    errors.push(`参考主题 "${REFERENCE_THEME}" 未在 theme-registry 中注册`);
+    errors.push(`参考 style "${REFERENCE_THEME}" 未在 style-registry 中注册`);
     console.error(errors.join('\n'));
     process.exit(1);
   }
@@ -827,7 +631,7 @@ function main(): void {
     process.exit(1);
   }
   console.log(
-    `主题完整性校验通过 (${themes.length} 个主题，每个主题 ${reference.variables.size} 个变量)`,
+    `主题完整性校验通过 (${themes.length} 个 style 文件，每个参考块 ${reference.variables.size} 个变量)`,
   );
 }
 
@@ -886,7 +690,7 @@ CI 失败时打印的错误示例：
   --duration-slow
   --easing-out
 
-[compact] 包含 1 个参考主题之外的变量（可能是 typo）：
+[classic.dark] 包含 1 个参考块之外的变量（可能是 typo）：
   --color-priamry
 ```
 
@@ -894,50 +698,55 @@ CI 失败时打印的错误示例：
 
 ---
 
-## 9. 使用者扩展新主题的步骤 [M2]
+## 9. 使用者扩展新风格的步骤 [M2]
 
-使用者想加一套新主题（例如"飞书风格"）只需 **3 步**：
+使用者想加一套新风格（例如"飞书风格"）只需 **3 步**：
 
 ### 步骤 1：新建主题 CSS 文件
 
-在 `packages/ui-tokens/src/themes/feishu.css` 创建新文件，复制 `default.css` 的全部 46 个变量声明，把选择器改成 `[data-theme='feishu']`，按需修改值：
+在 `packages/ui-tokens/src/styles/feishu.css` 创建新文件，复制 `classic.css` 的 light/dark 结构，按需修改值：
 
 ```css
-[data-theme='feishu'] {
+[data-style='feishu'] {
   --color-background: oklch(1 0 0);
   --color-foreground: oklch(0.2 0 0);
   --color-primary: oklch(0.55 0.2 250);  /* 飞书蓝 */
   --color-primary-foreground: oklch(1 0 0);
-  /* ... 全部 46 个变量必须声明，否则完整性脚本报错 ... */
+  /* ... 全部变量必须声明，否则完整性脚本报错 ... */
+}
+
+[data-style='feishu'][data-mode='dark'] {
+  --color-background: oklch(0.18 0.02 250);
+  --color-foreground: oklch(0.97 0 0);
+  /* ... dark block 同样必须完整声明 ... */
 }
 ```
 
-### 步骤 2：注册到 Theme Registry
+### 步骤 2：注册到 Style Registry
 
-修改 `packages/ui-tokens/src/theme-registry.ts`，添加新主题元数据：
+修改 `packages/ui-tokens/src/style-registry.ts`，添加新风格元数据：
 
 ```typescript
-export type ThemeId = 'default' | 'dark' | 'compact' | 'feishu';
+export type StyleId = 'classic' | 'feishu';
 
-export const themeRegistry: readonly ThemeMeta[] = [
-  // ... 原有 3 个主题 ...
+export const styleRegistry: readonly StyleMeta[] = [
+  // ... 原有 classic ...
   {
     id: 'feishu',
     displayName: '飞书',
     description: '飞书品牌色调',
-    cssFile: './themes/feishu.css',
+    color: '#2468f2',
+    cssFile: './styles/feishu.css',
   },
 ] as const;
 ```
 
-### 步骤 3：在 themes/index.css 引入
+### 步骤 3：在 styles/index.css 引入
 
-修改 `packages/ui-tokens/src/themes/index.css`：
+修改 `packages/ui-tokens/src/styles/index.css`：
 
 ```css
-@import './default.css';
-@import './dark.css';
-@import './compact.css';
+@import './classic.css';
 @import './feishu.css';
 ```
 
@@ -946,10 +755,10 @@ export const themeRegistry: readonly ThemeMeta[] = [
 ```bash
 cd client
 pnpm -F @mb/ui-tokens check:theme       # 主题完整性校验
-pnpm -r tsc --noEmit                    # ThemeId 联合类型更新后所有消费方编译通过
+pnpm -r tsc --noEmit                    # StyleId 联合类型更新后所有消费方编译通过
 ```
 
-完成后在 ThemeSwitcher UI 里就会自动出现"飞书"选项（因为所有 UI 都是从 `themeRegistry` 渲染）。
+完成后在 ThemeCustomizer 的风格下拉框里就会自动出现“飞书”选项（因为所有 UI 都是从 `styleRegistry` 渲染）。
 
 <!-- verify: cd client && pnpm -F @mb/ui-tokens check:theme && pnpm -r tsc --noEmit -->
 

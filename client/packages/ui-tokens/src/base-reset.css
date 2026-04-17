@@ -1,0 +1,11 @@
+/* shadcn v4 必备 — Tailwind v4 不再内置 border-color / outline-color reset */
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-border);
+    outline-color: var(--color-ring);
+  }
+}

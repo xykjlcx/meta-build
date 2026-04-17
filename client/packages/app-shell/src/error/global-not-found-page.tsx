@@ -1,4 +1,4 @@
-// 404 页面使用内联样式，因为 ThemeProvider/CSS 变量可能未初始化
+// 404 页面使用内联样式，因为 StyleProvider/CSS 变量可能未初始化
 // 文案硬编码中文，因为 i18n Provider 可能未初始化
 
 export function GlobalNotFoundPage() {

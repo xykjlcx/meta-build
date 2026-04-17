@@ -1,0 +1,152 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - link [ref=e8] [cursor=pointer]:
+      - /url: /admin/index
+    - generic [ref=e10]:
+      - link "企业管理" [ref=e11] [cursor=pointer]:
+        - /url: /admin/index
+        - img [ref=e915]
+        - text: 企业管理
+      - generic [ref=e13] [cursor=pointer]:
+        - img [ref=e916]
+        - text: 知识库
+        - img [ref=e15]
+    - generic [ref=e20]:
+      - img [ref=e172]
+      - generic [ref=e174]:
+        - generic [ref=e175]: 搜索功能导航、组织数据、角色详情等
+        - textbox "搜索功能导航、组织数据、角色详情等" [ref=e176]
+      - img [ref=e28]
+    - generic [ref=e30]:
+      - button [ref=e31] [cursor=pointer]:
+        - img [ref=e33]
+      - button [ref=e37] [cursor=pointer]:
+        - img [ref=e38]
+      - button [ref=e39] [cursor=pointer]:
+        - img [ref=e42]
+      - link [ref=e45] [cursor=pointer]:
+        - /url: https://www.feishu.cn/hc/zh-cn/categories/360001917053-%E4%BC%81%E4%B8%9A%E7%AE%A1%E7%90%86?from=in_admin
+        - img [ref=e48]
+      - button [ref=e54] [cursor=pointer]:
+        - img [ref=e56]
+      - generic [ref=e179] [cursor=pointer]:
+        - generic [ref=e181]:
+          - generic [ref=e182]: 昕越科技
+          - generic [ref=e185]: 创建人
+        - img [ref=e187]
+  - generic [ref=e60]:
+    - complementary [ref=e189]:
+      - link "企业知识库管理" [ref=e917] [cursor=pointer]:
+        - /url: /admin/drive/wiki
+        - img [ref=e919]
+        - generic [ref=e921]: 企业知识库管理
+      - generic [ref=e556] [cursor=pointer]:
+        - img [ref=e559]
+        - generic [ref=e561]: 收起导航
+    - generic [ref=e84]:
+      - generic [ref=e924]:
+        - generic [ref=e926]:
+          - generic [ref=e927]: 知识库
+          - img [ref=e930]
+        - generic:
+          - generic:
+            - generic:
+              - img
+          - generic:
+            - generic:
+              - img
+        - generic [ref=e933]: 企业知识库管理
+      - generic [ref=e935]:
+        - generic [ref=e938]:
+          - generic [ref=e941] [cursor=pointer]: 企业知识库管理
+          - generic [ref=e944] [cursor=pointer]: 自定义分类管理
+          - generic:
+            - generic:
+              - generic:
+                - generic:
+                  - generic: 更多
+                  - generic:
+                    - img
+        - generic [ref=e950]:
+          - generic [ref=e951]: 当前共有 1 个知识库，1 个状态正常，0 个已删除
+          - generic [ref=e952]:
+            - generic [ref=e954]:
+              - generic [ref=e955]: 默认分类
+              - generic [ref=e957]:
+                - generic [ref=e959]:
+                  - generic [ref=e962]:
+                    - generic [ref=e963]: 团队空间
+                    - img [ref=e965] [cursor=pointer]
+                  - generic [ref=e969]:
+                    - generic [ref=e970]: 个人空间
+                    - img [ref=e972] [cursor=pointer]
+                  - combobox [ref=e976]
+                - img [ref=e979]
+            - generic [ref=e982]:
+              - generic [ref=e983]: 状态
+              - generic [ref=e985] [cursor=pointer]:
+                - generic [ref=e986]:
+                  - generic [ref=e987]: 全部
+                  - generic:
+                    - combobox
+                - img [ref=e990]
+            - generic [ref=e992]:
+              - img [ref=e995]
+              - generic [ref=e999]:
+                - generic [ref=e1000]: 请输入管理员姓名或手机号
+                - generic:
+                  - combobox
+            - generic [ref=e1001]:
+              - generic [ref=e1003]:
+                - img [ref=e1006]
+                - generic [ref=e1008]:
+                  - generic [ref=e1009]: 请输入知识库名称或ID
+                  - textbox "请输入知识库名称或ID" [ref=e1010]
+                - img [ref=e1013]
+              - generic [ref=e1016] [cursor=pointer]:
+                - generic [ref=e1017]:
+                  - generic [ref=e1018]: 知识库名称
+                  - generic:
+                    - combobox
+                - img [ref=e1021]
+          - table [ref=e1030]:
+            - rowgroup [ref=e1032]:
+              - row "知识库名称 页面数量 管理员 状态 默认分类 自定义分类 创建时间 操作" [ref=e1033]:
+                - columnheader "知识库名称" [ref=e1034]:
+                  - generic [ref=e1036]: 知识库名称
+                - columnheader "页面数量" [ref=e1037]:
+                  - generic [ref=e1039]: 页面数量
+                - columnheader "管理员" [ref=e1040]:
+                  - generic [ref=e1042]: 管理员
+                - columnheader "状态" [ref=e1043]:
+                  - generic [ref=e1045]: 状态
+                - columnheader "默认分类" [ref=e1046]:
+                  - generic [ref=e1048]: 默认分类
+                - columnheader "自定义分类" [ref=e1049]:
+                  - generic [ref=e1051]: 自定义分类
+                - columnheader "创建时间" [ref=e1052]:
+                  - generic [ref=e1054]: 创建时间
+                - columnheader "操作" [ref=e1055]:
+                  - generic [ref=e1057]: 操作
+            - rowgroup [ref=e1058]:
+              - 'row "示例知识库 / Wiki samples ID: 7309119888362586113 10 李长昕 正常 团队空间 -- 2023-12-05 22:38:11 " [ref=e1059]':
+                - 'cell "示例知识库 / Wiki samples ID: 7309119888362586113" [ref=e1060]':
+                  - generic [ref=e1061]:
+                    - generic [ref=e1062]: 示例知识库 / Wiki samples
+                    - generic [ref=e1063]: "ID: 7309119888362586113"
+                - cell "10" [ref=e1064]:
+                  - generic [ref=e1065]: "10"
+                - cell "李长昕" [ref=e1066]:
+                  - generic [ref=e1069] [cursor=pointer]:
+                    - img [ref=e1071]
+                    - generic [ref=e1073]: 李长昕
+                - cell "正常" [ref=e1074]:
+                  - generic [ref=e1075]: 正常
+                - cell "团队空间" [ref=e1076]:
+                  - generic [ref=e1077]: 团队空间
+                - cell "--" [ref=e1078]:
+                  - generic [ref=e1083] [cursor=pointer]: "--"
+                - cell "2023-12-05 22:38:11" [ref=e1084]:
+                  - generic [ref=e1085]: 2023-12-05 22:38:11
+                - cell "" [ref=e1086]:
+                  - generic [ref=e1088] [cursor=pointer]: 

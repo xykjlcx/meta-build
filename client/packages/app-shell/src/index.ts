@@ -13,7 +13,7 @@ export {
 } from './i18n';
 
 // theme
-export { ThemeProvider, useTheme } from './theme';
+export { StyleProvider, useStyle } from './theme';
 
 // auth
 export {
@@ -35,10 +35,17 @@ export { createQueryClient } from './data';
 export { useMenu, type MenuNode, type UserMenuPayload } from './menu';
 
 // layouts
-export { BasicLayout, SidebarLayout, TopLayout } from './layouts';
+export {
+  BasicLayout,
+  LayoutResolver,
+  LayoutPresetProvider,
+  layoutRegistry,
+  useLayoutPreset,
+} from './layouts';
 
 // components
 export { BreadcrumbNav, type BreadcrumbEntry } from './components/breadcrumb-nav';
+export { ThemeCustomizer } from './components/theme-customizer';
 export {
   NotificationBadge,
   type NotificationBadgeProps,

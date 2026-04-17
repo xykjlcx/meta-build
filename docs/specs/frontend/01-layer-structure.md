@@ -20,7 +20,7 @@ client 端采用 **5 层 pnpm workspace + 1 个独立契约包** 结构，依赖
 
 | 层 | 包名 | 职责 | 隔离的第三方依赖 |
 |---|------|------|-----------------|
-| L1 | `@mb/ui-tokens` | Design tokens（CSS Variables）+ Theme Registry + Tailwind v4 CSS-first 配置（`@theme` 指令） | 无（纯 CSS + TS 常量） |
+| L1 | `@mb/ui-tokens` | Design tokens（CSS Variables）+ Style Registry + Tailwind v4 CSS-first 配置（`@theme` 指令） | 无（纯 CSS + TS 常量） |
 | L2 | `@mb/ui-primitives` | 42 个原子组件（shadcn/Radix 风格）| Radix UI / shadcn primitives / CVA / clsx |
 | L3 | `@mb/ui-patterns` | 8 个业务组件（NxTable / NxForm / NxTree / ...）| TanStack Table / React Hook Form / Zod / date-fns |
 | L4 | `@mb/app-shell` | 布局 / Provider 树 / 认证门面 / 全局 UI / i18n 机制 | TanStack Router / TanStack Query / i18next |
@@ -101,7 +101,7 @@ client 端采用 **5 层 pnpm workspace + 1 个独立契约包** 结构，依赖
 **L4 `@mb/app-shell`** —— 隔离 TanStack Router / TanStack Query / i18next
 
 - L4 是 Provider 树和路由守卫的归属层
-- L5 业务代码只通过 L4 暴露的 hook（`useCurrentUser` / `useMenu` / `useLanguage` / `useTheme`）访问应用基础设施
+- L5 业务代码只通过 L4 暴露的 hook（`useCurrentUser` / `useMenu` / `useLanguage` / `useStyle`）访问应用基础设施
 - 路由声明用 `@tanstack/react-router` 的 `createFileRoute`，但只允许在 `apps/web-admin/src/routes/**/*.tsx` 出现
 
 **L5 `apps/web-admin`** —— 业务代码
@@ -138,14 +138,13 @@ client/
 │   │   ├── package.json
 │   │   ├── tsconfig.json
 │   │   ├── src/
-│   │   │   ├── index.ts                       # 导出 Theme Registry + 类型
-│   │   │   ├── tailwind-preset.css             # Tailwind v4 CSS-first 配置（@theme 指令映射 CSS 变量）
-│   │   │   ├── themes/
-│   │   │   │   ├── default.css                # 默认主题（中性基调，参考主题）
-│   │   │   │   ├── dark.css                   # 暗色主题
-│   │   │   │   └── compact.css                # 高密度主题
-│   │   │   ├── theme-registry.ts              # Theme 元数据登记
-│   │   │   └── apply-theme.ts                 # data-theme 切换函数
+│   │   │   ├── index.ts                       # 导出 Style Registry + 类型
+│   │   │   ├── tailwind-theme.css             # Tailwind v4 CSS-first 配置（@theme 指令映射 CSS 变量）
+│   │   │   ├── styles/
+│   │   │   │   ├── classic.css                # canonical style（light + dark）
+│   │   │   │   └── index.css
+│   │   │   ├── style-registry.ts              # Style 元数据登记
+│   │   │   └── customizer.css                 # scale / radius / contentLayout CSS 维度
 │   │   └── scripts/
 │   │       └── check-theme-integrity.ts       # 主题完整性校验脚本（详见 02 章）
 │   │
@@ -181,19 +180,20 @@ client/
 │   │   └── src/
 │   │       ├── index.ts
 │   │       ├── layouts/
-│   │       │   ├── sidebar-layout.tsx
-│   │       │   ├── top-layout.tsx
+│   │       │   ├── layout-resolver.tsx
+│   │       │   ├── registry.ts
+│   │       │   ├── layout-preset-provider.tsx
 │   │       │   └── basic-layout.tsx
-│   │       ├── providers/
-│   │       │   ├── app-providers.tsx          # 全局 Provider 组合
-│   │       │   ├── query-client.ts
-│   │       │   └── error-boundary.tsx
+│   │       ├── presets/
+│   │       │   ├── inset/
+│   │       │   └── module-switcher/
 │   │       ├── auth/
 │   │       │   ├── use-current-user.ts        # 认证读门面（对应后端 CurrentUser）
 │   │       │   ├── use-auth.ts                # 认证写门面（对应后端 AuthFacade）
 │   │       │   └── require-auth.ts            # 路由守卫工厂
 │   │       ├── menu/
 │   │       │   ├── use-menu.ts                # 菜单 hook
+│   │       │   ├── types.ts
 │   │       │   └── icon-map.ts                # lucide 图标白名单
 │   │       ├── i18n/
 │   │       │   ├── i18n-instance.ts
@@ -206,9 +206,12 @@ client/
 │   │       │       └── en-US/
 │   │       │           ├── shell.json
 │   │       │           └── common.json
-│   │       └── theme/
-│   │           ├── use-theme.ts
-│   │           └── theme-switcher.tsx
+│   │       ├── theme/
+│   │       │   ├── use-style.ts
+│   │       │   └── style-provider.tsx
+│   │       └── customizer/
+│   │           ├── theme-customizer.tsx
+│   │           └── use-customizer-settings.ts
 │   │
 │   └── api-sdk/                               # 契约包（OpenAPI 产物）
 │       ├── package.json

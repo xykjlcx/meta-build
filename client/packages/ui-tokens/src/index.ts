@@ -1,6 +1,6 @@
 // L1 @mb/ui-tokens — 设计令牌包
 // M1: 导出 token 常量（供 TypeScript 引用）
-// M2: 增加 theme-registry + apply-theme
+// M2+: 导出 style registry 与 token 常量
 
 /**
  * 54 个语义 token 的名称常量——方便 TypeScript 代码引用。
@@ -70,5 +70,4 @@ export const TOKEN_NAMES = {
 
 export const TOTAL_TOKENS = 54;
 
-export { themeRegistry, type ThemeId, type ThemeMeta } from './theme-registry';
-export { applyTheme, loadTheme, initTheme, isValidTheme } from './apply-theme';
+export { styleRegistry, type StyleId, type StyleMeta } from './style-registry';
