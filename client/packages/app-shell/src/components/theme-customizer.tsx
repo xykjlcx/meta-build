@@ -20,8 +20,9 @@ import { styleRegistry } from '@mb/ui-tokens';
 import { Check, LayoutTemplate, Palette, PanelLeft, Settings2, SunMoon } from 'lucide-react';
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
+import { layoutRegistry } from '../layouts/registry';
 import { useLayoutPreset } from '../layouts/use-layout-preset';
-import { type StyleId, useStyle } from '../theme';
+import { type SidebarMode, type StyleId, useStyle } from '../theme';
 
 const scaleOptions = [
   { value: 'default', label: '⊘' },
@@ -52,15 +53,8 @@ const sidebarModeOptions = [
   { value: 'icon', labelKey: 'theme.sidebarMode.icon' },
 ] as const;
 
-// 布局预设元数据 — 独立于 registry 避免循环依赖
-const layoutPresets = [
-  { id: 'inset', nameKey: 'layout.inset', descKey: 'layout.insetDesc' },
-  {
-    id: 'module-switcher',
-    nameKey: 'layout.moduleSwitcher',
-    descKey: 'layout.module-switcherDesc',
-  },
-] as const;
+// 布局预设列表直接从 layoutRegistry 动态读取，保证 registerLayout() 新增的
+// 自定义 layout 能在 customizer 里显示（消除之前的"二份真相"问题）
 
 export function ThemeCustomizer() {
   const { t } = useTranslation('shell');
@@ -110,7 +104,7 @@ export function ThemeCustomizer() {
           <section className="space-y-2">
             <SectionLabel icon={LayoutTemplate}>{t('theme.layoutLabel')}</SectionLabel>
             <div className="grid gap-2">
-              {layoutPresets.map((preset) => {
+              {layoutRegistry.list().map((preset) => {
                 const active = preset.id === presetId;
 
                 return (
@@ -126,8 +120,14 @@ export function ThemeCustomizer() {
                     )}
                   >
                     <div>
-                      <div className="text-sm font-semibold">{t(preset.nameKey)}</div>
-                      <p className="text-xs text-muted-foreground">{t(preset.descKey)}</p>
+                      <div className="text-sm font-semibold">
+                        {t(preset.name, { defaultValue: preset.name })}
+                      </div>
+                      {preset.description && (
+                        <p className="text-xs text-muted-foreground">
+                          {t(preset.description, { defaultValue: preset.description })}
+                        </p>
+                      )}
                     </div>
                     {active && (
                       <span className="rounded-full bg-primary px-2 py-0.5 text-[10px] font-semibold text-primary-foreground">
@@ -205,7 +205,7 @@ export function ThemeCustomizer() {
           <ToggleField
             label={t('theme.sidebarModeLabel')}
             value={sidebarMode}
-            onValueChange={(value) => setSidebarMode(value as 'default' | 'icon')}
+            onValueChange={(value) => setSidebarMode(value as SidebarMode)}
             options={sidebarModeOptions.map((option) => ({
               value: option.value,
               label: t(option.labelKey),
@@ -226,9 +226,9 @@ export function ThemeCustomizer() {
             </div>
             <div className="flex flex-wrap gap-1.5 text-[11px] text-muted-foreground">
               <SummaryPill>
-                {t(
-                  layoutPresets.find((p) => p.id === presetId)?.nameKey ?? layoutPresets[0].nameKey,
-                )}
+                {t(layoutRegistry.get(presetId).name, {
+                  defaultValue: layoutRegistry.get(presetId).name,
+                })}
               </SummaryPill>
               <SummaryPill>{selectedStyle?.displayName}</SummaryPill>
               <SummaryPill>{colorMode === 'dark' ? t('theme.dark') : t('theme.light')}</SummaryPill>

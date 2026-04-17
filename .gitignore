@@ -19,6 +19,7 @@ build/
 *.tsbuildinfo
 .turbo/
 .vite/
+storybook-static/
 
 # ===== Java（后端）=====
 target/

@@ -16,7 +16,9 @@ const STATUS_CONFIG: Record<NoticeStatusValue, StatusConfig> = {
   },
   [NOTICE_STATUS.PUBLISHED]: {
     variant: 'outline',
-    dotColor: 'bg-emerald-500',
+    // 使用 semantic token `bg-success`；Tailwind 默认色板被 primitive.css `--color-*: initial`
+    // 清空后 bg-emerald-500 等 utility 不再生成色值
+    dotColor: 'bg-success',
     labelKey: 'status.published',
   },
   [NOTICE_STATUS.REVOKED]: {

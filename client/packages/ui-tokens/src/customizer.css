@@ -63,7 +63,6 @@
   margin-inline: auto;
 }
 
-/* Sidebar mode: icon — 让 Inset 布局的 Sidebar 默认进入图标折叠态 */
-[data-theme-sidebar-mode='icon'] {
-  --sidebar-width: var(--sidebar-width-icon, 3rem);
-}
+/* sidebarMode 由 InsetLayout 内部 React 受控（SidebarProvider 的 open prop），
+ * 这里不再需要 CSS selector —— customizer 的 sidebarMode 状态仍写入
+ * body.data-theme-sidebar-mode 以便调试/未来 preset 自定义覆盖使用。 */

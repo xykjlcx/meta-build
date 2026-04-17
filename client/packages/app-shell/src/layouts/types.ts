@@ -23,7 +23,11 @@ export interface ShellLayoutProps {
 }
 
 export interface LayoutPresetDef {
+  /** 唯一标识（customizer 下拉的 value） */
   id: string;
+  /** 可 i18n 的 name key（例：'layout.inset'）或直接展示名 */
   name: string;
+  /** 可 i18n 的描述 key（例：'layout.insetDesc'）；customizer 下拉 description 展示 */
+  description?: string;
   component: ComponentType<ShellLayoutProps>;
 }

@@ -73,9 +73,24 @@ export function InsetLayout({
   sidebarAboveFooterSlot,
 }: ShellLayoutProps) {
   const { logout, isLoggingOut } = useAuth();
+  const { sidebarMode, setSidebarMode } = useStyle();
+
+  // Sidebar 折叠状态由 customizer 的 sidebarMode 维度受控：
+  //   - sidebarMode='default' → open=true（展开）
+  //   - sidebarMode='icon'    → open=false（图标态）
+  // 同时 SidebarTrigger 点击反向同步回 sidebarMode，保持两处入口一致
+  const sidebarOpen = sidebarMode !== 'icon';
+  const handleSidebarOpenChange = (open: boolean) => {
+    setSidebarMode(open ? 'default' : 'icon');
+  };
 
   return (
-    <SidebarProvider style={INSET_SIDEBAR_VARS} className="bg-sidebar text-foreground">
+    <SidebarProvider
+      open={sidebarOpen}
+      onOpenChange={handleSidebarOpenChange}
+      style={INSET_SIDEBAR_VARS}
+      className="bg-sidebar text-foreground"
+    >
       <InsetSidebar
         menuTree={menuTree}
         currentUser={currentUser}

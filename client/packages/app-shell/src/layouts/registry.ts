@@ -58,10 +58,16 @@ class LayoutRegistry {
 }
 
 export const layoutRegistry = new LayoutRegistry('inset', [
-  { id: 'inset', name: 'layout.inset', component: InsetLayout },
+  {
+    id: 'inset',
+    name: 'layout.inset',
+    description: 'layout.insetDesc',
+    component: InsetLayout,
+  },
   {
     id: 'module-switcher',
     name: 'layout.moduleSwitcher',
+    description: 'layout.module-switcherDesc',
     component: ModuleSwitcherLayout,
   },
 ]);

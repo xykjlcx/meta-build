@@ -46,10 +46,10 @@ const preview: Preview = {
         delete document.documentElement.dataset.themeColorMode;
       }
 
-      delete document.documentElement.dataset.theme;
       delete document.body.dataset.themeScale;
       delete document.body.dataset.themeRadius;
       delete document.body.dataset.themeContentLayout;
+      delete document.body.dataset.themeSidebarMode;
 
       return <Story />;
     },
