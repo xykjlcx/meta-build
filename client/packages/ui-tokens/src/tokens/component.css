@@ -41,10 +41,32 @@
   --sidebar-item-active-bg: var(--color-sidebar-accent);
   --sidebar-margin-left: 0;
 
+  /* W1 新增：Sidebar 激活态（Inset/Mix 共用） */
+  --sidebar-item-active-fg: var(--color-primary);
+  --sidebar-item-active-font-weight: 500;
+  --sidebar-item-active-indicator-width: 0;
+  --sidebar-item-active-indicator-color: var(--color-primary);
+  --sidebar-item-hover-bg: color-mix(in oklch, var(--sidebar-fg) 8%, transparent);
+
+  /* W1 新增：Sidebar collapsed 宽度（语义别名，业务层不感知 size 层命名） */
+  --sidebar-collapsed-width: var(--size-sidebar-width-collapsed);
+
   /* ========== Header ========== */
   --header-bg: var(--color-background);
   --header-height: var(--size-header-height);
   --header-border: var(--color-border);
+
+  /* ========== Nav Tab（W1 新增；顶部导航 tab；Mix Layout 使用；Inset 若未来加也可用）========== */
+  --nav-tab-fg: var(--color-muted-foreground);
+  --nav-tab-hover-fg: var(--color-foreground);
+  --nav-tab-active-fg: var(--color-primary);
+  --nav-tab-active-bg: transparent;
+  --nav-tab-active-radius: 0;
+  --nav-tab-active-underline-width: 2px;
+  --nav-tab-active-underline-color: var(--color-primary);
+  --nav-tab-height: var(--size-control-h-md);
+  --nav-tab-padding-x: 0.25rem;
+  --nav-tab-gap: 1.5rem;
 
   /* ========== Chart ==========
    * 引用 primitive 的 chart 色板（灰阶 + 一丝冷蓝，对齐参考站）。
@@ -54,4 +76,55 @@
   --chart-3: var(--color-chart-3);
   --chart-4: var(--color-chart-4);
   --chart-5: var(--color-chart-5);
+}
+
+/* ========== Class-based rules（W1 新增，消费上面的 component tokens）========== */
+.nav-tab {
+  color: var(--nav-tab-fg);
+  height: var(--nav-tab-height);
+  padding-left: var(--nav-tab-padding-x);
+  padding-right: var(--nav-tab-padding-x);
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  border-bottom: 0 solid transparent;
+  border-radius: 0;
+  transition:
+    color var(--duration-fast) var(--easing-out),
+    background var(--duration-fast) var(--easing-out);
+}
+
+.nav-tab:hover { color: var(--nav-tab-hover-fg); }
+
+.nav-tab[data-active='true'] {
+  color: var(--nav-tab-active-fg);
+  background: var(--nav-tab-active-bg);
+  border-radius: var(--nav-tab-active-radius);
+  border-bottom: var(--nav-tab-active-underline-width) solid var(--nav-tab-active-underline-color);
+}
+
+.sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-md);
+  color: var(--sidebar-fg);
+  background: transparent;
+  font-weight: 400;
+  transition:
+    background var(--duration-fast) var(--easing-out),
+    color var(--duration-fast) var(--easing-out);
+  box-shadow: inset var(--sidebar-item-active-indicator-width) 0 0 0 transparent;
+}
+
+.sidebar-item:hover {
+  background: var(--sidebar-item-hover-bg);
+}
+
+.sidebar-item[data-active='true'] {
+  color: var(--sidebar-item-active-fg);
+  background: var(--sidebar-item-active-bg);
+  font-weight: var(--sidebar-item-active-font-weight);
+  box-shadow: inset var(--sidebar-item-active-indicator-width) 0 0 0 var(--sidebar-item-active-indicator-color);
 }

@@ -14,7 +14,7 @@
 | # | 维度 | 结论 |
 |---|------|------|
 | 1 | L4 哲学 | **隔离 TanStack Router / 菜单 API / 全局状态管理器**——L4 是"换壳不换业务"的关键层。L5 业务代码不直接 import `@tanstack/react-router` / `i18next`，全部走 L4 暴露的 hook 和工厂函数 |
-| 2 | 布局预设 | **认证后布局走 `LayoutResolver + Preset Registry`**。`BasicLayout` 保留给登录页 / 无菜单页；canonical authed preset 为 `inset`，`module-switcher` 为第二套正式 preset |
+| 2 | 布局预设 | **认证后布局走 `LayoutResolver + Preset Registry`**。`BasicLayout` 保留给登录页 / 无菜单页；canonical authed preset 为 `inset`，`mix` 为第二套正式 preset |
 | 3 | Provider 顺序 | **严格 6 层**：`ErrorBoundary` → `QueryClientProvider` → `I18nProvider` → `StyleProvider` → `RouterProvider` → 全局 Toast/Dialog 容器。顺序错误会导致部分 Provider 拿不到上层 context |
 | 4 | 认证门面 | **对称双门面**：`useCurrentUser()` 读 + `useAuth()` 写。对应后端 `CurrentUser` + `AuthFacade`。`features/**` 禁止直调 `@mb/api-sdk/auth/*` 状态接口，必须走门面 |
 | 5 | i18n 默认语言 | `zh-CN` 默认 + `zh-CN` fallback；**不做浏览器自动检测**（YAGNI） |
@@ -44,7 +44,7 @@
    ├ inset           │
    │  侧边栏 + 卡片式内容 │
    │                    │
-   ├ module-switcher ├──── routes/orders/index.tsx 不变
+   ├ mix              ├──── routes/orders/index.tsx 不变
    │  模块 Tab + 子侧栏   │
    │                    │
    └ 自定义 preset      │
@@ -112,7 +112,7 @@ authed layout 通过 `PresetRegistry` 显式注册：
 - canonical 默认值：`defaultLayoutId = 'inset'`
 - 正式 preset：
   - `inset`
-  - `module-switcher`
+  - `mix`
 - `BasicLayout` 保留为无菜单布局，不进入 authed preset 列表
 
 **禁止** 通过“第一个 import 即默认 preset”的 side-effect 顺序定义默认值。默认布局必须显式配置，避免 AI 和 bundler 推理失真。
@@ -124,7 +124,7 @@ Phase D 后，旧兼容壳已从源码导出中移除：
 | 当前状态 | 说明 |
 |------|------|
 | `LayoutResolver` | 认证后布局唯一入口 |
-| `inset` / `module-switcher` | 两套正式 preset |
+| `inset` / `mix` | 两套正式 preset |
 | `BasicLayout` | 保留给登录页 / 无菜单页 |
 
 旧固定布局兼容壳与旧单 theme API 均已下线，不再作为 public API。
@@ -134,7 +134,7 @@ Phase D 后，旧兼容壳已从源码导出中移除：
 | 场景 | 用哪个 |
 |------|-------|
 | 业务管理后台（默认） | `inset` |
-| 多模块 SaaS 导航 | `module-switcher` |
+| 多模块 SaaS 导航 | `mix` |
 | 登录 / 注册 / 忘记密码 | `BasicLayout` |
 | 全屏数据大屏 | `BasicLayout` |
 | 嵌入式（去掉外部 chrome） | `BasicLayout` |
@@ -1309,9 +1309,9 @@ packages/app-shell/
     │   │   ├── inset-layout.tsx
     │   │   ├── inset-header.tsx
     │   │   └── inset-sidebar.tsx
-    │   └── module-switcher/
+    │   └── mix/
     │       ├── index.ts
-    │       ├── module-switcher-layout.tsx
+    │       ├── mix-layout.tsx
     │       ├── global-header.tsx
     │       ├── module-tabs.tsx
     │       └── module-sidebar.tsx

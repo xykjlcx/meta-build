@@ -1,81 +1,30 @@
-import { InsetLayout } from '../presets/inset';
-import { ModuleSwitcherLayout } from '../presets/module-switcher';
-import type { LayoutPresetDef } from './types';
-
-class LayoutRegistry {
-  private readonly presets = new Map<string, LayoutPresetDef>();
-  private readonly defaultId: string;
-
-  constructor(defaultId: string, presets: LayoutPresetDef[]) {
-    this.defaultId = defaultId;
-    for (const preset of presets) {
-      this.presets.set(preset.id, preset);
-    }
-  }
-
-  private requirePreset(id: string): LayoutPresetDef {
-    const preset = this.presets.get(id);
-    if (!preset) {
-      throw new Error(`Unknown layout preset: ${id}`);
-    }
-    return preset;
-  }
-
-  get(id: string | null | undefined): LayoutPresetDef {
-    if (id && this.presets.has(id)) {
-      return this.requirePreset(id);
-    }
-    return this.requirePreset(this.defaultId);
-  }
-
-  list(): LayoutPresetDef[] {
-    return [...this.presets.values()];
-  }
-
-  getDefaultId(): string {
-    return this.defaultId;
-  }
-
-  has(id: string | null | undefined): boolean {
-    return id != null && this.presets.has(id);
-  }
-
-  /** 注册一个新的布局预设，重复 id 会覆盖，返回 unregister 函数 */
-  register(preset: LayoutPresetDef): () => void {
-    this.presets.set(preset.id, preset);
-    return () => {
-      this.unregister(preset.id);
-    };
-  }
-
-  unregister(id: string): void {
-    this.presets.delete(id);
-  }
-
-  getAllIds(): string[] {
-    return Array.from(this.presets.keys());
-  }
-}
-
-export const layoutRegistry = new LayoutRegistry('inset', [
-  {
-    id: 'inset',
-    name: 'layout.inset',
-    description: 'layout.insetDesc',
-    component: InsetLayout,
-  },
-  {
-    id: 'module-switcher',
-    name: 'layout.moduleSwitcher',
-    description: 'layout.module-switcherDesc',
-    component: ModuleSwitcherLayout,
-  },
-]);
-
 /**
- * 公开 API：注册一个新布局预设。
- * 使用方应在应用启动时（router 初始化前）调用。
+ * Layout Registry 的 side-effect 入口。
+ *
+ * 职责：导入具体 preset 组件，完成默认注册，然后全量 re-export registry-core。
+ *
+ * 读侧消费者（ThemeCustomizer / LayoutResolver / LayoutPresetProvider 等）
+ * 应改为从 registry-core 导入，以避免 registry → preset → ThemeCustomizer → registry 的循环。
+ * 本文件由应用入口（app-shell index / main.tsx）导入一次，保证默认 preset 在运行时生效。
  */
-export function registerLayout(preset: LayoutPresetDef): () => void {
-  return layoutRegistry.register(preset);
-}
+import { InsetLayout } from '../presets/inset';
+import { MixLayout } from '../presets/mix';
+import { layoutRegistry } from './registry-core';
+
+// 默认 preset 注册（应用启动时执行一次）
+layoutRegistry.register({
+  id: 'inset',
+  name: 'layout.inset',
+  description: 'layout.insetDesc',
+  component: InsetLayout,
+});
+
+layoutRegistry.register({
+  id: 'mix',
+  name: 'layout.mix',
+  description: 'layout.mixDesc',
+  component: MixLayout,
+});
+
+// 全量 re-export，保持对旧 import path 的向后兼容
+export { layoutRegistry, registerLayout } from './registry-core';

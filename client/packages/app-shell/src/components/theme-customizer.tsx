@@ -20,7 +20,7 @@ import { styleRegistry } from '@mb/ui-tokens';
 import { Check, LayoutTemplate, Palette, PanelLeft, Settings2, SunMoon } from 'lucide-react';
 import { useId } from 'react';
 import { useTranslation } from 'react-i18next';
-import { layoutRegistry } from '../layouts/registry';
+import { layoutRegistry } from '../layouts/registry-core';
 import { useLayoutPreset } from '../layouts/use-layout-preset';
 import { type SidebarMode, type StyleId, useStyle } from '../theme';
 

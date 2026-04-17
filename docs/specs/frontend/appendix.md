@@ -54,7 +54,7 @@
 | 术语 | 定义 | 详见 |
 |---|---|---|
 | **Provider 树** | L4 app-shell 的全局 Provider 严格 6 层顺序：ErrorBoundary → QueryClientProvider → I18nProvider → StyleProvider → RouterProvider → Toast/Dialog 容器 | [05-app-shell.md §4.1](./05-app-shell.md) |
-| **布局预设** | L4 的认证后布局由 `LayoutResolver + Preset Registry` 统一装配，canonical preset 为 `inset` / `module-switcher`；`BasicLayout` 保留给无菜单页面 | [05-app-shell.md §3](./05-app-shell.md) |
+| **布局预设** | L4 的认证后布局由 `LayoutResolver + Preset Registry` 统一装配，canonical preset 为 `inset` / `mix`；`BasicLayout` 保留给无菜单页面 | [05-app-shell.md §3](./05-app-shell.md) |
 | **按层分布的字典** | i18n 字典按层归属使用方：L4 持框架字典（`shell` / `common`），L5 持业务字典（`order.json` / `customer.json` ...），一个业务模块一个 namespace 一个 JSON 文件 | [05-app-shell.md §7.2](./05-app-shell.md) |
 | **数据库数据不 i18n** | MUST #6 的边界：代码中的静态文案必须走 `t()`；**但**数据库存储的文案（菜单 name / 字典选项 / 业务数据）永不走 i18n，直接渲染 | [05-app-shell.md §7.10](./05-app-shell.md) |
 | **Accept-Language 自动同步** | `@mb/api-sdk` 拦截器自动把 `i18n.language` 填到 HTTP 请求 header，前端切换语言后下一次 API 请求自动协商 | [05-app-shell.md §7.6](./05-app-shell.md) + [08-contract-client.md §4.3](./08-contract-client.md) |

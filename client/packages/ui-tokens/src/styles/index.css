@@ -4,4 +4,5 @@
  */
 @import '../tokens/primitive.css';
 @import '../tokens/semantic-classic.css';
+@import '../tokens/semantic-feishu.css';
 @import '../tokens/component.css';

@@ -325,7 +325,7 @@ shell_v2_keywords=(
     "Preset Registry"
     "StyleProvider"
     "inset"
-    "module-switcher"
+    "mix"
 )
 
 for kw in "${shell_v2_keywords[@]}"; do

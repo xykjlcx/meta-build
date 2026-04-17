@@ -80,7 +80,7 @@ Expected: 看到 `const componentRequired = [ '--button-bg', ..., '--chart-5' ];
 ```ts
     // W1 新增 Sidebar 激活态
     '--sidebar-item-active-fg',
-    '--sidebar-item-active-weight',
+    '--sidebar-item-active-font-weight',
     '--sidebar-item-active-indicator-width',
     '--sidebar-item-active-indicator-color',
     // W1 新增 Nav Tab
@@ -124,7 +124,7 @@ Expected: 退出码非 0，输出列出 15 个 `[FAIL] component 层缺少 N 个
 ```css
   /* W1 新增：Sidebar 激活态（Inset/Mix 共用） */
   --sidebar-item-active-fg: var(--color-primary);
-  --sidebar-item-active-weight: 500;
+  --sidebar-item-active-font-weight: 500;
   --sidebar-item-active-indicator-width: 0;
   --sidebar-item-active-indicator-color: var(--color-primary);
 
@@ -345,7 +345,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 .sidebar-item[data-active='true'] {
   color: var(--sidebar-item-active-fg);
   background: var(--sidebar-item-active-bg);
-  font-weight: var(--sidebar-item-active-weight);
+  font-weight: var(--sidebar-item-active-font-weight);
   box-shadow: inset var(--sidebar-item-active-indicator-width) 0 0 0 var(--sidebar-item-active-indicator-color);
 }
 ```
@@ -542,10 +542,14 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 - Modify: `docs/specs/frontend/09-customization-workflow.md`（line 191/379）
 - Modify: `docs/specs/frontend/appendix.md`（line 57）
 - Modify: `docs/adr/0017-app-shell从固定布局切换到layout-resolver加preset-registry.md`（line 24/27）
+- Modify: `scripts/verify-frontend-docs.sh`（line 328: `shell_v2_keywords` 数组里的 `"module-switcher"` → `"mix"`；这是 CI 守护脚本，不改会 false-positive）
+
+**已在 T3 提前做掉**（不要重复改）：
+- `client/packages/app-shell/src/i18n/zh-CN/shell.json` 和 `en-US/shell.json` 里的 `customizer.contentLayoutHint` + `customizer.sidebarModeHint` 文案（共 4 处 "module-switcher" → "Mix"）
 
 ### Steps
 
-- [ ] **Step 1: 批量 replace**
+- [ ] **Step 1: 批量 replace 5 份 docs + ADR**
 
 对每个文件做 `module-switcher` → `mix`、`ModuleSwitcherLayout` → `MixLayout`、`moduleSwitcher` → `mix`。
 
@@ -569,21 +573,43 @@ done
 
 ⚠️ 注意：这会把 `module-switcher-layout.tsx` 字符串也改成 `mix-layout.tsx`——这是对的（对齐 Task 3 的文件重命名）。
 
+- [ ] **Step 1b: 更新 CI 守护脚本 keyword 列表**
+
+`scripts/verify-frontend-docs.sh` line 328 的 `shell_v2_keywords` 数组里有 `"module-switcher"`——这是 CI 跑的守护脚本，要求文档必须出现某些关键词。rename 后这个关键词已经不存在了，守护会失败。更新成新关键词：
+
+```bash
+sed -i '' 's/"module-switcher"/"mix"/' scripts/verify-frontend-docs.sh
+```
+
+验证：
+```bash
+grep -n "shell_v2_keywords" -A 10 scripts/verify-frontend-docs.sh
+```
+Expected: `"mix"` 代替了 `"module-switcher"`。
+
 - [ ] **Step 2: 验证 grep 归零**
 
 ```bash
-grep -rn "module-switcher\|moduleSwitcher\|ModuleSwitcherLayout" docs/specs/frontend docs/adr | grep -v "2026-04-17-feishu-style"
+grep -rn "module-switcher\|moduleSwitcher\|ModuleSwitcherLayout" docs/specs/frontend docs/adr scripts/verify-frontend-docs.sh | grep -v "2026-04-17-feishu-style"
 ```
 
 Expected: 无输出（本次新建的 spec 和 plan 引用这些名词是"历史原貌"不改）。
 
+- [ ] **Step 2b: 跑 verify-frontend-docs.sh 确认守护不 regress**
+
+```bash
+bash scripts/verify-frontend-docs.sh
+```
+Expected: 退出 0。若 FAIL，根据 log 补齐漏改的文件。
+
 - [ ] **Step 3: Commit**
 
 ```bash
-git add -A docs/specs/frontend/ "docs/adr/0017-app-shell从固定布局切换到layout-resolver加preset-registry.md"
-git commit -m "docs: Rename module-switcher → mix 同步到 specs + ADR-0017
+git add -A docs/specs/frontend/ "docs/adr/0017-app-shell从固定布局切换到layout-resolver加preset-registry.md" scripts/verify-frontend-docs.sh
+git commit -m "docs: Rename module-switcher → mix 同步到 specs + ADR-0017 + CI 守护脚本
 
 按 cross-review-residual-scan rule：批量替换后 grep 归零验证，防 doc drift。
+scripts/verify-frontend-docs.sh 的 shell_v2_keywords 同步更新（CI 守护不 regress）。
 
 Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
 ```
@@ -763,7 +789,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
   --nav-tab-active-underline-width: 0;
   --sidebar-item-active-bg: var(--color-accent);
   --sidebar-item-active-fg: var(--color-accent-foreground);
-  --sidebar-item-active-weight: 600;
+  --sidebar-item-active-font-weight: 600;
   --card-shadow: none;
   --button-shadow: none;
 }
@@ -822,7 +848,7 @@ Co-Authored-By: Claude Opus 4.7 (1M context) <noreply@anthropic.com>"
   --nav-tab-active-underline-width: 0;
   --sidebar-item-active-bg: var(--color-accent);
   --sidebar-item-active-fg: var(--color-accent-foreground);
-  --sidebar-item-active-weight: 600;
+  --sidebar-item-active-font-weight: 600;
   --card-shadow: none;
   --button-shadow: none;
 }
@@ -1225,3 +1251,7 @@ Task 10 (4 组合视觉回归 + handoff)
 - 首屏闪烁彻底修复（spec §7.1，M6 任务）
 - `__MB_STYLE_IDS__` 单一真源治理（spec §7.2，M6 任务）
 - app-shell/presets/mix/ 的 unit test 覆盖（独立工作，不阻塞本 plan）
+
+### T4 code review follow-up（记 T10 handoff 跟进清单）
+
+- **I1（Important）提取 Header 子组件到公共层**：`MixUserMenu` / `MixMobileOverflowMenu` 与 Inset 的同名组件逐行同构（复制粘贴）。建议在后续 milestone 合并到 `app-shell/src/components/header-user-menu.tsx` + `header-overflow-menu.tsx`，Inset 和 Mix 都消费，避免分叉维护。成本 < 维护分叉成本。不阻塞本 plan。

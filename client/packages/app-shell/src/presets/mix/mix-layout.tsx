@@ -1,45 +1,58 @@
-import { Avatar, AvatarFallback, Button, cn } from '@mb/ui-primitives';
+import {
+  Avatar,
+  AvatarFallback,
+  Button,
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  cn,
+} from '@mb/ui-primitives';
 import {
   ChevronDown,
   ChevronRight,
+  Languages,
   LayoutGrid,
   LogOut,
   Menu,
+  MoreVertical,
   PanelLeft,
+  Settings,
+  Settings2,
+  SunMoon,
   User,
   X,
 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { toast } from 'sonner';
 import { useAuth } from '../../auth';
+import { DarkModeToggle } from '../../components/dark-mode-toggle';
+import { GlobalSearchPlaceholder } from '../../components/global-search-placeholder';
 import { LanguageSwitcher } from '../../components/language-switcher';
 import { ThemeCustomizer } from '../../components/theme-customizer';
+import { useLanguage } from '../../i18n';
 import type { ShellLayoutProps } from '../../layouts/types';
+import { resolveMenuIcon } from '../../menu';
 import type { MenuNode } from '../../menu';
+import { useStyle } from '../../theme';
 
-const MODULE_SWITCHER_SIDEBAR_WIDTH = '15rem';
-const MODULE_SWITCHER_SIDEBAR_COLLAPSED = '3.125rem';
-
-export function ModuleSwitcherLayout({
-  children,
-  menuTree,
-  currentUser,
-  notificationSlot,
-}: ShellLayoutProps) {
+export function MixLayout({ children, menuTree, currentUser, notificationSlot }: ShellLayoutProps) {
   const { t } = useTranslation('shell');
   const { logout, isLoggingOut } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const { modules, activeModule, activeModuleId, resolvedSidebarNodes, setActiveModuleId } =
-    useModuleSwitcherModules(menuTree);
+    useMixModules(menuTree);
 
   return (
     <div className="min-h-screen bg-muted text-foreground">
-      <ModuleSwitcherHeader
+      <MixHeader
         modules={modules}
         activeModuleId={activeModuleId}
-        currentUserName={currentUser.username}
+        currentUser={currentUser}
         notificationSlot={notificationSlot}
         isLoggingOut={isLoggingOut}
         onLogout={() => logout()}
@@ -57,7 +70,7 @@ export function ModuleSwitcherLayout({
           />
         )}
 
-        <ModuleSwitcherSidebar
+        <MixSidebar
           activeModule={activeModule}
           nodes={resolvedSidebarNodes}
           collapsed={collapsed}
@@ -68,18 +81,18 @@ export function ModuleSwitcherLayout({
 
         <div className="min-w-0 flex-1 bg-muted">
           <div className="flex items-center gap-2 border-b border-border px-4 py-3 text-sm text-muted-foreground lg:px-6">
-            <span>{activeModule?.name ?? t('moduleSwitcher.moduleFallback')}</span>
+            <span>{activeModule?.name ?? t('mix.moduleFallback')}</span>
             <ChevronRight className="size-4" />
-            <span>{t('moduleSwitcher.workspaceLabel')}</span>
+            <span>{t('mix.workspaceLabel')}</span>
           </div>
 
           <main className="min-w-0 p-4 lg:p-6">
             <div className="mb-6">
               <div className="text-xs font-semibold tracking-[0.16em] text-muted-foreground uppercase">
-                {t('moduleSwitcher.presetLabel')}
+                {t('mix.presetLabel')}
               </div>
               <h1 className="mt-1 text-2xl font-semibold text-foreground">
-                {activeModule?.name ?? t('moduleSwitcher.title')}
+                {activeModule?.name ?? t('mix.title')}
               </h1>
             </div>
             {children}
@@ -90,7 +103,7 @@ export function ModuleSwitcherLayout({
   );
 }
 
-function useModuleSwitcherModules(menuTree: MenuNode[]) {
+function useMixModules(menuTree: MenuNode[]) {
   const modules = useMemo(
     () => menuTree.filter((node) => node.visible !== false && node.menuType !== 'BUTTON'),
     [menuTree],
@@ -127,10 +140,10 @@ function useModuleSwitcherModules(menuTree: MenuNode[]) {
   };
 }
 
-function ModuleSwitcherHeader({
+function MixHeader({
   modules,
   activeModuleId,
-  currentUserName,
+  currentUser,
   notificationSlot,
   isLoggingOut,
   onLogout,
@@ -139,7 +152,7 @@ function ModuleSwitcherHeader({
 }: {
   modules: MenuNode[];
   activeModuleId: number | null;
-  currentUserName: string | null;
+  currentUser: ShellLayoutProps['currentUser'];
   notificationSlot?: ShellLayoutProps['notificationSlot'];
   isLoggingOut: boolean;
   onLogout: () => void;
@@ -151,6 +164,7 @@ function ModuleSwitcherHeader({
   return (
     <header className="sticky top-0 z-20 border-b border-border bg-background">
       <div className="flex h-(--size-header-height) items-center gap-4 px-4 lg:px-6">
+        {/* 移动端汉堡按钮 */}
         <Button
           variant="ghost"
           size="icon-sm"
@@ -161,6 +175,7 @@ function ModuleSwitcherHeader({
           <Menu className="size-4" />
         </Button>
 
+        {/* Logo + 品牌名 */}
         <div className="flex min-w-0 shrink-0 items-center gap-3">
           <div className="flex size-8 items-center justify-center rounded-md bg-foreground text-background">
             <LayoutGrid className="size-4" />
@@ -170,7 +185,11 @@ function ModuleSwitcherHeader({
           </div>
         </div>
 
-        <nav className="hidden min-w-0 flex-1 items-stretch gap-6 overflow-x-auto lg:flex">
+        {/* 桌面端模块 Tab 导航 */}
+        <nav
+          className="hidden min-w-0 flex-1 items-stretch overflow-x-auto lg:flex"
+          style={{ gap: 'var(--nav-tab-gap)' }}
+        >
           {modules.map((node) => {
             const active = node.id === activeModuleId;
 
@@ -179,10 +198,8 @@ function ModuleSwitcherHeader({
                 key={node.id}
                 type="button"
                 onClick={() => onSelectModule(node.id)}
-                className={cn(
-                  'relative flex h-full items-center border-b-2 border-transparent px-1 text-sm font-medium text-foreground/70 transition-colors hover:text-foreground',
-                  active && 'border-primary text-primary',
-                )}
+                data-active={active ? 'true' : 'false'}
+                className="nav-tab text-sm font-medium"
               >
                 {node.name}
               </button>
@@ -190,38 +207,142 @@ function ModuleSwitcherHeader({
           })}
         </nav>
 
+        {/* 右侧控件区 */}
         <div className="ml-auto flex shrink-0 items-center gap-1.5">
-          {notificationSlot}
-          <LanguageSwitcher />
-          <ThemeCustomizer />
+          {/* 桌面端搜索框 */}
+          <GlobalSearchPlaceholder className="hidden md:inline-flex" />
 
-          <div className="hidden items-center gap-2 rounded-full border border-border/70 bg-background px-2.5 py-1.5 md:flex">
-            <Avatar size="sm">
-              <AvatarFallback>
-                <User className="size-3.5" />
-              </AvatarFallback>
-            </Avatar>
-            <span className="max-w-24 truncate text-sm font-medium">
-              {currentUserName ?? t('header.profile')}
-            </span>
+          {notificationSlot}
+
+          {/* 桌面端控件组 */}
+          <div className="hidden items-center gap-1 md:flex">
+            <LanguageSwitcher />
+            <ThemeCustomizer />
+            <DarkModeToggle />
           </div>
 
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onLogout}
-            disabled={isLoggingOut}
-            aria-label={t('header.logout')}
-          >
-            <LogOut className="size-4" />
-          </Button>
+          {/* 桌面端 Avatar + DropdownMenu */}
+          <MixUserMenu currentUser={currentUser} isLoggingOut={isLoggingOut} onLogout={onLogout} />
+
+          {/* 移动端 overflow 菜单 */}
+          <MixMobileOverflowMenu onLogout={onLogout} isLoggingOut={isLoggingOut} />
         </div>
       </div>
     </header>
   );
 }
 
-function ModuleSwitcherSidebar({
+/**
+ * 桌面端 Avatar + DropdownMenu（Settings + Logout）
+ * 仅在 md: 以上显示。不从公共层提取——这是 mix 自己的最简版本。
+ */
+function MixUserMenu({
+  currentUser,
+  isLoggingOut,
+  onLogout,
+}: {
+  currentUser: ShellLayoutProps['currentUser'];
+  isLoggingOut: boolean;
+  onLogout: () => void;
+}) {
+  const { t } = useTranslation('shell');
+  const displayName = currentUser.username ?? t('sidebar.operatorFallback');
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          type="button"
+          aria-label={t('sidebar.userMenu')}
+          className="hidden items-center gap-2 rounded-full border border-border/70 bg-background px-2.5 py-1.5 md:flex"
+        >
+          <Avatar size="sm">
+            <AvatarFallback>
+              <User className="size-3.5" />
+            </AvatarFallback>
+          </Avatar>
+          <span className="max-w-24 truncate text-sm font-medium">{displayName}</span>
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-44">
+        <DropdownMenuItem>
+          <Settings className="mr-2 size-4" />
+          {t('sidebar.settings')}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={onLogout} disabled={isLoggingOut}>
+          <LogOut className="mr-2 size-4" />
+          {t('sidebar.logout')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/**
+ * 移动端（<768px）overflow 菜单。
+ * - Toggle Dark：直接切换 colorMode
+ * - Switch Language：循环切换已支持语言
+ * - Customize Theme：弹 toast 提示
+ * - Logout：直接触发
+ */
+function MixMobileOverflowMenu({
+  onLogout,
+  isLoggingOut,
+}: {
+  onLogout: () => void;
+  isLoggingOut: boolean;
+}) {
+  const { t } = useTranslation('shell');
+  const { colorMode, setColorMode } = useStyle();
+  const { language, setLanguage, supportedLanguages } = useLanguage();
+
+  function cycleLanguage() {
+    const keys = Object.keys(supportedLanguages) as (typeof language)[];
+    if (keys.length === 0) return;
+    const idx = keys.indexOf(language);
+    const next = keys[(idx + 1) % keys.length] ?? keys[0];
+    if (next) setLanguage(next);
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          aria-label={t('header.moreOptions')}
+          className="md:hidden"
+        >
+          <MoreVertical className="size-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem onSelect={() => cycleLanguage()}>
+          <Languages className="mr-2 size-4" />
+          {t('language.switch')}
+        </DropdownMenuItem>
+        <DropdownMenuItem onSelect={() => setColorMode(colorMode === 'dark' ? 'light' : 'dark')}>
+          <SunMoon className="mr-2 size-4" />
+          {t('header.toggleDark')}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onSelect={() => toast(t('theme.customize'), { description: t('search.comingSoonDesc') })}
+        >
+          <Settings2 className="mr-2 size-4" />
+          {t('theme.customize')}
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onSelect={onLogout} disabled={isLoggingOut}>
+          <LogOut className="mr-2 size-4" />
+          {t('header.logout')}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+function MixSidebar({
   activeModule,
   nodes,
   collapsed,
@@ -265,7 +386,7 @@ function ModuleSwitcherSidebar({
         mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       )}
       style={{
-        width: collapsed ? MODULE_SWITCHER_SIDEBAR_COLLAPSED : MODULE_SWITCHER_SIDEBAR_WIDTH,
+        width: collapsed ? 'var(--sidebar-collapsed-width)' : 'var(--sidebar-width)',
       }}
     >
       <div className="flex h-full w-full flex-col">
@@ -273,10 +394,10 @@ function ModuleSwitcherSidebar({
           {!collapsed && (
             <div className="min-w-0">
               <div className="truncate text-sm font-semibold text-foreground">
-                {activeModule?.name ?? t('moduleSwitcher.moduleFallback')}
+                {activeModule?.name ?? t('mix.moduleFallback')}
               </div>
               <div className="truncate text-xs text-muted-foreground">
-                {t('moduleSwitcher.moduleSidebarHint')}
+                {t('mix.moduleSidebarHint')}
               </div>
             </div>
           )}
@@ -357,29 +478,28 @@ function ModuleNavItem({
   const isExpanded = expandedIds[node.id] ?? true;
   const isActiveLeaf = node.id === activeLeafId;
 
+  // resolveMenuIcon 永远非空（未匹配时 fallback 到 FileText）
+  const Icon = resolveMenuIcon(node.icon);
+
   return (
     <div>
       <button
         type="button"
         onClick={() => {
-          if (hasChildren) {
-            onToggleExpanded(node.id);
-          }
+          if (hasChildren) onToggleExpanded(node.id);
         }}
         title={collapsed ? node.name : undefined}
-        className={cn(
-          'flex w-full items-center rounded-md px-3 py-2 text-left text-sm text-foreground/75 transition-colors hover:bg-background hover:text-foreground',
-          isActiveLeaf && !hasChildren && 'bg-background font-medium text-primary',
-          collapsed && 'justify-center px-0',
-        )}
+        data-active={isActiveLeaf && !hasChildren ? 'true' : 'false'}
+        className={cn('sidebar-item w-full text-left text-sm', collapsed && 'justify-center px-0')}
         style={{ paddingLeft: collapsed ? undefined : `${0.75 + depth * 0.75}rem` }}
       >
         {collapsed ? (
-          <span className="text-[11px] font-semibold text-foreground/70">
-            {node.name.slice(0, 1).toUpperCase()}
-          </span>
+          <Icon className="size-4" />
         ) : (
           <>
+            <span className="w-4 shrink-0 inline-flex items-center justify-center">
+              <Icon className="size-4" />
+            </span>
             <span className="min-w-0 flex-1 truncate">{node.name}</span>
             {hasChildren &&
               (isExpanded ? (
