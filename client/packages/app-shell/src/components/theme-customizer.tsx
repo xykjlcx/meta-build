@@ -177,7 +177,7 @@ export function ThemeCustomizer() {
 
             <ToggleField
               label={t('theme.radiusLabel')}
-              value={radius === 'none' ? '' : radius}
+              value={radius}
               onValueChange={(value) => setRadius(value as 'default' | 'sm' | 'md' | 'lg' | 'xl')}
               options={radiusOptions.map((option) => ({
                 value: option.value,
@@ -233,7 +233,7 @@ export function ThemeCustomizer() {
               <SummaryPill>{selectedStyle?.displayName}</SummaryPill>
               <SummaryPill>{colorMode === 'dark' ? t('theme.dark') : t('theme.light')}</SummaryPill>
               <SummaryPill>{t(`theme.scale.${scale}`)}</SummaryPill>
-              <SummaryPill>{radius === 'none' ? '0' : t(`theme.radius.${radius}`)}</SummaryPill>
+              <SummaryPill>{t(`theme.radius.${radius}`)}</SummaryPill>
               <SummaryPill>{t(`theme.contentLayout.${contentLayout}`)}</SummaryPill>
               <SummaryPill>{t(`theme.sidebarMode.${sidebarMode}`)}</SummaryPill>
             </div>

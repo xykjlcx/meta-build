@@ -70,7 +70,6 @@
     "scale": { "default": "Standard", "xs": "Compact", "lg": "Relaxed" },
     "radius": {
       "default": "System Default",
-      "none": "Sharp",
       "sm": "Tight",
       "md": "Balanced",
       "lg": "Soft",

@@ -3,7 +3,7 @@ import { type ReactNode, createContext, useEffect, useMemo, useState } from 'rea
 
 export type ColorMode = 'light' | 'dark';
 export type ThemeScale = 'default' | 'xs' | 'lg';
-export type ThemeRadius = 'default' | 'none' | 'sm' | 'md' | 'lg' | 'xl';
+export type ThemeRadius = 'default' | 'sm' | 'md' | 'lg' | 'xl';
 export type ContentLayout = 'default' | 'centered';
 export type SidebarMode = 'default' | 'icon';
 type LegacyThemeId = 'default' | 'dark' | 'compact';
@@ -20,7 +20,7 @@ function getValidStyleIds(): Set<string> {
   return new Set(styleRegistry.getAllIds());
 }
 const SCALE_IDS = new Set<ThemeScale>(['default', 'xs', 'lg']);
-const RADIUS_IDS = new Set<ThemeRadius>(['default', 'none', 'sm', 'md', 'lg', 'xl']);
+const RADIUS_IDS = new Set<ThemeRadius>(['default', 'sm', 'md', 'lg', 'xl']);
 const CONTENT_LAYOUT_IDS = new Set<ContentLayout>(['default', 'centered']);
 const SIDEBAR_MODE_IDS = new Set<SidebarMode>(['default', 'icon']);
 
