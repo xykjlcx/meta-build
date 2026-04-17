@@ -12,9 +12,14 @@
           const root = document.documentElement
           const body = document.body
           const legacyTheme = localStorage.getItem('mb-theme')
-          const style = localStorage.getItem('mb_style')
+          let style = localStorage.getItem('mb_style')
+          // ADR-0020 迁移：老的 feishu style 值映射到 lark-console
+          if (style === 'feishu') {
+            style = 'lark-console'
+            localStorage.setItem('mb_style', 'lark-console')
+          }
           // 白名单：扩展新 style 时必须在这里追加（唯一真源）
-          const allowedIds = window.__MB_STYLE_IDS__ ?? ['classic', 'feishu']
+          const allowedIds = window.__MB_STYLE_IDS__ ?? ['classic', 'lark-console']
           const validStyle = style && allowedIds.includes(style) ? style : null
           const mode = localStorage.getItem('mb_color_mode')
           const validMode = mode === 'dark' ? mode : null

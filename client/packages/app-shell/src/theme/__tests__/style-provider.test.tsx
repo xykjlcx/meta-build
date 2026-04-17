@@ -18,11 +18,7 @@ function renderWithProvider(
   defaultColorMode?: 'light' | 'dark',
 ): { getStyleId: () => string } {
   render(
-    <StyleProvider
-      // biome-ignore lint: 测试需要传入非法值
-      defaultStyle={defaultStyle as never}
-      defaultColorMode={defaultColorMode}
-    >
+    <StyleProvider defaultStyle={defaultStyle as never} defaultColorMode={defaultColorMode}>
       <TestHost />
     </StyleProvider>,
   );
@@ -57,13 +53,13 @@ describe('StyleProvider 归一化', () => {
     expect(document.documentElement.dataset.themeStyle).toBe('classic');
   });
 
-  it('defaultStyle 合法值 feishu 直接生效', () => {
-    const { getStyleId } = renderWithProvider('feishu');
-    expect(getStyleId()).toBe('feishu');
-    expect(document.documentElement.dataset.themeStyle).toBe('feishu');
+  it('defaultStyle 合法值 lark-console 直接生效', () => {
+    const { getStyleId } = renderWithProvider('lark-console');
+    expect(getStyleId()).toBe('lark-console');
+    expect(document.documentElement.dataset.themeStyle).toBe('lark-console');
   });
 
-  it('setStyle 合法值 feishu 生效，hook 状态和 DOM 同步', async () => {
+  it('setStyle 合法值 lark-console 生效，hook 状态和 DOM 同步', async () => {
     let capturedCtx: ReturnType<typeof useStyle> | null = null;
 
     function TestCapture() {
@@ -81,11 +77,11 @@ describe('StyleProvider 归一化', () => {
     expect(screen.getByTestId('style-id').textContent).toBe('classic');
 
     await act(async () => {
-      capturedCtx!.setStyle('feishu');
+      capturedCtx?.setStyle('lark-console');
     });
 
-    expect(screen.getByTestId('style-id').textContent).toBe('feishu');
-    expect(document.documentElement.dataset.themeStyle).toBe('feishu');
+    expect(screen.getByTestId('style-id').textContent).toBe('lark-console');
+    expect(document.documentElement.dataset.themeStyle).toBe('lark-console');
   });
 
   it('setStyle 非法值归一化到 classic，不抛异常', async () => {
@@ -98,12 +94,12 @@ describe('StyleProvider 归一化', () => {
     }
 
     render(
-      <StyleProvider defaultStyle={'feishu' as never}>
+      <StyleProvider defaultStyle={'lark-console' as never}>
         <TestCapture />
       </StyleProvider>,
     );
 
-    expect(screen.getByTestId('style-id').textContent).toBe('feishu');
+    expect(screen.getByTestId('style-id').textContent).toBe('lark-console');
 
     await act(async () => {
       // biome-ignore lint: 测试非法值归一化
@@ -122,10 +118,10 @@ describe('StyleProvider 归一化', () => {
     expect(document.documentElement.dataset.themeStyle).toBe('classic');
   });
 
-  it('localStorage 合法值 feishu mount 时恢复', () => {
-    localStorage.setItem('mb_style', 'feishu');
+  it('localStorage 合法值 lark-console mount 时恢复', () => {
+    localStorage.setItem('mb_style', 'lark-console');
     const { getStyleId } = renderWithProvider();
-    expect(getStyleId()).toBe('feishu');
-    expect(document.documentElement.dataset.themeStyle).toBe('feishu');
+    expect(getStyleId()).toBe('lark-console');
+    expect(document.documentElement.dataset.themeStyle).toBe('lark-console');
   });
 });

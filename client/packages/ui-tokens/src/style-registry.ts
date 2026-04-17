@@ -109,11 +109,11 @@ styleRegistry.register({
   cssFile: './tokens/semantic-classic.css',
 });
 
-// 注册 feishu style
+// 注册 lark-console style（完整"飞书管理后台"风格，含 shell 骨架配合）
 styleRegistry.register({
-  id: 'feishu',
-  displayName: '飞书',
-  description: '对标飞书管理后台的品牌主题（扁平 + 浅蓝激活）',
+  id: 'lark-console',
+  displayName: '飞书控制台',
+  description: '完整对齐飞书管理后台的品牌风格（扁平 + 浅蓝激活 + 精确控件节奏）',
   color: '#3370ff',
-  cssFile: './tokens/semantic-feishu.css',
+  cssFile: './tokens/semantic-lark-console.css',
 });

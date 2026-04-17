@@ -1,61 +1,82 @@
-/* Layer 2 — Semantic tokens for Feishu style
- * 对标飞书管理后台（g05t3iydj2i.feishu.cn/admin）
+/* Layer 2 — Semantic tokens for lark-console style
+ * 完整对齐飞书管理后台（g05t3iydj2i.feishu.cn/admin）+ nxboot-v2 精确视觉值
+ *
+ * ADR-0020：前身是 `feishu` style（2026-04-17），当时只做 semantic 色板覆写，
+ * 本次（2026-04-18）rename 为 lark-console 并补全：
+ *   - 控件 3 档高度（30/32/36px，严格对齐飞书管理后台）
+ *   - 精确色值（placeholder / icon-foreground / border-strong / soft 系列等）
+ *   - floating / modal / selected 三类阴影（扁平风 sm/md/lg/xl 保持 none）
+ *   - productive easing（飞书管理后台全站用 cubic-bezier(0.2, 0, 0, 1)）
  *
  * 约定：
  *   - 色类 token 引 primitive 色板（blue/gray 等）
  *   - 尺寸/阴影/动效/字体直接引 primitive
- *   - 扁平设计：shadow 基本清零；激活态靠色块 + 粗字
+ *   - 扁平设计：基础 shadow 清零；激活态靠色块 + 粗字
  *
  * Selector 命名：
- *   Light: [data-theme-style='feishu']
- *   Dark:  [data-theme-style='feishu'][data-theme-color-mode='dark']
+ *   Light: :root[data-theme-style='lark-console']
+ *   Dark:  :root[data-theme-style='lark-console'][data-theme-color-mode='dark']
  */
 
-:root[data-theme-style='feishu'] {
-  /* ===== Surface ===== */
-  --color-background: var(--color-white);
-  --color-foreground: var(--color-gray-800);
-  --color-card: var(--color-white);
+:root[data-theme-style='lark-console'] {
+  /* ===== Surface =====
+   * 关键差异：page background 不是纯白，是 #f2f3f5（飞书后台特征），
+   * card 区才是纯白——这样"白卡片 + 灰底"的层次感立得起来。
+   */
+  --color-background: var(--color-gray-100);              /* ≈ #f2f3f5 */
+  --color-foreground: var(--color-gray-800);              /* ≈ #1f2329 */
+  --color-card: var(--color-white);                       /* 内容承载白卡 */
   --color-card-foreground: var(--color-gray-800);
   --color-popover: var(--color-white);
   --color-popover-foreground: var(--color-gray-800);
+  --color-panel: oklch(0.99 0 0);                         /* ≈ #fafbfc 比 bg 略亮 */
 
   /* ===== Primary / Secondary / Accent ===== */
-  --color-primary: var(--color-blue-500);
+  --color-primary: var(--color-blue-500);                 /* = #3370ff */
   --color-primary-foreground: var(--color-white);
-  --color-secondary: var(--color-gray-100);
+  --color-primary-hover: var(--color-blue-600);           /* ≈ #2860e6 */
+  --color-secondary: var(--color-gray-100);               /* ≈ #f2f3f5（按钮次要灰底） */
   --color-secondary-foreground: var(--color-gray-700);
-  --color-accent: var(--color-blue-100);
-  --color-accent-foreground: var(--color-blue-700);
+  --color-accent: var(--color-blue-100);                  /* ≈ #edf1ff 浅蓝激活 */
+  --color-accent-foreground: var(--color-blue-700);       /* 激活文字用主蓝 */
 
-  /* ===== Muted ===== */
+  /* ===== Muted / Text layers ===== */
   --color-muted: var(--color-gray-100);
-  --color-muted-foreground: var(--color-gray-500);
+  --color-muted-foreground: var(--color-gray-600);        /* ≈ #646a73 比 classic 深一档 */
+  --color-placeholder: var(--color-gray-400);             /* ≈ #8f959e */
+  --color-icon-foreground: var(--color-gray-700);         /* ≈ #2b2f36 */
 
-  /* ===== Semantic status ===== */
-  --color-destructive: var(--color-red-500);
+  /* ===== Semantic status + soft variants =====
+   * soft 色对应飞书 #ffece8 / #e8ffea / #fff7e8，极浅对应色作为状态背景
+   */
+  --color-destructive: var(--color-red-500);              /* ≈ #f53f3f */
   --color-destructive-foreground: var(--color-white);
-  --color-success: var(--color-green-500);
+  --color-destructive-soft: oklch(0.95 0.03 25);          /* ≈ #ffece8 */
+  --color-success: var(--color-green-500);                /* ≈ #00b42a */
   --color-success-foreground: var(--color-white);
-  --color-warning: var(--color-amber-500);
+  --color-success-soft: oklch(0.96 0.05 145);             /* ≈ #e8ffea */
+  --color-warning: var(--color-amber-500);                /* ≈ #ff7d00 */
   --color-warning-foreground: var(--color-gray-800);
+  --color-warning-soft: oklch(0.97 0.04 85);              /* ≈ #fff7e8 */
   --color-info: var(--color-blue-500);
   --color-info-foreground: var(--color-white);
 
   /* ===== Border / Input / Ring ===== */
-  --color-border: var(--color-gray-200);
+  --color-border: var(--color-gray-300);                  /* ≈ #dee0e3 */
+  --color-border-strong: var(--color-gray-400);           /* ≈ #d0d3d6 */
   --color-input: var(--color-gray-300);
   --color-ring: var(--color-blue-500);
 
-  /* ===== Sidebar（飞书 sidebar 浅灰背景 #f5f6f7 ≈ gray-50）===== */
-  --color-sidebar: var(--color-gray-50);
-  --color-sidebar-foreground: var(--color-gray-600);
+  /* ===== Sidebar（飞书 sidebar 和 bg 同色 #f2f3f5，hover #e8eaed）===== */
+  --color-sidebar: var(--color-gray-100);                 /* = bg，让 sidebar 融入 */
+  --color-sidebar-foreground: var(--color-gray-800);      /* 文字同 foreground */
   --color-sidebar-primary: var(--color-blue-500);
   --color-sidebar-primary-foreground: var(--color-white);
-  --color-sidebar-accent: var(--color-blue-100);
+  --color-sidebar-accent: var(--color-blue-100);          /* 激活背景浅蓝 */
   --color-sidebar-accent-foreground: var(--color-blue-700);
-  --color-sidebar-border: var(--color-gray-200);
+  --color-sidebar-border: var(--color-gray-300);
   --color-sidebar-ring: var(--color-blue-500);
+  --color-sidebar-hover: var(--color-gray-200);           /* ≈ #e8eaed */
 
   /* ===== 圆角（飞书 4-6px，radius 基值 0.5rem ≈ 8px，-2px = 6px 即 md）===== */
   --radius-sm: calc(var(--radius) - 4px);
@@ -65,16 +86,22 @@
 
   /* ===== 尺寸（与 classic 保持一致）===== */
   --size-control-height: var(--size-control-h-md);
+  --size-control-height-sm: 1.875rem;
+  --size-control-height-md: 2rem;
+  --size-control-height-lg: 2.25rem;
   --size-header-height: 3.5rem;
   --size-sidebar-width: 16rem;
   --size-sidebar-width-collapsed: 4rem;
   --size-content-max-width: 80rem;
 
-  /* ===== 阴影（飞书扁平设计，shadow 清零）===== */
+  /* ===== 阴影（飞书扁平设计，基础 shadow 清零；floating/modal 用飞书小阴影）===== */
   --shadow-sm: none;
   --shadow-md: none;
   --shadow-lg: none;
   --shadow-xl: none;
+  --shadow-floating: 0 0.25rem 0.375rem -0.0625rem rgb(0 0 0 / 0.1), 0 0.125rem 0.25rem -0.125rem rgb(0 0 0 / 0.1);
+  --shadow-modal: 0 0.625rem 0.9375rem -0.1875rem rgb(0 0 0 / 0.1), 0 0.25rem 0.375rem -0.25rem rgb(0 0 0 / 0.1);
+  --shadow-selected: 0 0 0 1px rgb(50 101 254 / 0.08);
 
   /* ===== 动效 ===== */
   --duration-fast: 150ms;
@@ -82,6 +109,7 @@
   --duration-slow: 400ms;
   --easing-in: cubic-bezier(0.4, 0, 1, 1);
   --easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-productive: cubic-bezier(0.2, 0, 0, 1);
 
   /* ===== 字体（PingFang SC 飞书默认字体，primitive 已在最前）===== */
   --font-sans: 'PingFang SC', 'Hiragino Sans GB', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -104,7 +132,7 @@
   --button-shadow: none;
 }
 
-:root[data-theme-style='feishu'][data-theme-color-mode='dark'] {
+:root[data-theme-style='lark-console'][data-theme-color-mode='dark'] {
   /* Dark block：策略"能用不崩"，不追求 1:1 复刻（飞书本身没有深色主题） */
 
   /* ===== Surface（反转色阶）===== */
@@ -114,12 +142,14 @@
   --color-card-foreground: var(--color-gray-200);
   --color-popover: var(--color-gray-900);
   --color-popover-foreground: var(--color-gray-200);
+  --color-panel: var(--color-gray-900);
 
   /* ===== Primary / Secondary / Accent ===== */
 
   /* primary 提亮到 blue-400 保证深色下对比度 */
   --color-primary: var(--color-blue-400);
   --color-primary-foreground: var(--color-white);
+  --color-primary-hover: var(--color-blue-500);
   --color-secondary: var(--color-gray-700);
   --color-secondary-foreground: var(--color-gray-200);
 
@@ -127,22 +157,28 @@
   --color-accent: var(--color-blue-900);
   --color-accent-foreground: var(--color-blue-300);
 
-  /* ===== Muted ===== */
+  /* ===== Muted / Text layers ===== */
   --color-muted: var(--color-gray-900);
   --color-muted-foreground: var(--color-gray-400);
+  --color-placeholder: var(--color-gray-500);
+  --color-icon-foreground: var(--color-gray-200);
 
-  /* ===== Semantic status ===== */
+  /* ===== Semantic status + soft variants ===== */
   --color-destructive: var(--color-red-500);
   --color-destructive-foreground: var(--color-white);
+  --color-destructive-soft: oklch(0.3 0.08 25);
   --color-success: var(--color-green-500);
   --color-success-foreground: var(--color-white);
+  --color-success-soft: oklch(0.3 0.08 145);
   --color-warning: var(--color-amber-400);
   --color-warning-foreground: var(--color-gray-950);
+  --color-warning-soft: oklch(0.32 0.08 85);
   --color-info: var(--color-blue-400);
   --color-info-foreground: var(--color-white);
 
   /* ===== Border / Input / Ring ===== */
   --color-border: var(--color-gray-800);
+  --color-border-strong: var(--color-gray-700);
   --color-input: var(--color-gray-700);
   --color-ring: var(--color-blue-400);
 
@@ -155,6 +191,7 @@
   --color-sidebar-accent-foreground: var(--color-blue-300);
   --color-sidebar-border: var(--color-gray-800);
   --color-sidebar-ring: var(--color-blue-400);
+  --color-sidebar-hover: var(--color-gray-800);
 
   /* ===== 圆角 ===== */
   --radius-sm: calc(var(--radius) - 4px);
@@ -164,16 +201,22 @@
 
   /* ===== 尺寸 ===== */
   --size-control-height: var(--size-control-h-md);
+  --size-control-height-sm: 1.875rem;
+  --size-control-height-md: 2rem;
+  --size-control-height-lg: 2.25rem;
   --size-header-height: 3.5rem;
   --size-sidebar-width: 16rem;
   --size-sidebar-width-collapsed: 4rem;
   --size-content-max-width: 80rem;
 
-  /* ===== 阴影（扁平，全部清零）===== */
+  /* ===== 阴影（扁平，基础 shadow 清零；floating/modal 保留小阴影）===== */
   --shadow-sm: none;
   --shadow-md: none;
   --shadow-lg: none;
   --shadow-xl: none;
+  --shadow-floating: 0 0.25rem 0.375rem -0.0625rem rgb(0 0 0 / 0.4), 0 0.125rem 0.25rem -0.125rem rgb(0 0 0 / 0.4);
+  --shadow-modal: 0 0.625rem 0.9375rem -0.1875rem rgb(0 0 0 / 0.5), 0 0.25rem 0.375rem -0.25rem rgb(0 0 0 / 0.4);
+  --shadow-selected: 0 0 0 1px rgb(50 101 254 / 0.3);
 
   /* ===== 动效 ===== */
   --duration-fast: 150ms;
@@ -181,6 +224,7 @@
   --duration-slow: 400ms;
   --easing-in: cubic-bezier(0.4, 0, 1, 1);
   --easing-out: cubic-bezier(0, 0, 0.2, 1);
+  --easing-productive: cubic-bezier(0.2, 0, 0, 1);
 
   /* ===== 字体 ===== */
   --font-sans: 'PingFang SC', 'Hiragino Sans GB', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
