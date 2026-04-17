@@ -1251,3 +1251,7 @@ Task 10 (4 组合视觉回归 + handoff)
 - 首屏闪烁彻底修复（spec §7.1，M6 任务）
 - `__MB_STYLE_IDS__` 单一真源治理（spec §7.2，M6 任务）
 - app-shell/presets/mix/ 的 unit test 覆盖（独立工作，不阻塞本 plan）
+
+### T4 code review follow-up（记 T10 handoff 跟进清单）
+
+- **I1（Important）提取 Header 子组件到公共层**：`MixUserMenu` / `MixMobileOverflowMenu` 与 Inset 的同名组件逐行同构（复制粘贴）。建议在后续 milestone 合并到 `app-shell/src/components/header-user-menu.tsx` + `header-overflow-menu.tsx`，Inset 和 Mix 都消费，避免分叉维护。成本 < 维护分叉成本。不阻塞本 plan。

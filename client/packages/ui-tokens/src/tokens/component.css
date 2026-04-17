@@ -46,6 +46,7 @@
   --sidebar-item-active-font-weight: 500;
   --sidebar-item-active-indicator-width: 0;
   --sidebar-item-active-indicator-color: var(--color-primary);
+  --sidebar-item-hover-bg: color-mix(in oklch, var(--sidebar-fg) 8%, transparent);
 
   /* W1 新增：Sidebar collapsed 宽度（语义别名，业务层不感知 size 层命名） */
   --sidebar-collapsed-width: var(--size-sidebar-width-collapsed);
@@ -118,7 +119,7 @@
 }
 
 .sidebar-item:hover {
-  background: color-mix(in oklch, var(--sidebar-fg) 8%, transparent);
+  background: var(--sidebar-item-hover-bg);
 }
 
 .sidebar-item[data-active='true'] {
