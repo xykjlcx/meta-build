@@ -450,125 +450,32 @@ import { authApi } from "@mb/api-sdk";  // ✅ routes/auth/** 是登录态的建
 
 ### 6.1 Header
 
-```typescript
-// packages/app-shell/src/components/header.tsx
-import { Link } from "@tanstack/react-router";
-import { useTranslation } from "react-i18next";
-import { Avatar, DropdownMenu, Button } from "@mb/ui-primitives";
-import { LanguageSwitcher } from "./language-switcher";
-import { ThemeCustomizer } from "../customizer/theme-customizer";
-import { Breadcrumb } from "./breadcrumb";
-import { useCurrentUser } from "../auth/use-current-user";
-import { useAuth } from "../auth/use-auth";
+Header 不再是独立的全局组件，而是由各 layout preset 自管（见 §4 Layout Resolver 章节）。每个 preset（InsetLayout / MixLayout 等）内部各自实现 header，不对外暴露独立的 `Header` 组件，但所有 preset 的 header 都必须包含以下元素（通过 app-shell 提供的通用组件组装）：
 
-export interface HeaderProps {
-  className?: string;
-}
+- **品牌链接**：`<Link to="/">`，显示 `t('brand.name')`（InsetLayout 默认；MixLayout 可能用模块切换代替）
+- **面包屑**（仅限 InsetLayout）：`<BreadcrumbNav />`，从 `@mb/app-shell` 导出
+- **全局搜索占位**：`<GlobalSearchPlaceholder />`（M3 placeholder，真实搜索在 v1.5+）
+- **Dark 模式切换**：`<DarkModeToggle />`
+- **语言切换**：`<LanguageSwitcher />`
+- **主题定制**：`<ThemeCustomizer />`
+- **通知徽章**：`<NotificationBadge />`
+- **用户菜单**：用户头像 + 下拉菜单（含登出），用 `@mb/ui-primitives` 的 Avatar + DropdownMenu 组装
 
-export function Header({ className }: HeaderProps) {
-  const { t } = useTranslation("shell");
-  const currentUser = useCurrentUser();
-  const { logout } = useAuth();
-
-  return (
-    <header className={`flex items-center justify-between bg-background px-6 ${className ?? ""}`}>
-      <div className="flex items-center gap-4">
-        <Link to="/" className="text-lg font-semibold text-foreground">
-          {t("brand.name")}
-        </Link>
-        <Breadcrumb />
-      </div>
-      <div className="flex items-center gap-2">
-        <LanguageSwitcher />
-        <ThemeCustomizer />
-        <DropdownMenu>
-          <DropdownMenu.Trigger asChild>
-            <Button variant="ghost" size="sm">
-              <Avatar fallback={currentUser.username?.[0] ?? "?"} />
-              <span className="ml-2">{currentUser.username ?? t("auth.guest")}</span>
-            </Button>
-          </DropdownMenu.Trigger>
-          <DropdownMenu.Content>
-            <DropdownMenu.Item onClick={() => logout()}>{t("action.logout")}</DropdownMenu.Item>
-          </DropdownMenu.Content>
-        </DropdownMenu>
-      </div>
-    </header>
-  );
-}
-```
+扩展新 layout preset 时，参考 `packages/app-shell/src/presets/inset/inset-layout.tsx` 的 header JSX 结构。两个已有 preset 之间的 header 子组件（如 MixUserMenu / MixMobileOverflowMenu）未来可能抽取到 `components/header-*.tsx`（见 docs/handoff/feishu-style-visual-check.md follow-up）。
 
 ### 6.2 Sidebar
 
-```typescript
-// packages/app-shell/src/components/sidebar.tsx
-import { Link } from "@tanstack/react-router";
-import { useMenu } from "../menu/use-menu";
-import { MenuTreeNode } from "../menu/types";
-import { resolveMenuIcon } from "../menu/icon-map";
+Sidebar 不再是独立的全局组件，而是由各 layout preset 自管（见 §4 Layout Resolver 章节）。每个 preset 按自己的骨架渲染菜单树（InsetLayout 有单列 sidebar；MixLayout 有顶部 tab + 二级 sidebar 的两层结构），内部消费 `useMenu()` 拉取 `mb_iam_menu` 树（双树架构的前端消费点，详见 [07-menu-permission.md](./07-menu-permission.md)）。
 
-export interface SidebarProps {
-  className?: string;
-}
+所有 preset 的 sidebar 渲染都必须遵守：
 
-/**
- * 侧边栏菜单——渲染 mb_iam_menu 树（双树架构的前端消费点）。
- *
- * 数据来源：useMenu() 内部用 useQuery 拉 /api/v1/menus/current-user，
- * 返回当前用户有权限的菜单子树。
- *
- * 详见双树架构：07-menu-permission.md。
- */
-export function Sidebar({ className }: SidebarProps) {
-  const { data: menuTree, isLoading } = useMenu();
+- **数据来源**：`useMenu()` 内部用 `useQuery` 拉 `/api/v1/menus/current-user`，返回当前用户有权限的菜单子树
+- **节点文案**：`node.name` 直接渲染，**不走 `t(...)`**（精确边界：菜单 name 是数据库运维数据，不是代码静态文案，详见 [§7.10](#710-i18n-边界-代码静态文案-vs-数据库数据)）
+- **图标解析**：通过 `resolveMenuIcon(node.icon)` 从图标映射表取 Lucide icon
+- **路由导航**：叶子节点用 TanStack Router 的 `<Link to={node.path}>`，非叶子节点是分组不可点击
+- **折叠态**：InsetLayout 支持 `sidebar-mode='icon'` 只显图标；MixLayout 一级 tab 不折叠、二级 sidebar 的折叠策略由 preset 自定
 
-  if (isLoading) return <aside className={className}>...</aside>;
-
-  return (
-    <aside className={`overflow-y-auto bg-background ${className ?? ""}`}>
-      <nav className="py-4">
-        {menuTree?.map((node) => (
-          <SidebarItem key={node.id} node={node} depth={0} />
-        ))}
-      </nav>
-    </aside>
-  );
-}
-
-function SidebarItem({ node, depth }: { node: MenuTreeNode; depth: number }) {
-  const Icon = resolveMenuIcon(node.icon);
-
-  if (node.children && node.children.length > 0) {
-    return (
-      <div>
-        <div
-          className="flex items-center gap-2 px-4 py-2 text-sm text-muted-foreground"
-          style={{ paddingLeft: `${depth * 16 + 16}px` }}
-        >
-          <Icon className="h-4 w-4" />
-          <span>{node.name}</span>
-        </div>
-        {node.children.map((child) => (
-          <SidebarItem key={child.id} node={child} depth={depth + 1} />
-        ))}
-      </div>
-    );
-  }
-
-  return (
-    <Link
-      to={node.path ?? "/"}
-      className="flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-accent"
-      style={{ paddingLeft: `${depth * 16 + 16}px` }}
-    >
-      <Icon className="h-4 w-4" />
-      <span>{node.name}</span>
-    </Link>
-  );
-}
-```
-
-**注意**：`node.name` 直接渲染**不走 `t(...)`**——这是 MUST #6 的精确边界：菜单 name 是数据库存储的运维数据，不是代码中的静态文案。i18n 边界详见 [§7.10](#710-i18n-边界-代码静态文案-vs-数据库数据)。
+扩展新 layout preset 时，参考 `packages/app-shell/src/presets/inset/inset-layout.tsx` 与 `packages/app-shell/src/presets/mix/mix-layout.tsx` 的 sidebar JSX 结构。
 
 ### 6.3 GlobalLoading 与 GlobalToast 容器
 
