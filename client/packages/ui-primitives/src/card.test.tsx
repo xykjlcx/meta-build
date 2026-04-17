@@ -23,9 +23,9 @@ describe('Card', () => {
   it('Card 应该包含正确样式', () => {
     render(<Card>内容</Card>);
     const card = screen.getByText('内容');
-    expect(card.className).toContain('rounded-xl');
+    expect(card.className).toContain('rounded-[var(--card-radius)]');
     expect(card.className).toContain('border');
-    expect(card.className).toContain('shadow-sm');
+    expect(card.className).toContain('shadow-[var(--card-shadow)]');
   });
 
   it('应该合并自定义 className', () => {
