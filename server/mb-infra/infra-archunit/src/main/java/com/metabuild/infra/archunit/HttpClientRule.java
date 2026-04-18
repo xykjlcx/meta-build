@@ -18,12 +18,15 @@ public final class HttpClientRule {
     private HttpClientRule() {}
 
     private static final String REST_TEMPLATE_FQN = "org.springframework.web.client.RestTemplate";
+    private static final String REST_TEMPLATE_AUTO_CONFIG_FQN =
+        "com.metabuild.infra.web.config.RestTemplateAutoConfiguration";
 
     public static final ArchRule NO_DIRECT_REST_TEMPLATE_CONSTRUCTION =
         noClasses()
-            .that().doNotHaveSimpleName("RestTemplateAutoConfiguration")
+            .that().doNotHaveFullyQualifiedName(REST_TEMPLATE_AUTO_CONFIG_FQN)
             .should().callConstructorWhere(targetOwnerIs(REST_TEMPLATE_FQN))
-            .because("RestTemplate 必须通过 infra-web 提供的共享 Bean 注入，禁止 new RestTemplate()");
+            .because("RestTemplate 必须通过 infra-web 提供的共享 Bean 注入，禁止 new RestTemplate()（"
+                + "仅 " + REST_TEMPLATE_AUTO_CONFIG_FQN + " 作为装配类豁免）");
 
     private static DescribedPredicate<JavaConstructorCall> targetOwnerIs(String fqn) {
         return new DescribedPredicate<>("target type is " + fqn) {
