@@ -1,5 +1,7 @@
 # M5 Plan A: OpenAPI 管线 + Notice 后端 实施计划
 
+> **说明**：这是历史执行计划，不是当前真相。计划中的接口、测试数量、实现步骤和代码片段必须以当前仓库实际文件重新校验。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 搭建 OpenAPI 契约管线（orval），实现 notice 通知公告后端模块（CRUD + 状态机 + 附件 + 导出 + 发布 + 已读），作为第一个 canonical reference 业务模块。

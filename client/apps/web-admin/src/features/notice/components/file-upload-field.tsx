@@ -37,6 +37,18 @@ export function FileUploadField({ name, control }: FileUploadFieldProps) {
   const [uploading, setUploading] = useState(false);
 
   const currentFileIds: number[] = field.value ?? [];
+  const displayFiles =
+    currentFileIds.length === 0
+      ? []
+      : currentFileIds.map((fileId) => {
+          const matched = files.find((item) => item.fileId === fileId);
+          return (
+            matched ?? {
+              fileId,
+              fileName: t('upload.existingFile', { id: fileId }),
+            }
+          );
+        });
 
   const handleFileChange = useCallback(
     // biome-ignore lint/complexity/noExcessiveCognitiveComplexity: 文件上传包含格式/大小/数量多重校验
@@ -136,9 +148,9 @@ export function FileUploadField({ name, control }: FileUploadFieldProps) {
       />
 
       {/* 已上传文件列表 */}
-      {files.length > 0 && (
+      {displayFiles.length > 0 && (
         <ul className="space-y-1">
-          {files.map((f) => (
+          {displayFiles.map((f) => (
             <li key={f.fileId} className="flex items-center gap-2 text-sm">
               <span className="truncate">{f.fileName}</span>
               <Button

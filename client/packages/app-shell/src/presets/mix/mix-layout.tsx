@@ -14,10 +14,10 @@ import {
   TooltipTrigger,
   cn,
 } from '@mb/ui-primitives';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import {
   Bell,
   ChevronDown,
-  ChevronRight,
   Languages,
   LogOut,
   Menu,
@@ -33,28 +33,60 @@ import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { useAuth } from '../../auth';
+import { BreadcrumbNav } from '../../components/breadcrumb-nav';
 import { DarkModeToggle } from '../../components/dark-mode-toggle';
 import { ThemeCustomizer } from '../../components/theme-customizer';
 import { useLanguage } from '../../i18n';
 import type { ShellLayoutProps } from '../../layouts/types';
 import { resolveMenuIcon } from '../../menu';
 import type { MenuNode } from '../../menu';
-import { findFirstLeafId, getDisplayChildren, isDisplayNode } from '../../menu/menu-utils';
+import {
+  type MenuHrefResolver,
+  findActiveLeafIdByPath,
+  findFirstLeafId,
+  findMenuPathByPath,
+  getDisplayChildren,
+  isDisplayNode,
+} from '../../menu/menu-utils';
 import { useStyle } from '../../theme';
 import { MixSubsystemSwitcher } from './mix-subsystem-switcher';
 
-export function MixLayout({ children, menuTree, currentUser, notificationSlot }: ShellLayoutProps) {
+export function MixLayout({
+  children,
+  menuTree,
+  currentUser,
+  notificationSlot,
+  resolveMenuHref,
+}: ShellLayoutProps) {
   const { t } = useTranslation('shell');
   const { logout, isLoggingOut } = useAuth();
+  const navigate = useNavigate();
+  const currentPathname = useRouterState({ select: (state) => state.location.pathname });
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const { modules, activeModule, activeModuleId, resolvedSidebarNodes, setActiveModuleId } =
-    useMixModules(menuTree);
+    useMixModules(menuTree, currentPathname, resolveMenuHref);
+
+  const handleNavigate = (href: string) => {
+    void navigate({ to: href as never });
+  };
+
+  const breadcrumbItems = useMemo(() => {
+    const matchedPath = findMenuPathByPath(menuTree, currentPathname, resolveMenuHref);
+    if (matchedPath.length === 0) {
+      return activeModule ? [{ label: activeModule.name }] : [];
+    }
+
+    return matchedPath.map((node, index) => ({
+      label: node.name,
+      href: index < matchedPath.length - 1 ? (resolveMenuHref?.(node) ?? undefined) : undefined,
+    }));
+  }, [activeModule, currentPathname, menuTree, resolveMenuHref]);
 
   return (
     <TooltipProvider>
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="flex h-screen flex-col overflow-hidden bg-background text-foreground">
         <MixHeader
           modules={modules}
           activeModuleId={activeModuleId}
@@ -66,7 +98,7 @@ export function MixLayout({ children, menuTree, currentUser, notificationSlot }:
           onSelectModule={setActiveModuleId}
         />
 
-        <div className="flex min-h-[calc(100vh-var(--size-header-height))]">
+        <div className="flex min-h-0 flex-1 overflow-hidden">
           {/* 移动端遮罩 */}
           {mobileOpen && (
             <button
@@ -84,22 +116,23 @@ export function MixLayout({ children, menuTree, currentUser, notificationSlot }:
             activeModuleId={activeModuleId}
             collapsed={collapsed}
             mobileOpen={mobileOpen}
+            currentPathname={currentPathname}
             onCloseMobile={() => setMobileOpen(false)}
             onToggleCollapsed={() => setCollapsed((prev) => !prev)}
             onSelectModule={setActiveModuleId}
+            resolveMenuHref={resolveMenuHref}
+            onNavigate={handleNavigate}
           />
 
-          {/* 主内容区容器：外框 bg-sidebar 灰，包住面包屑 + main；main 用 rounded-tl + bg-card 浮出白卡片 */}
-          <div className="flex min-w-0 flex-1 flex-col bg-sidebar">
+          {/* 主内容区容器：右侧整块区域滚动，breadcrumb 固定在顶部，白卡整体向上滚动到 breadcrumb 下方 */}
+          <div className="flex min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden bg-sidebar">
             {/* 面包屑栏：bg-sidebar 与 sidebar 同色，文字用 foreground 近黑（飞书实测 rgb(31,35,41)）*/}
-            <div className="flex items-center gap-2 px-4 py-3 text-sm text-foreground lg:px-6">
-              <span>{activeModule?.name ?? t('mix.moduleFallback')}</span>
-              <ChevronRight className="size-4 text-muted-foreground" />
-              <span>{t('mix.workspaceLabel')}</span>
+            <div className="sticky top-0 z-10 flex shrink-0 items-center gap-2 bg-sidebar py-3 pr-4 pl-[0.3125rem] text-sm text-foreground lg:pr-6 lg:pl-[0.4375rem]">
+              <BreadcrumbNav items={breadcrumbItems} />
             </div>
 
-            {/* main：悬浮卡片 —— 四角 rounded-lg / 右下留 8px 间距露灰底 / 左上贴边与面包屑衔接 */}
-            <main className="mr-2 mb-2 min-w-0 flex-1 rounded-lg bg-card p-4 lg:p-6">
+            {/* main：白色内容卡片只负责包裹内容，不锁死高度；滚动条属于右侧整块内容区 */}
+            <main className="mr-2 min-h-[calc(100%-3rem)] min-w-0 shrink-0 rounded-lg bg-card p-4 lg:p-6">
               {children}
             </main>
           </div>
@@ -111,12 +144,29 @@ export function MixLayout({ children, menuTree, currentUser, notificationSlot }:
 
 // ─── useMixModules hook ───────────────────────────────────
 
-function useMixModules(menuTree: MenuNode[]) {
+function useMixModules(
+  menuTree: MenuNode[],
+  currentPathname: string,
+  resolveMenuHref?: MenuHrefResolver,
+) {
   const modules = useMemo(
     () => menuTree.filter((node) => node.visible !== false && node.menuType !== 'BUTTON'),
     [menuTree],
   );
   const [activeModuleId, setActiveModuleId] = useState<number | null>(modules[0]?.id ?? null);
+  const matchedModuleId = useMemo(() => {
+    if (!resolveMenuHref) {
+      return null;
+    }
+
+    for (const module of modules) {
+      if (findActiveLeafIdByPath([module], currentPathname, resolveMenuHref)) {
+        return module.id;
+      }
+    }
+
+    return null;
+  }, [currentPathname, modules, resolveMenuHref]);
 
   useEffect(() => {
     if (modules.length === 0) {
@@ -131,6 +181,12 @@ function useMixModules(menuTree: MenuNode[]) {
       return modules[0]?.id ?? null;
     });
   }, [modules]);
+
+  useEffect(() => {
+    if (matchedModuleId) {
+      setActiveModuleId(matchedModuleId);
+    }
+  }, [matchedModuleId]);
 
   const activeModule = modules.find((node) => node.id === activeModuleId) ?? modules[0] ?? null;
   const sidebarNodes = activeModule
@@ -245,7 +301,7 @@ function MixHeader({
         </nav>
 
         {/* 搜索区：桌面端占据中间剩余宽度（对齐飞书中央 544 宽、36 高搜索位）*/}
-        <div className="hidden min-w-0 flex-1 justify-center px-4 lg:flex">
+        <div className="hidden min-w-0 flex-1 justify-center pl-8 pr-4 lg:flex">
           <SearchInput
             placeholder={t('search.placeholder')}
             shortcut="⌘K"
@@ -253,7 +309,7 @@ function MixHeader({
             onClick={() =>
               toast(t('search.comingSoon'), { description: t('search.comingSoonDesc') })
             }
-            className="w-full max-w-[544px] cursor-pointer [&_input]:h-9"
+            className="w-full max-w-[500px] cursor-pointer [&_input]:h-9"
           />
         </div>
 
@@ -412,9 +468,12 @@ function MixSidebar({
   activeModuleId,
   collapsed,
   mobileOpen,
+  currentPathname,
   onCloseMobile,
   onToggleCollapsed,
   onSelectModule,
+  resolveMenuHref,
+  onNavigate,
 }: {
   activeModule: MenuNode | null;
   nodes: MenuNode[];
@@ -422,13 +481,19 @@ function MixSidebar({
   activeModuleId: number | null;
   collapsed: boolean;
   mobileOpen: boolean;
+  currentPathname: string;
   onCloseMobile: () => void;
   onToggleCollapsed: () => void;
   onSelectModule: (id: number) => void;
+  resolveMenuHref?: MenuHrefResolver;
+  onNavigate: (href: string) => void;
 }) {
   const { t } = useTranslation('shell');
   const [expandedIds, setExpandedIds] = useState<Record<number, boolean>>({});
-  const activeLeafId = useMemo(() => findFirstLeafId(nodes), [nodes]);
+  const activeLeafId = useMemo(
+    () => findActiveLeafIdByPath(nodes, currentPathname, resolveMenuHref) ?? findFirstLeafId(nodes),
+    [currentPathname, nodes, resolveMenuHref],
+  );
 
   useEffect(() => {
     if (nodes.length === 0) {
@@ -457,13 +522,12 @@ function MixSidebar({
     <aside
       className={cn(
         // bg-sidebar：lark-console 下 = #f2f3f5，和 page bg 同色，sidebar 融入背景
-        // 无 border-r / 无 ml：main 容器已是 bg-sidebar 灰，aside 贴左与之连片，右下浮出白卡片
-        'fixed inset-y-(--size-header-height) left-0 z-40 flex bg-sidebar transition-[transform,width] duration-200 ease-out lg:static lg:translate-x-0',
+        'fixed left-0 z-40 flex h-full bg-sidebar transition-[transform,width] duration-200 ease-out lg:static lg:h-auto lg:translate-x-0',
         mobileOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0',
       )}
-      style={{ width: sidebarWidth }}
+      style={{ width: sidebarWidth, top: 'var(--size-header-height)', bottom: 0 }}
     >
-      <div className="flex h-full w-full flex-col">
+      <div className={cn('flex h-full w-full flex-col', collapsed && 'items-center')}>
         {/* Sidebar 顶部：仅移动端显示（模块名 + 关闭按钮）；desktop 对齐飞书直接从主导航区开始 */}
         <div
           className={cn(
@@ -492,7 +556,7 @@ function MixSidebar({
         {/* 移动端模块切换器：桌面态隐藏，移动端抽屉顶部显示所有顶层模块 */}
         {modules.length > 1 && (
           <nav
-            className="lg:hidden border-b border-border px-2 pb-2"
+            className="border-b border-border px-[0.875rem] pb-2 lg:hidden"
             aria-label={t('mix.moduleSwitcherLabel')}
           >
             <div className="space-y-0.5">
@@ -505,10 +569,10 @@ function MixSidebar({
                     type="button"
                     onClick={() => onSelectModule(mod.id)}
                     data-active={isActive ? 'true' : 'false'}
-                    className={cn('sidebar-item w-full text-left text-[14px]')}
+                    className={cn('sidebar-item w-full rounded-[0.625rem] text-left text-[14px]')}
                   >
                     <span className="flex w-5 shrink-0 items-center justify-center">
-                      <Icon className="size-5" />
+                      <Icon className="size-[1.125rem]" />
                     </span>
                     <span className="min-w-0 flex-1 truncate">{mod.name}</span>
                   </button>
@@ -519,8 +583,14 @@ function MixSidebar({
         )}
 
         {/* 主导航区（对齐飞书：items 堆叠无间距，容器无侧边 padding）*/}
-        <nav className="flex-1 overflow-y-auto pt-3 pb-2" aria-label={activeModule?.name}>
-          <div className="space-y-0">
+        <nav
+          className={cn(
+            'flex-1 overflow-y-auto px-[0.875rem] pt-3 pb-2',
+            collapsed && 'w-full px-0',
+          )}
+          aria-label={activeModule?.name}
+        >
+          <div className={cn('space-y-0', collapsed && 'flex flex-col items-center')}>
             {nodes.map((node) => (
               <MenuItem
                 key={node.id}
@@ -529,6 +599,8 @@ function MixSidebar({
                 collapsed={collapsed}
                 activeLeafId={activeLeafId}
                 expandedIds={expandedIds}
+                resolveMenuHref={resolveMenuHref}
+                onNavigate={onNavigate}
                 onToggleExpanded={(id) =>
                   setExpandedIds((prev) => ({
                     ...prev,
@@ -541,32 +613,38 @@ function MixSidebar({
         </nav>
 
         {/* 底部"收起导航"按钮（对齐飞书：无 border-t / 高度 48 / iconWrap 36×48 与 menu item 对齐）*/}
-        <div className="pb-2">
+        <div
+          className={cn(
+            'mx-[0.875rem] mt-2 border-t border-border/80 pt-1.5 pb-1.5',
+            collapsed && 'mx-0 w-full border-t-0 px-0 pt-2 pb-2',
+          )}
+        >
           <button
             type="button"
             onClick={onToggleCollapsed}
             aria-label={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
             title={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
             className={cn(
-              'flex h-12 w-full items-center text-[14px] text-muted-foreground transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-foreground',
-              collapsed && 'justify-center',
+              'flex h-10.5 w-full items-center rounded-[0.625rem] text-[14px] text-muted-foreground transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-foreground',
+              collapsed && 'mx-auto h-10 w-10 justify-center rounded-[var(--radius-md)]',
             )}
           >
             <span
               className={cn(
-                'flex h-12 shrink-0 items-center justify-center',
-                collapsed ? 'w-full' : 'ml-1.5 w-9',
+                'flex h-10.5 shrink-0 items-center justify-center',
+                collapsed ? 'h-10 w-10' : 'ml-1.5 w-9',
               )}
             >
               <PanelLeft
                 className={cn(
-                  'size-5 transition-transform duration-200',
+                  'transition-transform duration-200',
+                  collapsed ? 'size-[1.125rem]' : 'size-5',
                   collapsed && 'rotate-180',
                 )}
               />
             </span>
             {!collapsed && (
-              <span className="flex h-12 min-w-0 flex-1 items-center">
+              <span className="flex h-10.5 min-w-0 flex-1 items-center">
                 {t('sidebar.collapse')}
               </span>
             )}
@@ -603,8 +681,41 @@ type MenuItemProps = {
   collapsed: boolean;
   activeLeafId: number | null;
   expandedIds: Record<number, boolean>;
+  resolveMenuHref?: MenuHrefResolver;
+  onNavigate: (href: string) => void;
   onToggleExpanded: (id: number) => void;
 };
+
+function CollapsedMenuItem({
+  node,
+  isActiveItem,
+  onClick,
+}: {
+  node: MenuNode;
+  isActiveItem: boolean;
+  onClick: () => void;
+}) {
+  const Icon = resolveMenuIcon(node.icon);
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          onClick={onClick}
+          data-active={isActiveItem ? 'true' : 'false'}
+          className={cn(
+            'relative mx-auto inline-flex h-10 w-10 items-center justify-center rounded-[var(--radius-md)] text-[var(--sidebar-fg,var(--color-sidebar-foreground))] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)] hover:text-foreground',
+            isActiveItem && 'text-[var(--sidebar-item-active-fg)]',
+          )}
+        >
+          <Icon className="size-[1.25rem]" strokeWidth={1.75} />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="right">{node.name}</TooltipContent>
+    </Tooltip>
+  );
+}
 
 function MenuItem({
   node,
@@ -612,6 +723,8 @@ function MenuItem({
   collapsed,
   activeLeafId,
   expandedIds,
+  resolveMenuHref,
+  onNavigate,
   onToggleExpanded,
 }: MenuItemProps) {
   if (!isDisplayNode(node)) return null;
@@ -620,47 +733,55 @@ function MenuItem({
   const hasChildren = children.length > 0;
   const isExpanded = expandedIds[node.id] ?? true;
   const isActiveLeaf = node.id === activeLeafId;
-  const Icon = resolveMenuIcon(node.icon);
   const showIcon = depth === 0;
   const isActiveItem = isActiveLeaf && !hasChildren;
+  const href = resolveMenuHref?.(node) ?? null;
 
   // 折叠态（仅顶层渲染，子级完全隐藏）
+  if (collapsed && depth > 0) return null;
   if (collapsed) {
-    if (depth > 0) return null;
     return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            data-active={isActiveItem ? 'true' : 'false'}
-            className="sidebar-item relative w-full justify-center px-0 text-[14px]"
-          >
-            <Icon className="size-[1.375rem]" strokeWidth={1.75} />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent side="right">{node.name}</TooltipContent>
-      </Tooltip>
+      <CollapsedMenuItem
+        node={node}
+        isActiveItem={isActiveItem}
+        onClick={() => {
+          if (href) {
+            onNavigate(href);
+          }
+        }}
+      />
     );
   }
+
+  const Icon = resolveMenuIcon(node.icon);
 
   return (
     <div>
       <button
         type="button"
-        onClick={() => hasChildren && onToggleExpanded(node.id)}
+        onClick={() => {
+          if (hasChildren) {
+            onToggleExpanded(node.id);
+            return;
+          }
+
+          if (href) {
+            onNavigate(href);
+          }
+        }}
         data-active={isActiveItem ? 'true' : 'false'}
         className={cn(
           // 外层 padding=0 / gap=0：iconWrap 的 ml 和固定宽度自然撑出留白（对齐飞书）
-          'flex h-12 w-full items-center text-[14px] text-[var(--sidebar-fg,var(--color-sidebar-foreground))] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)]',
+          'sidebar-item flex h-12 w-full items-center rounded-[0.625rem] px-0 text-[14px] text-[var(--sidebar-fg,var(--color-sidebar-foreground))] transition-colors duration-[var(--duration-fast)] hover:bg-[var(--sidebar-item-hover-bg)]',
           isActiveItem && 'font-medium',
         )}
       >
         {/* iconWrap: 36×48 with ml:6 —— 飞书的"锚点块"，即使二级空占位也保留 */}
-        <span className="ml-1.5 flex h-12 w-9 shrink-0 items-center justify-center">
+        <span className="ml-1 flex h-12 w-8 shrink-0 items-center justify-center">
           {showIcon && Icon && (
             <Icon
               className={cn(
-                'size-6',
+                'size-[1.125rem]',
                 isActiveItem && 'text-[var(--sidebar-item-active-fg)]',
               )}
               strokeWidth={1.75}
@@ -670,7 +791,7 @@ function MenuItem({
         {/* textWrap: flex-1 h-12 relative —— 紧贴 iconWrap，chevron 在其内部绝对定位 */}
         <span
           className={cn(
-            'relative flex h-12 min-w-0 flex-1 items-center pr-7',
+            'relative flex h-12 min-w-0 flex-1 items-center pr-6',
             isActiveItem && 'text-[var(--sidebar-item-active-fg)]',
           )}
         >
@@ -696,6 +817,8 @@ function MenuItem({
               collapsed={collapsed}
               activeLeafId={activeLeafId}
               expandedIds={expandedIds}
+              resolveMenuHref={resolveMenuHref}
+              onNavigate={onNavigate}
               onToggleExpanded={onToggleExpanded}
             />
           ))}

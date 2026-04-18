@@ -13,6 +13,7 @@
   },
   "form": {
     "title": "公告标题",
+    "titlePlaceholder": "输入一眼就能看懂的公告标题",
     "content": "公告内容",
     "pinned": "置顶",
     "startTime": "生效时间",
@@ -115,9 +116,30 @@
   "dialog": {
     "createTitle": "新建公告",
     "editTitle": "编辑公告",
+    "subtitle": "先完善内容，再决定发布时间和附件。发布动作仍走通知范围选择。",
     "saveDraft": "存为草稿",
     "saveAndPublish": "保存并发布",
-    "publishSettings": "发布设置"
+    "publishSettings": "发布设置",
+    "mainSection": "公告主体",
+    "mainSectionDesc": "标题和正文都在这里完成，正文支持富文本格式。",
+    "settingsSectionDesc": "控制置顶状态、生效和失效时间，避免误发。",
+    "attachmentSectionDesc": "支持上传常见办公文件，编辑已有公告时会展示已关联附件。",
+    "pinHint": "重要公告可置顶"
+  },
+  "editor": {
+    "heading1": "一级标题",
+    "heading2": "二级标题",
+    "bold": "加粗",
+    "italic": "斜体",
+    "strike": "删除线",
+    "bulletList": "无序列表",
+    "orderedList": "有序列表",
+    "quote": "引用",
+    "undo": "撤销",
+    "redo": "重做",
+    "tip": "支持标题、加粗、列表、引用",
+    "modeHint": "富文本模式",
+    "placeholder": "输入公告正文，可直接粘贴格式化内容或用上方工具栏整理结构..."
   },
   "wechat": {
     "bindMP": "绑定公众号",
@@ -153,7 +175,8 @@
     "fileTooLarge": "文件大小不能超过 {{max}}MB",
     "uploading": "上传中...",
     "uploadFailed": "上传失败",
-    "downloadFailed": "下载失败"
+    "downloadFailed": "下载失败",
+    "existingFile": "已关联附件 #{{id}}"
   },
   "wechatError": {
     "authUrlFailed": "获取授权链接失败",

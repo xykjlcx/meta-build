@@ -22,6 +22,7 @@ export interface HttpClientOptions {
   basePath: string;
   requestInterceptors: RequestInterceptor[];
   responseInterceptors: ResponseInterceptor[];
+  requestGate?: () => Promise<void>;
   /** 尝试刷新 token，成功返回新 access token，失败返回 null */
   tryRefreshToken?: () => Promise<string | null>;
   /** refresh 失败或未配置时的回调（跳登录页） */
@@ -55,6 +56,8 @@ export function createHttpClient(
     url: string,
     init: RequestOptions,
   ): Promise<HttpResponseMeta<T>> {
+    await opts.requestGate?.();
+
     let finalUrl = `${opts.basePath}${url}`;
     const { responseType, ...fetchInit } = init;
     let finalInit: RequestInit = { ...fetchInit };

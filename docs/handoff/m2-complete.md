@@ -1,5 +1,7 @@
 # M2 完成交接文档
 
+> **说明**：这是历史 milestone 快照，不是当前真相。当前前端状态以 `AGENTS.md`、`docs/specs/frontend/README.md`、`docs/handoff/frontend-gap-analysis.md` 为准。
+
 > 新 session 开始前读这份文档，5 分钟内获得 M2 完整上下文。
 
 ---

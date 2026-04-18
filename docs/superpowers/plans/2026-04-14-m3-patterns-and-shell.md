@@ -1,5 +1,7 @@
 # M3: L3 Patterns + L4 App Shell + L5 Routing 实施计划
 
+> **说明**：这是历史执行计划，不是当前真相。计划中的组件数量、旧布局名、旧主题 API 和代码片段必须以当前仓库实际文件重新校验。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 在 M2（L1 主题系统 + L2 30 个原子组件）之上，构建 L3 业务组件（8 个）、L4 应用壳层（布局 + Provider + i18n + 认证门面）、L5 TanStack Router 文件路由，交付可运行的前端应用骨架。

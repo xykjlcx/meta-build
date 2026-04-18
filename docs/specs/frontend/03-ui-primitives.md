@@ -1,6 +1,6 @@
 ## 03 - L2 原子组件库 ui-primitives
 
-> **关注点**：L2 `@mb/ui-primitives` 的隔离哲学、42 个原子组件清单、shadcn 式文案 props 约定、CVA variants 风格、Storybook 规范、L2 白名单依赖。
+> **关注点**：L2 `@mb/ui-primitives` 的隔离哲学、公开导出组件清单、shadcn 式文案 props 约定、CVA variants 风格、Storybook 规范、L2 白名单依赖。
 >
 > L2 是 meta-build 千人千面的"骨架层"——上层永不直接 import Radix，所有底层 UI 库的更换由 L2 内部消化。
 
@@ -10,7 +10,7 @@
 
 ### 1.1 一句话定位
 
-`@mb/ui-primitives` 是 meta-build 前端的**底层 UI 库隔离层**，提供 42 个 shadcn 风格的原子组件（M2 shadcn/ui v4 升级后扩充），所有组件源码作为使用者资产存在，由使用者直接修改 `*.tsx` 文件完成定制（**不是**通过 theme override 或 props 注入样式）。
+`@mb/ui-primitives` 是 meta-build 前端的**底层 UI 库隔离层**，提供一组 shadcn 风格的原子组件与布局基础件，所有组件源码作为使用者资产存在，由使用者直接修改 `*.tsx` 文件完成定制（**不是**通过 theme override 或 props 注入样式）。
 
 ### 1.2 核心约定速查
 
@@ -30,7 +30,7 @@
 
 | 子任务 | milestone |
 |---|---|
-| 42 个原子组件最小可用版本 | [M2] |
+| L2 公开组件最小可用版本 | [M2] |
 | 全部组件 Storybook stories | [M2] |
 | Vitest 单元测试覆盖 | [M2] |
 | Visual Regression 快照 | [M6] |
@@ -106,15 +106,15 @@ packages:
 
 ---
 
-## 3. 42 个原子组件清单
+## 3. L2 公开组件清单
 
-按职责分 4 类。每个组件 1-2 行说明 + 底层 Radix 原语来源。所有组件都遵循 §4 的 API 约定。
+按职责分 4 类。以下清单对齐当前 `src/index.ts` 的公开导出；`cn()` 作为工具函数单独导出，不计入组件清单。
 
-### 3.1 输入类（11 个）[M2]
+### 3.1 输入与选择类（14 个）[M2]
 
 | # | 组件 | 文件 | Radix 原语 | 职责 |
 |---|---|---|---|---|
-| 1 | `Button` | `button.tsx` | 无（原生 `<button>` + Slot） | 5 variants × 4 sizes，支持 `asChild` 多态 |
+| 1 | `Button` | `button.tsx` | 无（原生 `<button>` + Slot） | 5 variants × 多尺寸，支持 `asChild` 多态 |
 | 2 | `Input` | `input.tsx` | 无（原生 `<input>`） | 文本输入，支持 disabled / invalid 状态 |
 | 3 | `Textarea` | `textarea.tsx` | 无（原生 `<textarea>`） | 多行输入 |
 | 4 | `Label` | `label.tsx` | `@radix-ui/react-label` | 关联 `<input>` 的语义化标签 |
@@ -122,45 +122,50 @@ packages:
 | 6 | `RadioGroup` | `radio-group.tsx` | `@radix-ui/react-radio-group` | 单选组 |
 | 7 | `Switch` | `switch.tsx` | `@radix-ui/react-switch` | 开关切换 |
 | 8 | `Slider` | `slider.tsx` | `@radix-ui/react-slider` | 滑块，单值 / 区间值 |
-| 9 | `Select` | `select.tsx` | `@radix-ui/react-select` | 下拉单选 |
-| 10 | `Combobox` | `combobox.tsx` | `@radix-ui/react-popover` + `cmdk` | 搜索下拉（client 侧搜索，异步版在 L3 `ApiSelect`） |
-| 11 | `DatePicker` | `date-picker.tsx` | `@radix-ui/react-popover` + `react-day-picker` | 单日期选择，支持范围在 L3 复合 |
+| 9 | `Toggle` | `toggle.tsx` | `@radix-ui/react-toggle` | 单个切换按钮 |
+| 10 | `ToggleGroup` | `toggle-group.tsx` | `@radix-ui/react-toggle-group` | 分组切换按钮 |
+| 11 | `Select` | `select.tsx` | `@radix-ui/react-select` | 下拉单选 |
+| 12 | `Combobox` | `combobox.tsx` | `@radix-ui/react-popover` + `cmdk` | 搜索下拉（client 侧搜索，异步版在 L3 `ApiSelect`） |
+| 13 | `DatePicker` | `date-picker.tsx` | `@radix-ui/react-popover` + `react-day-picker` | 单日期选择 |
+| 14 | `Calendar` | `calendar.tsx` | `react-day-picker` | 日历面板基础件 |
 
-### 3.2 反馈类（7 个）[M2]
-
-| # | 组件 | 文件 | Radix 原语 | 职责 |
-|---|---|---|---|---|
-| 12 | `Dialog` | `dialog.tsx` | `@radix-ui/react-dialog` | 模态对话框（中心定位） |
-| 13 | `AlertDialog` | `alert-dialog.tsx` | `@radix-ui/react-alert-dialog` | 强阻塞确认对话框（删除等不可撤销操作） |
-| 14 | `Drawer` | `drawer.tsx` | `@radix-ui/react-dialog` + 自定义动画 | 侧边抽屉（左 / 右 / 上 / 下） |
-| 15 | `Tooltip` | `tooltip.tsx` | `@radix-ui/react-tooltip` | 鼠标悬停提示 |
-| 16 | `Popover` | `popover.tsx` | `@radix-ui/react-popover` | 浮层容器（不强制遮罩） |
-| 17 | `Toast` | `toast.tsx` | `@radix-ui/react-toast` | 全局通知（配合 `useToast` hook） |
-| 18 | `HoverCard` | `hover-card.tsx` | `@radix-ui/react-hover-card` | 悬停展开卡片（用户头像预览等） |
-
-### 3.3 导航类（5 个）[M2]
+### 3.2 反馈与浮层类（8 个）[M2]
 
 | # | 组件 | 文件 | Radix 原语 | 职责 |
 |---|---|---|---|---|
-| 19 | `Tabs` | `tabs.tsx` | `@radix-ui/react-tabs` | 标签页切换 |
-| 20 | `Breadcrumb` | `breadcrumb.tsx` | 无（语义化 `<nav>` + `<ol>`） | 面包屑导航 |
-| 21 | `DropdownMenu` | `dropdown-menu.tsx` | `@radix-ui/react-dropdown-menu` | 下拉菜单（用户菜单等） |
-| 22 | `NavigationMenu` | `navigation-menu.tsx` | `@radix-ui/react-navigation-menu` | 顶部导航菜单（多级展开） |
-| 23 | `Command` | `command.tsx` | `cmdk` | 命令面板（Cmd+K 风格） |
+| 15 | `Dialog` | `dialog.tsx` | `@radix-ui/react-dialog` | 模态对话框（中心定位） |
+| 16 | `Sheet` | `sheet.tsx` | `@radix-ui/react-dialog` | 侧滑面板基础件 |
+| 17 | `AlertDialog` | `alert-dialog.tsx` | `@radix-ui/react-alert-dialog` | 强阻塞确认对话框 |
+| 18 | `Drawer` | `drawer.tsx` | `@radix-ui/react-dialog` + 自定义动画 | 侧边抽屉（左 / 右 / 上 / 下） |
+| 19 | `Tooltip` | `tooltip.tsx` | `@radix-ui/react-tooltip` | 鼠标悬停提示 |
+| 20 | `Popover` | `popover.tsx` | `@radix-ui/react-popover` | 浮层容器（不强制遮罩） |
+| 21 | `Sonner` | `sonner.tsx` | `sonner` | 全局通知基础件 |
+| 22 | `HoverCard` | `hover-card.tsx` | `@radix-ui/react-hover-card` | 悬停展开卡片（用户头像预览等） |
+
+### 3.3 导航与布局基础件（6 个）[M2]
+
+| # | 组件 | 文件 | Radix 原语 | 职责 |
+|---|---|---|---|---|
+| 23 | `Tabs` | `tabs.tsx` | `@radix-ui/react-tabs` | 标签页切换 |
+| 24 | `Breadcrumb` | `breadcrumb.tsx` | 无（语义化 `<nav>` + `<ol>`） | 面包屑导航 |
+| 25 | `DropdownMenu` | `dropdown-menu.tsx` | `@radix-ui/react-dropdown-menu` | 下拉菜单（用户菜单等） |
+| 26 | `NavigationMenu` | `navigation-menu.tsx` | `@radix-ui/react-navigation-menu` | 顶部导航菜单（多级展开） |
+| 27 | `Command` | `command.tsx` | `cmdk` | 命令面板（Cmd+K 风格） |
+| 28 | `Sidebar` | `sidebar.tsx` | 组合封装 | Sidebar primitives（Provider / Trigger / Rail / Menu 等） |
 
 ### 3.4 展示类（7 个）[M2]
 
 | # | 组件 | 文件 | Radix 原语 | 职责 |
 |---|---|---|---|---|
-| 24 | `Card` | `card.tsx` | 无（语义化 `<div>`） | 卡片容器（含 Header / Content / Footer 子组件） |
-| 25 | `Badge` | `badge.tsx` | 无（语义化 `<span>`） | 状态标签（5 variants） |
-| 26 | `Avatar` | `avatar.tsx` | `@radix-ui/react-avatar` | 头像（含 fallback） |
-| 27 | `Separator` | `separator.tsx` | `@radix-ui/react-separator` | 分隔线（横 / 竖） |
-| 28 | `Skeleton` | `skeleton.tsx` | 无（动画 `<div>`） | 骨架屏占位 |
-| 29 | `Accordion` | `accordion.tsx` | `@radix-ui/react-accordion` | 折叠面板（FAQ 等） |
-| 30 | `Table` | `table.tsx` | 无（语义化 `<table>`） | 表格容器（含 TableHeader / TableBody / TableRow / TableHead / TableCell 子组件），L3 NxTable 的底层原子 |
+| 29 | `Card` | `card.tsx` | 无（语义化 `<div>`） | 卡片容器（含 Header / Content / Footer 子组件） |
+| 30 | `Badge` | `badge.tsx` | 无（语义化 `<span>`） | 状态标签 |
+| 31 | `Avatar` | `avatar.tsx` | `@radix-ui/react-avatar` | 头像（含 fallback） |
+| 32 | `Separator` | `separator.tsx` | `@radix-ui/react-separator` | 分隔线（横 / 竖） |
+| 33 | `Skeleton` | `skeleton.tsx` | 无（动画 `<div>`） | 骨架屏占位 |
+| 34 | `Accordion` | `accordion.tsx` | `@radix-ui/react-accordion` | 折叠面板 |
+| 35 | `Table` | `table.tsx` | 无（语义化 `<table>`） | 表格容器，L3 `NxTable` 的底层原子 |
 
-> **总计 42 个原子组件**，每个组件对应一个文件。`Card` / `Dialog` / `AlertDialog` / `Drawer` / `Table` 等会导出多个子组件（`Card` / `CardHeader` / `CardContent` / `CardFooter`），统一打包在同一文件内导出。文件清单与决策表保持 1:1。
+> 当前 L2 公开导出 **35 个组件模块 + `cn()` 工具函数**。`Card` / `Dialog` / `AlertDialog` / `Drawer` / `Table` / `Sidebar` 等模块会导出多个子组件，统一打包在同一文件中。
 
 ### 3.5 不在 L2 范围
 
@@ -169,7 +174,7 @@ packages:
 | 不在 L2 | 应该在哪里 | 原因 |
 |---|---|---|
 | `NxTable` / `NxForm` 等数据表格、表单 | L3 `@mb/ui-patterns` | 需要 wrap TanStack Table / RHF，业务复合 |
-| `Header` / `Sidebar` / 全局布局 | L4 `@mb/app-shell` | 需要 wrap 路由、菜单、Provider |
+| `Header` / 全局布局 / 菜单 wiring | L4 `@mb/app-shell` | 需要 wrap 路由、菜单、Provider；`Sidebar` 原语在 L2，但 layout preset 组合归 L4 |
 | 业务字段输入（`OrderStatusSelect` / `CustomerPicker`） | L5 `apps/web-admin/src/features/**` | 业务语义，L2/L3 都不能持有 |
 | Icon 库本身 | 直接用 `lucide-react` | L1/L2 共用，不需要再 wrap |
 

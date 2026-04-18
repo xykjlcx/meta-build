@@ -6,6 +6,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@mb/ui-primitives';
+import { Link } from '@tanstack/react-router';
 
 /**
  * 面包屑导航 — M3 基础版。
@@ -28,9 +29,16 @@ export function BreadcrumbNav({ items }: { items: BreadcrumbEntry[] }) {
             <BreadcrumbItem key={item.label}>
               {isLast ? (
                 <BreadcrumbPage>{item.label}</BreadcrumbPage>
+              ) : item.href ? (
+                <>
+                  <BreadcrumbLink asChild>
+                    <Link to={item.href}>{item.label}</Link>
+                  </BreadcrumbLink>
+                  <BreadcrumbSeparator />
+                </>
               ) : (
                 <>
-                  <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+                  <span className="text-muted-foreground">{item.label}</span>
                   <BreadcrumbSeparator />
                 </>
               )}

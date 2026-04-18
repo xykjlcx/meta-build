@@ -17,8 +17,8 @@ export function useAuth() {
       }
       localStorage.setItem(ACCESS_TOKEN_KEY, result.accessToken);
       localStorage.setItem(REFRESH_TOKEN_KEY, result.refreshToken);
-      // 不手动缓存用户信息 — 让 _authed.tsx 的 ensureQueryData 调 /auth/me 获取完整 CurrentUserVo
-      queryClient.invalidateQueries({ queryKey: ['auth', 'me'] });
+      // 登录后清空上一会话的查询缓存，避免沿用旧账号的用户信息或业务数据。
+      queryClient.clear();
       const params = new URLSearchParams(window.location.search);
       const redirectTo = params.get('redirect') ?? '/';
       navigate({ to: redirectTo });

@@ -14,6 +14,10 @@
 #  10. 反向索引链接的目标文件存在
 #  11. 废弃关键词已清理（is_deleted / 软删除 已改名为 is_stale / stale）
 #  12. 行数粗略平衡（>= 6000 行）
+#  13. AGENTS / handoff 关键真相入口无高信号 drift
+#  14. 新增公开组件 PageHeader 的最小契约闭环存在
+#  15. canonical frontend spec 无已知旧计数/旧组件边界残留
+#  16. 历史 handoff / plan 文档显式声明“不是当前真相”
 #
 # 不验证 GitHub anchor 的精确性（本地无法渲染），但会检查相对路径链接的目标文件存在。
 
@@ -401,6 +405,161 @@ for f in "${content_files[@]}"; do
         ok "$name: $lines 行 > 200"
     else
         fail "$name: $lines 行 < 200（内容过少）"
+    fi
+done
+
+# === 13. 关键真相入口守护 ===
+section "13. 关键真相入口守护"
+
+entry_files=(
+    "AGENTS.md"
+    "docs/specs/frontend/README.md"
+    "docs/handoff/frontend-gap-analysis.md"
+    "docs/handoff/m5-complete.md"
+)
+
+for f in "${entry_files[@]}"; do
+    if [ -f "$f" ]; then
+        ok "$f 存在"
+    else
+        fail "$f 缺失"
+    fi
+done
+
+# 已知高信号旧事实：不是所有数字都守护，只拦截已经反复漂移且会误导执行顺序的项
+stale_truth_patterns='54 token|54 个设计 token|3 主题|3 × 54 token|3×54 token|274 tests|274 单元|M5 已完成|42 个 shadcn/ui v4|42 个原子组件|8 个业务组件'
+bad_stale_truth=$(rg -n "$stale_truth_patterns" "${entry_files[@]}" 2>/dev/null || true)
+if [ -n "$bad_stale_truth" ]; then
+    fail "发现关键真相入口中的旧事实残留："
+    echo "$bad_stale_truth"
+else
+    ok "关键真相入口无已知旧事实残留"
+fi
+
+agents_keywords=(
+    "前端收口路线"
+    "P0：质量线 + 真相收口"
+    "docs/handoff/frontend-gap-analysis.md"
+)
+
+for kw in "${agents_keywords[@]}"; do
+    if grep -qF -- "$kw" AGENTS.md 2>/dev/null; then
+        ok "AGENTS.md 包含 $kw"
+    else
+        fail "AGENTS.md 缺少 $kw"
+    fi
+done
+
+readme_keywords=(
+    "docs/handoff/frontend-gap-analysis.md"
+    "0019"
+    "0020"
+)
+
+for kw in "${readme_keywords[@]}"; do
+    if grep -qF -- "$kw" docs/specs/frontend/README.md 2>/dev/null; then
+        ok "frontend README 包含 $kw"
+    else
+        fail "frontend README 缺少 $kw"
+    fi
+done
+
+gap_keywords=(
+    "P0：质量线 + 真相收口"
+    "P1：Notice canonical 闭环"
+    "P2：UPMS 核心前端"
+    "P3：阶段性联调复盘"
+    "Deferred（当前明确不做）"
+)
+
+for kw in "${gap_keywords[@]}"; do
+    if grep -qF -- "$kw" docs/handoff/frontend-gap-analysis.md 2>/dev/null; then
+        ok "frontend-gap-analysis.md 包含 $kw"
+    else
+        fail "frontend-gap-analysis.md 缺少 $kw"
+    fi
+done
+
+m5_keywords=(
+    "历史记录，不是当前前端总真相"
+    "frontend-gap-analysis.md"
+    "P0：质量线 + 真相收口"
+)
+
+for kw in "${m5_keywords[@]}"; do
+    if grep -qF -- "$kw" docs/handoff/m5-complete.md 2>/dev/null; then
+        ok "m5-complete.md 包含 $kw"
+    else
+        fail "m5-complete.md 缺少 $kw"
+    fi
+done
+
+# === 14. 新增公开组件最小契约 ===
+section "14. 新增公开组件最小契约"
+
+if grep -qF -- "export { PageHeader, type PageHeaderProps } from './page-header';" client/packages/ui-patterns/src/index.ts 2>/dev/null; then
+    ok "PageHeader 仍为 public export"
+
+    if [ -f "client/packages/ui-patterns/src/page-header.stories.tsx" ]; then
+        ok "PageHeader story 存在"
+    else
+        fail "PageHeader story 缺失"
+    fi
+
+    if [ -f "client/packages/ui-patterns/src/page-header.test.tsx" ]; then
+        ok "PageHeader test 存在"
+    else
+        fail "PageHeader test 缺失"
+    fi
+else
+    ok "PageHeader 未公开导出，跳过契约闭环检查"
+fi
+
+# === 15. canonical frontend spec 守护 ===
+section "15. canonical frontend spec 守护"
+
+canonical_spec_files=(
+    "docs/specs/frontend/01-layer-structure.md"
+    "docs/specs/frontend/03-ui-primitives.md"
+    "docs/specs/frontend/04-ui-patterns.md"
+    "docs/specs/frontend/09-customization-workflow.md"
+)
+
+bad_canonical_spec=$(rg -n '42 个原子组件|8 个业务组件|toast\.tsx|ThemeProvider|useTheme|SidebarLayout|TopLayout' "${canonical_spec_files[@]}" 2>/dev/null || true)
+if [ -n "$bad_canonical_spec" ]; then
+    fail "canonical frontend spec 发现旧计数 / 旧组件边界残留："
+    echo "$bad_canonical_spec"
+else
+    ok "canonical frontend spec 无已知旧计数 / 旧组件边界残留"
+fi
+
+# === 16. 历史文档标签守护 ===
+section "16. 历史文档标签守护"
+
+historical_docs=(
+    "docs/handoff/m2-complete.md"
+    "docs/handoff/m3-complete.md"
+    "docs/handoff/feishu-style-visual-check.md"
+    "docs/handoff/shell-redesign-research.md"
+    "docs/specs/frontend/2026-04-17-feishu-style-and-mix-rename-plan.md"
+    "docs/specs/frontend/2026-04-17-feishu-style-and-mix-rename.md"
+    "docs/superpowers/plans/2026-04-13-m1-scaffolding.md"
+    "docs/superpowers/plans/2026-04-14-m2-theme-and-primitives.md"
+    "docs/superpowers/plans/2026-04-14-m3-patterns-and-shell.md"
+    "docs/superpowers/plans/2026-04-14-m4-backend-platform.md"
+    "docs/superpowers/plans/2026-04-14-m4-review-fixes.md"
+    "docs/superpowers/plans/2026-04-14-m5-plan-a-openapi-notice-backend.md"
+    "docs/superpowers/plans/2026-04-15-m5-plan-b-sse-notification-channels.md"
+    "docs/superpowers/plans/2026-04-15-m5-plan-c-notice-frontend-e2e.md"
+    "docs/superpowers/plans/2026-04-15-notice-ui-polish.md"
+    "docs/superpowers/plans/2026-04-16-shell-visual-polish.md"
+)
+
+for f in "${historical_docs[@]}"; do
+    if grep -q "不是当前真相" "$f" 2>/dev/null; then
+        ok "$(basename "$f") 标注了历史身份"
+    else
+        fail "$(basename "$f") 缺少“不是当前真相”历史标签"
     fi
 done
 

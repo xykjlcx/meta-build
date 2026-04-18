@@ -20,8 +20,8 @@ meta-build 前端 = **给 AI 执行的不可动摇的契约 + 千人千面的定
 |------|-------|-------|
 | [01-layer-structure.md](./01-layer-structure.md) | 5 层 package 结构 + 依赖方向 + 脚手架定位 + 每层白名单 | **从这里开始** / 加新 package / 调依赖方向 |
 | [02-ui-tokens-theme.md](./02-ui-tokens-theme.md) | L1 CSS Variables + Style Registry + ColorMode + Customizer CSS 维度 + 完整性校验脚本 | 改主题 / 加新风格 / 调整语义 token |
-| [03-ui-primitives.md](./03-ui-primitives.md) | L2 42 原子组件 + Radix 隔离哲学 + Storybook 规范 | 改原子组件 / 加新 variant |
-| [04-ui-patterns.md](./04-ui-patterns.md) | L3 8 业务组件 API + TanStack Table/RHF 隔离 | 改业务组件 / 加新复合组件 |
+| [03-ui-primitives.md](./03-ui-primitives.md) | L2 原子组件与布局基础件 + Radix 隔离哲学 + Storybook 规范 | 改原子组件 / 加新 variant |
+| [04-ui-patterns.md](./04-ui-patterns.md) | L3 业务组件与页面骨架组件 API + TanStack Table/RHF 隔离 | 改业务组件 / 加新复合组件 |
 | [05-app-shell.md](./05-app-shell.md) | L4 Layout Resolver + Preset Registry + Provider + 认证门面 + 完整 i18n 工程 | 改布局 / 改 i18n / 改全局 UI |
 | [06-routing-and-data.md](./06-routing-and-data.md) | TanStack Router 文件路由 + TanStack Query + 路由守卫 | 加新路由 / 调数据加载 |
 | [07-menu-permission.md](./07-menu-permission.md) | **双树权限架构**（路由树 + 菜单树） | **改权限 / 改菜单运维 UI** |
@@ -54,6 +54,7 @@ meta-build 前端 = **给 AI 执行的不可动摇的契约 + 千人千面的定
 | [docs/specs/backend/](../backend/README.md) | 通过契约驱动（`@mb/api-sdk`）与本文档解耦，互不依赖 |
 | [CLAUDE.md](../../../CLAUDE.md) | 索引式结构，只引用本文件的反向索引段 |
 | [docs/adr/](../../adr/) | 双树架构等关键决策的 ADR 待 spec 定稿后补写 |
+| [docs/handoff/frontend-gap-analysis.md](../../handoff/frontend-gap-analysis.md) | 当前前端收口路线与完成度口径的真相入口 |
 | [meta-build规划_v1_最终对齐.md](../../../meta-build规划_v1_最终对齐.md) | ground truth 基线，本文档是它的"前端实施展开版" |
 
 ---
@@ -64,8 +65,8 @@ meta-build 前端 = **给 AI 执行的不可动摇的契约 + 千人千面的定
 client/
 ├── packages/
 │   ├── ui-tokens/          # L1 设计令牌 + Style Registry（纯 CSS Variables）
-│   ├── ui-primitives/      # L2 42 原子组件（隔离 Radix/shadcn）
-│   ├── ui-patterns/        # L3 8 业务组件（隔离 TanStack Table/RHF）
+│   ├── ui-primitives/      # L2 原子组件库（隔离 Radix/shadcn）
+│   ├── ui-patterns/        # L3 业务组件与页面骨架组件（隔离 TanStack Table/RHF）
 │   ├── app-shell/          # L4 布局 + Provider + 认证门面 + i18n 机制
 │   └── api-sdk/            # 契约客户端 package（手写层入 git，generated/ 不入 git，orval 产物）
 ├── apps/
@@ -145,6 +146,8 @@ client/
 | [0016](../../adr/0016-前端主题系统从theme切换到style加color-mode与customizer.md) | 前端主题系统从 Theme 切换到 Style + ColorMode + Customizer | 已采纳 |
 | [0017](../../adr/0017-app-shell从固定布局切换到layout-resolver加preset-registry.md) | App Shell 从固定布局切换到 Layout Resolver + Preset Registry | 已采纳 |
 | [0018](../../adr/0018-废弃compact主题改为style加customizer维度组合.md) | 废弃 Compact 主题，改为 Style + Customizer 维度组合 | 已采纳 |
+| [0019](../../adr/0019-正交三层契约与mix-rename和primitive-blue修正.md) | 正交三层 token 契约（Layout × Style × Component）+ mix rename + primitive blue 修正 | 已采纳 |
+| [0020](../../adr/0020-feishu-rename-to-lark-console-and-token-expansion.md) | feishu → lark-console 重命名 + semantic token 扩展 | 已采纳 |
 
 后端 ADR 见 [docs/adr/](../../adr/)（目前 0001-0012 全部为后端决策）。
 
@@ -160,7 +163,7 @@ client/
 | 新拆 / 合并子文件 | 改本 README 导航 + 反向索引锚点；**不改 CLAUDE.md** |
 | 发现 drift | 立即修正，不允许"等下次一起改"——nxboot 反面教材 |
 | 完成 milestone | 子文件回补 `[M2 时补]` / `[M3 时补]` 占位 |
-| 验证文档完整性 | 跑 `./scripts/verify-frontend-docs.sh`（检查文件存在 + 格式合规 + 关键词 + drift 扫描 + 行数平衡）|
+| 验证文档完整性 | 跑 `./scripts/verify-frontend-docs.sh`（检查 specs canonical + AGENTS/handoff 关键入口 + 高信号 drift）|
 
 ---
 
@@ -183,8 +186,7 @@ client/
 
 ## 状态
 
-- **2026-04-11 定稿**：M0 前端 spec 全部落盘（README + 11 子文件 + appendix，共 13 个 .md 文件，约 11800 行）
-- **本次写作来源**：2026-04-11 brainstorming 会话（17 项决策 + 13 条前端硬约束 + 2 条推荐 + 双树权限架构 + i18n 8 子决策）
-- **M4.2 对齐**：后端已去除全表通用软删除位；前端路由树的代码侧 fallback 字段统一使用 `is_stale` 语义，明确区分"代码侧已不再出现"和运维删除两个概念（2026-04-11 drift 清理完成）
-- **验证脚本**：`./scripts/verify-frontend-docs.sh`（137 / 0 全绿）
-- **下一步**：洋哥 review → 可选写双树架构 ADR → 进入 M1 脚手架实施计划
+- **2026-04-18 对齐**：README 已吸收 ADR-0019 / ADR-0020，当前前端真相以 Style + ColorMode + Customizer、Layout Resolver + Preset Registry、`lark-console` 命名为准
+- **当前路线**：前端收口顺序见 [frontend-gap-analysis.md](../../handoff/frontend-gap-analysis.md)
+- **历史快照**：M5 notice 交付记录见 [m5-complete.md](../../handoff/m5-complete.md)；该文件是历史记录，不是当前总真相
+- **验证脚本**：`./scripts/verify-frontend-docs.sh`（守护 specs + AGENTS + handoff 关键入口）

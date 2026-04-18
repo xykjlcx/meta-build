@@ -1,6 +1,6 @@
 ## 04 - L3 业务组件库 ui-patterns
 
-> **关注点**：L3 `@mb/ui-patterns` 的隔离哲学、8 个核心业务组件 props API、TanStack Table / RHF / Zod 隔离边界、不硬编码业务语义的硬约束、Storybook 规范、L3 白名单依赖。
+> **关注点**：L3 `@mb/ui-patterns` 的隔离哲学、公开导出组件 props API、TanStack Table / RHF / Zod 隔离边界、不硬编码业务语义的硬约束、Storybook 规范、L3 白名单依赖。
 >
 > L3 是 L2 原子组件之上的"业务复合层"——隔离 TanStack Table / React Hook Form 等业务基础设施，但**不持有任何具体业务语义**（订单 / 客户 / 商品等业务词汇永不进 L3）。
 
@@ -10,13 +10,13 @@
 
 ### 1.1 一句话定位
 
-`@mb/ui-patterns` 是 meta-build 前端的**业务基础设施隔离层**，提供 8 个高频复合组件（NxTable / NxForm / NxFilter / NxDrawer / NxBar / NxLoading / ApiSelect / NxTree），所有组件源码作为使用者资产存在，对上层屏蔽 TanStack Table / React Hook Form / Zod / date-fns 等业务基础设施 API。
+`@mb/ui-patterns` 是 meta-build 前端的**业务基础设施隔离层**，提供 8 个高频业务复合组件（NxTable / NxForm / NxFilter / NxDrawer / NxBar / NxLoading / ApiSelect / NxTree）以及 3 个页面骨架组件（PageHeader / StatusBadge / SearchInput），所有组件源码作为使用者资产存在，对上层屏蔽 TanStack Table / React Hook Form / Zod / date-fns 等业务基础设施 API。
 
 ### 1.2 核心约定速查
 
 | 项 | 决策 |
 |---|---|
-| 命名前缀 | `Nx*`（meta-build 业务复合组件统一前缀，区分 L2 原子组件） |
+| 命名约定 | `Nx*` 用于核心业务复合组件；`PageHeader` / `StatusBadge` / `SearchInput` 作为页面骨架组件公开导出 |
 | 底层基础设施 | TanStack Table v8 + React Hook Form + Zod + date-fns |
 | 视觉来源 | 全部基于 L2 `@mb/ui-primitives` 组合，不直接引用 Radix |
 | 文案处理 | **零内部 i18n**（继承 L2 约定），所有文案通过 props 传入 |
@@ -31,7 +31,8 @@
 
 | 子任务 | milestone |
 |---|---|
-| 8 个核心组件最小可用版本 | [M3] |
+| 8 个核心业务组件最小可用版本 | [M3] |
+| 3 个页面骨架组件最小可用版本 | [M3+] |
 | 全部组件 Storybook stories | [M3] |
 | Vitest 单元测试覆盖 | [M3] |
 | 组件 props 类型生成的 TS 文档 | [M3] |
@@ -90,7 +91,7 @@ client/packages/
 
 ---
 
-## 3. 8 个核心业务组件清单
+## 3. 11 个公开组件清单
 
 | # | 组件 | 文件 | 基础设施 | 职责 |
 |---|---|---|---|---|
@@ -102,6 +103,9 @@ client/packages/
 | 6 | `NxLoading` | `nx-loading.tsx` | 无（纯 React + L2） | 加载状态容器：骨架屏 + 空状态 + 错误态 + 重试按钮（三态合一） |
 | 7 | `ApiSelect` | `api-select.tsx` | TanStack Query 动态 import + L2 Combobox | 异步下拉：基于 `@mb/api-sdk` + 搜索 + 分页 + 缓存 |
 | 8 | `NxTree` | `nx-tree.tsx` | 无（纯 React + L2） | 树形展示/选择：节点渲染 + 拖拽排序 + 展开折叠 + 自定义节点渲染（菜单管理 UI 使用，见 [07 §11](./07-menu-permission.md#11-菜单管理-ui-代码示例-m3m4)） |
+| 9 | `PageHeader` | `page-header.tsx` | 无（纯 React + L2） | 页面标题栏：eyebrow / title / description / meta / actions |
+| 10 | `StatusBadge` | `status-badge.tsx` | 无（纯 React + L2 Badge） | 语义状态徽章：tone → variant 映射 |
+| 11 | `SearchInput` | `search-input.tsx` | 无（纯 React + L2 Input） | 搜索输入框：placeholder / shortcut / className |
 
 ### 3.1 不在 L3 范围
 

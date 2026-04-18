@@ -2,6 +2,25 @@ import { type AppPermission, type MenuVo, menuApi } from '@mb/api-sdk';
 import { type UseQueryResult, useQuery } from '@tanstack/react-query';
 import type { MenuNode, UserMenuPayload } from './types';
 
+async function waitForMockRuntimeReady() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const runtime = window as unknown as Record<string, unknown>;
+  if (!runtime.__msw_enabled__) {
+    return;
+  }
+
+  const startedAt = performance.now();
+  while (performance.now() - startedAt < 3000) {
+    if (runtime.__msw_ready__ && navigator.serviceWorker.controller) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+}
+
 function toMenuNode(dto: MenuVo): MenuNode {
   return {
     id: dto.id,
@@ -26,6 +45,7 @@ export function useMenu(): UseQueryResult<UserMenuPayload, Error> {
   return useQuery({
     queryKey: ['app-shell', 'menu', 'current-user'],
     queryFn: async () => {
+      await waitForMockRuntimeReady();
       const payload = await menuApi.queryCurrentUserMenu();
       return {
         tree: payload.tree.map(toMenuNode),

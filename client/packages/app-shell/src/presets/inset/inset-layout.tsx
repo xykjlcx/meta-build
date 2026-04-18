@@ -26,6 +26,7 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from '@mb/ui-primitives';
+import { useNavigate, useRouterState } from '@tanstack/react-router';
 import {
   ChevronDown,
   ChevronRight,
@@ -53,7 +54,13 @@ import { useLanguage } from '../../i18n';
 import type { ShellLayoutProps } from '../../layouts/types';
 import { resolveMenuIcon } from '../../menu';
 import type { MenuNode } from '../../menu';
-import { findFirstLeafId, getDisplayChildren, isDisplayNode } from '../../menu/menu-utils';
+import {
+  type MenuHrefResolver,
+  findActiveLeafIdByPath,
+  findFirstLeafId,
+  getDisplayChildren,
+  isDisplayNode,
+} from '../../menu/menu-utils';
 import { useStyle } from '../../theme';
 
 // Sidebar 宽度对齐 shadcnuikit.com/dashboard/default（256px）
@@ -72,6 +79,7 @@ export function InsetLayout({
   sidebarHeaderSlot,
   sidebarFooterSlot,
   sidebarAboveFooterSlot,
+  resolveMenuHref,
 }: ShellLayoutProps) {
   const { logout, isLoggingOut } = useAuth();
   const { sidebarMode, setSidebarMode } = useStyle();
@@ -99,6 +107,7 @@ export function InsetLayout({
         footerSlot={sidebarFooterSlot}
         aboveFooterSlot={sidebarAboveFooterSlot}
         onLogout={() => logout()}
+        resolveMenuHref={resolveMenuHref}
       />
 
       <SidebarInset>
@@ -125,6 +134,7 @@ function InsetSidebar({
   footerSlot,
   aboveFooterSlot,
   onLogout,
+  resolveMenuHref,
 }: {
   menuTree: MenuNode[];
   currentUser: CurrentUser;
@@ -132,10 +142,22 @@ function InsetSidebar({
   footerSlot?: ReactNode;
   aboveFooterSlot?: ReactNode;
   onLogout: () => void;
+  resolveMenuHref?: MenuHrefResolver;
 }) {
+  const navigate = useNavigate();
+  const currentPathname = useRouterState({ select: (state) => state.location.pathname });
   const [expandedIds, setExpandedIds] = useState<Record<number, boolean>>({});
   const visibleNodes = useMemo(() => menuTree.filter(isDisplayNode), [menuTree]);
-  const activeLeafId = useMemo(() => findFirstLeafId(visibleNodes), [visibleNodes]);
+  const activeLeafId = useMemo(
+    () =>
+      findActiveLeafIdByPath(visibleNodes, currentPathname, resolveMenuHref) ??
+      findFirstLeafId(visibleNodes),
+    [currentPathname, resolveMenuHref, visibleNodes],
+  );
+
+  const handleNavigate = (href: string) => {
+    void navigate({ to: href as never });
+  };
 
   useEffect(() => {
     if (visibleNodes.length === 0) return;
@@ -173,6 +195,8 @@ function InsetSidebar({
                         depth={0}
                         activeLeafId={activeLeafId}
                         expandedIds={expandedIds}
+                        resolveMenuHref={resolveMenuHref}
+                        onNavigate={handleNavigate}
                         onToggleExpanded={(id) =>
                           setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }))
                         }
@@ -193,6 +217,8 @@ function InsetSidebar({
                     depth={0}
                     activeLeafId={activeLeafId}
                     expandedIds={expandedIds}
+                    resolveMenuHref={resolveMenuHref}
+                    onNavigate={handleNavigate}
                     onToggleExpanded={(id) =>
                       setExpandedIds((prev) => ({ ...prev, [id]: !prev[id] }))
                     }
@@ -341,12 +367,6 @@ function InsetHeader({
           className="mx-1 hidden data-[orientation=vertical]:h-4 md:block"
         />
 
-        <Avatar size="sm" className="hidden md:flex">
-          <AvatarFallback>
-            <User className="size-3.5" />
-          </AvatarFallback>
-        </Avatar>
-
         {/* 桌面端 Logout */}
         <Button
           variant="ghost"
@@ -468,18 +488,33 @@ function InsetMenuNode({
   depth,
   activeLeafId,
   expandedIds,
+  resolveMenuHref,
+  onNavigate,
   onToggleExpanded,
 }: {
   node: MenuNode;
   depth: number;
   activeLeafId: number | null;
   expandedIds: Record<number, boolean>;
+  resolveMenuHref?: MenuHrefResolver;
+  onNavigate: (href: string) => void;
   onToggleExpanded: (id: number) => void;
 }) {
   const children = getDisplayChildren(node);
   const hasChildren = children.length > 0;
   const isExpanded = expandedIds[node.id] ?? true;
   const isActiveLeaf = activeLeafId === node.id;
+  const href = resolveMenuHref?.(node) ?? null;
+
+  const handleClick = () => {
+    if (hasChildren) {
+      onToggleExpanded(node.id);
+      return;
+    }
+    if (href) {
+      onNavigate(href);
+    }
+  };
 
   if (depth === 0) {
     return (
@@ -487,9 +522,7 @@ function InsetMenuNode({
         <SidebarMenuButton
           type="button"
           isActive={isActiveLeaf && !hasChildren}
-          onClick={() => {
-            if (hasChildren) onToggleExpanded(node.id);
-          }}
+          onClick={handleClick}
         >
           <MenuNodeIcon node={node} />
           <span className="min-w-0 flex-1 truncate">{node.name}</span>
@@ -511,6 +544,8 @@ function InsetMenuNode({
                 depth={depth + 1}
                 activeLeafId={activeLeafId}
                 expandedIds={expandedIds}
+                resolveMenuHref={resolveMenuHref}
+                onNavigate={onNavigate}
                 onToggleExpanded={onToggleExpanded}
               />
             ))}
@@ -525,12 +560,9 @@ function InsetMenuNode({
       <SidebarMenuSubButton
         type="button"
         isActive={isActiveLeaf && !hasChildren}
-        onClick={() => {
-          if (hasChildren) onToggleExpanded(node.id);
-        }}
+        onClick={handleClick}
       >
-        <MenuNodeIcon node={node} />
-        <span className="min-w-0 flex-1 truncate">{node.name}</span>
+        <span className="min-w-0 flex-1 truncate pl-1">{node.name}</span>
         {node.badge !== undefined && <MenuNodeBadge badge={node.badge} />}
         {hasChildren &&
           (isExpanded ? (
@@ -549,6 +581,8 @@ function InsetMenuNode({
               depth={depth + 1}
               activeLeafId={activeLeafId}
               expandedIds={expandedIds}
+              resolveMenuHref={resolveMenuHref}
+              onNavigate={onNavigate}
               onToggleExpanded={onToggleExpanded}
             />
           ))}

@@ -3,6 +3,8 @@ import { useEffect } from 'react';
 import { getAccessToken, useCurrentUser } from '../auth';
 import { sseEventBus } from './event-bus';
 
+const MOCK_SSE_CHANNEL = 'mb-mock-sse';
+
 /**
  * SSE 连接管理 hook。
  *
@@ -16,12 +18,12 @@ export function useSseConnection(): void {
   useEffect(() => {
     if (!user.isAuthenticated) return;
 
-    // MSW 模式下跳过 SSE 连接（fetchEventSource 不经过 service worker，会穿透到真实后端）
     if (
       typeof window !== 'undefined' &&
       (window as unknown as Record<string, unknown>).__msw_enabled__
-    )
-      return;
+    ) {
+      return connectMockSse(user.userId ?? 0);
+    }
 
     const ctrl = new AbortController();
     const token = getAccessToken();
@@ -63,5 +65,49 @@ export function useSseConnection(): void {
     });
 
     return () => ctrl.abort();
-  }, [user.isAuthenticated]);
+  }, [user.isAuthenticated, user.userId]);
+}
+
+function connectMockSse(userId: number) {
+  if (typeof window === 'undefined' || typeof BroadcastChannel === 'undefined') {
+    return undefined;
+  }
+
+  const tabId = crypto.randomUUID();
+  const ownerKey = `mb_mock_sse_owner:${userId}`;
+  const channel = new BroadcastChannel(MOCK_SSE_CHANNEL);
+
+  const handleMessage = (event: MessageEvent) => {
+    const payload = event.data as
+      | { type?: 'event'; event?: string; data?: unknown }
+      | { type?: 'session-replaced'; targetTabId?: string };
+
+    if (payload.type === 'event' && payload.event) {
+      sseEventBus.emit(payload.event, payload.data ?? {});
+      return;
+    }
+
+    if (payload.type === 'session-replaced' && payload.targetTabId === tabId) {
+      sseEventBus.emit('session-replaced', {});
+    }
+  };
+
+  channel.addEventListener('message', handleMessage);
+
+  const previousOwner = window.localStorage.getItem(ownerKey);
+  if (previousOwner && previousOwner !== tabId) {
+    channel.postMessage({
+      type: 'session-replaced',
+      targetTabId: previousOwner,
+    });
+  }
+  window.localStorage.setItem(ownerKey, tabId);
+
+  return () => {
+    channel.removeEventListener('message', handleMessage);
+    if (window.localStorage.getItem(ownerKey) === tabId) {
+      window.localStorage.removeItem(ownerKey);
+    }
+    channel.close();
+  };
 }

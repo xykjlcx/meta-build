@@ -58,6 +58,7 @@ export function NoticeDetailPage() {
   });
 
   const notice: NoticeDetailVo | undefined = detailResponse;
+  const canViewNotificationLog = user.hasPermission('notification:notification:list');
 
   // 标记已读 — 使用 ref 避免 exhaustive-deps 重复触发
   const markReadMutation = useMarkNoticeRead();
@@ -304,14 +305,18 @@ export function NoticeDetailPage() {
           <Tabs defaultValue="recipients">
             <TabsList className="w-full justify-start rounded-none border-b bg-transparent px-4 pt-2">
               <TabsTrigger value="recipients">{t('detail.recipients')}</TabsTrigger>
-              <TabsTrigger value="log">{t('detail.notificationLog')}</TabsTrigger>
+              {canViewNotificationLog && (
+                <TabsTrigger value="log">{t('detail.notificationLog')}</TabsTrigger>
+              )}
             </TabsList>
             <TabsContent value="recipients" className="p-4">
               <RecipientsTab noticeId={noticeId} />
             </TabsContent>
-            <TabsContent value="log" className="p-4">
-              <NotificationLogTab noticeId={noticeId} />
-            </TabsContent>
+            {canViewNotificationLog && (
+              <TabsContent value="log" className="p-4">
+                <NotificationLogTab noticeId={noticeId} />
+              </TabsContent>
+            )}
           </Tabs>
         </CardContent>
       </Card>

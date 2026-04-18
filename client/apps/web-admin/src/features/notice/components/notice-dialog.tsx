@@ -21,13 +21,15 @@ import {
   Checkbox,
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogHeader,
   DialogTitle,
   Input,
   Label,
   Separator,
 } from '@mb/ui-primitives';
 import { useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, CalendarClock, Megaphone, Paperclip, Pin } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Controller, FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { useTranslation } from 'react-i18next';
@@ -112,56 +114,70 @@ export function NoticeDialog({ open, onOpenChange, noticeId, onSuccess }: Notice
     }
   }, [methods.formState.isDirty, onOpenChange]);
 
+  const persistNotice = useCallback(
+    async (values: NoticeFormValues) => {
+      if (isEditing && noticeId) {
+        await updateMutation.mutateAsync({
+          id: noticeId,
+          data: {
+            ...values,
+            version: detail?.version ?? 0,
+          },
+        });
+        return noticeId;
+      }
+
+      const created = await createMutation.mutateAsync({ data: values });
+      return created.id ?? null;
+    },
+    [createMutation, detail?.version, isEditing, noticeId, updateMutation],
+  );
+
   // 表单提交（保存）
   const handleSubmit = useCallback(
     async (values: NoticeFormValues) => {
       try {
-        if (isEditing && noticeId) {
-          await updateMutation.mutateAsync({
-            id: noticeId,
-            data: {
-              ...values,
-              version: detail?.version ?? 0,
-            },
-          });
-          toast.success(t('action.edit'));
-        } else {
-          await createMutation.mutateAsync({ data: values });
-          toast.success(t('action.create'));
-        }
+        await persistNotice(values);
+        toast.success(t(isEditing ? 'action.edit' : 'action.create'));
         onOpenChange(false);
         onSuccess();
       } catch {
         // 错误由 HttpClient 全局拦截器处理
       }
     },
-    [isEditing, noticeId, detail, createMutation, updateMutation, onOpenChange, onSuccess, t],
+    [isEditing, onOpenChange, onSuccess, persistNotice, t],
   );
 
   // 存为草稿 — 与保存逻辑相同（后端草稿状态由默认值控制）
   const handleSaveDraft = useCallback(
     async (values: NoticeFormValues) => {
       try {
-        if (isEditing && noticeId) {
-          await updateMutation.mutateAsync({
-            id: noticeId,
-            data: {
-              ...values,
-              version: detail?.version ?? 0,
-            },
-          });
-          toast.success(t('dialog.saveDraft'));
-        } else {
-          await createMutation.mutateAsync({ data: values });
-          toast.success(t('dialog.saveDraft'));
-        }
+        await persistNotice(values);
+        toast.success(t('dialog.saveDraft'));
         onOpenChange(false);
         onSuccess();
       } catch {
         // 错误由 HttpClient 全局拦截器处理
       }
     },
-    [isEditing, noticeId, detail, createMutation, updateMutation, onOpenChange, onSuccess, t],
+    [onOpenChange, onSuccess, persistNotice, t],
+  );
+
+  const handleSaveAndPublish = useCallback(
+    async (values: NoticeFormValues) => {
+      try {
+        const savedNoticeId = await persistNotice(values);
+        if (!savedNoticeId) {
+          return;
+        }
+
+        setPendingPublishId(savedNoticeId);
+        setTargetSelectorOpen(true);
+      } catch {
+        // 错误由 HttpClient 全局拦截器处理
+      }
+    },
+    [persistNotice],
   );
 
   // 发布确认 → 目标选择
@@ -174,19 +190,21 @@ export function NoticeDialog({ open, onOpenChange, noticeId, onSuccess }: Notice
           onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: noticeQueryKeys.list() });
             queryClient.invalidateQueries({ queryKey: noticeQueryKeys.unreadCount() });
+            queryClient.invalidateQueries({ queryKey: noticeQueryKeys.detail(pendingPublishId) });
             toast.success(t('action.publish'));
+            setTargetSelectorOpen(false);
+            setPendingPublishId(null);
+            onOpenChange(false);
             onSuccess();
           },
         },
       );
     },
-    [pendingPublishId, publishMutation, queryClient, onSuccess, t],
+    [onOpenChange, onSuccess, pendingPublishId, publishMutation, queryClient, t],
   );
 
-  // 预留：保存并发布按钮触发
-  void setPendingPublishId;
-
-  const isSaving = createMutation.isPending || updateMutation.isPending;
+  const isSaving =
+    createMutation.isPending || updateMutation.isPending || publishMutation.isPending;
 
   return (
     <>
@@ -197,44 +215,58 @@ export function NoticeDialog({ open, onOpenChange, noticeId, onSuccess }: Notice
         }}
       >
         <DialogContent
-          className="max-w-5xl h-[90vh] flex flex-col gap-0 p-0"
+          className="h-[calc(100vh-2rem)] max-w-[min(1380px,calc(100vw-2rem))] flex flex-col gap-0 overflow-hidden rounded-[1.25rem] p-0"
           showCloseButton={false}
         >
-          {/* Header */}
-          <div className="flex items-center justify-between border-b px-6 py-4">
-            <div className="flex items-center gap-3">
-              <Button variant="ghost" size="icon" className="size-8" onClick={handleClose}>
-                <ArrowLeft className="size-4" />
-              </Button>
-              <DialogTitle className="text-lg font-semibold">
-                {isEditing ? t('dialog.editTitle') : t('dialog.createTitle')}
-              </DialogTitle>
+          <DialogHeader className="border-b bg-background/96 px-8 py-5 backdrop-blur-sm">
+            <div className="flex items-start justify-between gap-6">
+              <div className="flex items-start gap-3">
+                <Button variant="ghost" size="icon" className="mt-0.5 size-9" onClick={handleClose}>
+                  <span className="sr-only">{t('action.cancel')}</span>
+                  <ArrowLeft className="size-4" />
+                </Button>
+                <div className="space-y-1 text-left">
+                  <DialogTitle className="text-[1.5rem] font-semibold tracking-[-0.02em]">
+                    {isEditing ? t('dialog.editTitle') : t('dialog.createTitle')}
+                  </DialogTitle>
+                  <DialogDescription className="text-sm text-muted-foreground">
+                    {t('dialog.subtitle')}
+                  </DialogDescription>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  disabled={isSaving}
+                  onClick={methods.handleSubmit(handleSaveDraft)}
+                >
+                  {t('dialog.saveDraft')}
+                </Button>
+                <Button
+                  variant="outline"
+                  disabled={isSaving}
+                  onClick={methods.handleSubmit(handleSaveAndPublish)}
+                >
+                  {t('dialog.saveAndPublish')}
+                </Button>
+                <Button disabled={isSaving} onClick={methods.handleSubmit(handleSubmit)}>
+                  {t('action.save')}
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                disabled={isSaving}
-                onClick={methods.handleSubmit(handleSaveDraft)}
-              >
-                {t('dialog.saveDraft')}
-              </Button>
-              <Button disabled={isSaving} onClick={methods.handleSubmit(handleSubmit)}>
-                {t('action.save')}
-              </Button>
-            </div>
-          </div>
+          </DialogHeader>
 
           {/* Body: 左侧表单 + 右侧设置面板 */}
           <FormProvider {...methods}>
-            <div className="flex flex-1 overflow-hidden">
+            <div className="grid min-h-0 flex-1 grid-cols-[minmax(0,1fr)_360px] overflow-hidden">
               {/* 左侧主表单区 */}
-              <div className="flex-1 overflow-y-auto p-6 space-y-6">
+              <div className="overflow-y-auto bg-background px-8 py-7">
                 <NoticeMainFields />
               </div>
 
               {/* 右侧设置面板 */}
-              <div className="w-64 border-l bg-muted/30 p-6 space-y-4 overflow-y-auto">
-                <h3 className="font-semibold text-sm">{t('dialog.publishSettings')}</h3>
+              <div className="overflow-y-auto border-l bg-muted/25 px-6 py-7">
                 <NoticeSideFields />
               </div>
             </div>
@@ -269,7 +301,12 @@ export function NoticeDialog({ open, onOpenChange, noticeId, onSuccess }: Notice
       {/* 目标选择器 */}
       <TargetSelector
         open={targetSelectorOpen}
-        onOpenChange={setTargetSelectorOpen}
+        onOpenChange={(nextOpen) => {
+          setTargetSelectorOpen(nextOpen);
+          if (!nextOpen) {
+            setPendingPublishId(null);
+          }
+        }}
         onConfirm={handlePublishConfirm}
       />
     </>
@@ -286,65 +323,113 @@ function NoticeMainFields() {
   } = useFormContext<NoticeFormValues>();
 
   return (
-    <>
-      {/* 标题 */}
-      <div className="space-y-2">
-        <Label htmlFor="notice-title">
-          {t('form.title')} <span className="text-destructive">*</span>
-        </Label>
-        <Input id="notice-title" placeholder={t('form.title')} {...register('title')} />
-        {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
-      </div>
+    <div className="space-y-6">
+      <section className="rounded-2xl border border-border bg-card px-6 py-6 shadow-xs">
+        <div className="mb-4 flex items-start gap-3">
+          <div className="mt-0.5 rounded-xl bg-primary/10 p-2 text-primary">
+            <Megaphone className="size-4" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold">{t('dialog.mainSection')}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{t('dialog.mainSectionDesc')}</p>
+          </div>
+        </div>
 
-      {/* 富文本 */}
-      <div className="space-y-2">
-        <Label>{t('form.content')}</Label>
-        <TipTapField name="content" control={control as never} />
-      </div>
+        <div className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="notice-title">
+              {t('form.title')} <span className="text-destructive">*</span>
+            </Label>
+            <Input
+              id="notice-title"
+              placeholder={t('form.titlePlaceholder')}
+              className="h-11 text-base"
+              {...register('title')}
+            />
+            {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
+          </div>
 
-      {/* 附件 */}
-      <div className="space-y-2">
-        <Label>{t('form.attachments')}</Label>
-        <FileUploadField name="attachmentFileIds" control={control as never} />
-      </div>
-    </>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between gap-3">
+              <Label>{t('form.content')}</Label>
+              <span className="text-xs text-muted-foreground">{t('editor.modeHint')}</span>
+            </div>
+            <TipTapField name="content" control={control as never} />
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
 
-/** 右侧设置字段：置顶 + 生效/失效时间 */
+/** 右侧设置字段：置顶 + 生效/失效时间 + 附件 */
 function NoticeSideFields() {
   const { t } = useTranslation('notice');
   const { register, control } = useFormContext<NoticeFormValues>();
 
   return (
-    <>
-      {/* 置顶 — Radix Checkbox 需要 Controller 桥接 */}
-      <Controller
-        name="pinned"
-        control={control}
-        render={({ field }) => (
-          <div className="flex items-center gap-2">
-            <Checkbox id="notice-pinned" checked={field.value} onCheckedChange={field.onChange} />
-            <Label htmlFor="notice-pinned" className="text-sm">
-              {t('form.pinned')}
-            </Label>
+    <div className="space-y-5">
+      <section className="rounded-2xl border border-border bg-card px-5 py-5 shadow-xs">
+        <div className="mb-4 flex items-start gap-3">
+          <div className="mt-0.5 rounded-xl bg-primary/10 p-2 text-primary">
+            <CalendarClock className="size-4" />
           </div>
-        )}
-      />
+          <div>
+            <h3 className="text-base font-semibold">{t('dialog.publishSettings')}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">{t('dialog.settingsSectionDesc')}</p>
+          </div>
+        </div>
 
-      <Separator />
+        <Controller
+          name="pinned"
+          control={control}
+          render={({ field }) => (
+            <div className="flex items-center gap-3 rounded-xl border border-border/70 bg-muted/20 px-3 py-3">
+              <Checkbox id="notice-pinned" checked={field.value} onCheckedChange={field.onChange} />
+              <Label
+                htmlFor="notice-pinned"
+                className="flex flex-1 items-center justify-between text-sm"
+              >
+                <span className="inline-flex items-center gap-2">
+                  <Pin className="size-4 text-muted-foreground" />
+                  {t('form.pinned')}
+                </span>
+                <span className="text-xs text-muted-foreground">{t('dialog.pinHint')}</span>
+              </Label>
+            </div>
+          )}
+        />
 
-      {/* 生效时间 */}
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">{t('form.startTime')}</Label>
-        <Input type="datetime-local" className="h-9 text-sm" {...register('startTime')} />
-      </div>
+        <Separator className="my-5" />
 
-      {/* 失效时间 */}
-      <div className="space-y-1.5">
-        <Label className="text-xs text-muted-foreground">{t('form.endTime')}</Label>
-        <Input type="datetime-local" className="h-9 text-sm" {...register('endTime')} />
-      </div>
-    </>
+        <div className="space-y-4">
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">{t('form.startTime')}</Label>
+            <Input type="datetime-local" className="h-10 text-sm" {...register('startTime')} />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label className="text-xs text-muted-foreground">{t('form.endTime')}</Label>
+            <Input type="datetime-local" className="h-10 text-sm" {...register('endTime')} />
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card px-5 py-5 shadow-xs">
+        <div className="mb-4 flex items-start gap-3">
+          <div className="mt-0.5 rounded-xl bg-primary/10 p-2 text-primary">
+            <Paperclip className="size-4" />
+          </div>
+          <div>
+            <h3 className="text-base font-semibold">{t('form.attachments')}</h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {t('dialog.attachmentSectionDesc')}
+            </p>
+          </div>
+        </div>
+
+        <FileUploadField name="attachmentFileIds" control={control as never} />
+      </section>
+    </div>
   );
 }

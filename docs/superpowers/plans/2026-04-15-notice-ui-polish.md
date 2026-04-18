@@ -1,5 +1,7 @@
 # Notice UI 打磨实施计划
 
+> **说明**：这是历史执行计划，不是当前真相。计划中的页面结构、交互细节和代码片段必须以当前仓库实际文件重新校验。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 将 Notice 通知公告三个页面（列表/编辑/详情）从"功能可用"升级为"视觉完善"，对标飞书管理后台的成熟度。

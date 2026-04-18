@@ -57,6 +57,7 @@ export interface NxTableProps<TData> {
 // ─── 常量 ───────────────────────────────────────────────
 
 const SKELETON_ROWS = 5;
+const CELL_WIDTHS = ['w-full', 'w-5/6', 'w-3/4', 'w-2/3', 'w-[58%]'];
 
 // ─── 组件 ───────────────────────────────────────────────
 
@@ -194,7 +195,9 @@ function NxTable<TData>({
                   {Array.from({ length: colCount }).map((_, colIdx) => (
                     // biome-ignore lint: 同上
                     <TableCell key={`skeleton-${rowIdx}-${colIdx}`}>
-                      <Skeleton className="h-4 w-full" />
+                      <Skeleton
+                        className={cn('h-4', CELL_WIDTHS[(rowIdx + colIdx) % CELL_WIDTHS.length])}
+                      />
                     </TableCell>
                   ))}
                 </TableRow>
@@ -242,7 +245,9 @@ function NxTable<TData>({
         {/* 分页栏 — 紧贴表格底部，与 border 容器一起 */}
         {pagination && (
           <div className="flex items-center justify-between border-t border-border px-4 py-3">
-            {paginationInfoTemplate ? (
+            {loading ? (
+              <Skeleton className="h-4 w-28" />
+            ) : paginationInfoTemplate ? (
               <span className="text-[14px] text-muted-foreground">
                 {paginationInfoTemplate
                   .replace('{total}', String(pagination.totalElements))
@@ -253,64 +258,73 @@ function NxTable<TData>({
               <span />
             )}
             <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="sm"
-                {...(!previousLabel && { 'aria-label': 'previous page' })}
-                disabled={pagination.page <= 1}
-                onClick={() =>
-                  onPaginationChange?.({
-                    ...pagination,
-                    page: pagination.page - 1,
-                  })
-                }
-              >
-                {previousLabel ?? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
+              {loading ? (
+                <>
+                  <Skeleton className="h-8 w-16 rounded-md" />
+                  <Skeleton className="h-8 w-16 rounded-md" />
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    {...(!previousLabel && { 'aria-label': 'previous page' })}
+                    disabled={pagination.page <= 1}
+                    onClick={() =>
+                      onPaginationChange?.({
+                        ...pagination,
+                        page: pagination.page - 1,
+                      })
+                    }
                   >
-                    <polyline points="15 18 9 12 15 6" />
-                  </svg>
-                )}
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                {...(!nextLabel && { 'aria-label': 'next page' })}
-                disabled={pagination.page >= pagination.totalPages}
-                onClick={() =>
-                  onPaginationChange?.({
-                    ...pagination,
-                    page: pagination.page + 1,
-                  })
-                }
-              >
-                {nextLabel ?? (
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
+                    {previousLabel ?? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <polyline points="15 18 9 12 15 6" />
+                      </svg>
+                    )}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    {...(!nextLabel && { 'aria-label': 'next page' })}
+                    disabled={pagination.page >= pagination.totalPages}
+                    onClick={() =>
+                      onPaginationChange?.({
+                        ...pagination,
+                        page: pagination.page + 1,
+                      })
+                    }
                   >
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                )}
-              </Button>
+                    {nextLabel ?? (
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                      >
+                        <polyline points="9 18 15 12 9 6" />
+                      </svg>
+                    )}
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         )}

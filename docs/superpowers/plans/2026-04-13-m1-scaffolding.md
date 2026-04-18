@@ -1,5 +1,7 @@
 # M1 脚手架实施计划
 
+> **说明**：这是历史执行计划，不是当前真相。计划中的代码片段、目录结构、命名和完成度必须以当前仓库实际文件重新校验。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 从空仓库构建 meta-build 完整的 M1 脚手架，使得 `git clone → docker compose up -d → scripts/dev.sh` 能跑起来并看到登录页。

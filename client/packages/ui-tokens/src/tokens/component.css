@@ -129,3 +129,7 @@
   font-weight: var(--sidebar-item-active-font-weight);
   box-shadow: inset var(--sidebar-item-active-indicator-width) 0 0 0 var(--sidebar-item-active-indicator-color);
 }
+
+.sidebar-item[data-active='true']:hover {
+  background: var(--sidebar-item-hover-bg);
+}

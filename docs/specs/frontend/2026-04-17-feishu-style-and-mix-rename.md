@@ -1,5 +1,7 @@
 # Feishu Style + Mix Layout Rename 设计
 
+> **说明**：这是历史设计记录，不是当前真相。文中提到的数量、截图、回归口径只代表当时落地上下文，当前状态以现行代码与 canonical spec 为准。
+
 > 日期：2026-04-17
 > 状态：Design（待实施）
 > 关联 ADR：ADR-0019（待创建）— 正交三层契约（Layout × Style × Component Token）的正式落地

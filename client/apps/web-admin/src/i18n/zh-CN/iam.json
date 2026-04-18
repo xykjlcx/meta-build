@@ -1,0 +1,143 @@
+{
+  "title": {
+    "user": "用户管理",
+    "role": "角色管理",
+    "dept": "部门管理",
+    "menu": "菜单管理"
+  },
+  "description": {
+    "user": "建立用户、部门和角色之间的前端管理基线。",
+    "role": "围绕权限分组和菜单分配收口角色闭环。",
+    "dept": "当前契约先收口组织树、新增和只读详情。",
+    "menu": "当前契约先收口菜单树、新增和类型处理。"
+  },
+  "field": {
+    "username": "用户名",
+    "password": "初始密码",
+    "newPassword": "新密码",
+    "nickname": "昵称",
+    "email": "邮箱",
+    "phone": "手机号",
+    "dept": "所属部门",
+    "status": "状态",
+    "updatedAt": "更新时间",
+    "roleName": "角色名称",
+    "roleCode": "角色编码",
+    "dataScope": "数据范围",
+    "sortOrder": "排序",
+    "remark": "备注",
+    "parentDept": "上级部门",
+    "deptName": "部门名称",
+    "leader": "负责人",
+    "createdAt": "创建时间",
+    "parentMenu": "上级菜单",
+    "menuType": "菜单类型",
+    "menuName": "菜单名称",
+    "icon": "图标名",
+    "permissionCode": "权限码",
+    "visible": "是否显示"
+  },
+  "action": {
+    "create": "新增",
+    "createChild": "新增下级",
+    "edit": "编辑",
+    "delete": "删除",
+    "assignRole": "分配角色",
+    "assignMenu": "分配菜单",
+    "resetPassword": "重置密码",
+    "cancel": "取消",
+    "save": "保存",
+    "view": "详情",
+    "close": "关闭",
+    "more": "更多操作"
+  },
+  "dialog": {
+    "createUserTitle": "新增用户",
+    "editUserTitle": "编辑用户",
+    "userDesc": "用户创建支持部门挂载；角色分配走独立动作。",
+    "assignRoleTitle": "分配角色",
+    "resetPasswordTitle": "重置密码",
+    "deleteUserTitle": "删除用户",
+    "createRoleTitle": "新增角色",
+    "editRoleTitle": "编辑角色",
+    "roleDesc": "角色编码创建后保持稳定，后续只允许调整名称和范围。",
+    "assignMenuTitle": "分配菜单",
+    "deleteRoleTitle": "删除角色",
+    "createDeptTitle": "新增部门",
+    "deptCreateDesc": "当前契约未提供更新接口，P2 先收口树形创建闭环。",
+    "deptDetailTitle": "部门详情",
+    "deleteDeptTitle": "删除部门",
+    "createMenuTitle": "新增菜单",
+    "menuCreateDesc": "DIRECTORY / MENU / BUTTON 三类节点统一走同一创建表单。",
+    "menuDetailTitle": "菜单详情",
+    "deleteMenuTitle": "删除菜单"
+  },
+  "confirm": {
+    "deleteUser": "确定删除用户 {{name}} 吗？",
+    "deleteRole": "确定删除角色 {{name}} 吗？",
+    "deleteDept": "确定删除部门 {{name}} 吗？删除后其子节点也会移除。",
+    "deleteMenu": "确定删除菜单 {{name}} 吗？删除后其子节点也会移除。"
+  },
+  "hint": {
+    "roleAssignmentContract": "当前契约没有“查询用户已分配角色”接口，页面只缓存本次会话内的选择；首次分配需人工确认。",
+    "menuAssignmentContract": "当前契约没有“查询角色已分配菜单”接口，页面只缓存本次会话内的选择；首次分配需人工确认。",
+    "resetPassword": "后端只提供重置动作，不返回密码明文；这里输入的新密码会直接覆盖原值。",
+    "deptContract": "当前后端契约没有部门更新接口，所以这里先提供只读详情。",
+    "menuContract": "当前后端契约没有菜单更新接口，所以这里先提供只读详情。"
+  },
+  "message": {
+    "actionFailed": "操作失败，请稍后重试",
+    "userCreated": "用户已创建",
+    "userUpdated": "用户已更新",
+    "userDeleted": "用户已删除",
+    "roleAssigned": "角色分配已保存",
+    "passwordReset": "密码已重置",
+    "roleCreated": "角色已创建",
+    "roleUpdated": "角色已更新",
+    "roleDeleted": "角色已删除",
+    "menuAssigned": "菜单分配已保存",
+    "deptCreated": "部门已创建",
+    "deptDeleted": "部门已删除",
+    "menuCreated": "菜单已创建",
+    "menuDeleted": "菜单已删除"
+  },
+  "status": {
+    "enabled": "启用",
+    "disabled": "停用",
+    "unassigned": "未分配",
+    "rootNode": "根节点",
+    "visible": "显示",
+    "hidden": "隐藏"
+  },
+  "validation": {
+    "username": "用户名至少 3 个字符",
+    "password": "密码至少 8 位",
+    "email": "邮箱格式不正确"
+  },
+  "empty": {
+    "user": "暂无用户数据",
+    "role": "暂无角色数据",
+    "dept": "暂无部门数据",
+    "menu": "暂无菜单数据"
+  },
+  "loading": {
+    "dept": "部门树加载中...",
+    "menu": "菜单树加载中..."
+  },
+  "pagination": {
+    "info": "共 {{total}} 条，第 {{page}} / {{pages}} 页",
+    "prev": "上一页",
+    "next": "下一页"
+  },
+  "role": {
+    "dataScope": {
+      "all": "全部数据",
+      "dept": "本部门数据",
+      "self": "仅本人数据"
+    }
+  },
+  "dept": {
+    "leader": "负责人",
+    "sortOrder": "排序"
+  }
+}

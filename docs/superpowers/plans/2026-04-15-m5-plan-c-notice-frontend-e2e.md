@@ -1,5 +1,7 @@
 # M5 Plan C: Notice 前端 + SSE 集成 + E2E 测试
 
+> **说明**：这是历史执行计划，不是当前真相。计划中的旧布局名、旧组件数量、测试数量和代码片段必须以当前仓库实际文件重新校验。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 实现 notice 通知公告的完整前端页面（列表/新增编辑/详情），集成 SSE 实时推送（公告 toast + 踢人下线 + 权限刷新 + 系统广播），补充 Playwright E2E 测试。

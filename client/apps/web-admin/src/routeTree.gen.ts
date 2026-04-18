@@ -18,6 +18,10 @@ import { Route as AuthedSettingsIndexRouteImport } from './routes/_authed/settin
 import { Route as AuthedNoticesIndexRouteImport } from './routes/_authed/notices/index'
 import { Route as AuthedSettingsWechatBindRouteImport } from './routes/_authed/settings/wechat-bind'
 import { Route as AuthedNoticesIdRouteImport } from './routes/_authed/notices/$id'
+import { Route as AuthedSystemUsersIndexRouteImport } from './routes/_authed/system/users/index'
+import { Route as AuthedSystemRolesIndexRouteImport } from './routes/_authed/system/roles/index'
+import { Route as AuthedSystemMenusIndexRouteImport } from './routes/_authed/system/menus/index'
+import { Route as AuthedSystemDeptsIndexRouteImport } from './routes/_authed/system/depts/index'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -64,6 +68,26 @@ const AuthedNoticesIdRoute = AuthedNoticesIdRouteImport.update({
   path: '/notices/$id',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedSystemUsersIndexRoute = AuthedSystemUsersIndexRouteImport.update({
+  id: '/system/users/',
+  path: '/system/users/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedSystemRolesIndexRoute = AuthedSystemRolesIndexRouteImport.update({
+  id: '/system/roles/',
+  path: '/system/roles/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedSystemMenusIndexRoute = AuthedSystemMenusIndexRouteImport.update({
+  id: '/system/menus/',
+  path: '/system/menus/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedSystemDeptsIndexRoute = AuthedSystemDeptsIndexRouteImport.update({
+  id: '/system/depts/',
+  path: '/system/depts/',
+  getParentRoute: () => AuthedRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -74,6 +98,10 @@ export interface FileRoutesByFullPath {
   '/settings/wechat-bind': typeof AuthedSettingsWechatBindRoute
   '/notices/': typeof AuthedNoticesIndexRoute
   '/settings/': typeof AuthedSettingsIndexRoute
+  '/system/depts/': typeof AuthedSystemDeptsIndexRoute
+  '/system/menus/': typeof AuthedSystemMenusIndexRoute
+  '/system/roles/': typeof AuthedSystemRolesIndexRoute
+  '/system/users/': typeof AuthedSystemUsersIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -84,6 +112,10 @@ export interface FileRoutesByTo {
   '/settings/wechat-bind': typeof AuthedSettingsWechatBindRoute
   '/notices': typeof AuthedNoticesIndexRoute
   '/settings': typeof AuthedSettingsIndexRoute
+  '/system/depts': typeof AuthedSystemDeptsIndexRoute
+  '/system/menus': typeof AuthedSystemMenusIndexRoute
+  '/system/roles': typeof AuthedSystemRolesIndexRoute
+  '/system/users': typeof AuthedSystemUsersIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,6 +128,10 @@ export interface FileRoutesById {
   '/_authed/settings/wechat-bind': typeof AuthedSettingsWechatBindRoute
   '/_authed/notices/': typeof AuthedNoticesIndexRoute
   '/_authed/settings/': typeof AuthedSettingsIndexRoute
+  '/_authed/system/depts/': typeof AuthedSystemDeptsIndexRoute
+  '/_authed/system/menus/': typeof AuthedSystemMenusIndexRoute
+  '/_authed/system/roles/': typeof AuthedSystemRolesIndexRoute
+  '/_authed/system/users/': typeof AuthedSystemUsersIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -108,6 +144,10 @@ export interface FileRouteTypes {
     | '/settings/wechat-bind'
     | '/notices/'
     | '/settings/'
+    | '/system/depts/'
+    | '/system/menus/'
+    | '/system/roles/'
+    | '/system/users/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -118,6 +158,10 @@ export interface FileRouteTypes {
     | '/settings/wechat-bind'
     | '/notices'
     | '/settings'
+    | '/system/depts'
+    | '/system/menus'
+    | '/system/roles'
+    | '/system/users'
   id:
     | '__root__'
     | '/'
@@ -129,6 +173,10 @@ export interface FileRouteTypes {
     | '/_authed/settings/wechat-bind'
     | '/_authed/notices/'
     | '/_authed/settings/'
+    | '/_authed/system/depts/'
+    | '/_authed/system/menus/'
+    | '/_authed/system/roles/'
+    | '/_authed/system/users/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -203,6 +251,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedNoticesIdRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/system/users/': {
+      id: '/_authed/system/users/'
+      path: '/system/users'
+      fullPath: '/system/users/'
+      preLoaderRoute: typeof AuthedSystemUsersIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/system/roles/': {
+      id: '/_authed/system/roles/'
+      path: '/system/roles'
+      fullPath: '/system/roles/'
+      preLoaderRoute: typeof AuthedSystemRolesIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/system/menus/': {
+      id: '/_authed/system/menus/'
+      path: '/system/menus'
+      fullPath: '/system/menus/'
+      preLoaderRoute: typeof AuthedSystemMenusIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/system/depts/': {
+      id: '/_authed/system/depts/'
+      path: '/system/depts'
+      fullPath: '/system/depts/'
+      preLoaderRoute: typeof AuthedSystemDeptsIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
@@ -212,6 +288,10 @@ interface AuthedRouteChildren {
   AuthedSettingsWechatBindRoute: typeof AuthedSettingsWechatBindRoute
   AuthedNoticesIndexRoute: typeof AuthedNoticesIndexRoute
   AuthedSettingsIndexRoute: typeof AuthedSettingsIndexRoute
+  AuthedSystemDeptsIndexRoute: typeof AuthedSystemDeptsIndexRoute
+  AuthedSystemMenusIndexRoute: typeof AuthedSystemMenusIndexRoute
+  AuthedSystemRolesIndexRoute: typeof AuthedSystemRolesIndexRoute
+  AuthedSystemUsersIndexRoute: typeof AuthedSystemUsersIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -220,6 +300,10 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedSettingsWechatBindRoute: AuthedSettingsWechatBindRoute,
   AuthedNoticesIndexRoute: AuthedNoticesIndexRoute,
   AuthedSettingsIndexRoute: AuthedSettingsIndexRoute,
+  AuthedSystemDeptsIndexRoute: AuthedSystemDeptsIndexRoute,
+  AuthedSystemMenusIndexRoute: AuthedSystemMenusIndexRoute,
+  AuthedSystemRolesIndexRoute: AuthedSystemRolesIndexRoute,
+  AuthedSystemUsersIndexRoute: AuthedSystemUsersIndexRoute,
 }
 
 const AuthedRouteWithChildren =

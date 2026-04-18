@@ -1,5 +1,7 @@
 # Feishu Style + Mix Layout 视觉回归归档
 
+> **说明**：这是历史视觉回归归档，不是当前真相。涉及的数字、截图、验收口径只代表 2026-04-17 当次结果，当前状态以现行 spec / handoff / 代码为准。
+
 > 日期：2026-04-17
 > Spec: [2026-04-17-feishu-style-and-mix-rename.md](../specs/frontend/2026-04-17-feishu-style-and-mix-rename.md)
 > Plan: [2026-04-17-feishu-style-and-mix-rename-plan.md](../specs/frontend/2026-04-17-feishu-style-and-mix-rename-plan.md)

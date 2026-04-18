@@ -1,0 +1,143 @@
+{
+  "title": {
+    "user": "User Management",
+    "role": "Role Management",
+    "dept": "Department Management",
+    "menu": "Menu Management"
+  },
+  "description": {
+    "user": "Establish the frontend baseline for users, departments, and roles.",
+    "role": "Close the loop around role groups and menu assignment.",
+    "dept": "The current contract closes the tree, creation, and read-only details first.",
+    "menu": "The current contract closes the tree, creation, and menu type handling first."
+  },
+  "field": {
+    "username": "Username",
+    "password": "Initial Password",
+    "newPassword": "New Password",
+    "nickname": "Nickname",
+    "email": "Email",
+    "phone": "Phone",
+    "dept": "Department",
+    "status": "Status",
+    "updatedAt": "Updated At",
+    "roleName": "Role Name",
+    "roleCode": "Role Code",
+    "dataScope": "Data Scope",
+    "sortOrder": "Sort Order",
+    "remark": "Remark",
+    "parentDept": "Parent Department",
+    "deptName": "Department Name",
+    "leader": "Leader",
+    "createdAt": "Created At",
+    "parentMenu": "Parent Menu",
+    "menuType": "Menu Type",
+    "menuName": "Menu Name",
+    "icon": "Icon Name",
+    "permissionCode": "Permission Code",
+    "visible": "Visible"
+  },
+  "action": {
+    "create": "Create",
+    "createChild": "Create Child",
+    "edit": "Edit",
+    "delete": "Delete",
+    "assignRole": "Assign Roles",
+    "assignMenu": "Assign Menus",
+    "resetPassword": "Reset Password",
+    "cancel": "Cancel",
+    "save": "Save",
+    "view": "View",
+    "close": "Close",
+    "more": "More Actions"
+  },
+  "dialog": {
+    "createUserTitle": "Create User",
+    "editUserTitle": "Edit User",
+    "userDesc": "User creation supports department binding; role assignment stays as a separate action.",
+    "assignRoleTitle": "Assign Roles",
+    "resetPasswordTitle": "Reset Password",
+    "deleteUserTitle": "Delete User",
+    "createRoleTitle": "Create Role",
+    "editRoleTitle": "Edit Role",
+    "roleDesc": "Role codes stay stable after creation; later edits only adjust name and scope.",
+    "assignMenuTitle": "Assign Menus",
+    "deleteRoleTitle": "Delete Role",
+    "createDeptTitle": "Create Department",
+    "deptCreateDesc": "The current contract has no update endpoint, so P2 closes the tree creation flow first.",
+    "deptDetailTitle": "Department Detail",
+    "deleteDeptTitle": "Delete Department",
+    "createMenuTitle": "Create Menu",
+    "menuCreateDesc": "DIRECTORY / MENU / BUTTON nodes share the same create form.",
+    "menuDetailTitle": "Menu Detail",
+    "deleteMenuTitle": "Delete Menu"
+  },
+  "confirm": {
+    "deleteUser": "Delete user {{name}}?",
+    "deleteRole": "Delete role {{name}}?",
+    "deleteDept": "Delete department {{name}} and its children?",
+    "deleteMenu": "Delete menu {{name}} and its children?"
+  },
+  "hint": {
+    "roleAssignmentContract": "The current contract has no endpoint to query assigned roles for a user. The page only caches selections in the current session, so the first assignment needs manual confirmation.",
+    "menuAssignmentContract": "The current contract has no endpoint to query assigned menus for a role. The page only caches selections in the current session, so the first assignment needs manual confirmation.",
+    "resetPassword": "The backend only exposes the reset action and never returns the password value. The input here will overwrite the current password directly.",
+    "deptContract": "The current backend contract has no department update endpoint, so this screen stays read-only for details.",
+    "menuContract": "The current backend contract has no menu update endpoint, so this screen stays read-only for details."
+  },
+  "message": {
+    "actionFailed": "Action failed. Please try again later.",
+    "userCreated": "User created.",
+    "userUpdated": "User updated.",
+    "userDeleted": "User deleted.",
+    "roleAssigned": "Role assignment saved.",
+    "passwordReset": "Password reset.",
+    "roleCreated": "Role created.",
+    "roleUpdated": "Role updated.",
+    "roleDeleted": "Role deleted.",
+    "menuAssigned": "Menu assignment saved.",
+    "deptCreated": "Department created.",
+    "deptDeleted": "Department deleted.",
+    "menuCreated": "Menu created.",
+    "menuDeleted": "Menu deleted."
+  },
+  "status": {
+    "enabled": "Enabled",
+    "disabled": "Disabled",
+    "unassigned": "Unassigned",
+    "rootNode": "Root",
+    "visible": "Visible",
+    "hidden": "Hidden"
+  },
+  "validation": {
+    "username": "Username must be at least 3 characters.",
+    "password": "Password must be at least 8 characters.",
+    "email": "Email format is invalid."
+  },
+  "empty": {
+    "user": "No users yet.",
+    "role": "No roles yet.",
+    "dept": "No departments yet.",
+    "menu": "No menus yet."
+  },
+  "loading": {
+    "dept": "Loading departments...",
+    "menu": "Loading menus..."
+  },
+  "pagination": {
+    "info": "Total {{total}}, Page {{page}} / {{pages}}",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "role": {
+    "dataScope": {
+      "all": "All Data",
+      "dept": "Department Data",
+      "self": "Self Only"
+    }
+  },
+  "dept": {
+    "leader": "Leader",
+    "sortOrder": "Sort"
+  }
+}

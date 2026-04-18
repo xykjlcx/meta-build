@@ -1,5 +1,7 @@
 # Shell 视觉打磨实施计划
 
+> **说明**：这是历史执行计划，不是当前真相。计划中的布局结构、组件命名和代码片段必须以当前仓库实际文件重新校验。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 将 Inset 和 Module Switcher 两种布局的视觉效果对齐到原始参考（shadcnuikit / 飞书），打磨 ThemeCustomizer，清理临时文件。

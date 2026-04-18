@@ -72,14 +72,74 @@ export {
   useUnreadNoticeCount,
   useUpdateNotice,
 } from './apis/notice-api';
-export { getDept, useGetDept } from './generated/endpoints/dept-controller/dept-controller';
-export { getRole, useGetRole } from './generated/endpoints/role-controller/role-controller';
-export { getUser, useGetUser } from './generated/endpoints/user-controller/user-controller';
+export {
+  deleteDeptById,
+  getDept,
+  getDeptById,
+  getGetDeptByIdQueryKey,
+  getGetDeptQueryKey,
+  postDept,
+  useDeleteDeptById,
+  useGetDept,
+  useGetDeptById,
+  usePostDept,
+} from './generated/endpoints/dept-controller/dept-controller';
+export {
+  deleteMenuById,
+  getGetMenuByIdQueryKey,
+  getGetMenuQueryKey,
+  getMenu,
+  getMenuById,
+  postMenu,
+  useDeleteMenuById,
+  useGetMenu,
+  useGetMenuById,
+  usePostMenu,
+} from './generated/endpoints/menu-controller/menu-controller';
+export {
+  deleteRoleById,
+  getGetRoleByIdQueryKey,
+  getGetRoleQueryKey,
+  getRole,
+  getRoleById,
+  postRole,
+  putRoleById,
+  putRoleByIdMenu,
+  useDeleteRoleById,
+  useGetRole,
+  useGetRoleById,
+  usePostRole,
+  usePutRoleById,
+  usePutRoleByIdMenu,
+} from './generated/endpoints/role-controller/role-controller';
+export {
+  deleteUserById,
+  getGetUserByIdQueryKey,
+  getGetUserQueryKey,
+  getUser,
+  getUserById,
+  postUser,
+  postUserByIdResetPassword,
+  putUserById,
+  putUserByIdRole,
+  useDeleteUserById,
+  useGetUser,
+  useGetUserById,
+  usePostUser,
+  usePostUserByIdResetPassword,
+  usePutUserById,
+  usePutUserByIdRole,
+} from './generated/endpoints/user-controller/user-controller';
 export type {
   DeptVo,
   GetRoleParams,
   GetUserParams,
+  MenuCreateCmd,
+  RoleCreateCmd,
   RoleVo,
+  RoleUpdateCmd,
+  UserCreateCmd,
+  UserUpdateCmd,
   UserVo,
 } from './generated/models';
 export {

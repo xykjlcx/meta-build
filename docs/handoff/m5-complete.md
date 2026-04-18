@@ -1,16 +1,17 @@
-# M5 完成交接文档
+# M5 交付快照（历史记录）
 
-> 新 session 开始前读这份文档,5 分钟内获得 M5 完整上下文。本文档与 [frontend-gap-analysis.md](frontend-gap-analysis.md) 配套使用:本文档描述 M5 **已交付**的内容,gap-analysis 描述 M5 **未覆盖**的前端缺口(P0-P4)。
+> 这份文档记录的是 **2026-04-15 的 M5 交付快照**，用于回看 notice canonical 当时交付了什么。
+> **它是历史记录，不是当前前端总真相。** 当前前端路线、完成度口径与优先级，请看 [frontend-gap-analysis.md](frontend-gap-analysis.md)。
 
 ---
 
-## 当前状态
+## 快照说明
 
-- **M5 已完成并合并到 main**(2026-04-15,commit 区间 `50db465..e58aa3b`,共 29 commits,+6671/-631 行)
+- **本文件记录的交付**已于 2026-04-15 合并到 `main`（commit 区间 `50db465..e58aa3b`，共 29 commits，+6671/-631 行）
 - **后端**:`mvn verify` 全绿，ArchitectureTest 28 条 ArchUnit 规则通过
-- **前端**:`pnpm build` + `pnpm check:types` + `pnpm test`(274 单元)+ `pnpm playwright test`(19 E2E,15 可执行 + 4 fixme)全绿
+- **前端**：当时的 `pnpm build` / `pnpm check:types` / `pnpm test` / `pnpm playwright test` 全绿（这是历史快照，不代表当前数字）
 - **交付范围**:business-notice canonical reference + SSE 基础设施 + 4 通道通知分发 + OpenAPI 驱动的 api-sdk + 前端 Notice 全量 + SSE 集成 + 微信绑定页
-- **未交付**:order / approval 两个 canonical reference(M5 规划但未开始)、8 个平台模块前端页面(见 gap-analysis)
+- **当前总状态入口**：见 [frontend-gap-analysis.md](frontend-gap-analysis.md) 的 P0-P3 路线
 
 ---
 
@@ -182,14 +183,14 @@
 
 ## 下一阶段
 
-**首要选择**:补完 M3/M4 的"下班信号"——8 个平台模块前端页面(user/role/menu/dept/dict/config/oplog/job-logs),建议按 gap-analysis §9 的顺序(用户管理先做,作为模板)。
+当前不再用这份历史快照承载前端执行顺序。前端推进顺序统一为：
 
-**M6 规划路径**(待洋哥决策 A/B/C):
-- 选项 A:延续 v1 规划 → 补 order + approval + 验证层完整版 + 主题样本库
-- 选项 B:优先 v1 可演示性 → 完成 P0 前端页面 + 侧边栏升级 + 8 套主题样本
-- 选项 C:跳到 Spec 引擎预研 → Notice 作为反向提炼样本
+1. `P0：质量线 + 真相收口`
+2. `P1：Notice canonical 闭环`
+3. `P2：UPMS 核心前端`
+4. `P3：阶段性联调复盘`
 
-详见 [项目状态快照 plan 文档](../../../.claude/plans/effervescent-brewing-valiant.md)(当前 session 产出)。
+详细口径见 [frontend-gap-analysis.md](frontend-gap-analysis.md)。
 
 ---
 
@@ -207,7 +208,7 @@ cd server && mvn -Pcodegen generate-sources -pl mb-schema
 # 前端
 cd client && pnpm dev                                           # MSW mock 模式(localhost:5173)
 cd client && pnpm generate:api-sdk                              # orval 从 openapi.json 生成
-cd client && pnpm test                                          # 274 单元
+cd client && pnpm test                                          # 单元测试
 cd client && pnpm playwright test                               # 19 E2E
 
 # Docker

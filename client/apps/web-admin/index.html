@@ -4,6 +4,104 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Meta-Build Admin</title>
+    <style>
+      #app-loading {
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background:
+          radial-gradient(circle at top, rgb(239 244 255 / 92%), transparent 42%),
+          linear-gradient(180deg, #f7f8fb 0%, #eef2f6 100%);
+        transition:
+          opacity 280ms ease,
+          transform 280ms ease;
+      }
+
+      #app-loading.fade-out {
+        opacity: 0;
+        transform: scale(0.985);
+        pointer-events: none;
+      }
+
+      .app-loading-shell {
+        display: flex;
+        align-items: center;
+        gap: 18px;
+        padding: 22px 24px;
+        border: 1px solid rgb(148 163 184 / 12%);
+        border-radius: 18px;
+        background: rgb(255 255 255 / 82%);
+        box-shadow: 0 24px 48px -30px rgb(15 23 42 / 28%);
+        backdrop-filter: blur(16px);
+      }
+
+      .app-loading-mark {
+        position: relative;
+        width: 48px;
+        height: 48px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #2f7cff 0%, #2563eb 100%);
+        box-shadow: 0 16px 28px -16px rgb(37 99 235 / 60%);
+      }
+
+      .app-loading-mark::before {
+        content: "";
+        position: absolute;
+        inset: 13px;
+        border: 2px solid rgb(255 255 255 / 86%);
+        border-radius: 8px;
+      }
+
+      .app-loading-mark::after {
+        content: "";
+        position: absolute;
+        top: 16px;
+        left: 16px;
+        width: 16px;
+        height: 16px;
+        background:
+          linear-gradient(#fff 0 0) 0 0 / 6px 6px no-repeat,
+          linear-gradient(#fff 0 0) 100% 0 / 6px 6px no-repeat,
+          linear-gradient(#fff 0 0) 0 100% / 6px 6px no-repeat,
+          linear-gradient(#fff 0 0) 100% 100% / 6px 6px no-repeat;
+        animation: app-loading-pulse 1.15s ease-in-out infinite;
+      }
+
+      .app-loading-copy {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .app-loading-title {
+        font-size: 18px;
+        font-weight: 650;
+        line-height: 1.2;
+        color: #111827;
+        letter-spacing: -0.02em;
+      }
+
+      .app-loading-subtitle {
+        margin-top: 6px;
+        font-size: 13px;
+        color: #667085;
+      }
+
+      @keyframes app-loading-pulse {
+        0%,
+        100% {
+          opacity: 0.9;
+          transform: scale(1);
+        }
+
+        50% {
+          opacity: 0.68;
+          transform: scale(0.92);
+        }
+      }
+    </style>
   </head>
   <body>
     <script>
@@ -111,6 +209,15 @@
         }
       })()
     </script>
+    <div id="app-loading" aria-live="polite" aria-label="应用加载中">
+      <div class="app-loading-shell">
+        <div class="app-loading-mark"></div>
+        <div class="app-loading-copy">
+          <div class="app-loading-title">Meta Build</div>
+          <div class="app-loading-subtitle">工作台启动中...</div>
+        </div>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

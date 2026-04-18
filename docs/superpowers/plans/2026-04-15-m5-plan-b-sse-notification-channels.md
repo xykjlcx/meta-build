@@ -1,5 +1,7 @@
 # M5 Plan B: SSE 基础设施 + 通知渠道系统
 
+> **说明**：这是历史执行计划，不是当前真相。计划中的接口、测试数量、实现步骤和代码片段必须以当前仓库实际文件重新校验。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 搭建 SSE 实时推送基础设施（infra-sse），升级 platform-notification 为多渠道通知系统（站内信+邮件+微信公众号+微信小程序），串联 Notice 发布→通知分发全链路。

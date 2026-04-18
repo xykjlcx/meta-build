@@ -1,5 +1,7 @@
 # M1-M4 审查修复计划
 
+> **说明**：这是历史执行计划，不是当前真相。计划中的修复步骤、代码片段和依赖关系必须以当前仓库实际文件重新校验。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 修复 M1-M4 红蓝对抗审查发现的 9 Critical + 19 Major + 15 Minor 问题，确保 M5 前底座稳固。

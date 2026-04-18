@@ -1,4 +1,5 @@
 import {
+  type NoticeTarget,
   type NoticeVo,
   noticeApi,
   noticeQueryKeys,
@@ -50,13 +51,17 @@ import {
   Trash2,
   Undo2,
 } from 'lucide-react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { BatchConfirmDialog } from '../components/batch-confirm-dialog';
-import { NoticeDialog } from '../components/notice-dialog';
 import { NoticeStatusBadge } from '../components/notice-status-badge';
+import { TargetSelector } from '../components/target-selector';
 import { NOTICE_STATUS, type NoticeStatusValue, PAGE_SIZE } from '../constants';
+
+const NoticeDialog = lazy(async () => ({
+  default: (await import('../components/notice-dialog')).NoticeDialog,
+}));
 
 // ─── debounce hook ──────────────────────────────────────
 function useDebounced<T>(value: T, delay: number): T {
@@ -94,6 +99,7 @@ export function NoticeListPage() {
 
   // 单条操作确认框
   const [confirmAction, setConfirmAction] = useState<ConfirmAction | null>(null);
+  const [publishTargetNoticeId, setPublishTargetNoticeId] = useState<number | null>(null);
 
   // 批量操作确认框
   const [batchConfirm, setBatchConfirm] = useState<{
@@ -145,14 +151,33 @@ export function NoticeListPage() {
       case 'delete':
         deleteMutation.mutate({ id }, { onSuccess });
         break;
-      case 'publish':
-        publishMutation.mutate({ id, data: { targets: [{ targetType: 'ALL' }] } }, { onSuccess });
-        break;
       case 'revoke':
         revokeMutation.mutate({ id }, { onSuccess });
         break;
     }
-  }, [confirmAction, deleteMutation, publishMutation, revokeMutation, invalidateNotices]);
+  }, [confirmAction, deleteMutation, revokeMutation, invalidateNotices]);
+
+  const handlePublishRequest = useCallback((id: number) => {
+    setPublishTargetNoticeId(id);
+  }, []);
+
+  const handlePublishTargetsConfirm = useCallback(
+    (targets: NoticeTarget[]) => {
+      if (!publishTargetNoticeId) return;
+
+      publishMutation.mutate(
+        { id: publishTargetNoticeId, data: { targets } },
+        {
+          onSuccess: () => {
+            invalidateNotices();
+            setPublishTargetNoticeId(null);
+            toast.success(t('action.publish'));
+          },
+        },
+      );
+    },
+    [invalidateNotices, publishMutation, publishTargetNoticeId, t],
+  );
 
   // 复制为新建
   const handleDuplicate = useCallback(
@@ -348,12 +373,13 @@ export function NoticeListPage() {
             navigateToDetail={(id) => navigate({ to: '/notices/$id', params: { id: String(id) } })}
             onEdit={handleEdit}
             onDuplicate={handleDuplicate}
+            onPublish={handlePublishRequest}
             onConfirmAction={(action) => setConfirmAction(action)}
           />
         ),
       },
     ],
-    [t, user, navigate, handleEdit, handleDuplicate],
+    [t, user, navigate, handleEdit, handleDuplicate, handlePublishRequest],
   );
 
   // ─── 渲染 ──────────────────────────────────────────
@@ -450,7 +476,9 @@ export function NoticeListPage() {
               onValueChange={(v) => setPagination({ size: Number(v), page: 1 })}
             >
               <SelectTrigger size="sm" className="min-w-[6.5rem]">
-                <SelectValue>{t('pagination.perPageOption', { size: pagination.size })}</SelectValue>
+                <SelectValue>
+                  {t('pagination.perPageOption', { size: pagination.size })}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="10">{t('pagination.perPageOption', { size: 10 })}</SelectItem>
@@ -467,6 +495,7 @@ export function NoticeListPage() {
             <Button
               variant="outline"
               size="icon-sm"
+              data-testid="notice-pagination-prev"
               disabled={pagination.page <= 1}
               onClick={() => setPagination((p) => ({ ...p, page: p.page - 1 }))}
             >
@@ -475,6 +504,7 @@ export function NoticeListPage() {
             <Button
               variant="outline"
               size="icon-sm"
+              data-testid="notice-pagination-next"
               disabled={pagination.page >= totalPages}
               onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))}
             >
@@ -508,12 +538,16 @@ export function NoticeListPage() {
       />
 
       {/* 新增/编辑弹窗 */}
-      <NoticeDialog
-        open={dialogOpen}
-        onOpenChange={handleDialogOpenChange}
-        noticeId={editingNoticeId}
-        onSuccess={handleDialogSuccess}
-      />
+      {dialogOpen && (
+        <Suspense fallback={null}>
+          <NoticeDialog
+            open={dialogOpen}
+            onOpenChange={handleDialogOpenChange}
+            noticeId={editingNoticeId}
+            onSuccess={handleDialogSuccess}
+          />
+        </Suspense>
+      )}
 
       {/* 单条操作确认框 */}
       <AlertDialog open={!!confirmAction} onOpenChange={(open) => !open && setConfirmAction(null)}>
@@ -521,12 +555,10 @@ export function NoticeListPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>
               {confirmAction?.type === 'delete' && t('action.delete')}
-              {confirmAction?.type === 'publish' && t('action.publish')}
               {confirmAction?.type === 'revoke' && t('action.revoke')}
             </AlertDialogTitle>
             <AlertDialogDescription>
               {confirmAction?.type === 'delete' && t('confirm.delete')}
-              {confirmAction?.type === 'publish' && t('confirm.publish')}
               {confirmAction?.type === 'revoke' && t('confirm.revoke')}
             </AlertDialogDescription>
           </AlertDialogHeader>
@@ -537,12 +569,21 @@ export function NoticeListPage() {
               onClick={handleConfirmAction}
             >
               {confirmAction?.type === 'delete' && t('action.delete')}
-              {confirmAction?.type === 'publish' && t('action.publish')}
               {confirmAction?.type === 'revoke' && t('action.revoke')}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <TargetSelector
+        open={publishTargetNoticeId !== null}
+        onOpenChange={(open) => {
+          if (!open) {
+            setPublishTargetNoticeId(null);
+          }
+        }}
+        onConfirm={handlePublishTargetsConfirm}
+      />
 
       {/* 批量操作确认框 */}
       {batchConfirm && (
@@ -561,7 +602,7 @@ export function NoticeListPage() {
 }
 
 type ConfirmAction = {
-  type: 'delete' | 'publish' | 'revoke';
+  type: 'delete' | 'revoke';
   id: number;
 };
 
@@ -580,6 +621,7 @@ function NoticeRowActions({
   navigateToDetail,
   onEdit,
   onDuplicate,
+  onPublish,
   onConfirmAction,
 }: {
   notice: NoticeVo;
@@ -588,6 +630,7 @@ function NoticeRowActions({
   navigateToDetail: (id: number) => void;
   onEdit: (id: number) => void;
   onDuplicate: (id: number) => void;
+  onPublish: (id: number) => void;
   onConfirmAction: (action: ConfirmAction) => void;
 }) {
   const noticeId = notice.id ?? 0;
@@ -598,6 +641,7 @@ function NoticeRowActions({
     t,
     user,
     onDuplicate,
+    onPublish,
     onConfirmAction,
   });
 
@@ -668,6 +712,7 @@ function buildSecondaryActions({
   t,
   user,
   onDuplicate,
+  onPublish,
   onConfirmAction,
 }: {
   noticeId: number;
@@ -675,6 +720,7 @@ function buildSecondaryActions({
   t: Translate;
   user: ReturnType<typeof useCurrentUser>;
   onDuplicate: (id: number) => void;
+  onPublish: (id: number) => void;
   onConfirmAction: (action: ConfirmAction) => void;
 }): NoticeRowAction[] {
   const actions: NoticeRowAction[] = [];
@@ -684,7 +730,7 @@ function buildSecondaryActions({
       key: 'publish',
       icon: Send,
       label: t('action.publish'),
-      onClick: () => onConfirmAction({ type: 'publish', id: noticeId }),
+      onClick: () => onPublish(noticeId),
     });
   }
 

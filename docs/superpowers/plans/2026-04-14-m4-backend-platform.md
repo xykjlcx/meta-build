@@ -1,5 +1,7 @@
 # M4: 后端底座 + 8 平台模块 + 契约驱动 — 实施计划
 
+> **说明**：这是历史执行计划，不是当前真相。计划中的模块状态、接口清单和代码片段必须以当前仓库实际文件重新校验。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 实现后端 infra 剩余 7 模块 + 8 个 platform 模块 + OpenAPI 契约驱动，从 M1 脚手架状态到可运行的完整后端。

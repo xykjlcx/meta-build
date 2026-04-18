@@ -65,6 +65,11 @@ export function RecipientsTab({ noticeId }: RecipientsTabProps) {
       loading={isLoading}
       pagination={currentPagination}
       onPaginationChange={setPagination}
+      paginationInfoTemplate={t('pagination.info', {
+        total: '{total}',
+        page: '{page}',
+        pages: '{pages}',
+      })}
       emptyText={t('list.empty')}
     />
   );

@@ -1,6 +1,7 @@
 import type { ComponentType, ReactNode } from 'react';
 import type { CurrentUser } from '../auth';
 import type { MenuNode } from '../menu';
+import type { MenuHrefResolver } from '../menu/menu-utils';
 
 export interface ShellLayoutProps {
   children: ReactNode;
@@ -20,6 +21,9 @@ export interface ShellLayoutProps {
 
   /** Sidebar Footer 之上的装饰/CTA 位（如 "Upgrade" 卡片；默认不渲染） */
   sidebarAboveFooterSlot?: ReactNode;
+
+  /** 由 L5 注入菜单节点对应的业务路由，L4 只消费不定义。 */
+  resolveMenuHref?: MenuHrefResolver;
 }
 
 export interface LayoutPresetDef {

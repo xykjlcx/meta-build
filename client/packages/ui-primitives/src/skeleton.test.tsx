@@ -14,10 +14,10 @@ describe('Skeleton', () => {
     expect(el.className).toContain('animate-pulse');
   });
 
-  it('应该包含 muted 背景色', () => {
+  it('应该包含中性骨架底色', () => {
     const { container } = render(<Skeleton />);
     const el = container.firstChild as HTMLElement;
-    expect(el.className).toContain('bg-accent');
+    expect(el.className).toContain('bg-border/70');
   });
 
   it('应该包含圆角样式', () => {

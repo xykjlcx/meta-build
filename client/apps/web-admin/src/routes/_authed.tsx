@@ -3,6 +3,26 @@ import { LayoutResolver, NotificationBadge, toCurrentUser, useSseConnection } fr
 import { Outlet, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useCallback } from 'react';
 import { SseHandlers } from '../features/notice/components/sse-handlers';
+import { resolveMenuHref } from '../menu-route-map';
+
+async function waitForMockRuntimeReady() {
+  if (typeof window === 'undefined') {
+    return;
+  }
+
+  const runtime = window as unknown as Record<string, unknown>;
+  if (!runtime.__msw_enabled__) {
+    return;
+  }
+
+  const startedAt = performance.now();
+  while (performance.now() - startedAt < 3000) {
+    if (runtime.__msw_ready__ && navigator.serviceWorker.controller) {
+      return;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+}
 
 export const Route = createFileRoute('/_authed')({
   beforeLoad: async ({ context }) => {
@@ -32,6 +52,7 @@ function AuthedLayout() {
 
   // L5 注入未读计数查询函数给 L4 的 NotificationBadge
   const unreadQueryFn = useCallback(async () => {
+    await waitForMockRuntimeReady();
     const result = await noticeApi.getUnreadCount();
     return result.count ?? 0;
   }, []);
@@ -45,6 +66,7 @@ function AuthedLayout() {
           onClick={() => navigate({ to: '/notices', search: { edit: undefined } })}
         />
       }
+      resolveMenuHref={resolveMenuHref}
     >
       <SseHandlers />
       <Outlet />

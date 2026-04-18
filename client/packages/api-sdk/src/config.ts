@@ -10,6 +10,7 @@ export interface ApiSdkConfig extends ErrorHandlerOptions {
   basePath: string;
   getToken: () => string | null;
   getLanguage: () => string;
+  requestGate?: () => Promise<void>;
   /** 尝试刷新 token，成功返回新 access token，失败返回 null */
   tryRefreshToken?: () => Promise<string | null>;
 }
@@ -25,6 +26,7 @@ export function configureApiSdk(config: ApiSdkConfig): void {
       createRequestIdInterceptor(),
     ],
     responseInterceptors: [createErrorInterceptor(config)],
+    requestGate: config.requestGate,
     tryRefreshToken: config.tryRefreshToken,
     onUnauthenticated: config.onUnauthenticated,
   });

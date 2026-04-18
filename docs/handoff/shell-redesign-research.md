@@ -1,5 +1,7 @@
 # App Shell 骨架层重设计 — 调研报告
 
+> **说明**：这是历史调研记录，不是当前真相。文中出现的旧布局名、旧主题 API、旧对比口径只代表调研时上下文，当前实现以现行代码与 spec 为准。
+
 > **调研日期**：2026-04-16
 > **调研范围**：shadcnuikit.com 模板技术逆向 + shadcn/ui 官方文档 + 社区最佳实践 + meta-build 现状深度分析
 > **目标**：用 shadcnuikit 的骨架风格（inset 布局 + 毛玻璃 Top Bar + 卡片化内容区 + 运行时 Theme Customizer）重构 meta-build 的 App Shell 层。

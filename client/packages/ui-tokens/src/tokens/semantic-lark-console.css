@@ -67,17 +67,18 @@
   --color-input: var(--color-gray-300);
   --color-ring: var(--color-blue-500);
 
-  /* ===== Sidebar（飞书 sidebar 和 bg 同色 #f2f3f5，hover #e8eaed）=====
-   * 激活态按 nxboot-v2 实现：**无背景色变化** + 文字变蓝 + 加粗 + 左 3px 蓝条 + icon 继承文字蓝
-   *   - sidebar-accent 设为 transparent（不做背景色激活，靠蓝条和文字区分）
-   *   - sidebar-accent-foreground 设为 primary 蓝（文字和 icon 一起染蓝）
-   *   - icon 在组件层 **不显式切断继承**，让它跟随激活文字色
+  /* ===== Sidebar（飞书 sidebar 和 bg 同色 #f2f3f5，只有 hover 才有浅灰 pill）=====
+   * 当前以飞书截图为准：
+   *   - 激活态没有灰底，只有蓝字 + 略高字重
+   *   - hover 才出现浅灰底
+   *   - 文本与 icon 变蓝，字重略高
+   *   - 无左蓝条
    */
   --color-sidebar: var(--color-gray-100);                 /* = bg，让 sidebar 融入 */
   --color-sidebar-foreground: var(--color-gray-800);      /* 文字同 foreground */
   --color-sidebar-primary: var(--color-blue-500);
   --color-sidebar-primary-foreground: var(--color-white);
-  --color-sidebar-accent: transparent;                    /* 激活无背景色（nxboot-v2 风格） */
+  --color-sidebar-accent: var(--color-gray-200);          /* 激活浅灰底 */
   --color-sidebar-accent-foreground: var(--color-blue-500); /* 激活文字/icon 蓝（primary） */
   --color-sidebar-border: var(--color-gray-300);
   --color-sidebar-ring: var(--color-blue-500);
@@ -95,7 +96,7 @@
   --size-control-height-md: 2rem;
   --size-control-height-lg: 2.25rem;
   --size-header-height: 3.5rem;
-  --size-sidebar-width: 14.75rem;                         /* 236px，飞书实测 */
+  --size-sidebar-width: 14.25rem;                         /* 收窄到 228px，更贴近当前页面比例 */
   --size-sidebar-width-collapsed: 3.75rem;
   --size-content-max-width: 80rem;
 
@@ -134,8 +135,8 @@
    *   - 圆角 4px (radius-sm)，无下划线
    *
    * Sidebar（对齐飞书实测）：
-   *   - 激活**无背景色变化**，只有文字变蓝 + 加粗
-   *   - **无左侧 3px 蓝条**（飞书 DOM 里根本没有，nxboot-v2 是超飞书优化）
+   *   - 激活是浅灰底 + 蓝字 + 500 字重
+   *   - **无左侧 3px 蓝条**（飞书 DOM 里根本没有）
    *   - item 高度 48px（飞书实测，见 mix-layout.tsx 里 h-12）
    *
    * Card（对齐飞书实测）：
@@ -148,7 +149,7 @@
   --nav-tab-height: 2.25rem;                                /* 36px (飞书实测) */
   --nav-tab-padding-x: 0.75rem;                             /* 12px (飞书实测) */
   --nav-tab-padding-y: 0.4375rem;                           /* 7px (飞书实测) */
-  --sidebar-item-active-bg: var(--color-sidebar-accent);    /* = transparent */
+  --sidebar-item-active-bg: transparent;
   --sidebar-item-active-fg: var(--color-sidebar-accent-foreground); /* = blue-500 */
   --sidebar-item-active-font-weight: 500;
   --sidebar-item-active-indicator-width: 0;                 /* 飞书无左蓝条 */
@@ -209,12 +210,12 @@
   --color-input: var(--color-gray-700);
   --color-ring: var(--color-blue-400);
 
-  /* ===== Sidebar（暗色，策略同 light：无背景激活 + 蓝条 + 蓝字 + icon 继承蓝）===== */
+  /* ===== Sidebar（暗色，策略同 light：无 active 背景，hover 才给背景）===== */
   --color-sidebar: var(--color-gray-900);
   --color-sidebar-foreground: var(--color-gray-300);
   --color-sidebar-primary: var(--color-blue-400);
   --color-sidebar-primary-foreground: var(--color-white);
-  --color-sidebar-accent: transparent;                    /* 激活无背景色 */
+  --color-sidebar-accent: var(--color-gray-800);          /* 激活浅层背景 */
   --color-sidebar-accent-foreground: var(--color-blue-400); /* 激活文字/icon 蓝 */
   --color-sidebar-border: var(--color-gray-800);
   --color-sidebar-ring: var(--color-blue-400);
@@ -232,7 +233,7 @@
   --size-control-height-md: 2rem;
   --size-control-height-lg: 2.25rem;
   --size-header-height: 3.5rem;
-  --size-sidebar-width: 14.75rem;                         /* 236px，飞书实测 */
+  --size-sidebar-width: 14.25rem;                         /* 收窄到 228px，更贴近当前页面比例 */
   --size-sidebar-width-collapsed: 3.75rem;
   --size-content-max-width: 80rem;
 
@@ -267,7 +268,7 @@
   --nav-tab-height: 2.25rem;
   --nav-tab-padding-x: 0.75rem;
   --nav-tab-padding-y: 0.4375rem;
-  --sidebar-item-active-bg: var(--color-sidebar-accent);
+  --sidebar-item-active-bg: transparent;
   --sidebar-item-active-fg: var(--color-sidebar-accent-foreground);
   --sidebar-item-active-font-weight: 500;
   --sidebar-item-active-indicator-width: 0;

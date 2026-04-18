@@ -1,5 +1,7 @@
 # M2: 前端 L1 主题系统 + L2 原子组件 实施计划
 
+> **说明**：这是历史执行计划，不是当前真相。计划中的主题数量、token 数量、组件数量和代码片段必须以当前仓库实际文件重新校验。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 完成 L1 主题系统（3 套主题 + 运行时切换 + 完整性校验）和 L2 原子组件库（30 个 shadcn/Radix 风格组件 + Storybook + Vitest）。

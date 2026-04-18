@@ -2,7 +2,7 @@
  * MixLayout 移动端行为集成测试
  *
  * 测试策略：
- * - mock `useAuth` 避免引入 TanStack Query + Router 依赖
+ * - mock `useAuth` / router hooks，避免引入 TanStack Query 与 Router 副作用
  * - 用真实 StyleProvider + LayoutPresetProvider + I18nProvider wrap（行为接近生产环境）
  * - 移动端/桌面端区分是纯 CSS（Tailwind lg:hidden），不需要 matchMedia
  */
@@ -19,7 +19,7 @@ import type { MenuNode } from '../../../menu';
 import { StyleProvider } from '../../../theme/style-provider';
 import { MixLayout } from '../mix-layout';
 
-// mock useAuth，绕过 TanStack Query + Router 依赖
+// mock useAuth，绕过 TanStack Query 依赖
 vi.mock('../../../auth', () => ({
   useAuth: () => ({
     logout: vi.fn(),
@@ -29,6 +29,15 @@ vi.mock('../../../auth', () => ({
   getAccessToken: () => null,
   requireAuth: () => {},
   ANONYMOUS: {},
+}));
+
+vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => vi.fn(),
+  useRouterState: ({
+    select,
+  }: {
+    select: (state: { location: { pathname: string } }) => unknown;
+  }) => select({ location: { pathname: '/' } }),
 }));
 
 // ---- Fixtures ----
@@ -91,9 +100,9 @@ function renderMixLayout(menuTree: MenuNode[] = MENU_TREE) {
 
 /** 找到汉堡按钮并 click，打开移动端抽屉 */
 function openMobileDrawer() {
-  // MixHeader 里的汉堡按钮：aria-label = t('sidebar.expand') = '展开侧边栏'
-  // 折叠态下 sidebar 底部的展开按钮也叫 '展开侧边栏'，故用 getAllByRole 取 header 里的第一个
-  const hamburgers = screen.getAllByRole('button', { name: '展开侧边栏' });
+  // MixHeader 里的汉堡按钮：aria-label = t('sidebar.expand') = '展开导航'
+  // 折叠态下 sidebar 底部按钮同名，故用 getAllByRole 取 header 里的第一个
+  const hamburgers = screen.getAllByRole('button', { name: '展开导航' });
   // header 汉堡按钮始终是 DOM 里第一个同名按钮
   const first = hamburgers[0];
   if (!first) throw new Error('hamburger button not found');
@@ -160,8 +169,8 @@ describe('MixLayout 移动端抽屉', () => {
   it('折叠态下打开移动端抽屉，aside style.width 使用 var(--sidebar-width) 而非折叠宽度', async () => {
     renderMixLayout();
 
-    // 触发折叠：sidebar 底部的折叠按钮 aria-label = '收起侧边栏'
-    const collapseBtn = screen.getByRole('button', { name: '收起侧边栏' });
+    // 触发折叠：sidebar 底部的折叠按钮 aria-label = '收起导航'
+    const collapseBtn = screen.getByRole('button', { name: '收起导航' });
     await act(async () => {
       fireEvent.click(collapseBtn);
     });

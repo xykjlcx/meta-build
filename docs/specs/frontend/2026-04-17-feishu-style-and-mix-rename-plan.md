@@ -1,5 +1,7 @@
 # Feishu Style + Mix Layout Rename Implementation Plan
 
+> **说明**：这是历史执行计划，不是当前真相。计划中的代码片段、测试数量、token 数量和步骤拆分只代表当时执行上下文，使用前必须以当前仓库实际文件重新校验。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 >
 > **更新日志**：

@@ -12,11 +12,13 @@ import {
 } from '@mb/app-shell';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { RouterProvider } from '@tanstack/react-router';
-import { StrictMode } from 'react';
+import { StrictMode, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { registerBusinessResources } from './i18n/register';
 import { createAppRouter } from './router';
 import './styles.css';
+
+const mockReadyPromise = enableMocking();
 
 // Phase 1: 同步初始化（React 渲染前）
 registerBusinessResources();
@@ -26,6 +28,10 @@ configureApiSdk({
   basePath: '',
   getToken: () => getAccessToken(),
   getLanguage: () => i18n.language,
+  requestGate: async () => {
+    if (import.meta.env.PROD) return;
+    await mockReadyPromise;
+  },
   tryRefreshToken: async () => {
     const refreshToken = localStorage.getItem('mb_refresh_token');
     if (!refreshToken) return null;
@@ -64,12 +70,31 @@ configureApiSdk({
 const queryClient = createQueryClient();
 const router = createAppRouter({ queryClient });
 
+function dismissGlobalLoading() {
+  const loadingEl = document.getElementById('app-loading');
+  if (!loadingEl) {
+    return;
+  }
+
+  loadingEl.classList.add('fade-out');
+  window.setTimeout(() => loadingEl.remove(), 280);
+}
+
+function AppReadyEffect() {
+  useEffect(() => {
+    dismissGlobalLoading();
+  }, []);
+
+  return null;
+}
+
 function App() {
   return (
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <I18nProvider>
           <StyleProvider>
+            <AppReadyEffect />
             <RouterProvider router={router} />
             <ToastContainer />
             <DialogContainer />
@@ -83,13 +108,41 @@ function App() {
 async function enableMocking() {
   if (import.meta.env.PROD) return;
   const { worker } = await import('./mock/browser');
+  await worker.start({ onUnhandledRequest: 'bypass', waitUntilReady: true });
+  if (
+    typeof window !== 'undefined' &&
+    'serviceWorker' in navigator &&
+    !navigator.serviceWorker.controller
+  ) {
+    const hasReloaded = window.sessionStorage.getItem('mb_msw_reloaded') === '1';
+    if (!hasReloaded) {
+      window.sessionStorage.setItem('mb_msw_reloaded', '1');
+      window.location.reload();
+      return new Promise<never>(() => {});
+    }
+  }
+  window.sessionStorage.removeItem('mb_msw_reloaded');
+  await waitForServiceWorkerControl();
   (window as unknown as Record<string, unknown>).__msw_enabled__ = true;
-  return worker.start({ onUnhandledRequest: 'bypass' });
+  (window as unknown as Record<string, unknown>).__msw_ready__ = true;
+}
+
+async function waitForServiceWorkerControl() {
+  if (typeof navigator === 'undefined' || !('serviceWorker' in navigator)) {
+    return;
+  }
+
+  await navigator.serviceWorker.ready;
+
+  const startedAt = performance.now();
+  while (!navigator.serviceWorker.controller && performance.now() - startedAt < 3000) {
+    await new Promise((resolve) => setTimeout(resolve, 50));
+  }
 }
 
 const rootEl = document.getElementById('root');
 if (rootEl) {
-  enableMocking().then(() => {
+  mockReadyPromise.then(() => {
     createRoot(rootEl).render(
       <StrictMode>
         <App />
