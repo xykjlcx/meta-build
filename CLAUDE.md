@@ -374,6 +374,7 @@ docker compose up -d                                      # PG(15432) + Redis(16
 | [docs/handoff/](docs/handoff/) | **Milestone 交接文档**（m1-complete / m2-complete / m2-shadcn-upgrade-supplement / m3-complete / m4-complete / m5-complete / frontend-gap-analysis） | 持续更新 |
 | [docs/日志/](docs/日志/) | 每日工作日志 | 持续更新 |
 | [docs/rules/](docs/rules/) | **项目规则库**（pitfall + playbook，持续积累） | 持续更新 |
+| [docs/collab/concurrent-dev-protocol.md](docs/collab/concurrent-dev-protocol.md) | **前后端并发协作约定**（worktree 隔离 + 共享文件段落归属 + ADR 编号纪律） | 定稿 |
 
 ---
 
