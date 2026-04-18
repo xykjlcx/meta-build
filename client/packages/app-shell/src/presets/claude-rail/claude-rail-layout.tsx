@@ -1,14 +1,17 @@
 /**
- * ClaudeInsetLayout — Plan A "claude-inset" preset。
+ * ClaudeRailLayout — Plan A "claude-rail" preset（窄图标轨道侧栏）。
  *
- * 100% 还原 Claude Design `layout--inset`（styles/app.css:219-250 + bg-blobs:86-101）：
- * - 外层 bg-sidebar 暖深色铺底 + relative overflow-hidden
- * - bg-blobs 背景装饰（两个模糊圆形渐变绝对定位，brand 色左上 + info 色右下）—— claude-inset 的视觉标志
- * - Topbar 贴顶 + bg-background/60 backdrop-blur-md（毛玻璃感）
- * - 主体 aside + main 都 rounded-xl border shadow-sm（内嵌白卡片），外边距 m-2 mt-0
- * - aside bg-sidebar/80 backdrop-blur-sm / main bg-background/90 backdrop-blur-sm
+ * 100% 还原 Claude Design `layout--rail`（styles/app.css:234-249 + bg-blobs:86-101）：
+ * - 外层 bg-background relative overflow-hidden + <BgBlobs /> 装饰（复用 claude-inset 视觉）
+ * - Topbar 保留 classic / inset 的完整结构（品牌 + HeaderTab + 搜索 + 功能区 + user menu）
+ * - Sidebar 窄 rail (w-16)：border-r bg-sidebar，一级图标轨道
+ *   · 每个菜单项用 Tooltip 承载 label，Link 上带 aria-label 供屏幕阅读器
+ *   · 只渲染 icon，不渲染 label 文字，不渲染二级菜单（窄轨道装不下）
+ *   · 二级导航由跳转后的页面内导航表达
+ * - Main flex-1 overflow-y-auto（保留 role="main" / id="main-content"）
  *
- * Topbar + Sidebar nav 内部 JSX 与 claude-classic 完全一致（Plan 明确"不抽共享 Topbar 组件"）。
+ * 与 claude-classic 差异：外层加 bg-blobs + Sidebar 从 w-60 语义列表变 w-16 图标轨道
+ * 与 claude-inset 差异：不是内嵌白卡片，而是 Topbar 直接贴顶 + rail 侧栏直接贴左
  */
 
 import { SearchInput } from '@mb/ui-patterns';
@@ -21,7 +24,10 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  Tooltip,
+  TooltipContent,
   TooltipProvider,
+  TooltipTrigger,
   cn,
 } from '@mb/ui-primitives';
 import { Link, useNavigate, useRouterState } from '@tanstack/react-router';
@@ -36,10 +42,10 @@ import { SystemSwitcherPopover } from '../../components/system-switcher-popover'
 import { ThemeCustomizer } from '../../components/theme-customizer';
 import type { ShellLayoutProps } from '../../layouts/types';
 import { type MenuNode, resolveMenuIcon } from '../../menu';
-import { getDisplayChildren, isDisplayNode } from '../../menu/menu-utils';
+import { isDisplayNode } from '../../menu/menu-utils';
 import { useActiveModule } from '../../menu/use-active-module';
 
-export function ClaudeInsetLayout({
+export function ClaudeRailLayout({
   children,
   menuTree,
   currentUser,
@@ -64,11 +70,11 @@ export function ClaudeInsetLayout({
 
   return (
     <TooltipProvider>
-      <div className="relative flex h-screen flex-col overflow-hidden bg-sidebar text-foreground">
+      <div className="relative flex h-screen flex-col overflow-hidden bg-background text-foreground">
         {/* bg-blobs 背景装饰：brand 色左上（opacity 0.35）+ info 色右下（opacity 0.22） */}
         <BgBlobs />
 
-        <InsetTopbar
+        <RailTopbar
           menuTree={menuTree}
           activeModuleId={activeModuleId}
           onModuleChange={setActiveModule}
@@ -79,8 +85,8 @@ export function ClaudeInsetLayout({
           onLogout={() => logout()}
         />
 
-        <div className="relative z-10 flex min-h-0 flex-1 gap-2 overflow-hidden m-2 mt-0">
-          <InsetSidebar
+        <div className="relative z-10 flex min-h-0 flex-1 overflow-hidden">
+          <RailSidebar
             activeSubmenu={activeSubmenu}
             currentPathname={currentPathname}
             resolveMenuHref={resolveMenuHref}
@@ -90,7 +96,7 @@ export function ClaudeInsetLayout({
           <main
             role="main"
             id="main-content"
-            className="flex-1 min-w-0 overflow-y-auto rounded-xl border bg-background/90 shadow-sm backdrop-blur-sm"
+            className="flex-1 min-w-0 overflow-y-auto"
             aria-label={t('layout.mainContent', { defaultValue: 'Main content' })}
           >
             {children}
@@ -101,11 +107,11 @@ export function ClaudeInsetLayout({
   );
 }
 
-// ─── InsetTopbar ────────────────────────────────────────────
+// ─── RailTopbar ─────────────────────────────────────────────
 //
-// 与 classic 差异：relative z-10 + bg-background/60 backdrop-blur-md（毛玻璃）
+// 与 classic 差异：relative z-10（浮于 bg-blobs 之上）
 
-function InsetTopbar({
+function RailTopbar({
   menuTree,
   activeModuleId,
   onModuleChange,
@@ -127,7 +133,7 @@ function InsetTopbar({
   const { t } = useTranslation('shell');
 
   return (
-    <header className="relative z-10 flex h-14 shrink-0 items-center gap-3 border-b bg-background/60 px-4 backdrop-blur-md">
+    <header className="relative z-10 flex h-14 shrink-0 items-center gap-3 border-b bg-card px-4">
       {/* 品牌：M 小方块 + meta-build 文字 */}
       <div className="flex shrink-0 items-center gap-2">
         <div
@@ -195,17 +201,13 @@ function InsetTopbar({
         <div className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
 
         {/* User menu */}
-        <InsetUserMenu
-          currentUser={currentUser}
-          isLoggingOut={isLoggingOut}
-          onLogout={onLogout}
-        />
+        <RailUserMenu currentUser={currentUser} isLoggingOut={isLoggingOut} onLogout={onLogout} />
       </div>
     </header>
   );
 }
 
-function InsetUserMenu({
+function RailUserMenu({
   currentUser,
   isLoggingOut,
   onLogout,
@@ -249,11 +251,12 @@ function InsetUserMenu({
   );
 }
 
-// ─── InsetSidebar ───────────────────────────────────────────
+// ─── RailSidebar ────────────────────────────────────────────
 //
-// 与 classic 差异：rounded-xl + bg-sidebar/80 + backdrop-blur-sm + border-sidebar-border（去掉 border-r）
+// 窄轨道：w-16 图标列 + Tooltip 承载 label（side="right"）。
+// 不渲染二级菜单 —— 二级导航由跳转后的页面内导航表达（Plan A 目标只到一级 rail）。
 
-function InsetSidebar({
+function RailSidebar({
   activeSubmenu,
   currentPathname,
   resolveMenuHref,
@@ -270,15 +273,14 @@ function InsetSidebar({
 
   return (
     <aside
-      className="w-60 shrink-0 overflow-y-auto rounded-xl border border-sidebar-border bg-sidebar/80 text-sidebar-foreground backdrop-blur-sm"
+      className="w-16 shrink-0 overflow-y-auto border-r bg-sidebar text-sidebar-foreground"
       aria-label={t('mix.moduleSidebarHint', { defaultValue: '二级导航' })}
     >
-      <nav className="px-2 py-3 flex flex-col gap-0.5">
+      <nav className="p-2 flex flex-col gap-1 items-center">
         {visibleNodes.map((node) => (
-          <InsetMenuItem
+          <RailMenuItem
             key={node.id}
             node={node}
-            depth={0}
             currentPathname={currentPathname}
             resolveMenuHref={resolveMenuHref}
             onNavigate={onNavigate}
@@ -289,71 +291,57 @@ function InsetSidebar({
   );
 }
 
-function InsetMenuItem({
+function RailMenuItem({
   node,
-  depth,
   currentPathname,
   resolveMenuHref,
   onNavigate,
 }: {
   node: MenuNode;
-  depth: number;
   currentPathname: string;
   resolveMenuHref?: ShellLayoutProps['resolveMenuHref'];
   onNavigate: (href: string) => void;
 }) {
   const Icon = resolveMenuIcon(node.icon);
   const href = resolveMenuHref?.(node) ?? null;
-  const children = getDisplayChildren(node);
-  const hasChildren = children.length > 0;
   const isActive =
     href != null && (currentPathname === href || currentPathname.startsWith(`${href}/`));
 
-  const content = (
-    <span
-      className={cn(
-        'flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] transition-colors',
-        depth === 0 ? 'font-medium' : 'pl-8 font-normal text-muted-foreground',
-        isActive ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/60 hover:text-foreground',
-      )}
-    >
-      {depth === 0 && <Icon className="size-4 shrink-0" strokeWidth={1.75} />}
-      <span className="truncate">{node.name}</span>
-    </span>
+  const iconClassName = cn(
+    'grid h-10 w-10 place-items-center rounded-md transition-colors',
+    isActive
+      ? 'bg-sidebar-accent text-sidebar-accent-foreground'
+      : 'text-sidebar-foreground/80 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground',
   );
 
   return (
-    <div>
-      {href ? (
-        <Link
-          to={href as never}
-          onClick={(e) => {
-            e.preventDefault();
-            onNavigate(href);
-          }}
-          data-active={isActive ? 'true' : 'false'}
-          className="block no-underline text-inherit"
-        >
-          {content}
-        </Link>
-      ) : (
-        <div data-active={isActive ? 'true' : 'false'}>{content}</div>
-      )}
-
-      {hasChildren && (
-        <div className="mt-0.5">
-          {children.map((child) => (
-            <InsetMenuItem
-              key={child.id}
-              node={child}
-              depth={depth + 1}
-              currentPathname={currentPathname}
-              resolveMenuHref={resolveMenuHref}
-              onNavigate={onNavigate}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        {href ? (
+          <Link
+            to={href as never}
+            onClick={(e) => {
+              e.preventDefault();
+              onNavigate(href);
+            }}
+            aria-label={node.name}
+            data-active={isActive ? 'true' : 'false'}
+            className={iconClassName}
+          >
+            <Icon className="size-5" strokeWidth={1.75} />
+          </Link>
+        ) : (
+          <span
+            role="img"
+            aria-label={node.name}
+            data-active={isActive ? 'true' : 'false'}
+            className={iconClassName}
+          >
+            <Icon className="size-5" strokeWidth={1.75} />
+          </span>
+        )}
+      </TooltipTrigger>
+      <TooltipContent side="right">{node.name}</TooltipContent>
+    </Tooltip>
   );
 }
