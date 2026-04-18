@@ -37,6 +37,10 @@ spring:
     properties:
       mail.smtp.auth: true
       mail.smtp.starttls.enable: true
+      # socket 级超时，防 SMTP 黑洞 hang 住 JavaMailSender 线程（见 meta-0023）
+      mail.smtp.connectiontimeout: 10000
+      mail.smtp.timeout: 15000
+      mail.smtp.writetimeout: 15000
 
   # Redis
   data:
@@ -154,8 +158,11 @@ mb:
       fail-count-ttl-minutes: 30
       reset-token-ttl-minutes: 15
 
-# Actuator
+# Actuator（独立端口 + 绑定本地回环，避免暴露给公网）
 management:
+  server:
+    port: ${MB_MANAGEMENT_PORT:9090}
+    address: ${MB_MANAGEMENT_ADDRESS:127.0.0.1}
   endpoints:
     web:
       base-path: /actuator
