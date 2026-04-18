@@ -13,7 +13,10 @@ import com.metabuild.platform.iam.api.cmd.AssignRolesCmd;
 import com.metabuild.platform.iam.api.cmd.RoleCreateCmd;
 import com.metabuild.platform.iam.api.vo.RoleVo;
 import com.metabuild.platform.iam.api.cmd.RoleUpdateCmd;
+import com.metabuild.platform.iam.api.vo.UserVo;
+import com.metabuild.platform.iam.domain.user.UserRepository;
 import com.metabuild.schema.tables.records.MbIamRoleRecord;
+import com.metabuild.schema.tables.records.MbIamUserRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,7 @@ public class RoleService implements RoleApi {
     private final CurrentUser currentUser;
     private final SnowflakeIdGenerator idGenerator;
     private final com.metabuild.platform.iam.domain.user.UserService userService;
+    private final UserRepository userRepository;
 
     @Override
     public RoleVo getById(Long id) {
@@ -53,6 +57,37 @@ public class RoleService implements RoleApi {
     public List<Long> findRoleIdsByUserId(Long userId) {
         userService.assertUserExists(userId);
         return roleRepository.findRoleIdsByUserId(userId);
+    }
+
+    /**
+     * 查角色的成员（分页 + keyword 模糊）。
+     * Plan B 决策：不过滤 status（返回启用+禁用），默认 id desc。
+     * 角色不存在抛 404。
+     */
+    public PageResult<UserVo> listMembers(Long roleId, PageQuery page, String keyword) {
+        roleRepository.findById(roleId)
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.ROLE_NOT_FOUND, roleId));
+
+        PageResult<MbIamUserRecord> result = userRepository.findMembersByRoleId(roleId, page, keyword);
+        List<UserVo> content = result.content().stream().map(this::toUserVo).toList();
+        return new PageResult<>(content, result.totalElements(), result.totalPages(), result.page(), result.size());
+    }
+
+    private UserVo toUserVo(MbIamUserRecord r) {
+        return new UserVo(
+            r.getId(),
+            r.getUsername(),
+            r.getEmail(),
+            r.getPhone(),
+            r.getNickname(),
+            r.getAvatar(),
+            r.getDeptId(),
+            r.getStatus(),
+            Boolean.TRUE.equals(r.getMustChangePassword()),
+            r.getPasswordUpdatedAt(),
+            r.getCreatedAt(),
+            r.getUpdatedAt()
+        );
     }
 
     public PageResult<RoleVo> listPage(PageQuery query) {

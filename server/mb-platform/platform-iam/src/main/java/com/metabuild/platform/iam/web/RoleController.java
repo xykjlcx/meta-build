@@ -8,6 +8,7 @@ import com.metabuild.platform.iam.api.cmd.RoleCreateCmd;
 import com.metabuild.platform.iam.api.vo.RoleMenusVo;
 import com.metabuild.platform.iam.api.vo.RoleVo;
 import com.metabuild.platform.iam.api.cmd.RoleUpdateCmd;
+import com.metabuild.platform.iam.api.vo.UserVo;
 import com.metabuild.platform.iam.domain.menu.MenuService;
 import com.metabuild.platform.iam.domain.role.RoleService;
 import jakarta.validation.Valid;
@@ -75,5 +76,16 @@ public class RoleController {
     @RequirePermission("iam:role:detail")
     public RoleMenusVo getMenus(@PathVariable Long id) {
         return new RoleMenusVo(menuService.findMenuIdsByRoleId(id));
+    }
+
+    /** 查角色成员（分页 + keyword 模糊，含启用+禁用） */
+    @GetMapping("/{id}/members")
+    @RequirePermission("iam:role:viewMembers")
+    public PageResult<UserVo> listMembers(
+        @PathVariable Long id,
+        @ParameterObject PageRequestDto request,
+        @RequestParam(required = false) String keyword
+    ) {
+        return roleService.listMembers(id, paginationPolicy.normalize(request), keyword);
     }
 }

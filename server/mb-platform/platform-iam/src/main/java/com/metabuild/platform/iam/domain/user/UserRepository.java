@@ -5,6 +5,7 @@ import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.jooq.query.SortParser;
 import com.metabuild.platform.iam.api.cmd.UserListQuery;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
+import static com.metabuild.schema.tables.MbIamUserRole.MB_IAM_USER_ROLE;
 import lombok.RequiredArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -220,5 +221,35 @@ public class UserRepository {
 
     public void deleteById(Long id) {
         dsl.deleteFrom(MB_IAM_USER).where(MB_IAM_USER.ID.eq(id)).execute();
+    }
+
+    /**
+     * 查某角色的成员（分页 + keyword 模糊）。含被禁用用户，不过滤 status（Plan B 决策：
+     * UI 用 badge 展示禁用状态，管理员视角要看到所有持有者）。
+     */
+    public PageResult<MbIamUserRecord> findMembersByRoleId(Long roleId, PageQuery page, String keyword) {
+        Condition where = MB_IAM_USER.ID.in(
+            dsl.select(MB_IAM_USER_ROLE.USER_ID)
+                .from(MB_IAM_USER_ROLE)
+                .where(MB_IAM_USER_ROLE.ROLE_ID.eq(roleId))
+        );
+        if (keyword != null && !keyword.isBlank()) {
+            String pattern = "%" + keyword + "%";
+            where = where.and(
+                MB_IAM_USER.USERNAME.likeIgnoreCase(pattern)
+                    .or(MB_IAM_USER.NICKNAME.likeIgnoreCase(pattern))
+                    .or(MB_IAM_USER.EMAIL.likeIgnoreCase(pattern))
+            );
+        }
+
+        long total = dsl.fetchCount(dsl.selectFrom(MB_IAM_USER).where(where));
+        List<MbIamUserRecord> records = dsl.selectFrom(MB_IAM_USER)
+            .where(where)
+            .orderBy(MB_IAM_USER.ID.desc())
+            .limit(page.size())
+            .offset(page.offset())
+            .fetch();
+
+        return PageResult.of(records, total, page);
     }
 }
