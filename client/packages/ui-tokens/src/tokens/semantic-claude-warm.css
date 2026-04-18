@@ -136,7 +136,7 @@
 
   /* ===== 字体（Claude Design 以 Inter 为主，中文优先 PingFang SC）===== */
   --font-sans: 'Inter', 'PingFang SC', 'HarmonyOS Sans SC', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, 'Cascadia Code', monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', menlo, 'Cascadia Code', monospace;
   --font-heading: var(--font-sans);
 }
 
@@ -234,6 +234,6 @@
 
   /* ===== 字体 ===== */
   --font-sans: 'Inter', 'PingFang SC', 'HarmonyOS Sans SC', ui-sans-serif, system-ui, -apple-system, sans-serif;
-  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, 'Cascadia Code', monospace;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', menlo, 'Cascadia Code', monospace;
   --font-heading: var(--font-sans);
 }

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { findMenuPathByPath, isDisplayNode, type MenuHrefResolver } from './menu-utils';
+import { type MenuHrefResolver, findMenuPathByPath, isDisplayNode } from './menu-utils';
 import type { MenuNode } from './types';
 
 const ACTIVE_MODULE_KEY = 'mb_active_module_id';

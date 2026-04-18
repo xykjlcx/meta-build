@@ -8,7 +8,7 @@
  *   · 每个菜单项用 Tooltip 承载 label，Link 上带 aria-label 供屏幕阅读器
  *   · 只渲染 icon，不渲染 label 文字，不渲染二级菜单（窄轨道装不下）
  *   · 二级导航由跳转后的页面内导航表达
- * - Main flex-1 overflow-y-auto（保留 role="main" / id="main-content"）
+ * - Main flex-1 overflow-y-auto（&lt;main&gt; 元素隐式 role=main，无需显式 role 属性 / 保留 id="main-content"）
  *
  * 与 claude-classic 差异：外层加 bg-blobs + Sidebar 从 w-60 语义列表变 w-16 图标轨道
  * 与 claude-inset 差异：不是内嵌白卡片，而是 Topbar 直接贴顶 + rail 侧栏直接贴左
@@ -94,7 +94,6 @@ export function ClaudeRailLayout({
           />
 
           <main
-            role="main"
             id="main-content"
             className="flex-1 min-w-0 overflow-y-auto"
             aria-label={t('layout.mainContent', { defaultValue: 'Main content' })}

@@ -88,7 +88,6 @@ export function ClaudeInsetLayout({
           />
 
           <main
-            role="main"
             id="main-content"
             className="flex-1 min-w-0 overflow-y-auto rounded-xl border bg-background/90 shadow-sm backdrop-blur-sm"
             aria-label={t('layout.mainContent', { defaultValue: 'Main content' })}
@@ -195,11 +194,7 @@ function InsetTopbar({
         <div className="mx-1 h-6 w-px bg-border" aria-hidden="true" />
 
         {/* User menu */}
-        <InsetUserMenu
-          currentUser={currentUser}
-          isLoggingOut={isLoggingOut}
-          onLogout={onLogout}
-        />
+        <InsetUserMenu currentUser={currentUser} isLoggingOut={isLoggingOut} onLogout={onLogout} />
       </div>
     </header>
   );
