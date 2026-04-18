@@ -276,7 +276,7 @@ export function StyleProvider({
   defaultStyle?: StyleId;
   defaultColorMode?: ColorMode;
 }) {
-  // defaultStyle 如果非法也归一化到 'classic'
+  // defaultStyle 如果非法归一化到 'claude-warm'（Plan A 默认兜底）
   const safeDefaultStyle = normalizeStyleId(defaultStyle);
   const defaultState = useMemo(
     () => createDefaultState(safeDefaultStyle, defaultColorMode),
@@ -294,7 +294,7 @@ export function StyleProvider({
     () => ({
       styleId: state.styleId,
       setStyle: (styleId) => {
-        // 非法 id 归一化到 'classic'，防止外部 JS 或 AI 注入无效值（M2 修复）
+        // 非法 id 归一化到 'claude-warm'（Plan A 默认兜底），防止外部 JS 或 AI 注入无效值（M2 修复 + Plan A 更新）
         setState((prev) => ({ ...prev, styleId: normalizeStyleId(styleId) }));
       },
       colorMode: state.colorMode,
