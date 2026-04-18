@@ -178,6 +178,13 @@ public class MenuService implements MenuApi {
         log.info("分配菜单到角色: roleId={}, menuCount={}", roleId, menuIds.size());
     }
 
+    /** 查角色已分配的菜单 ID 列表（编辑态回显）。角色不存在抛 404。 */
+    public List<Long> findMenuIdsByRoleId(Long roleId) {
+        roleRepository.findById(roleId)
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.ROLE_NOT_FOUND, roleId));
+        return menuRepository.findMenuIdsByRoleId(roleId);
+    }
+
     /** 构建菜单树（递归，parentId=0 为根节点） */
     private List<MenuVo> buildTree(List<MbIamMenuRecord> all, Long parentId) {
         Map<Long, List<MbIamMenuRecord>> byParent = all.stream()

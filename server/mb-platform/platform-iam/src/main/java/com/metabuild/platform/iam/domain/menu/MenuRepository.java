@@ -138,6 +138,14 @@ public class MenuRepository {
         dsl.deleteFrom(MB_IAM_MENU).where(MB_IAM_MENU.ID.eq(id)).execute();
     }
 
+    /** 查角色已分配的菜单 ID 列表 */
+    public List<Long> findMenuIdsByRoleId(Long roleId) {
+        return dsl.select(MB_IAM_ROLE_MENU.MENU_ID)
+            .from(MB_IAM_ROLE_MENU)
+            .where(MB_IAM_ROLE_MENU.ROLE_ID.eq(roleId))
+            .fetchInto(Long.class);
+    }
+
     /** 批量删除角色的菜单关联 */
     public void deleteRoleMenus(Long roleId) {
         dsl.deleteFrom(MB_IAM_ROLE_MENU)

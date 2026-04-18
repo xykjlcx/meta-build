@@ -5,6 +5,7 @@ import com.metabuild.infra.web.pagination.PageRequestDto;
 import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.iam.api.cmd.RoleCreateCmd;
+import com.metabuild.platform.iam.api.vo.RoleMenusVo;
 import com.metabuild.platform.iam.api.vo.RoleVo;
 import com.metabuild.platform.iam.api.cmd.RoleUpdateCmd;
 import com.metabuild.platform.iam.domain.menu.MenuService;
@@ -67,5 +68,12 @@ public class RoleController {
     @RequirePermission("iam:role:assignMenu")
     public void assignMenus(@PathVariable Long id, @RequestBody List<Long> menuIds) {
         menuService.assignMenusToRole(id, menuIds);
+    }
+
+    /** 查角色已分配的菜单 ID 列表（编辑态回显） */
+    @GetMapping("/{id}/menus")
+    @RequirePermission("iam:role:detail")
+    public RoleMenusVo getMenus(@PathVariable Long id) {
+        return new RoleMenusVo(menuService.findMenuIdsByRoleId(id));
     }
 }

@@ -33,6 +33,7 @@ public class RoleService implements RoleApi {
     private final RoleRepository roleRepository;
     private final CurrentUser currentUser;
     private final SnowflakeIdGenerator idGenerator;
+    private final com.metabuild.platform.iam.domain.user.UserService userService;
 
     @Override
     public RoleVo getById(Long id) {
@@ -46,6 +47,12 @@ public class RoleService implements RoleApi {
         return roleRepository.findByUserId(userId).stream()
             .map(this::toResponse)
             .toList();
+    }
+
+    /** 查用户已分配的角色 ID 列表（前端编辑态回显）。用户不存在抛 404。 */
+    public List<Long> findRoleIdsByUserId(Long userId) {
+        userService.assertUserExists(userId);
+        return roleRepository.findRoleIdsByUserId(userId);
     }
 
     public PageResult<RoleVo> listPage(PageQuery query) {

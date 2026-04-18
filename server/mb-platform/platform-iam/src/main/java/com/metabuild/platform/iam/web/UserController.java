@@ -10,6 +10,7 @@ import com.metabuild.platform.iam.api.cmd.ResetPasswordCmd;
 import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
 import com.metabuild.platform.iam.api.cmd.UserListQuery;
 import com.metabuild.platform.iam.api.vo.UserListVo;
+import com.metabuild.platform.iam.api.vo.UserRolesVo;
 import com.metabuild.platform.iam.api.vo.UserVo;
 import com.metabuild.platform.iam.api.cmd.UserUpdateCmd;
 import com.metabuild.platform.iam.domain.user.UserService;
@@ -91,5 +92,12 @@ public class UserController {
     @RequirePermission("iam:user:assignRole")
     public void assignRoles(@PathVariable Long id, @Valid @RequestBody AssignRolesCmd request) {
         roleService.assignRolesToUser(id, request);
+    }
+
+    /** 查用户已分配的角色 ID 列表（编辑态回显） */
+    @GetMapping("/{id}/roles")
+    @RequirePermission("iam:user:detail")
+    public UserRolesVo getRoles(@PathVariable Long id) {
+        return new UserRolesVo(roleService.findRoleIdsByUserId(id));
     }
 }

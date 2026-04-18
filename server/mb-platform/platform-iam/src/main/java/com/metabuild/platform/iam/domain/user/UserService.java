@@ -55,6 +55,12 @@ public class UserService implements UserApi {
             .orElseThrow(() -> new NotFoundException(IamErrorCodes.USER_NOT_FOUND, id));
     }
 
+    /** 校验用户存在，不存在抛 NotFound（跨 Service 复用前置校验）。 */
+    public void assertUserExists(Long userId) {
+        userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.USER_NOT_FOUND, userId));
+    }
+
     @Override
     public PageResult<UserVo> list(PageQuery query) {
         PageResult<MbIamUserRecord> page = userRepository.findPage(query);
