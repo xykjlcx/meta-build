@@ -7,8 +7,10 @@ import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.iam.api.cmd.AssignRolesCmd;
 import com.metabuild.platform.iam.api.cmd.ChangePasswordCmd;
 import com.metabuild.platform.iam.api.cmd.ResetPasswordCmd;
+import com.metabuild.platform.iam.api.cmd.UserBatchPatchCmd;
 import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
 import com.metabuild.platform.iam.api.cmd.UserListQuery;
+import com.metabuild.platform.iam.api.vo.UserBatchResultVo;
 import com.metabuild.platform.iam.api.vo.UserListVo;
 import com.metabuild.platform.iam.api.vo.UserRolesVo;
 import com.metabuild.platform.iam.api.vo.UserVo;
@@ -99,5 +101,12 @@ public class UserController {
     @RequirePermission("iam:user:detail")
     public UserRolesVo getRoles(@PathVariable Long id) {
         return new UserRolesVo(roleService.findRoleIdsByUserId(id));
+    }
+
+    /** 批量更新用户（PATCH deptId / status，上限 100） */
+    @PutMapping("/batch")
+    @RequirePermission("iam:user:batchUpdate")
+    public UserBatchResultVo batchUpdate(@Valid @RequestBody UserBatchPatchCmd request) {
+        return userService.batchPatch(request);
     }
 }

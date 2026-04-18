@@ -11,8 +11,10 @@ import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.UserApi;
 import com.metabuild.platform.iam.api.cmd.ChangePasswordCmd;
+import com.metabuild.platform.iam.api.cmd.UserBatchPatchCmd;
 import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
 import com.metabuild.platform.iam.api.cmd.UserListQuery;
+import com.metabuild.platform.iam.api.vo.UserBatchResultVo;
 import com.metabuild.platform.iam.api.vo.UserListVo;
 import com.metabuild.platform.iam.api.vo.UserVo;
 import com.metabuild.platform.iam.api.cmd.UserUpdateCmd;
@@ -151,6 +153,47 @@ public class UserService implements UserApi {
             throw new ConflictException(CommonErrorCodes.CONCURRENT_MODIFICATION);
         }
         return toResponse(record);
+    }
+
+    /**
+     * 批量更新用户（PATCH 式）。
+     * <ul>
+     *   <li>上限 100，超出抛 iam.user.batchExceedsLimit</li>
+     *   <li>全量事务：任一失败整体回滚（NotFoundException / ConcurrentModification 触发回滚）</li>
+     *   <li>patch 内字段均为 null 时视为 no-op，返回 updated=ids.size()</li>
+     * </ul>
+     */
+    @Transactional
+    public UserBatchResultVo batchPatch(UserBatchPatchCmd cmd) {
+        if (cmd.ids().size() > 100) {
+            throw new BusinessException(IamErrorCodes.USER_BATCH_EXCEEDS_LIMIT);
+        }
+        if (cmd.patch().isEmpty()) {
+            // 无字段更新，no-op
+            return new UserBatchResultVo(cmd.ids().size(), List.of());
+        }
+
+        int updatedCount = 0;
+        for (Long id : cmd.ids()) {
+            var record = userRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(IamErrorCodes.USER_NOT_FOUND, id));
+
+            if (cmd.patch().deptId() != null) {
+                record.setDeptId(cmd.patch().deptId());
+                record.setOwnerDeptId(cmd.patch().deptId());
+            }
+            if (cmd.patch().status() != null) {
+                record.setStatus(cmd.patch().status());
+            }
+
+            int updated = userRepository.update(record, currentUser.userIdOrSystem());
+            if (updated == 0) {
+                throw new ConflictException(CommonErrorCodes.CONCURRENT_MODIFICATION);
+            }
+            updatedCount++;
+        }
+        log.info("批量更新用户: count={}, patch={}", updatedCount, cmd.patch());
+        return new UserBatchResultVo(updatedCount, List.of());
     }
 
     @Transactional
