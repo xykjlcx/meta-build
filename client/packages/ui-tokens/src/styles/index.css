@@ -5,4 +5,5 @@
 @import '../tokens/primitive.css';
 @import '../tokens/semantic-classic.css';
 @import '../tokens/semantic-lark-console.css';
+@import '../tokens/semantic-claude-warm.css';
 @import '../tokens/component.css';

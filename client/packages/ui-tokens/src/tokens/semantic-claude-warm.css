@@ -1,0 +1,239 @@
+/* Layer 2 — Semantic tokens for claude-warm style
+ * 对齐 Anthropic Claude Design 视觉语言（暖米白 + 暖橙 light / midnight 暖深 + 亮橙 dark）
+ *
+ * 真相源：
+ *   - /Users/ocean/Desktop/claude-design-test01/styles/tokens.css
+ *     - light：`[data-theme="claude"]`（第 45-80 行）
+ *     - dark ：`[data-theme="midnight"]`（第 121-156 行）
+ *
+ * Claude Design token → meta-build 映射（主要）：
+ *   --bg          → --color-background
+ *   --bg-elev     → --color-card / --color-popover
+ *   --bg-sunken   → --color-muted
+ *   --surface-alt → --color-panel
+ *   --fg          → --color-foreground（及 card/popover/icon 同族）
+ *   --fg-muted    → --color-muted-foreground / --color-secondary-foreground
+ *   --fg-subtle   → --color-placeholder
+ *   --brand       → --color-primary / --color-accent-foreground / --color-info / --color-ring
+ *   --brand-hover → --color-primary-hover
+ *   --brand-fg    → --color-primary-foreground
+ *   --brand-bg    → --color-secondary / --color-accent
+ *   --border      → --color-border / --color-input
+ *   --border-strong → --color-border-strong
+ *   --ring        → --color-ring（保留 alpha）
+ *   --success / --warning / --danger / --info           → --color-success / warning / destructive / info
+ *   --success-bg / --warning-bg / --danger-bg           → --color-*-soft
+ *
+ * 说明：
+ *   - Claude Design 无 sidebar 独立 token —— 基于 bg-sunken / brand / brand-bg 推导
+ *   - info-soft / info-foreground 等 Claude Design 未显式给 —— 用 brand-bg 同族策略
+ *   - radius / size / motion 等非色 token：复用 classic 同值（primitive 派生，天然通用）
+ *   - shadow：用 Claude Design 暖棕 tint（rgba(20,14,8,...)），覆盖 primitive 的中性黑阴影
+ *   - font：Claude Design 用 Inter + PingFang SC + feature-settings（在本 token 不落地）
+ *
+ * Selector 命名：
+ *   Light: [data-theme-style='claude-warm']
+ *   Dark:  [data-theme-style='claude-warm'][data-theme-color-mode='dark']
+ */
+
+[data-theme-style='claude-warm'] {
+  /* ===== Surface =====
+   * bg 暖米白；card/popover 用更亮一档的 bg-elev；panel 用 surface-alt。
+   * muted 用 bg-sunken（比 bg 略暗，做次级区块背景）。
+   */
+  --color-background: oklch(0.975 0.008 85);              /* --bg 暖米白 */
+  --color-foreground: oklch(0.24 0.015 60);               /* --fg 暖深棕 */
+  --color-card: oklch(0.99 0.006 85);                     /* --bg-elev */
+  --color-card-foreground: oklch(0.24 0.015 60);
+  --color-popover: oklch(0.99 0.006 85);
+  --color-popover-foreground: oklch(0.24 0.015 60);
+  --color-panel: oklch(0.98 0.007 85);                    /* --surface-alt */
+
+  /* ===== Primary / Secondary / Accent =====
+   * primary = Claude 暖橙；secondary/accent 用 --brand-bg（极浅橙底）做次级/激活背景。
+   */
+  --color-primary: oklch(0.66 0.15 45);                   /* --brand Claude 橙 */
+  --color-primary-foreground: oklch(0.99 0.005 85);       /* --brand-fg */
+  --color-primary-hover: oklch(0.6 0.16 45);              /* --brand-hover */
+  --color-secondary: oklch(0.95 0.03 55);                 /* --brand-bg 浅橙底 */
+  --color-secondary-foreground: oklch(0.48 0.012 60);     /* --fg-muted */
+  --color-accent: oklch(0.95 0.03 55);                    /* 激活态与 secondary 同族 */
+  --color-accent-foreground: oklch(0.6 0.16 45);          /* 激活文字用 brand-hover（高对比橙） */
+
+  /* ===== Muted / Text layers ===== */
+  --color-muted: oklch(0.955 0.01 85);                    /* --bg-sunken */
+  --color-muted-foreground: oklch(0.48 0.012 60);         /* --fg-muted */
+  --color-placeholder: oklch(0.62 0.01 60);               /* --fg-subtle */
+  --color-icon-foreground: oklch(0.24 0.015 60);          /* --fg */
+
+  /* ===== Semantic status + soft variants =====
+   * soft = Claude Design 的 *-bg（极浅对应色状态背景）
+   */
+  --color-destructive: oklch(0.58 0.18 25);               /* --danger */
+  --color-destructive-foreground: oklch(0.99 0.005 85);
+  --color-destructive-soft: oklch(0.95 0.04 25);          /* --danger-bg */
+  --color-success: oklch(0.62 0.13 150);                  /* --success */
+  --color-success-foreground: oklch(0.99 0.005 85);
+  --color-success-soft: oklch(0.95 0.04 150);             /* --success-bg */
+  --color-warning: oklch(0.72 0.14 75);                   /* --warning */
+  --color-warning-foreground: oklch(0.24 0.015 60);       /* 暖深棕字，warning 亮色上可读 */
+  --color-warning-soft: oklch(0.96 0.05 85);              /* --warning-bg */
+  --color-info: oklch(0.62 0.12 235);                     /* --info */
+  --color-info-foreground: oklch(0.99 0.005 85);
+
+  /* ===== Border / Input / Ring ===== */
+  --color-border: oklch(0.9 0.008 70);                    /* --border */
+  --color-border-strong: oklch(0.82 0.01 70);             /* --border-strong */
+  --color-input: oklch(0.9 0.008 70);                     /* 与 border 同族 */
+  --color-ring: oklch(0.68 0.14 45 / 0.35);               /* --ring 带 alpha */
+
+  /* ===== Sidebar（Claude Design 无独立 token，基于主色板推导）=====
+   * 策略：sidebar 略低于 bg（用 bg-sunken），active 用 brand-bg 浅橙 + brand 橙字，
+   *       无独立 hover 色，复用 accent 浅橙。
+   */
+  --color-sidebar: oklch(0.955 0.01 85);                  /* --bg-sunken 稍沉 */
+  --color-sidebar-foreground: oklch(0.48 0.012 60);       /* --fg-muted */
+  --color-sidebar-primary: oklch(0.66 0.15 45);           /* --brand */
+  --color-sidebar-primary-foreground: oklch(0.99 0.005 85); /* --brand-fg */
+  --color-sidebar-accent: oklch(0.95 0.03 55);            /* --brand-bg 激活浅橙 */
+  --color-sidebar-accent-foreground: oklch(0.6 0.16 45);  /* 激活橙字 */
+  --color-sidebar-border: oklch(0.9 0.008 70);            /* --border */
+  --color-sidebar-ring: oklch(0.66 0.15 45);              /* --brand */
+  --color-sidebar-hover: oklch(0.95 0.03 55);             /* hover 浅橙 */
+
+  /* ===== 圆角（派生自 primitive 的 --radius，复用 classic 档位）===== */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* ===== 尺寸（复用 classic 标准，管理后台控件节奏通用）===== */
+  --size-control-height: var(--size-control-h-md);
+  --size-control-height-sm: 2rem;
+  --size-control-height-md: 2.25rem;
+  --size-control-height-lg: 2.75rem;
+  --size-header-height: 3.5rem;
+  --size-sidebar-width: 16rem;
+  --size-sidebar-width-collapsed: 4rem;
+  --size-content-max-width: 80rem;
+
+  /* ===== 阴影（Claude Design 暖棕 tint rgba(20,14,8,...) 替代 primitive 纯黑）===== */
+  --shadow-sm: 0 1px 2px rgb(20 14 8 / 0.06), 0 1px 1px rgb(20 14 8 / 0.04);
+  --shadow-md: 0 4px 12px -2px rgb(20 14 8 / 0.08), 0 2px 4px -1px rgb(20 14 8 / 0.04);
+  --shadow-lg: 0 12px 32px -8px rgb(20 14 8 / 0.12), 0 4px 8px -2px rgb(20 14 8 / 0.06);
+  --shadow-xl: 0 24px 60px -12px rgb(20 14 8 / 0.18), 0 8px 16px -4px rgb(20 14 8 / 0.08);
+  --shadow-floating: 0 4px 12px -2px rgb(20 14 8 / 0.1), 0 2px 4px -1px rgb(20 14 8 / 0.06);
+  --shadow-modal: 0 12px 32px -8px rgb(20 14 8 / 0.14), 0 4px 8px -2px rgb(20 14 8 / 0.08);
+  --shadow-selected: 0 0 0 2px var(--color-ring);
+
+  /* ===== 动效（Claude Design 用稍慢的 320ms 让暖感更绅士；复用 productive 曲线）===== */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --easing-productive: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ===== 字体（Claude Design 以 Inter 为主，中文优先 PingFang SC）===== */
+  --font-sans: 'Inter', 'PingFang SC', 'HarmonyOS Sans SC', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, 'Cascadia Code', monospace;
+  --font-heading: var(--font-sans);
+}
+
+[data-theme-style='claude-warm'][data-theme-color-mode='dark'] {
+  /* Dark = Midnight：暖深棕黑（hue 60）+ 亮橙（brand 提亮到 0.74）
+   * Claude Design `[data-theme="midnight"]` 直接映射。
+   */
+
+  /* ===== Surface ===== */
+  --color-background: oklch(0.18 0.012 60);               /* --bg midnight 暖深 */
+  --color-foreground: oklch(0.94 0.008 85);               /* --fg 暖米白字 */
+  --color-card: oklch(0.24 0.012 60);                     /* --surface，比 bg 亮 */
+  --color-card-foreground: oklch(0.94 0.008 85);
+  --color-popover: oklch(0.24 0.012 60);
+  --color-popover-foreground: oklch(0.94 0.008 85);
+  --color-panel: oklch(0.26 0.012 60);                    /* --surface-alt */
+
+  /* ===== Primary / Secondary / Accent ===== */
+  --color-primary: oklch(0.74 0.14 50);                   /* --brand 亮橙 */
+  --color-primary-foreground: oklch(0.18 0.012 60);       /* --brand-fg 用 bg 形成深字亮底反差 */
+  --color-primary-hover: oklch(0.8 0.14 50);              /* --brand-hover 更亮 */
+  --color-secondary: oklch(0.3 0.05 50);                  /* --brand-bg 暖橙低亮 */
+  --color-secondary-foreground: oklch(0.72 0.012 70);     /* --fg-muted */
+  --color-accent: oklch(0.3 0.05 50);                     /* 激活态同 secondary */
+  --color-accent-foreground: oklch(0.74 0.14 50);         /* 激活橙字 */
+
+  /* ===== Muted / Text layers ===== */
+  --color-muted: oklch(0.22 0.012 60);                    /* --bg-elev */
+  --color-muted-foreground: oklch(0.72 0.012 70);         /* --fg-muted */
+  --color-placeholder: oklch(0.58 0.012 70);              /* --fg-subtle */
+  --color-icon-foreground: oklch(0.94 0.008 85);          /* --fg */
+
+  /* ===== Semantic status + soft variants（dark：降亮度 + 同 hue soft）===== */
+  --color-destructive: oklch(0.68 0.19 25);               /* --danger */
+  --color-destructive-foreground: oklch(0.94 0.008 85);
+  --color-destructive-soft: oklch(0.3 0.08 25);           /* --danger-bg */
+  --color-success: oklch(0.72 0.15 155);                  /* --success */
+  --color-success-foreground: oklch(0.18 0.012 60);
+  --color-success-soft: oklch(0.3 0.06 155);              /* --success-bg */
+  --color-warning: oklch(0.78 0.14 80);                   /* --warning */
+  --color-warning-foreground: oklch(0.18 0.012 60);
+  --color-warning-soft: oklch(0.32 0.07 80);              /* --warning-bg */
+  --color-info: oklch(0.7 0.13 235);                      /* --info */
+  --color-info-foreground: oklch(0.18 0.012 60);
+
+  /* ===== Border / Input / Ring ===== */
+  --color-border: oklch(0.32 0.012 60);                   /* --border */
+  --color-border-strong: oklch(0.42 0.014 60);            /* --border-strong */
+  --color-input: oklch(0.32 0.012 60);
+  --color-ring: oklch(0.7 0.14 45 / 0.45);                /* --ring 带 alpha */
+
+  /* ===== Sidebar（Midnight 推导：比 bg 稍亮 bg-elev，active 用 brand-bg 暖橙低亮）===== */
+  --color-sidebar: oklch(0.22 0.012 60);                  /* --bg-elev 稍亮 */
+  --color-sidebar-foreground: oklch(0.72 0.012 70);       /* --fg-muted */
+  --color-sidebar-primary: oklch(0.74 0.14 50);           /* --brand 亮橙 */
+  --color-sidebar-primary-foreground: oklch(0.18 0.012 60);
+  --color-sidebar-accent: oklch(0.3 0.05 50);             /* --brand-bg 激活暖橙 */
+  --color-sidebar-accent-foreground: oklch(0.74 0.14 50); /* 激活亮橙字 */
+  --color-sidebar-border: oklch(0.32 0.012 60);
+  --color-sidebar-ring: oklch(0.74 0.14 50);
+  --color-sidebar-hover: oklch(0.3 0.05 50);              /* hover 暖橙低亮 */
+
+  /* ===== 圆角 ===== */
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  /* ===== 尺寸 ===== */
+  --size-control-height: var(--size-control-h-md);
+  --size-control-height-sm: 2rem;
+  --size-control-height-md: 2.25rem;
+  --size-control-height-lg: 2.75rem;
+  --size-header-height: 3.5rem;
+  --size-sidebar-width: 16rem;
+  --size-sidebar-width-collapsed: 4rem;
+  --size-content-max-width: 80rem;
+
+  /* ===== 阴影（dark 加深；用暖棕纯黑，视觉上与 light 同族）===== */
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.3);
+  --shadow-md: 0 4px 12px -2px rgb(0 0 0 / 0.4), 0 2px 4px -1px rgb(0 0 0 / 0.2);
+  --shadow-lg: 0 12px 32px -8px rgb(0 0 0 / 0.5), 0 4px 8px -2px rgb(0 0 0 / 0.25);
+  --shadow-xl: 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 8px 16px -4px rgb(0 0 0 / 0.3);
+  --shadow-floating: 0 4px 12px -2px rgb(0 0 0 / 0.4), 0 2px 4px -1px rgb(0 0 0 / 0.25);
+  --shadow-modal: 0 12px 32px -8px rgb(0 0 0 / 0.55), 0 4px 8px -2px rgb(0 0 0 / 0.3);
+  --shadow-selected: 0 0 0 2px var(--color-ring);
+
+  /* ===== 动效 ===== */
+  --duration-fast: 150ms;
+  --duration-normal: 250ms;
+  --duration-slow: 400ms;
+  --easing-in: cubic-bezier(0.4, 0, 1, 1);
+  --easing-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --easing-productive: cubic-bezier(0.2, 0, 0, 1);
+
+  /* ===== 字体 ===== */
+  --font-sans: 'Inter', 'PingFang SC', 'HarmonyOS Sans SC', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, 'Cascadia Code', monospace;
+  --font-heading: var(--font-sans);
+}
