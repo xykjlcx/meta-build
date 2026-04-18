@@ -107,11 +107,11 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* ===== 尺寸（复用 classic 标准，管理后台控件节奏通用）===== */
+  /* ===== 尺寸（对齐 Claude Design density: default=44px/compact=36px/comfortable=52px）===== */
   --size-control-height: var(--size-control-h-md);
-  --size-control-height-sm: 2rem;
-  --size-control-height-md: 2.25rem;
-  --size-control-height-lg: 2.75rem;
+  --size-control-height-sm: 2.25rem; /* 36px */
+  --size-control-height-md: 2.75rem; /* 44px = Claude Design --row-h default */
+  --size-control-height-lg: 3.25rem; /* 52px */
   --size-header-height: 3.5rem;
   --size-sidebar-width: 16rem;
   --size-sidebar-width-collapsed: 4rem;
@@ -205,11 +205,11 @@
   --radius-lg: var(--radius);
   --radius-xl: calc(var(--radius) + 4px);
 
-  /* ===== 尺寸 ===== */
+  /* ===== 尺寸（dark 同 light 档位，对齐 Claude Design density）===== */
   --size-control-height: var(--size-control-h-md);
-  --size-control-height-sm: 2rem;
-  --size-control-height-md: 2.25rem;
-  --size-control-height-lg: 2.75rem;
+  --size-control-height-sm: 2.25rem; /* 36px */
+  --size-control-height-md: 2.75rem; /* 44px = Claude Design --row-h default */
+  --size-control-height-lg: 3.25rem; /* 52px */
   --size-header-height: 3.5rem;
   --size-sidebar-width: 16rem;
   --size-sidebar-width-collapsed: 4rem;
