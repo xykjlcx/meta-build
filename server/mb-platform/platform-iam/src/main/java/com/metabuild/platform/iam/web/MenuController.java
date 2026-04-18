@@ -4,6 +4,7 @@ import com.metabuild.common.security.CurrentUser;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.iam.api.vo.CurrentUserMenuVo;
 import com.metabuild.platform.iam.api.cmd.MenuCreateCmd;
+import com.metabuild.platform.iam.api.cmd.MenuUpdateCmd;
 import com.metabuild.platform.iam.api.vo.MenuVo;
 import com.metabuild.platform.iam.domain.menu.MenuService;
 import jakarta.validation.Valid;
@@ -52,6 +53,12 @@ public class MenuController {
     public MenuVo create(@Valid @RequestBody MenuCreateCmd request) {
         Long id = menuService.createMenu(request);
         return menuService.getById(id);
+    }
+
+    @PutMapping("/{id}")
+    @RequirePermission("iam:menu:update")
+    public MenuVo update(@PathVariable Long id, @Valid @RequestBody MenuUpdateCmd request) {
+        return menuService.updateMenu(id, request);
     }
 
     @DeleteMapping("/{id}")

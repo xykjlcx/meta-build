@@ -18,10 +18,10 @@ public final class IamErrorCodes {
     public static final String DEPT_NAME_DUPLICATE = "iam.dept.nameDuplicate";
 
     public static final String MENU_NOT_FOUND = "iam.menu.notFound";
-    public static final String MENU_PARENT_CIRCULAR = "iam.menu.parent.circular";
-    public static final String MENU_TYPE_CHILDREN_EXIST = "iam.menu.type.childrenExist";
-    public static final String MENU_BUTTON_PERMISSION_REQUIRED = "iam.menu.button.permissionRequired";
-    public static final String MENU_PERMISSION_CODE_DUPLICATE = "iam.menu.permissionCode.duplicate";
+    public static final String MENU_PARENT_CIRCULAR = "iam.menu.parentCircular";
+    public static final String MENU_CHILDREN_EXIST = "iam.menu.childrenExist";
+    public static final String MENU_BUTTON_PERMISSION_REQUIRED = "iam.menu.buttonPermissionRequired";
+    public static final String MENU_PERMISSION_CODE_DUPLICATE = "iam.menu.permissionCodeDuplicate";
 
     public static final String USER_EMAIL_DUPLICATE = "iam.user.emailDuplicate";
     public static final String USER_BATCH_EXCEEDS_LIMIT = "iam.user.batchExceedsLimit";

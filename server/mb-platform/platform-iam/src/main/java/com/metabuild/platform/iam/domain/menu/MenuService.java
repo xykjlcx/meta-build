@@ -1,10 +1,15 @@
 package com.metabuild.platform.iam.domain.menu;
 
+import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.CommonErrorCodes;
+import com.metabuild.common.exception.ConflictException;
 import com.metabuild.common.exception.NotFoundException;
+import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.MenuApi;
 import com.metabuild.platform.iam.api.cmd.MenuCreateCmd;
+import com.metabuild.platform.iam.api.cmd.MenuUpdateCmd;
 import com.metabuild.platform.iam.api.vo.MenuVo;
 import com.metabuild.platform.iam.domain.role.RoleRepository;
 import com.metabuild.schema.tables.records.MbIamMenuRecord;
@@ -30,6 +35,7 @@ public class MenuService implements MenuApi {
     private final MenuRepository menuRepository;
     private final RoleRepository roleRepository;
     private final CurrentUser currentUser;
+    private final SnowflakeIdGenerator idGenerator;
 
     @Override
     public MenuVo getById(Long id) {
@@ -66,7 +72,19 @@ public class MenuService implements MenuApi {
 
     @Transactional
     public Long createMenu(MenuCreateCmd request) {
+        // BUTTON 类型必须有 permissionCode
+        if ("BUTTON".equals(request.menuType())
+            && (request.permissionCode() == null || request.permissionCode().isBlank())) {
+            throw new BusinessException(IamErrorCodes.MENU_BUTTON_PERMISSION_REQUIRED);
+        }
+        // permissionCode 全局唯一
+        if (menuRepository.existsByPermissionCode(request.permissionCode(), null)) {
+            throw new ConflictException(IamErrorCodes.MENU_PERMISSION_CODE_DUPLICATE,
+                request.permissionCode());
+        }
+
         var record = new MbIamMenuRecord();
+        record.setId(idGenerator.nextId());
         record.setParentId(request.parentId()); // null 表示顶级菜单
         record.setName(request.name());
         record.setPermissionCode(request.permissionCode());
@@ -81,6 +99,68 @@ public class MenuService implements MenuApi {
         Long menuId = menuRepository.insert(record);
         log.info("创建菜单: menuId={}, name={}", menuId, request.name());
         return menuId;
+    }
+
+    /**
+     * 更新菜单。校验：
+     * 1. parentId 不能是自己或后代（防环）
+     * 2. 有 children 不能改为 BUTTON
+     * 3. BUTTON 必须有 permissionCode
+     * 4. permissionCode 全局唯一（排除自身，null 允许多条）
+     */
+    @Transactional
+    public MenuVo updateMenu(Long id, MenuUpdateCmd request) {
+        var record = menuRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.MENU_NOT_FOUND, id));
+
+        Long newParentId = request.parentId();
+
+        // 防环
+        if (newParentId != null) {
+            if (newParentId.equals(id)) {
+                throw new BusinessException(IamErrorCodes.MENU_PARENT_CIRCULAR);
+            }
+            List<Long> descendantIds = menuRepository.findAllDescendantIds(id);
+            if (descendantIds.contains(newParentId)) {
+                throw new BusinessException(IamErrorCodes.MENU_PARENT_CIRCULAR);
+            }
+        }
+
+        // 有 children 不能改为 BUTTON
+        if ("BUTTON".equals(request.menuType()) && menuRepository.hasChildren(id)) {
+            throw new BusinessException(IamErrorCodes.MENU_CHILDREN_EXIST);
+        }
+
+        // BUTTON 必须有 permissionCode
+        if ("BUTTON".equals(request.menuType())
+            && (request.permissionCode() == null || request.permissionCode().isBlank())) {
+            throw new BusinessException(IamErrorCodes.MENU_BUTTON_PERMISSION_REQUIRED);
+        }
+
+        // permissionCode 全局唯一（排除自身）
+        if (menuRepository.existsByPermissionCode(request.permissionCode(), id)) {
+            throw new ConflictException(IamErrorCodes.MENU_PERMISSION_CODE_DUPLICATE,
+                request.permissionCode());
+        }
+
+        record.setParentId(newParentId);
+        record.setName(request.name());
+        record.setPermissionCode(request.permissionCode());
+        record.setMenuType(request.menuType());
+        record.setIcon(request.icon());
+        if (request.sortOrder() != null) {
+            record.setSortOrder(request.sortOrder());
+        }
+        if (request.visible() != null) {
+            record.setVisible(request.visible());
+        }
+
+        int updated = menuRepository.update(record, currentUser.userIdOrSystem());
+        if (updated == 0) {
+            throw new ConflictException(CommonErrorCodes.CONCURRENT_MODIFICATION);
+        }
+        log.info("更新菜单: menuId={}, name={}", id, request.name());
+        return toResponse(record, List.of());
     }
 
     @Transactional
