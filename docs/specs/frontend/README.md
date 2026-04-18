@@ -134,6 +134,7 @@ client/
 | 5 | L2-L5 组件样式必须通过 Tailwind 语义 class 消费主题 | [10-quality-gates.md §3.5](./10-quality-gates.md) + [03-ui-primitives.md §4.4](./03-ui-primitives.md) |
 | 6 | 代码静态文案走 i18n，**数据库存储的文案永不走 i18n** | [10-quality-gates.md §3.6](./10-quality-gates.md) + [05-app-shell.md §7](./05-app-shell.md) |
 | 7 | 所有 `import.meta.env.*` 引用的变量必须在 `.env.example` 声明 | [10-quality-gates.md §3.7](./10-quality-gates.md) + [10-quality-gates.md §4.11](./10-quality-gates.md) 脚本实现 |
+| 8 | 业务逻辑代码（业务 hook / 表单校验 / 状态管理 / 权限判断 / L3 业务组件行为 / bug 修复）**必须走 TDD**：先写失败测试 → 看它失败 → 写最小代码通过。测试 commit 必须先于实现 commit。L2 原子组件纯视觉可免，交互行为仍需 TDD。例外需在 commit 写 `TDD-exempt: <reason>` | [rules/tdd-enforcement.md](../../rules/tdd-enforcement.md) |
 
 ---
 

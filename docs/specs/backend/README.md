@@ -151,6 +151,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | 14 | 实体 → DTO 映射**必须**手写 `from()` 静态方法，v1 **禁用** MapStruct / ModelMapper（C2）| [08-archunit-rules.md §7.3](./08-archunit-rules.md) |
 | 15 | Service 对 `org.jooq` 的依赖**仅限** `Record` / `Result` / `exception` 白名单（`SERVICE_JOOQ_WHITELIST`）；`DSLContext` / `DSL` / `Field` / `Condition` / 各类 Step 一律禁止（C8）| [08-archunit-rules.md §6 N3 精化规则](./08-archunit-rules.md) |
 | 16 | 含 `owner_dept_id` 字段的表**必须**在 `DataScopeConfig` 注册到 `DataScopeRegistry`（漏注册 = 超权风险） | 代码审查 + DataScopeConfig 登记纪律（ArchUnit 跨 jOOQ schema 和 Spring Bean 的差集检测暂不实现） | [05-security.md §7.7](./05-security.md) |
+| 17 | 业务逻辑代码（Service / 状态机 / 权限规则 / Repository 自定义查询 / bug 修复）**必须走 TDD**：先写失败测试 → 看它失败 → 写最小代码通过。测试 commit 必须先于实现 commit，禁止一次性提交"实现 + 测试"套餐 | rules/tdd-enforcement.md + AI 派发 prompt 分两阶段（PR review 看 commit 顺序） | [rules/tdd-enforcement.md](../../rules/tdd-enforcement.md) |
 
 ---
 
