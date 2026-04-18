@@ -1,1 +1,2 @@
 com.metabuild.infra.web.WebAutoConfiguration
+com.metabuild.infra.web.config.RestTemplateAutoConfiguration
