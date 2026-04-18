@@ -103,5 +103,19 @@
     "password": "Password",
     "login": "Login",
     "forgotPassword": "Forgot Password"
+  },
+  "system": {
+    "switcher": "System Switcher",
+    "admin": "Admin",
+    "finance": "Finance",
+    "crm": "CRM",
+    "logistics": "Logistics",
+    "analytics": "Analytics",
+    "knowledge": "Knowledge",
+    "workflow": "Workflow",
+    "messaging": "Messaging",
+    "more": "More",
+    "placeholder": "More systems coming soon",
+    "comingSoon": "Coming soon"
   }
 }

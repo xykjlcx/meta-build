@@ -103,5 +103,19 @@
     "password": "密码",
     "login": "登录",
     "forgotPassword": "忘记密码"
+  },
+  "system": {
+    "switcher": "切换系统",
+    "admin": "管理后台",
+    "finance": "财务系统",
+    "crm": "客户管理",
+    "logistics": "物流打单",
+    "analytics": "数据分析",
+    "knowledge": "知识库",
+    "workflow": "工作流",
+    "messaging": "消息中心",
+    "more": "更多",
+    "placeholder": "更多系统即将推出",
+    "comingSoon": "敬请期待"
   }
 }

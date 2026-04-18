@@ -43,6 +43,7 @@ export {
   registerLayout,
   useLayoutPreset,
 } from './layouts';
+export type { LayoutPresetDef, ShellLayoutProps, SystemItem } from './layouts';
 
 // components
 export { BreadcrumbNav, type BreadcrumbEntry } from './components/breadcrumb-nav';
@@ -53,6 +54,10 @@ export {
   NotificationBadge,
   type NotificationBadgeProps,
 } from './components/notification-badge';
+export {
+  SystemSwitcherPopover,
+  type SystemSwitcherPopoverProps,
+} from './components/system-switcher-popover';
 
 // error
 export { GlobalErrorBoundary, GlobalErrorPage, GlobalNotFoundPage } from './error';
