@@ -4,6 +4,22 @@
 
 ## 当前脚本
 
+### `mvn-test.sh`
+
+用途：Maven test 安全 wrapper，拦截 `-pl` 但缺 `-am` 的命令（跨模块 test 必须同时重编依赖，否则读旧 class，见 `docs/rules/maven-reactor-run-pitfall.md`）。
+
+```bash
+# 单测某个模块的 class，写法和 ./mvnw 完全一致，但会强制你加 -am
+./scripts/mvn-test.sh -pl mb-admin -am test -Dtest=OpenapiSnapshotTest
+```
+
+拦截示例：
+
+```bash
+$ ./scripts/mvn-test.sh -pl mb-admin test -Dtest=Foo
+❌ 拦截：-pl 跨模块操作必须同时 -am（否则依赖模块不重编）
+```
+
 ### `verify-and-run-admin.sh`
 
 用途：
