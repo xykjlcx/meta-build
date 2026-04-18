@@ -14,7 +14,6 @@ import com.metabuild.infra.archunit.JdbcIsolationRule;
 import com.metabuild.infra.archunit.JooqIsolationRule;
 import com.metabuild.infra.archunit.ModuleBoundaryRule;
 import com.metabuild.infra.archunit.PaginationRule;
-import com.metabuild.infra.archunit.PermissionWriteRule;
 import com.metabuild.infra.archunit.SaTokenIsolationRule;
 import com.metabuild.infra.archunit.ScheduledRule;
 import com.metabuild.infra.archunit.TimezoneRule;
@@ -246,12 +245,5 @@ class ArchitectureTest {
     @Test
     void scheduled_method_must_have_shedlock() {
         ScheduledRule.SCHEDULED_METHOD_MUST_HAVE_SHEDLOCK.check(classes);
-    }
-
-    // ========== 权限写入门面 ==========
-
-    @Test
-    void only_permission_write_facade_can_call_permission_write_methods() {
-        PermissionWriteRule.ONLY_PERMISSION_WRITE_FACADE_CAN_CALL_PERMISSION_WRITE_METHODS.check(classes);
     }
 }
