@@ -1,7 +1,8 @@
+import { styleRegistry } from '@mb/ui-tokens';
 import { act, render, screen } from '@testing-library/react';
 import { useEffect } from 'react';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { StyleProvider } from '../style-provider';
+import { StyleProvider, normalizeStyleId } from '../style-provider';
 import { useStyle } from '../use-style';
 
 // 测试用宿主组件：渲染 styleId 到 DOM 方便断言
@@ -46,17 +47,23 @@ afterEach(() => {
 });
 
 describe('StyleProvider 归一化', () => {
-  it('defaultStyle 非法值归一化到 classic', () => {
+  it('defaultStyle 非法值归一化到 claude-warm（Plan A 默认）', () => {
     const { getStyleId } = renderWithProvider('non-existent');
-    expect(getStyleId()).toBe('classic');
+    expect(getStyleId()).toBe('claude-warm');
     // DOM 上的 data-theme-style 也应同步
-    expect(document.documentElement.dataset.themeStyle).toBe('classic');
+    expect(document.documentElement.dataset.themeStyle).toBe('claude-warm');
   });
 
   it('defaultStyle 合法值 lark-console 直接生效', () => {
     const { getStyleId } = renderWithProvider('lark-console');
     expect(getStyleId()).toBe('lark-console');
     expect(document.documentElement.dataset.themeStyle).toBe('lark-console');
+  });
+
+  it('defaultStyle 合法值 classic 直接生效（保留 classic 作为 check:theme 基准）', () => {
+    const { getStyleId } = renderWithProvider('classic');
+    expect(getStyleId()).toBe('classic');
+    expect(document.documentElement.dataset.themeStyle).toBe('classic');
   });
 
   it('setStyle 合法值 lark-console 生效，hook 状态和 DOM 同步', async () => {
@@ -74,7 +81,8 @@ describe('StyleProvider 归一化', () => {
       </StyleProvider>,
     );
 
-    expect(screen.getByTestId('style-id').textContent).toBe('classic');
+    // Provider 内部默认值已切到 claude-warm
+    expect(screen.getByTestId('style-id').textContent).toBe('claude-warm');
 
     await act(async () => {
       capturedCtx?.setStyle('lark-console');
@@ -84,7 +92,7 @@ describe('StyleProvider 归一化', () => {
     expect(document.documentElement.dataset.themeStyle).toBe('lark-console');
   });
 
-  it('setStyle 非法值归一化到 classic，不抛异常', async () => {
+  it('setStyle 非法值归一化到 claude-warm，不抛异常', async () => {
     let capturedCtx: ReturnType<typeof useStyle> | null = null;
 
     function TestCapture() {
@@ -106,16 +114,16 @@ describe('StyleProvider 归一化', () => {
       capturedCtx!.setStyle('xyz' as never);
     });
 
-    expect(screen.getByTestId('style-id').textContent).toBe('classic');
-    expect(document.documentElement.dataset.themeStyle).toBe('classic');
+    expect(screen.getByTestId('style-id').textContent).toBe('claude-warm');
+    expect(document.documentElement.dataset.themeStyle).toBe('claude-warm');
   });
 
-  it('localStorage 非法值 mount 时归一化到 classic', () => {
+  it('localStorage 非法值 mount 时归一化到 claude-warm', () => {
     localStorage.setItem('mb_style', 'hacked');
     const { getStyleId } = renderWithProvider();
     // readStateFromStorage 检查 isStyleId，非法值返回 null，走到 fallback
-    expect(getStyleId()).toBe('classic');
-    expect(document.documentElement.dataset.themeStyle).toBe('classic');
+    expect(getStyleId()).toBe('claude-warm');
+    expect(document.documentElement.dataset.themeStyle).toBe('claude-warm');
   });
 
   it('localStorage 合法值 lark-console mount 时恢复', () => {
@@ -123,5 +131,25 @@ describe('StyleProvider 归一化', () => {
     const { getStyleId } = renderWithProvider();
     expect(getStyleId()).toBe('lark-console');
     expect(document.documentElement.dataset.themeStyle).toBe('lark-console');
+  });
+});
+
+describe('claude-warm style registration', () => {
+  it('registers claude-warm with correct cssFile path', () => {
+    const meta = styleRegistry.get('claude-warm');
+    expect(meta).toBeDefined();
+    expect(meta?.cssFile).toBe('./tokens/semantic-claude-warm.css');
+    expect(meta?.id).toBe('claude-warm');
+    expect(meta?.color).toBe('#d97a3f');
+  });
+
+  it('normalizeStyleId 非法 id 回落到 claude-warm（Plan A 默认兜底）', () => {
+    // 直接单测 normalizeStyleId export
+    expect(normalizeStyleId('non-existent-style')).toBe('claude-warm');
+    expect(normalizeStyleId('')).toBe('claude-warm');
+    // 合法 id 原样返回
+    expect(normalizeStyleId('classic')).toBe('classic');
+    expect(normalizeStyleId('lark-console')).toBe('lark-console');
+    expect(normalizeStyleId('claude-warm')).toBe('claude-warm');
   });
 });

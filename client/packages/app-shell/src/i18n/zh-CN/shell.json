@@ -87,7 +87,12 @@
       "xl": "圆润"
     },
     "contentLayout": { "default": "铺满容器", "centered": "居中聚焦" },
-    "sidebarMode": { "default": "展开", "icon": "图标" }
+    "sidebarMode": { "default": "展开", "icon": "图标" },
+    "styles": {
+      "classic": "经典",
+      "lark-console": "飞书控制台",
+      "claude-warm": "Claude 暖色"
+    }
   },
   "language": { "switch": "切换语言" },
   "auth": {

@@ -93,7 +93,7 @@ function App() {
     <GlobalErrorBoundary>
       <QueryClientProvider client={queryClient}>
         <I18nProvider>
-          <StyleProvider>
+          <StyleProvider defaultStyle="claude-warm" defaultColorMode="light">
             <AppReadyEffect />
             <RouterProvider router={router} />
             <ToastContainer />

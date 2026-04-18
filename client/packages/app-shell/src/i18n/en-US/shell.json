@@ -87,7 +87,12 @@
       "xl": "Rounded"
     },
     "contentLayout": { "default": "Fill Container", "centered": "Centered Focus" },
-    "sidebarMode": { "default": "Expanded", "icon": "Icon" }
+    "sidebarMode": { "default": "Expanded", "icon": "Icon" },
+    "styles": {
+      "classic": "Classic",
+      "lark-console": "Lark Console",
+      "claude-warm": "Claude Warm"
+    }
   },
   "language": { "switch": "Switch Language" },
   "auth": {

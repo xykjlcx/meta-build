@@ -262,14 +262,14 @@ function applyState(state: ThemeState): void {
   }
 }
 
-/** 非法 id 归一化：返回合法的 styleId，无效值回落到 'classic' */
-function normalizeStyleId(id: StyleId): StyleId {
-  return styleRegistry.has(id) ? id : 'classic';
+/** 非法 id 归一化：返回合法的 styleId，无效值回落到 'claude-warm'（Plan A 默认） */
+export function normalizeStyleId(id: StyleId): StyleId {
+  return styleRegistry.has(id) ? id : 'claude-warm';
 }
 
 export function StyleProvider({
   children,
-  defaultStyle = 'classic',
+  defaultStyle = 'claude-warm',
   defaultColorMode = 'light',
 }: {
   children: ReactNode;

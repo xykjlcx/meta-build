@@ -117,3 +117,12 @@ styleRegistry.register({
   color: '#3370ff',
   cssFile: './tokens/semantic-lark-console.css',
 });
+
+// 注册 claude-warm style（对齐 Anthropic Claude Design，Plan A 默认）
+styleRegistry.register({
+  id: 'claude-warm',
+  displayName: 'Claude 暖色',
+  description: '对齐 Anthropic Claude Design 的暖米白 + 暖橙品牌色',
+  color: '#d97a3f',
+  cssFile: './tokens/semantic-claude-warm.css',
+});
