@@ -2,8 +2,6 @@ package com.metabuild.admin.notice;
 
 import com.metabuild.admin.BaseIntegrationTest;
 import com.metabuild.admin.MockCurrentUser;
-import com.metabuild.business.notice.api.cmd.BatchIdsCmd;
-import com.metabuild.business.notice.api.vo.BatchResultVo;
 import com.metabuild.business.notice.api.cmd.NoticeCreateCmd;
 import com.metabuild.business.notice.api.vo.NoticeDetailVo;
 import com.metabuild.business.notice.api.NoticeErrorCodes;
@@ -283,53 +281,8 @@ class NoticeIntegrationTest extends BaseIntegrationTest {
     }
 
     // ===================================================================
-    // 批量操作（2 用例）
+    // 批量操作 → 见 NoticeBatchTest（独立事务测试，需禁用外层事务）
     // ===================================================================
-
-    @Nested
-    class BatchTests {
-
-        @Test
-        void batchPublish_returnsSuccessAndSkipped() {
-            // 创建 2 个草稿 + 1 个已发布
-            Long draftId1 = noticeService.create(new NoticeCreateCmd(
-                "批量草稿1", null, false, null, null, null
-            )).id();
-            Long draftId2 = noticeService.create(new NoticeCreateCmd(
-                "批量草稿2", null, false, null, null, null
-            )).id();
-            Long publishedId = noticeService.create(new NoticeCreateCmd(
-                "已发布", null, false, null, null, null
-            )).id();
-            noticeService.publish(publishedId, publishCmdWithUserTarget(ADMIN_USER_ID));
-
-            // 批量发布（含已发布的，应 skip）
-            BatchResultVo result = noticeService.batchPublish(
-                new BatchIdsCmd(List.of(draftId1, draftId2, publishedId))
-            );
-
-            assertThat(result.success()).isEqualTo(2);
-            assertThat(result.skipped()).isEqualTo(1);
-        }
-
-        @Test
-        void batchDelete_returnsSuccessAndSkipped() {
-            Long draftId = noticeService.create(new NoticeCreateCmd(
-                "待删草稿", null, false, null, null, null
-            )).id();
-            Long publishedId = noticeService.create(new NoticeCreateCmd(
-                "已发布不删", null, false, null, null, null
-            )).id();
-            noticeService.publish(publishedId, publishCmdWithUserTarget(ADMIN_USER_ID));
-
-            BatchResultVo result = noticeService.batchDelete(
-                new BatchIdsCmd(List.of(draftId, publishedId))
-            );
-
-            assertThat(result.success()).isEqualTo(1);
-            assertThat(result.skipped()).isEqualTo(1);
-        }
-    }
 
     // ===================================================================
     // 查询（3 用例）

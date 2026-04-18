@@ -249,48 +249,39 @@ public class NoticeService {
     }
 
     /**
-     * 批量发布公告。
-     * <p>
-     * 逐条校验，符合条件（DRAFT）的执行发布（简化版，无接收人展开），不符合的跳过。
+     * 批量发布公告（待重构：当前是 silent skip，无接收人展开，无事件）。
      */
     @Transactional
     public BatchResultVo batchPublish(BatchIdsCmd cmd) {
         int success = 0;
-        int skipped = 0;
 
         for (Long id : cmd.ids()) {
             var opt = noticeRepository.findSnapshotById(id);
             if (opt.isEmpty() || opt.get().status() != (short) NoticeStatus.DRAFT.code()) {
-                skipped++;
                 continue;
             }
             noticeRepository.updateStatus(id, (short) NoticeStatus.PUBLISHED.code(), currentUser.userId());
             success++;
         }
 
-        log.info("批量发布公告: success={}, skipped={}", success, skipped);
-        return new BatchResultVo(success, skipped);
+        log.info("批量发布公告: success={}", success);
+        return new BatchResultVo(success, 0, List.of());
     }
 
     /**
-     * 批量删除公告。
-     * <p>
-     * 逐条校验，符合条件（DRAFT 或 REVOKED）的执行删除，不符合的跳过。
+     * 批量删除公告（待重构：当前是 silent skip）。
      */
     @Transactional
     public BatchResultVo batchDelete(BatchIdsCmd cmd) {
         int success = 0;
-        int skipped = 0;
 
         for (Long id : cmd.ids()) {
             var opt = noticeRepository.findSnapshotById(id);
             if (opt.isEmpty()) {
-                skipped++;
                 continue;
             }
             NoticeStatus status = NoticeStatus.fromCode(opt.get().status());
             if (status != NoticeStatus.DRAFT && status != NoticeStatus.REVOKED) {
-                skipped++;
                 continue;
             }
             noticeAttachmentRepository.deleteByNoticeId(id);
@@ -300,8 +291,8 @@ public class NoticeService {
             success++;
         }
 
-        log.info("批量删除公告: success={}, skipped={}", success, skipped);
-        return new BatchResultVo(success, skipped);
+        log.info("批量删除公告: success={}", success);
+        return new BatchResultVo(success, 0, List.of());
     }
 
     // ------ 已读/未读 ------
