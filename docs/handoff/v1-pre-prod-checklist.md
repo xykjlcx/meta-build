@@ -22,7 +22,7 @@
 |---|---|---|---|
 | **TLS 版本锁定** | 未显式锁定 | JVM 参数加 `-Djdk.tls.client.protocols=TLSv1.3 -Djdk.tls.server.protocols=TLSv1.3`，补 ArchUnit 规则禁止 `new SSLContext()` 手工降级，补 nginx/K8s ingress 的 `ssl_protocols TLSv1.3` | 安全扫描工具报 TLS < 1.2 |
 | **敏感信息脱敏** | 局部脱敏（Sa-Token 密码字段等），不系统 | 补 Logback converter `%maskPhone / %maskIdCard / %maskEmail`；DeliveryLog 的 `error_message` 入库前过滤；WeChatBindingService 日志里 `openId` 脱敏（前 4 后 4） | 日志进了 ELK / 公共存储 |
-| **Actuator 独立端口** | ✅ 已做（9090 + 127.0.0.1） | 验证 nginx/K8s Service 没暴露 9090；Prometheus scrape target 指向 9090 | — |
+| **Actuator 独立端口** | ✅ 已做（仅 prod profile，默认 9090 + 127.0.0.1，可通过 `MB_MANAGEMENT_PORT` / `MB_MANAGEMENT_ADDRESS` 覆盖）| 验证 nginx / K8s Service 没暴露 9090；Prometheus scrape target 指向 9090 | — |
 | **Flyway SQL 审计** | 本地 review 即可 | 每次 migration 前，DBA / 有 DBA 经验的人过一遍索引 / FK / NOT NULL；本 checklist 更新"上线前跑过的 migration 清单" | 生产故障追溯发现 DDL 误操作 |
 | **生产环境 env 覆盖** | `.env.example` 仅示例 | 生产实际的 `MB_SA_TOKEN_JWT_SECRET` / DB 密码 / 邮件 / 微信配置通过 K8s Secret 或 CI/CD Variable 注入，**绝不写进 image** | — |
 

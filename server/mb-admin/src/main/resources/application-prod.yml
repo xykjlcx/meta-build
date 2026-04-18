@@ -20,7 +20,11 @@ sa-token:
   is-log: false
 
 # 生产环境 Actuator：仅暴露只读端点，排除 loggers（运行时修改日志级别有安全风险）
+# 独立端口 + 绑本地回环，避免暴露给公网；K8s Service / nginx 别转发到 9090
 management:
+  server:
+    port: ${MB_MANAGEMENT_PORT:9090}
+    address: ${MB_MANAGEMENT_ADDRESS:127.0.0.1}
   endpoints:
     web:
       exposure:

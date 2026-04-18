@@ -158,11 +158,10 @@ mb:
       fail-count-ttl-minutes: 30
       reset-token-ttl-minutes: 15
 
-# Actuator（独立端口 + 绑定本地回环，避免暴露给公网）
+# Actuator
+# 注：生产 profile（application-prod.yml）启用独立端口 9090 + 127.0.0.1，
+# dev/test 保持与主应用同端口方便 MockMvc 测试和本地调试。
 management:
-  server:
-    port: ${MB_MANAGEMENT_PORT:9090}
-    address: ${MB_MANAGEMENT_ADDRESS:127.0.0.1}
   endpoints:
     web:
       base-path: /actuator

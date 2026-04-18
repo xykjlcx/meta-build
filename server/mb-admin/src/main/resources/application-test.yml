@@ -18,11 +18,6 @@ springdoc:
   api-docs:
     enabled: false
 
-# 测试环境 actuator 回到主端口（MockMvc 测试需要通过主 dispatcher 访问）
-management:
-  server:
-    port:
-
 logging:
   level:
     com.metabuild: DEBUG
