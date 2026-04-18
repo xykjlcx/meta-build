@@ -22,6 +22,15 @@
     "toggleDark": "切换明暗",
     "moreOptions": "更多选项"
   },
+  "topbar": {
+    "help": "帮助",
+    "inbox": "收件箱",
+    "notifications": "通知",
+    "profile": "个人信息",
+    "settings": "设置",
+    "logout": "退出登录",
+    "searchPlaceholder": "搜索功能、页面或菜单..."
+  },
   "search": {
     "placeholder": "搜索功能、页面或菜单...",
     "comingSoon": "全局搜索开发中",
@@ -35,7 +44,8 @@
     "mixDesc": "顶部模块切换 + 子侧栏结构，适合多模块 SaaS。",
     "headerTabs": {
       "more": "更多模块"
-    }
+    },
+    "mainContent": "主内容区"
   },
   "mix": {
     "title": "模块工作区",

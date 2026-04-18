@@ -22,6 +22,15 @@
     "toggleDark": "Toggle dark mode",
     "moreOptions": "More options"
   },
+  "topbar": {
+    "help": "Help",
+    "inbox": "Inbox",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logout": "Sign out",
+    "searchPlaceholder": "Search features, pages, or menus..."
+  },
   "search": {
     "placeholder": "Search features, pages, or menus...",
     "comingSoon": "Global search coming soon",
@@ -35,7 +44,8 @@
     "mixDesc": "Header-level module tabs with a secondary sidebar for multi-product SaaS.",
     "headerTabs": {
       "more": "More"
-    }
+    },
+    "mainContent": "Main content"
   },
   "mix": {
     "title": "Module Workspace",
