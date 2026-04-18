@@ -1,10 +1,12 @@
 package com.metabuild.infra.web.config;
 
+import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -23,21 +25,30 @@ public class RestTemplateAutoConfiguration {
 
     @Bean
     public RestTemplate mbRestTemplate(MbRestTemplateProperties properties) {
+        // 连接池级别配置：验证空闲连接 + socket 超时粒度
+        ConnectionConfig connectionConfig = ConnectionConfig.custom()
+                .setConnectTimeout(Timeout.ofMilliseconds(properties.connectTimeout().toMillis()))
+                .setSocketTimeout(Timeout.ofMilliseconds(properties.readTimeout().toMillis()))
+                .setValidateAfterInactivity(TimeValue.ofMilliseconds(properties.validateAfterInactivity().toMillis()))
+                .build();
+
         PoolingHttpClientConnectionManager connectionManager = PoolingHttpClientConnectionManagerBuilder.create()
                 .setMaxConnTotal(properties.maxTotalConnections())
                 .setMaxConnPerRoute(properties.maxConnectionsPerRoute())
+                .setDefaultConnectionConfig(connectionConfig)
                 .build();
 
+        // 请求级别配置：独立的 connectionRequestTimeout（从池拿连接的等待上限）
         RequestConfig requestConfig = RequestConfig.custom()
-                .setConnectTimeout(Timeout.ofMilliseconds(properties.connectTimeout().toMillis()))
+                .setConnectionRequestTimeout(Timeout.ofMilliseconds(properties.connectionRequestTimeout().toMillis()))
                 .setResponseTimeout(Timeout.ofMilliseconds(properties.readTimeout().toMillis()))
-                .setConnectionRequestTimeout(Timeout.ofMilliseconds(properties.connectTimeout().toMillis()))
                 .build();
 
         CloseableHttpClient httpClient = HttpClients.custom()
                 .setConnectionManager(connectionManager)
                 .setDefaultRequestConfig(requestConfig)
                 .evictExpiredConnections()
+                .evictIdleConnections(TimeValue.ofMilliseconds(properties.evictIdleConnectionsAfter().toMillis()))
                 .build();
 
         return new RestTemplate(new HttpComponentsClientHttpRequestFactory(httpClient));

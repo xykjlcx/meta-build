@@ -18,13 +18,19 @@ import java.time.Duration;
 public record MbRestTemplateProperties(
         @NotNull Duration connectTimeout,
         @NotNull Duration readTimeout,
+        @NotNull Duration connectionRequestTimeout,
+        @NotNull Duration validateAfterInactivity,
+        @NotNull Duration evictIdleConnectionsAfter,
         @Positive int maxTotalConnections,
         @Positive int maxConnectionsPerRoute
 ) {
     public MbRestTemplateProperties {
         if (connectTimeout == null) connectTimeout = Duration.ofSeconds(5);
         if (readTimeout == null) readTimeout = Duration.ofSeconds(30);
+        if (connectionRequestTimeout == null) connectionRequestTimeout = Duration.ofSeconds(2);
+        if (validateAfterInactivity == null) validateAfterInactivity = Duration.ofSeconds(10);
+        if (evictIdleConnectionsAfter == null) evictIdleConnectionsAfter = Duration.ofSeconds(30);
         if (maxTotalConnections <= 0) maxTotalConnections = 200;
-        if (maxConnectionsPerRoute <= 0) maxConnectionsPerRoute = 50;
+        if (maxConnectionsPerRoute <= 0) maxConnectionsPerRoute = 100;
     }
 }
