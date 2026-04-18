@@ -55,6 +55,7 @@ scope: [后端/前端/全栈/构建/部署/流程]
 | [批量重命名脚本必须可回滚](batch-rename-script-must-be-reversible.md) | 批量重命名, rename script, 批处理脚本, 大规模改名 | 0416 DTO/API 包重命名时，首版脚本把工作树打进半迁移中间态 |
 | [业务逻辑代码必须 TDD（先写失败测试再实现）](tdd-enforcement.md) | TDD, 测试, test, 先写测试, 业务逻辑, Service, hook, 状态机, bug 修复, 先实现再测试, 补测试 | 0418 审计 M4/M5 commit 历史发现实际是"实现先行，半小时后补测试"，与 Superpowers TDD skill 的 Iron Law 冲突 |
 | [过度工程化陷阱识别（Review 后先问"是不是真问题"）](over-engineering-trap.md) | Review, 隐患, 性能, 缓存, 超时, 方案 A 方案 B, 链式补丁, 决策四步协议 | 0418 meta-0023 撤销 ADR-0021/0022 过度工程化反面样本 |
+| [Mixed commit 必须精细回退，禁用 git revert](surgical-revert.md) | git revert, 回退, 撤销 commit, 部分回退, mixed commit, ADR 撤销 | 0418 meta-0023 回退 88081d75 / 13bcc06b 时保留了真改进的经验 |
 
 ### 全栈
 | 规则 | triggers | 来源 |
@@ -93,6 +94,7 @@ scope: [后端/前端/全栈/构建/部署/流程]
 | [多视角审查](multi-perspective-review.md) | review, 审查, 定稿, milestone 交付 | 0412 四维审查 + 0413 七角色走查，含两套验证过的角色清单 |
 | [计划必须 Review 后才能实施](plan-review-before-execution.md) | 计划, plan, 实施, execute, writing-plans, 并行, 串行 | 0414 M2+M4 计划审查均发现大量问题 |
 | [契约变更按固定顺序收尾](contract-change-closeout-order.md) | OpenAPI, orval, DTO 重命名, 契约变更, api-sdk | 0416 大规模 DTO 重命名收尾时，靠固定顺序拆解后端 / OpenAPI / 前端 / docs 漂移 |
+| [高风险任务主动做二轮 Review（不等用户问）](second-pass-review.md) | review, 交付, milestone, 批次, 二轮, 二轮 review, ≥3 commit, infra 层, 契约变更 | 0418 meta-0023 会话一轮 review 漏 openapi 500 错报坑，二轮由用户触发才发现 |
 
 ---
 
