@@ -7,6 +7,7 @@ public final class CommonErrorCodes {
 
     public static final String SYSTEM_INTERNAL = "system.internal";
     public static final String SYSTEM_SERVICE_UNAVAILABLE = "system.serviceUnavailable";
+    public static final String SYSTEM_NOT_FOUND = "system.notFound";
 
     public static final String VALIDATION = "validation";
     public static final String VALIDATION_NOT_NULL = "validation.notNull";

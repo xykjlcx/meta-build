@@ -16,6 +16,7 @@ import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.net.URI;
 import java.util.List;
@@ -159,6 +160,21 @@ public class GlobalExceptionHandler {
         pd.setProperty("code", CommonErrorCodes.AUTH_FORBIDDEN);
         pd.setProperty("traceId", MDC.get("traceId"));
         log.warn("角色拒绝 [{}]: role={}", CommonErrorCodes.AUTH_FORBIDDEN, ex.getRole());
+        return pd;
+    }
+
+    /**
+     * 未定义路由 / 静态资源缺失 → 404（防止被 handleGeneral 吞成 500，违反 HTTP 语义）。
+     * 典型触发场景：客户端打错 URL、废弃端点仍有调用、禁用的 springdoc 被访问。
+     */
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ProblemDetail handleNoResource(NoResourceFoundException ex) {
+        var pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
+        pd.setTitle(HttpStatus.NOT_FOUND.getReasonPhrase());
+        pd.setDetail("资源不存在");
+        pd.setProperty("code", CommonErrorCodes.SYSTEM_NOT_FOUND);
+        pd.setProperty("traceId", MDC.get("traceId"));
+        log.debug("资源不存在: {}", ex.getResourcePath());
         return pd;
     }
 
