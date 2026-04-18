@@ -96,6 +96,11 @@ scope: [后端/前端/全栈/构建/部署/流程]
 | [契约变更按固定顺序收尾](contract-change-closeout-order.md) | OpenAPI, orval, DTO 重命名, 契约变更, api-sdk | 0416 大规模 DTO 重命名收尾时，靠固定顺序拆解后端 / OpenAPI / 前端 / docs 漂移 |
 | [高风险任务主动做二轮 Review（不等用户问）](second-pass-review.md) | review, 交付, milestone, 批次, 二轮, 二轮 review, ≥3 commit, infra 层, 契约变更 | 0418 meta-0023 会话一轮 review 漏 openapi 500 错报坑，二轮由用户触发才发现 |
 
+### 前端
+| 规则 | triggers | 来源 |
+|------|----------|------|
+| [L3 是沉淀出来的，不是设计出来的](l3-sedimentation-principle.md) | 新增组件, 考虑 L3 下沉, ui-patterns 扩展, Dashboard 图表组件 | 0418 Claude Design 对齐（Q11）Dashboard 图表组件是否下沉 L3 的决策 |
+
 ---
 
 ## 已归档（archive/）
