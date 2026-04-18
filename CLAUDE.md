@@ -346,7 +346,7 @@ cd server && ./mvnw verify                                # 全量构建 + 测�
 cd server && ./mvnw -Pcodegen generate-sources -pl mb-schema  # jOOQ codegen
 cd server && ./scripts/verify-and-run-admin.sh            # 正式启动：admin 依赖闭包 verify 后再启动
 cd server && SERVER_PORT=18080 ./scripts/verify-and-run-admin.sh  # 临时改端口启动
-cd server && ./mvnw -pl mb-admin test -Dtest=ArchitectureTest # ArchUnit 测试
+cd server && ./scripts/mvn-test.sh -pl mb-admin -am test -Dtest=ArchitectureTest  # 跨模块单测：强制 wrapper（见 docs/rules/maven-reactor-run-pitfall.md，-pl 必配 -am）
 
 # === Docker ===
 docker compose up -d                                      # PG(15432) + Redis(16379)
