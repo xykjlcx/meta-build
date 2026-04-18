@@ -1235,8 +1235,8 @@ layout-container (100vh, overflow:visible)
 
 | 文件 | 内容 |
 |------|------|
-| `feishu-admin-01-full-page.png` | 企业管理首页全貌 |
-| `feishu-admin-02-product-settings.png` | 点击"产品设置"后的下拉面板 |
-| `feishu-admin-03-wiki-page.png` | 切换到"知识库"产品后的页面（Sidebar 变化） |
-| `feishu-admin-04-sidebar-collapsed.png` | Sidebar 折叠为图标模式 |
-| `feishu-admin-05-responsive-768.png` | 768px 视口下的表现 |
+| `images/shell-redesign/feishu-admin-01-full-page.png` | 企业管理首页全貌 |
+| `images/shell-redesign/feishu-admin-02-product-settings.png` | 点击"产品设置"后的下拉面板 |
+| `images/shell-redesign/feishu-admin-03-wiki-page.png` | 切换到"知识库"产品后的页面（Sidebar 变化） |
+| `images/shell-redesign/feishu-admin-04-sidebar-collapsed.png` | Sidebar 折叠为图标模式 |
+| `images/shell-redesign/feishu-admin-05-responsive-768.png` | 768px 视口下的表现 |
