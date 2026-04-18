@@ -32,7 +32,10 @@
     "inset": "Inset 壳",
     "insetDesc": "默认后台布局，内容区卡片化，适合管理系统。",
     "mix": "Mix（顶栏+侧栏）",
-    "mixDesc": "顶部模块切换 + 子侧栏结构，适合多模块 SaaS。"
+    "mixDesc": "顶部模块切换 + 子侧栏结构，适合多模块 SaaS。",
+    "headerTabs": {
+      "more": "更多模块"
+    }
   },
   "mix": {
     "title": "模块工作区",

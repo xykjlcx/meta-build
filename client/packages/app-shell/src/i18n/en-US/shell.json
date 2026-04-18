@@ -32,7 +32,10 @@
     "inset": "Inset Shell",
     "insetDesc": "Card-like default admin shell for everyday backoffice pages.",
     "mix": "Mix (Top + Side)",
-    "mixDesc": "Header-level module tabs with a secondary sidebar for multi-product SaaS."
+    "mixDesc": "Header-level module tabs with a secondary sidebar for multi-product SaaS.",
+    "headerTabs": {
+      "more": "More"
+    }
   },
   "mix": {
     "title": "Module Workspace",
