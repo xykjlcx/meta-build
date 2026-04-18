@@ -350,7 +350,7 @@ Style / ColorMode / scale / radius / Preset / lang 全部继续 localStorage 存
 ## 关联 ADR
 - ADR-0016（Style / ColorMode / Customizer）：扩展（claude-warm 成为新默认）
 - ADR-0017（Layout Resolver + Preset Registry）：扩展（5 preset）
-- ADR-0020（lark-console + 70 token 扩展）：扩展（claude-warm 同等地位，token 实际达 140，CLAUDE.md drift 同步修正）
+- ADR-0020（lark-console + 70 token 扩展）：扩展（claude-warm 作为第三个 style 同等提供 70 core token × 2 ColorMode）
 - ADR frontend-0025（三层导航哲学）：本 ADR 的 Q4 决策详细展开
 ```
 
@@ -587,7 +587,7 @@ grep -nE "2 个 style|2 style|两个 style|2 套 (主题|style)" $SCAN
 
 按 Step 1 grep 结果精准替换：
 
-- `docs/specs/frontend/02-ui-tokens-theme.md`：token 数量（70 → 140）+ style 清单（从 2 扩到 3）+ 密度档名（xs/lg → compact/comfortable）
+- `docs/specs/frontend/02-ui-tokens-theme.md`：style 清单（从 2 扩到 3：classic + lark-console + claude-warm）+ 密度档名（xs/lg → compact/comfortable）。**不改 "70 semantic token" 措辞**——70 是 per-style 正确数字（见 Plan 概念 7）
 - `docs/specs/frontend/05-app-shell.md`：preset 清单（2 → 5）+ 默认 preset（inset → claude-inset）+ 三层导航模型（新增段落或指向 ADR frontend-0025）
 - `docs/specs/frontend/09-customization-workflow.md`：增补"使用者新增 Style / Preset 的 how-to 清单"（对应 Review 的使用者视角反馈）
 
@@ -624,7 +624,7 @@ Expected: 0 errors。若脚本不存在或不覆盖新增关键词，把新 grep
 
 ```bash
 git add CLAUDE.md AGENTS.md docs/specs/frontend/
-git commit -m "docs: 修正 CLAUDE/AGENTS/specs drift（preset 2→5 / token 70→140 / 密度档名 / depcruise 7→9）"
+git commit -m "docs: 修正 CLAUDE/AGENTS/specs drift（preset 2→5 / style 2→3 / 密度档名 xs-lg → compact-comfortable / depcruise 7→9 / 默认 style classic → claude-warm）"
 ```
 
 ---
