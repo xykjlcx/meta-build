@@ -26,7 +26,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
         SaPermissionImpl.class,
         RequirePermissionAspect.class,
         SaTokenAuthFacade.class,
-        RefreshTokenService.class
+        RefreshTokenService.class,
+        SaTokenTaskDecorator.class
 })
 public class SecurityAutoConfiguration implements WebMvcConfigurer {
 
