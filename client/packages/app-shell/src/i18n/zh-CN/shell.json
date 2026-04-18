@@ -42,6 +42,12 @@
     "insetDesc": "默认后台布局，内容区卡片化，适合管理系统。",
     "mix": "Mix（顶栏+侧栏）",
     "mixDesc": "顶部模块切换 + 子侧栏结构，适合多模块 SaaS。",
+    "claudeClassic": "Claude 经典",
+    "claudeClassicDesc": "标准顶栏 + 左侧栏（对齐 Claude Design classic）",
+    "claudeInset": "Claude 内嵌",
+    "claudeInsetDesc": "顶栏贴顶 + 主体内嵌白卡片（对齐 Claude Design inset）",
+    "claudeRail": "Claude 图标轨",
+    "claudeRailDesc": "窄图标侧栏 + 悬浮 label",
     "headerTabs": {
       "more": "更多模块"
     },

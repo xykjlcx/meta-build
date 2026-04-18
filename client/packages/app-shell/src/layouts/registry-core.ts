@@ -80,7 +80,7 @@ export class LayoutRegistry {
   }
 }
 
-export const layoutRegistry = new LayoutRegistry('inset');
+export const layoutRegistry = new LayoutRegistry('claude-inset');
 
 /**
  * 公开 API：注册一个新布局预设。

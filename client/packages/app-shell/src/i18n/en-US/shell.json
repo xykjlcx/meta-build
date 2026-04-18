@@ -42,6 +42,12 @@
     "insetDesc": "Card-like default admin shell for everyday backoffice pages.",
     "mix": "Mix (Top + Side)",
     "mixDesc": "Header-level module tabs with a secondary sidebar for multi-product SaaS.",
+    "claudeClassic": "Claude Classic",
+    "claudeClassicDesc": "Standard topbar + left sidebar (aligned with Claude Design classic).",
+    "claudeInset": "Claude Inset",
+    "claudeInsetDesc": "Topbar pinned to edge + inset white card body (aligned with Claude Design inset).",
+    "claudeRail": "Claude Rail",
+    "claudeRailDesc": "Narrow icon rail + hover-reveal labels.",
     "headerTabs": {
       "more": "More"
     },
