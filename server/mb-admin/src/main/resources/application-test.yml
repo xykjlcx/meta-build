@@ -14,6 +14,7 @@ sa-token:
   is-log: false
   jwt-secret-key: test-jwt-secret-key-for-testing
 
+# 默认禁用 springdoc 省其他测试启动时间；OpenapiSnapshotTest 通过 @TestPropertySource 单测强开
 springdoc:
   api-docs:
     enabled: false
