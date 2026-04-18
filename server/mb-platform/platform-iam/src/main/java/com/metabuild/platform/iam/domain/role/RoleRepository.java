@@ -140,6 +140,23 @@ public class RoleRepository {
             .execute();
     }
 
+    /** 删除用户与指定角色子集的关联 */
+    public void deleteUserRolesByUserAndRoleIds(Long userId, java.util.Set<Long> roleIds) {
+        if (roleIds == null || roleIds.isEmpty()) return;
+        dsl.deleteFrom(MB_IAM_USER_ROLE)
+            .where(MB_IAM_USER_ROLE.USER_ID.eq(userId))
+            .and(MB_IAM_USER_ROLE.ROLE_ID.in(roleIds))
+            .execute();
+    }
+
+    /** 查询持有指定角色的全部用户 ID */
+    public List<Long> findUserIdsByRoleId(Long roleId) {
+        return dsl.select(MB_IAM_USER_ROLE.USER_ID)
+            .from(MB_IAM_USER_ROLE)
+            .where(MB_IAM_USER_ROLE.ROLE_ID.eq(roleId))
+            .fetchInto(Long.class);
+    }
+
     /** 查询指定角色列表对应的自定义数据权限部门 ID */
     public List<Long> findDataScopeDeptIds(List<Long> roleIds) {
         if (roleIds == null || roleIds.isEmpty()) return List.of();
