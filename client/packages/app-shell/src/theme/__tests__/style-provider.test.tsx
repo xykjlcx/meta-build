@@ -134,6 +134,70 @@ describe('StyleProvider 归一化', () => {
   });
 });
 
+describe('ThemeScale localStorage migration', () => {
+  it("migrates legacy 'xs' to 'compact'", () => {
+    // 需要一个合法 styleId 才会走 readStateFromStorage 的非 null 分支
+    localStorage.setItem('mb_style', 'claude-warm');
+    localStorage.setItem('mb_scale', 'xs');
+    render(
+      <StyleProvider>
+        <div />
+      </StyleProvider>,
+    );
+    expect(localStorage.getItem('mb_scale')).toBe('compact');
+    expect(document.body.dataset.themeScale).toBe('compact');
+  });
+
+  it("migrates legacy 'lg' to 'comfortable'", () => {
+    localStorage.setItem('mb_style', 'claude-warm');
+    localStorage.setItem('mb_scale', 'lg');
+    render(
+      <StyleProvider>
+        <div />
+      </StyleProvider>,
+    );
+    expect(localStorage.getItem('mb_scale')).toBe('comfortable');
+    expect(document.body.dataset.themeScale).toBe('comfortable');
+  });
+
+  it('falls back to default on invalid value', () => {
+    localStorage.setItem('mb_style', 'claude-warm');
+    localStorage.setItem('mb_scale', 'whatever');
+    render(
+      <StyleProvider>
+        <div />
+      </StyleProvider>,
+    );
+    expect(document.body.dataset.themeScale).toBeUndefined();
+  });
+
+  it('removes data-theme-scale attr when switching back to default', async () => {
+    localStorage.setItem('mb_style', 'claude-warm');
+    localStorage.setItem('mb_scale', 'compact');
+
+    let capturedCtx: ReturnType<typeof useStyle> | null = null;
+    function TestCapture() {
+      const ctx = useStyle();
+      capturedCtx = ctx;
+      return <div />;
+    }
+
+    render(
+      <StyleProvider>
+        <TestCapture />
+      </StyleProvider>,
+    );
+
+    expect(document.body.dataset.themeScale).toBe('compact');
+
+    await act(async () => {
+      capturedCtx?.setScale('default');
+    });
+
+    expect(document.body.dataset.themeScale).toBeUndefined();
+  });
+});
+
 describe('claude-warm style registration', () => {
   it('registers claude-warm with correct cssFile path', () => {
     const meta = styleRegistry.get('claude-warm');

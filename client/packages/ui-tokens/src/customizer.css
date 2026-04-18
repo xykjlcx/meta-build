@@ -1,5 +1,12 @@
-[data-theme-scale='xs'] {
-  --size-control-height: 1.75rem;
+/**
+ * 密度档位（Plan A Task 8 与 Claude Design 对齐）
+ *   compact:     --size-control-height 36px (2.25rem)
+ *   default :    :root 保持不变（当前 2.25rem，与 compact 等值；如需拉开差距由主控决定）
+ *   comfortable: --size-control-height 52px (3.25rem)
+ * 命名保持 meta-build 现有 token（C2 决策 A），只调数值。
+ */
+[data-theme-scale='compact'] {
+  --size-control-height: 2.25rem;
   --size-header-height: 2.75rem;
   --size-sidebar-width: 13rem;
   --size-sidebar-width-collapsed: 3rem;
@@ -8,8 +15,8 @@
   --duration-slow: 300ms;
 }
 
-[data-theme-scale='lg'] {
-  --size-control-height: 2.5rem;
+[data-theme-scale='comfortable'] {
+  --size-control-height: 3.25rem;
   --size-header-height: 4rem;
   --size-sidebar-width: 18rem;
   --size-sidebar-width-collapsed: 4.5rem;

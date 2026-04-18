@@ -25,9 +25,9 @@ import { useLayoutPreset } from '../layouts/use-layout-preset';
 import { type SidebarMode, type StyleId, useStyle } from '../theme';
 
 const scaleOptions = [
-  { value: 'default', label: '⊘' },
-  { value: 'xs', label: 'XS' },
-  { value: 'lg', label: 'LG' },
+  { value: 'compact', labelKey: 'theme.scale.compact' },
+  { value: 'default', labelKey: 'theme.scale.default' },
+  { value: 'comfortable', labelKey: 'theme.scale.comfortable' },
 ] as const;
 
 const radiusOptions = [
@@ -170,10 +170,11 @@ export function ThemeCustomizer() {
             <ToggleField
               label={t('theme.scaleLabel')}
               value={scale}
-              onValueChange={(value) => setScale(value as 'default' | 'xs' | 'lg')}
+              onValueChange={(value) => setScale(value as 'default' | 'compact' | 'comfortable')}
               options={scaleOptions.map((option) => ({
                 value: option.value,
-                label: option.label,
+                label: t(option.labelKey),
+                className: 'flex-1',
               }))}
             />
 

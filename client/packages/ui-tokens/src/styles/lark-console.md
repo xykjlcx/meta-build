@@ -376,7 +376,7 @@ PingFang SC（苹方）是飞书管理后台的**事实字体**：
 | 行高 | `1.5` | 与 classic 相同 |
 | Sidebar item 高 | `32px` | 紧凑，符合飞书实测 |
 | 控件高度 `--size-control-h-md` | `2.25rem` = `36px` | 主按钮 / 输入框 / Select，飞书实测值 |
-| customizer scale 档位 | `xs / sm / md`（默认 md） | 通过 `data-theme-scale` 切换 |
+| customizer scale 档位 | `compact / default / comfortable`（默认 default） | 通过 `data-theme-scale` 切换 |
 
 飞书管理后台本身就是**中偏紧**的密度风格，因此 lark-console style 默认保持 scale 默认档（md）而不主动缩小。如果使用者觉得太紧，可通过 customizer 切换到 `comfortable` 档（控件高度 `2.5rem`，行高微增）。
 

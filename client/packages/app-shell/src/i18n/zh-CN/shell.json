@@ -78,7 +78,7 @@
     "sidebarModeLabel": "侧栏模式",
     "sidebarModeHint": "当前布局不支持此维度",
     "summary": "当前组合",
-    "scale": { "default": "标准", "xs": "紧凑", "lg": "宽松" },
+    "scale": { "compact": "紧凑", "default": "标准", "comfortable": "舒适" },
     "radius": {
       "default": "跟随默认",
       "sm": "克制",

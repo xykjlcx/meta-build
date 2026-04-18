@@ -2,7 +2,7 @@ import { type StyleId, styleRegistry } from '@mb/ui-tokens';
 import { type ReactNode, createContext, useEffect, useMemo, useState } from 'react';
 
 export type ColorMode = 'light' | 'dark';
-export type ThemeScale = 'default' | 'xs' | 'lg';
+export type ThemeScale = 'default' | 'compact' | 'comfortable';
 export type ThemeRadius = 'default' | 'sm' | 'md' | 'lg' | 'xl';
 export type ContentLayout = 'default' | 'centered';
 export type SidebarMode = 'default' | 'icon';
@@ -19,7 +19,7 @@ const SIDEBAR_MODE_KEY = 'mb_sidebar_mode';
 function getValidStyleIds(): Set<string> {
   return new Set(styleRegistry.getAllIds());
 }
-const SCALE_IDS = new Set<ThemeScale>(['default', 'xs', 'lg']);
+const SCALE_IDS = new Set<ThemeScale>(['default', 'compact', 'comfortable']);
 const RADIUS_IDS = new Set<ThemeRadius>(['default', 'sm', 'md', 'lg', 'xl']);
 const CONTENT_LAYOUT_IDS = new Set<ContentLayout>(['default', 'centered']);
 const SIDEBAR_MODE_IDS = new Set<SidebarMode>(['default', 'icon']);
@@ -71,6 +71,16 @@ function isSidebarMode(value: string | null | undefined): value is SidebarMode {
   return value != null && SIDEBAR_MODE_IDS.has(value as SidebarMode);
 }
 
+/**
+ * 将旧版密度值映射到新命名（Plan A Task 8：xs → compact, lg → comfortable）。
+ * 只处理字符串级别的迁移，不在这里做合法性校验（交给 isThemeScale）。
+ */
+function migrateScale(raw: string | null): string | null {
+  if (raw === 'xs') return 'compact';
+  if (raw === 'lg') return 'comfortable';
+  return raw;
+}
+
 function mapLegacyThemeToState(theme: LegacyThemeId): ThemeState {
   if (theme === 'dark') {
     return {
@@ -86,7 +96,7 @@ function mapLegacyThemeToState(theme: LegacyThemeId): ThemeState {
     return {
       styleId: 'classic',
       colorMode: 'light',
-      scale: 'xs',
+      scale: 'compact',
       radius: 'sm',
       contentLayout: 'default',
       sidebarMode: 'default',
@@ -117,7 +127,16 @@ function readStateFromStorage(): ThemeState | null {
   const storedStyle = window.localStorage.getItem(STYLE_KEY);
   if (isStyleId(storedStyle)) {
     const storedMode = window.localStorage.getItem(COLOR_MODE_KEY);
-    const storedScale = window.localStorage.getItem(SCALE_KEY);
+    const rawScale = window.localStorage.getItem(SCALE_KEY);
+    const migratedScale = migrateScale(rawScale);
+    // 如果发生了 legacy → 新命名的迁移，立刻回写 localStorage 防止下次再走迁移路径
+    if (migratedScale !== rawScale && migratedScale != null) {
+      try {
+        window.localStorage.setItem(SCALE_KEY, migratedScale);
+      } catch {
+        // ignore localStorage 写失败
+      }
+    }
     const storedRadius = window.localStorage.getItem(RADIUS_KEY);
     const storedContentLayout = window.localStorage.getItem(CONTENT_LAYOUT_KEY);
     const storedSidebarMode = window.localStorage.getItem(SIDEBAR_MODE_KEY);
@@ -125,7 +144,7 @@ function readStateFromStorage(): ThemeState | null {
     return {
       styleId: storedStyle,
       colorMode: storedMode === 'dark' ? 'dark' : 'light',
-      scale: isThemeScale(storedScale) ? storedScale : 'default',
+      scale: isThemeScale(migratedScale) ? migratedScale : 'default',
       radius: isThemeRadius(storedRadius) ? storedRadius : 'default',
       contentLayout: isContentLayout(storedContentLayout) ? storedContentLayout : 'default',
       sidebarMode: isSidebarMode(storedSidebarMode) ? storedSidebarMode : 'default',
@@ -147,7 +166,12 @@ function readStateFromDom(): ThemeState | null {
   }
 
   const attrMode = document.documentElement.dataset.themeColorMode;
-  const attrScale = document.body.dataset.themeScale;
+  const rawAttrScale = document.body.dataset.themeScale ?? null;
+  const migratedAttrScale = migrateScale(rawAttrScale);
+  // 如果 DOM 上残留 legacy 值，立刻改写 dataset 保持 SSR / 刷新瞬间一致
+  if (migratedAttrScale !== rawAttrScale && migratedAttrScale != null) {
+    document.body.dataset.themeScale = migratedAttrScale;
+  }
   const attrRadius = document.body.dataset.themeRadius;
   const attrContentLayout = document.body.dataset.themeContentLayout;
   const attrSidebarMode = document.body.dataset.themeSidebarMode;
@@ -155,7 +179,7 @@ function readStateFromDom(): ThemeState | null {
   return {
     styleId: attrStyle,
     colorMode: attrMode === 'dark' ? 'dark' : 'light',
-    scale: isThemeScale(attrScale) ? attrScale : 'default',
+    scale: isThemeScale(migratedAttrScale) ? migratedAttrScale : 'default',
     radius: isThemeRadius(attrRadius) ? attrRadius : 'default',
     contentLayout: isContentLayout(attrContentLayout) ? attrContentLayout : 'default',
     sidebarMode: isSidebarMode(attrSidebarMode) ? attrSidebarMode : 'default',

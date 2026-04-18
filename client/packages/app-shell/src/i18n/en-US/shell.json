@@ -78,7 +78,7 @@
     "sidebarModeLabel": "Sidebar Mode",
     "sidebarModeHint": "Not supported by current layout",
     "summary": "Current Mix",
-    "scale": { "default": "Standard", "xs": "Compact", "lg": "Relaxed" },
+    "scale": { "compact": "Compact", "default": "Standard", "comfortable": "Comfortable" },
     "radius": {
       "default": "System Default",
       "sm": "Tight",
