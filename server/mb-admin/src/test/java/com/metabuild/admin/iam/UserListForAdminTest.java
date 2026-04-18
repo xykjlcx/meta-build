@@ -6,7 +6,7 @@ import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.platform.iam.api.cmd.DeptCreateCmd;
 import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
-import com.metabuild.platform.iam.api.cmd.UserListQuery;
+import com.metabuild.platform.iam.api.query.UserListQuery;
 import com.metabuild.platform.iam.api.cmd.UserUpdateCmd;
 import com.metabuild.platform.iam.api.vo.UserListVo;
 import com.metabuild.platform.iam.domain.dept.DeptService;

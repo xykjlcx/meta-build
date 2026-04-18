@@ -3,7 +3,7 @@ package com.metabuild.platform.iam.domain.user;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.jooq.query.SortParser;
-import com.metabuild.platform.iam.api.cmd.UserListQuery;
+import com.metabuild.platform.iam.api.query.UserListQuery;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
 import static com.metabuild.schema.tables.MbIamUserRole.MB_IAM_USER_ROLE;
 import lombok.RequiredArgsConstructor;

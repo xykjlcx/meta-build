@@ -1,4 +1,4 @@
-package com.metabuild.platform.iam.api.cmd;
+package com.metabuild.platform.iam.api.query;
 
 import com.metabuild.common.dto.PageQuery;
 

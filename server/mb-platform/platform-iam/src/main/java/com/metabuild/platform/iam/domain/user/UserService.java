@@ -14,7 +14,7 @@ import com.metabuild.platform.iam.api.cmd.ChangePasswordCmd;
 import com.metabuild.platform.iam.api.cmd.UserBatchPatchCmd;
 import com.metabuild.platform.iam.api.cmd.ProfileUpdateCmd;
 import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
-import com.metabuild.platform.iam.api.cmd.UserListQuery;
+import com.metabuild.platform.iam.api.query.UserListQuery;
 import com.metabuild.platform.iam.api.vo.UserBatchResultVo;
 import com.metabuild.platform.iam.api.vo.UserListVo;
 import com.metabuild.platform.iam.api.vo.UserVo;
