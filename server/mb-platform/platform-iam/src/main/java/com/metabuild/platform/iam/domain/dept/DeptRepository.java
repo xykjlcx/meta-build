@@ -55,7 +55,8 @@ public class DeptRepository {
         // )
         // SELECT id FROM dept_tree
         var deptTree = DSL.name("dept_tree");
-        var id = DSL.field(DSL.name("id"), Long.class);
+        // CTE 列必须用限定名 dept_tree.id 避免与 mb_iam_dept.id 在 JOIN 中歧义
+        var deptTreeId = DSL.field(DSL.name("dept_tree", "id"), Long.class);
 
         return dsl.withRecursive(deptTree.as(
                 DSL.select(MB_IAM_DEPT.ID)
@@ -65,18 +66,34 @@ public class DeptRepository {
                     DSL.select(MB_IAM_DEPT.ID)
                         .from(MB_IAM_DEPT)
                         .join(DSL.table(deptTree))
-                        .on(MB_IAM_DEPT.PARENT_ID.eq(id))
+                        .on(MB_IAM_DEPT.PARENT_ID.eq(deptTreeId))
                 )
             ))
-            .select(id)
+            .select(deptTreeId)
             .from(DSL.table(deptTree))
-            .fetch(id);
+            .fetch(deptTreeId);
     }
 
     public boolean hasChildren(Long id) {
         return dsl.fetchExists(
             dsl.selectFrom(MB_IAM_DEPT).where(MB_IAM_DEPT.PARENT_ID.eq(id))
         );
+    }
+
+    /**
+     * 检查同一 parent 下是否存在同名部门（排除指定 id，用于更新时校验唯一性）。
+     * parentId = null 表示根节点（schema 层 parent_id 存 NULL）。
+     * excludeId = null 时不排除（创建场景）。
+     */
+    public boolean existsByNameAndParent(String name, Long parentId, Long excludeId) {
+        var condition = MB_IAM_DEPT.NAME.eq(name);
+        condition = parentId == null
+            ? condition.and(MB_IAM_DEPT.PARENT_ID.isNull())
+            : condition.and(MB_IAM_DEPT.PARENT_ID.eq(parentId));
+        if (excludeId != null) {
+            condition = condition.and(MB_IAM_DEPT.ID.ne(excludeId));
+        }
+        return dsl.fetchExists(dsl.selectFrom(MB_IAM_DEPT).where(condition));
     }
 
     public Long insert(MbIamDeptRecord record) {

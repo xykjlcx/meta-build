@@ -14,8 +14,17 @@ public final class IamErrorCodes {
     public static final String DEPT_NOT_FOUND = "iam.dept.notFound";
     public static final String DEPT_HAS_CHILDREN = "iam.dept.hasChildren";
     public static final String DEPT_HAS_USERS = "iam.dept.hasUsers";
+    public static final String DEPT_PARENT_CIRCULAR = "iam.dept.parentCircular";
+    public static final String DEPT_NAME_DUPLICATE = "iam.dept.nameDuplicate";
 
     public static final String MENU_NOT_FOUND = "iam.menu.notFound";
+    public static final String MENU_PARENT_CIRCULAR = "iam.menu.parent.circular";
+    public static final String MENU_TYPE_CHILDREN_EXIST = "iam.menu.type.childrenExist";
+    public static final String MENU_BUTTON_PERMISSION_REQUIRED = "iam.menu.button.permissionRequired";
+    public static final String MENU_PERMISSION_CODE_DUPLICATE = "iam.menu.permissionCode.duplicate";
+
+    public static final String USER_EMAIL_DUPLICATE = "iam.user.emailDuplicate";
+    public static final String USER_BATCH_EXCEEDS_LIMIT = "iam.user.batchExceedsLimit";
 
     public static final String AUTH_BAD_CREDENTIALS = "iam.auth.badCredentials";
     public static final String AUTH_USER_DISABLED = "iam.auth.userDisabled";

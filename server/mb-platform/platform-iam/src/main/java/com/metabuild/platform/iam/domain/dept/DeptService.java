@@ -1,12 +1,15 @@
 package com.metabuild.platform.iam.domain.dept;
 
 import com.metabuild.common.exception.BusinessException;
+import com.metabuild.common.exception.ConflictException;
+import com.metabuild.common.exception.CommonErrorCodes;
 import com.metabuild.common.exception.NotFoundException;
 import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.common.security.CurrentUser;
 import com.metabuild.platform.iam.api.DeptApi;
 import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.cmd.DeptCreateCmd;
+import com.metabuild.platform.iam.api.cmd.DeptUpdateCmd;
 import com.metabuild.platform.iam.api.vo.DeptVo;
 import com.metabuild.schema.tables.records.MbIamDeptRecord;
 import lombok.RequiredArgsConstructor;
@@ -62,6 +65,50 @@ public class DeptService implements DeptApi {
         Long deptId = deptRepository.insert(record);
         log.info("创建部门: deptId={}, name={}", deptId, request.name());
         return deptId;
+    }
+
+    /**
+     * 更新部门。校验：
+     * 1. parentId 不能是自己或自己的后代（防环）
+     * 2. 同一 parent 下 name 唯一（排除自身）
+     * parentId=null 表示根节点（schema 层 parent_id 存 NULL）。
+     */
+    @Transactional
+    public DeptVo updateDept(Long id, DeptUpdateCmd request) {
+        var record = deptRepository.findById(id)
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.DEPT_NOT_FOUND, id));
+
+        Long newParentId = request.parentId();
+
+        // 防环：新 parent 不能是自己或自己的后代
+        if (newParentId != null) {
+            if (newParentId.equals(id)) {
+                throw new BusinessException(IamErrorCodes.DEPT_PARENT_CIRCULAR);
+            }
+            List<Long> descendantIds = deptRepository.findAllChildDeptIds(id);
+            if (descendantIds.contains(newParentId)) {
+                throw new BusinessException(IamErrorCodes.DEPT_PARENT_CIRCULAR);
+            }
+        }
+
+        // 同 parent 下 name 唯一（排除自身）
+        if (deptRepository.existsByNameAndParent(request.name(), newParentId, id)) {
+            throw new ConflictException(IamErrorCodes.DEPT_NAME_DUPLICATE, request.name());
+        }
+
+        record.setParentId(newParentId);
+        record.setName(request.name());
+        record.setLeaderUserId(request.leaderUserId());
+        if (request.sortOrder() != null) {
+            record.setSortOrder(request.sortOrder());
+        }
+
+        int updated = deptRepository.update(record, currentUser.userIdOrSystem());
+        if (updated == 0) {
+            throw new ConflictException(CommonErrorCodes.CONCURRENT_MODIFICATION);
+        }
+        log.info("更新部门: deptId={}, name={}", id, request.name());
+        return toResponse(record, List.of());
     }
 
     @Transactional

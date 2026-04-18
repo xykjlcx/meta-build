@@ -2,6 +2,7 @@ package com.metabuild.platform.iam.web;
 
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.iam.api.cmd.DeptCreateCmd;
+import com.metabuild.platform.iam.api.cmd.DeptUpdateCmd;
 import com.metabuild.platform.iam.api.vo.DeptVo;
 import com.metabuild.platform.iam.domain.dept.DeptService;
 import jakarta.validation.Valid;
@@ -39,6 +40,12 @@ public class DeptController {
     public DeptVo create(@Valid @RequestBody DeptCreateCmd request) {
         Long id = deptService.createDept(request);
         return deptService.getById(id);
+    }
+
+    @PutMapping("/{id}")
+    @RequirePermission("iam:dept:update")
+    public DeptVo update(@PathVariable Long id, @Valid @RequestBody DeptUpdateCmd request) {
+        return deptService.updateDept(id, request);
     }
 
     @DeleteMapping("/{id}")
