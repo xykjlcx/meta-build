@@ -34,11 +34,6 @@ public class AsyncConfig implements AsyncConfigurer {
         this.taskDecorators = taskDecorators;
     }
 
-    @Bean
-    public MdcTaskDecorator mdcTaskDecorator() {
-        return new MdcTaskDecorator();
-    }
-
     @Bean("mbAsyncExecutor")
     public ThreadPoolTaskExecutor mbAsyncExecutor() {
         var executor = new ThreadPoolTaskExecutor();

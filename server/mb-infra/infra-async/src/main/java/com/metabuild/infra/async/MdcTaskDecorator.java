@@ -4,6 +4,7 @@ import org.slf4j.MDC;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.task.TaskDecorator;
+import org.springframework.stereotype.Component;
 
 import java.util.Map;
 
@@ -14,6 +15,7 @@ import java.util.Map;
  * 所有日志包括 SaToken 内部日志都能带上 traceId。
  */
 @Order(Ordered.HIGHEST_PRECEDENCE)
+@Component
 public class MdcTaskDecorator implements TaskDecorator {
 
     @Override
