@@ -169,6 +169,7 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | [0021](docs/adr/0021-虚拟线程加java25加通知分发取消同步聚合.md) | 虚拟线程 + Java 25 + Dispatcher fire-and-forget | **已撤销（见 meta-0023）** |
 | [0022](docs/adr/0022-权限一致性应用层清关联加jooq-listener源头捕获.md) | FK RESTRICT + Repository 清关联 + jOOQ listener 源头捕获 | **已撤销（见 meta-0023）** |
 | [meta-0023](docs/adr/meta-0023-over-engineering-case-study.md) | **撤销 ADR-0021 / 0022——过度工程化反面样本 + 决策四步协议"是不是"必须问**（启用新 ADR 命名规范 `<scope>-<nnnn>-<title>.md`） | 已采纳 |
+| [backend-0026](docs/adr/backend-0026-uservo-list-vo-and-aggregate-last-login.md) | **新增 UserListVo + login_log 聚合 lastLoginAt**（仅 list 场景 / LATERAL JOIN 避免 N+1；0024-0025 预留给 Plan A frontend ADR） | 已采纳 |
 
 **新增 ADR 的时机**：任何翻转既有决策、引入新架构概念、或修订规划文档的行为，都应该先写 ADR 再改代码/specs。
 
