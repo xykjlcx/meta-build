@@ -15,6 +15,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,7 +38,8 @@ public class WeChatMiniChannel implements NotificationChannel {
 
     private final WeChatProperties weChatProperties;
     private final WeChatBindingRepository bindingRepository;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
+    private final WeChatAccessTokenCache accessTokenCache;
 
     @Override
     public String channelType() {
@@ -66,7 +68,12 @@ public class WeChatMiniChannel implements NotificationChannel {
         // 逐个发送订阅消息
         for (Map.Entry<Long, String> entry : openIdMap.entrySet()) {
             try {
-                sendSubscribeMessage(accessToken, entry.getValue(), templateId, title);
+                Integer errcode = sendSubscribeMessage(accessToken, entry.getValue(), templateId, title);
+                if (errcode != null && (errcode == 40001 || errcode == 42001)) {
+                    accessTokenCache.invalidate(cacheKey(mini.appId()));
+                    accessToken = getAccessToken(mini.appId(), mini.appSecret());
+                    sendSubscribeMessage(accessToken, entry.getValue(), templateId, title);
+                }
                 log.debug("小程序订阅消息发送成功: userId={}, openId={}", entry.getKey(), entry.getValue());
             } catch (Exception e) {
                 log.error("小程序订阅消息发送失败: userId={}, error={}", entry.getKey(), e.getMessage());
@@ -80,8 +87,21 @@ public class WeChatMiniChannel implements NotificationChannel {
                 && !weChatProperties.mini().templateNotice().isBlank();
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+    public Duration defaultTimeout() {
+        return Duration.ofSeconds(10);
+    }
+
+    private String cacheKey(String appId) {
+        return "MINI:" + appId;
+    }
+
     private String getAccessToken(String appId, String appSecret) {
+        return accessTokenCache.getOrLoad(cacheKey(appId), () -> fetchAccessToken(appId, appSecret));
+    }
+
+    @SuppressWarnings("unchecked")
+    private String fetchAccessToken(String appId, String appSecret) {
         String url = String.format(TOKEN_URL, appId, appSecret);
         Map<String, Object> response = restTemplate.getForObject(url, Map.class);
         if (response == null || !response.containsKey("access_token")) {
@@ -90,7 +110,8 @@ public class WeChatMiniChannel implements NotificationChannel {
         return (String) response.get("access_token");
     }
 
-    private void sendSubscribeMessage(String accessToken, String openId, String templateId, String title) {
+    @SuppressWarnings("unchecked")
+    private Integer sendSubscribeMessage(String accessToken, String openId, String templateId, String title) {
         String url = String.format(SEND_URL, accessToken);
 
         Map<String, Object> body = new HashMap<>();
@@ -106,6 +127,11 @@ public class WeChatMiniChannel implements NotificationChannel {
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
 
-        restTemplate.postForObject(url, request, Map.class);
+        Map<String, Object> response = restTemplate.postForObject(url, request, Map.class);
+        if (response == null) {
+            return null;
+        }
+        Object errcode = response.get("errcode");
+        return errcode instanceof Number n ? n.intValue() : null;
     }
 }

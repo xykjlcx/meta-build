@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.Map;
 
 /**
@@ -52,5 +53,10 @@ public class InAppChannel implements NotificationChannel {
     public boolean supports(NotificationMessage message) {
         // 站内信渠道始终可用（不依赖外部配置）
         return true;
+    }
+
+    @Override
+    public Duration defaultTimeout() {
+        return Duration.ofSeconds(2);
     }
 }

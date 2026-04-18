@@ -25,6 +25,7 @@ import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
 import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationDeliveryLog;
 import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
 import com.metabuild.schema.tables.MbUserWechatBinding;
@@ -140,6 +141,11 @@ public class Tables {
      * 通知公告表
      */
     public static final MbNotification MB_NOTIFICATION = MbNotification.MB_NOTIFICATION;
+
+    /**
+     * 通知投递日志（按渠道维度，区别于按收件人维度的 mb_notification_log）
+     */
+    public static final MbNotificationDeliveryLog MB_NOTIFICATION_DELIVERY_LOG = MbNotificationDeliveryLog.MB_NOTIFICATION_DELIVERY_LOG;
 
     /**
      * 通知发送记录

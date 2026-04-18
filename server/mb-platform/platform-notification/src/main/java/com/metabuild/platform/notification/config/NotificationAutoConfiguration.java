@@ -4,6 +4,7 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -11,9 +12,12 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
 
 /**
  * 通知公告模块自动配置入口。
+ *
+ * <p>通过 mb.notification.enabled=false 可整体关闭本模块（默认开启）。
  */
 @AutoConfiguration
-@EnableConfigurationProperties({WeChatProperties.class, EmailProperties.class})
+@ConditionalOnProperty(name = "mb.notification.enabled", havingValue = "true", matchIfMissing = true)
+@EnableConfigurationProperties({MbNotificationProperties.class, WeChatProperties.class, EmailProperties.class})
 @ComponentScan(basePackages = "com.metabuild.platform.notification")
 public class NotificationAutoConfiguration {
 

@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 
+import java.time.Duration;
 import java.util.Map;
 
 /**
@@ -76,5 +77,10 @@ public class EmailChannel implements NotificationChannel {
     @Override
     public boolean supports(NotificationMessage message) {
         return emailProperties.isConfigured();
+    }
+
+    @Override
+    public Duration defaultTimeout() {
+        return Duration.ofSeconds(15);
     }
 }

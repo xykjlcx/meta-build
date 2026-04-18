@@ -51,7 +51,7 @@ public class WeChatBindingService {
     private final CurrentUser currentUser;
     private final StringRedisTemplate redisTemplate;
     private final Clock clock;
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
     /**
      * 生成公众号 OAuth state（存 Redis，TTL 5 分钟）。

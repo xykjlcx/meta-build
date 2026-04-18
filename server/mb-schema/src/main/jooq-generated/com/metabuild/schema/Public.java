@@ -25,6 +25,7 @@ import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
 import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationDeliveryLog;
 import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
 import com.metabuild.schema.tables.MbUserWechatBinding;
@@ -156,6 +157,11 @@ public class Public extends SchemaImpl {
     public final MbNotification MB_NOTIFICATION = MbNotification.MB_NOTIFICATION;
 
     /**
+     * 通知投递日志（按渠道维度，区别于按收件人维度的 mb_notification_log）
+     */
+    public final MbNotificationDeliveryLog MB_NOTIFICATION_DELIVERY_LOG = MbNotificationDeliveryLog.MB_NOTIFICATION_DELIVERY_LOG;
+
+    /**
      * 通知发送记录
      */
     public final MbNotificationLog MB_NOTIFICATION_LOG = MbNotificationLog.MB_NOTIFICATION_LOG;
@@ -207,6 +213,7 @@ public class Public extends SchemaImpl {
             MbJobLog.MB_JOB_LOG,
             MbLogOperation.MB_LOG_OPERATION,
             MbNotification.MB_NOTIFICATION,
+            MbNotificationDeliveryLog.MB_NOTIFICATION_DELIVERY_LOG,
             MbNotificationLog.MB_NOTIFICATION_LOG,
             MbNotificationRead.MB_NOTIFICATION_READ,
             MbUserWechatBinding.MB_USER_WECHAT_BINDING

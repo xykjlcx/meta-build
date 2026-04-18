@@ -25,6 +25,7 @@ import com.metabuild.schema.tables.MbIamUserRole;
 import com.metabuild.schema.tables.MbJobLog;
 import com.metabuild.schema.tables.MbLogOperation;
 import com.metabuild.schema.tables.MbNotification;
+import com.metabuild.schema.tables.MbNotificationDeliveryLog;
 import com.metabuild.schema.tables.MbNotificationLog;
 import com.metabuild.schema.tables.MbNotificationRead;
 import com.metabuild.schema.tables.MbUserWechatBinding;
@@ -71,6 +72,9 @@ public class Indexes {
     public static final Index IDX_NOTICE_TENANT_CREATED = Internal.createIndex(DSL.name("idx_notice_tenant_created"), BizNotice.BIZ_NOTICE, new OrderField[] { BizNotice.BIZ_NOTICE.TENANT_ID, BizNotice.BIZ_NOTICE.CREATED_AT.desc() }, false);
     public static final Index IDX_NOTICE_TENANT_DEPT = Internal.createIndex(DSL.name("idx_notice_tenant_dept"), BizNotice.BIZ_NOTICE, new OrderField[] { BizNotice.BIZ_NOTICE.TENANT_ID, BizNotice.BIZ_NOTICE.OWNER_DEPT_ID }, false);
     public static final Index IDX_NOTICE_TENANT_STATUS = Internal.createIndex(DSL.name("idx_notice_tenant_status"), BizNotice.BIZ_NOTICE, new OrderField[] { BizNotice.BIZ_NOTICE.TENANT_ID, BizNotice.BIZ_NOTICE.STATUS }, false);
+    public static final Index IDX_NOTIF_DELIVERY_LOG_CREATED_AT = Internal.createIndex(DSL.name("idx_notif_delivery_log_created_at"), MbNotificationDeliveryLog.MB_NOTIFICATION_DELIVERY_LOG, new OrderField[] { MbNotificationDeliveryLog.MB_NOTIFICATION_DELIVERY_LOG.CREATED_AT }, false);
+    public static final Index IDX_NOTIF_DELIVERY_LOG_NOTICE_CHANNEL = Internal.createIndex(DSL.name("idx_notif_delivery_log_notice_channel"), MbNotificationDeliveryLog.MB_NOTIFICATION_DELIVERY_LOG, new OrderField[] { MbNotificationDeliveryLog.MB_NOTIFICATION_DELIVERY_LOG.NOTICE_ID, MbNotificationDeliveryLog.MB_NOTIFICATION_DELIVERY_LOG.CHANNEL }, false);
+    public static final Index IDX_NOTIF_DELIVERY_LOG_STATUS = Internal.createIndex(DSL.name("idx_notif_delivery_log_status"), MbNotificationDeliveryLog.MB_NOTIFICATION_DELIVERY_LOG, new OrderField[] { MbNotificationDeliveryLog.MB_NOTIFICATION_DELIVERY_LOG.STATUS }, false);
     public static final Index IDX_NOTIF_LOG_MODULE_REF = Internal.createIndex(DSL.name("idx_notif_log_module_ref"), MbNotificationLog.MB_NOTIFICATION_LOG, new OrderField[] { MbNotificationLog.MB_NOTIFICATION_LOG.MODULE, MbNotificationLog.MB_NOTIFICATION_LOG.REFERENCE_ID }, false);
     public static final Index IDX_NOTIF_LOG_RECIPIENT = Internal.createIndex(DSL.name("idx_notif_log_recipient"), MbNotificationLog.MB_NOTIFICATION_LOG, new OrderField[] { MbNotificationLog.MB_NOTIFICATION_LOG.TENANT_ID, MbNotificationLog.MB_NOTIFICATION_LOG.RECIPIENT_ID, MbNotificationLog.MB_NOTIFICATION_LOG.CREATED_AT.desc() }, false);
     public static final Index IDX_NOTIF_LOG_STATUS = Internal.createIndex(DSL.name("idx_notif_log_status"), MbNotificationLog.MB_NOTIFICATION_LOG, new OrderField[] { MbNotificationLog.MB_NOTIFICATION_LOG.TENANT_ID, MbNotificationLog.MB_NOTIFICATION_LOG.STATUS }, false);
