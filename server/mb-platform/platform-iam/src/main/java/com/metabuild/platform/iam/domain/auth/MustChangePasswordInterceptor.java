@@ -8,6 +8,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.AntPathMatcher;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 /**
@@ -21,15 +22,21 @@ public class MustChangePasswordInterceptor implements HandlerInterceptor {
     /** Session 中存储"强制修改密码"标志的键名 */
     public static final String SESSION_KEY_MUST_CHANGE_PASSWORD = "mustChangePassword";
 
-    /** 允许访问的路径白名单（不需要登录或允许未改密码用户访问） */
-    private static final String[] ALLOWED_PATHS = {
+    /**
+     * 允许访问的路径白名单（Ant 风格模式）。
+     * <p>auth/captcha 用 /** 通配子路径；密码修改用精确路径，避免前缀绕过。</p>
+     */
+    private static final String[] ALLOWED_PATTERNS = {
         "/api/v1/auth/login",
         "/api/v1/auth/logout",
         "/api/v1/auth/refresh",
         "/api/v1/users/me/password",
-        "/api/v1/captcha",
+        "/api/v1/captcha/**",
         "/actuator",
+        "/actuator/**",
     };
+
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
     private final CurrentUser currentUser;
     private final AuthFacade authFacade;
@@ -44,8 +51,8 @@ public class MustChangePasswordInterceptor implements HandlerInterceptor {
         String path = request.getRequestURI();
 
         // 白名单放行
-        for (String allowed : ALLOWED_PATHS) {
-            if (path.startsWith(allowed)) {
+        for (String pattern : ALLOWED_PATTERNS) {
+            if (PATH_MATCHER.match(pattern, path)) {
                 return true;
             }
         }
