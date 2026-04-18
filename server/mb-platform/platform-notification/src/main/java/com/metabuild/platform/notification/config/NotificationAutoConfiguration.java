@@ -17,7 +17,7 @@ import org.springframework.mail.javamail.JavaMailSenderImpl;
  */
 @AutoConfiguration
 @ConditionalOnProperty(name = "mb.notification.enabled", havingValue = "true", matchIfMissing = true)
-@EnableConfigurationProperties({MbNotificationProperties.class, WeChatProperties.class, EmailProperties.class})
+@EnableConfigurationProperties({WeChatProperties.class, EmailProperties.class})
 @ComponentScan(basePackages = "com.metabuild.platform.notification")
 public class NotificationAutoConfiguration {
 

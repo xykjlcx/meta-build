@@ -15,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -85,11 +84,6 @@ public class WeChatMiniChannel implements NotificationChannel {
     public boolean supports(NotificationMessage message) {
         return weChatProperties.mini().isConfigured()
                 && !weChatProperties.mini().templateNotice().isBlank();
-    }
-
-    @Override
-    public Duration defaultTimeout() {
-        return Duration.ofSeconds(10);
     }
 
     private String cacheKey(String appId) {

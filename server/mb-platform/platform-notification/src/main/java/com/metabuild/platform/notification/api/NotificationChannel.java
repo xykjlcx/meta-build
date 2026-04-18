@@ -1,7 +1,5 @@
 package com.metabuild.platform.notification.api;
 
-import java.time.Duration;
-
 /**
  * 通知渠道接口（Strategy 模式）。
  *
@@ -34,11 +32,4 @@ public interface NotificationChannel {
      * @return true=支持发送
      */
     boolean supports(NotificationMessage message);
-
-    /**
-     * 渠道默认超时时间。配置 mb.notification.timeout.* 优先生效。
-     */
-    default Duration defaultTimeout() {
-        return Duration.ofSeconds(10);
-    }
 }
