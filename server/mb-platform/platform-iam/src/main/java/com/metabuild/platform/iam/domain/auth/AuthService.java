@@ -44,6 +44,9 @@ public class AuthService implements AuthApi {
 
     private static final String FAIL_COUNT_KEY_PREFIX = "mb:iam:login:fail:";
 
+    /** v1 默认租户 ID，与 schema 中 tenant_id 默认值保持一致；多租户启用后从请求上下文解析 */
+    private static final long DEFAULT_TENANT_ID = 0L;
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final DeptRepository deptRepository;
@@ -60,7 +63,8 @@ public class AuthService implements AuthApi {
     @Transactional
     public LoginResult login(LoginCmd request) {
         String username = request.username();
-        String failKey = FAIL_COUNT_KEY_PREFIX + username;
+        long tenantId = resolveTenantId();
+        String failKey = buildFailKey(tenantId, username);
 
         // 1. 检查失败次数
         int failCount = getFailCount(failKey);
@@ -192,6 +196,16 @@ public class AuthService implements AuthApi {
         LoginResult result = authFacade.doLogin(userId, sessionData);
         log.info("Token 刷新成功: userId={}", userId);
         return result;
+    }
+
+    /** 构建登录失败计数 key，包含 tenantId 段以支持多租户隔离 */
+    private String buildFailKey(long tenantId, String username) {
+        return FAIL_COUNT_KEY_PREFIX + tenantId + ":" + username;
+    }
+
+    /** 解析当前请求的 tenantId。v1 单租户固定为 0，v1.5+ 从请求上下文（header / 子域名）解析 */
+    private long resolveTenantId() {
+        return DEFAULT_TENANT_ID;
     }
 
     /** 获取失败次数 */

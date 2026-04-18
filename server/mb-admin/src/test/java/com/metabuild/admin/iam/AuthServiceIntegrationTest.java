@@ -12,6 +12,7 @@ import com.metabuild.platform.iam.domain.user.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 
@@ -33,15 +34,23 @@ class AuthServiceIntegrationTest extends BaseIntegrationTest {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private StringRedisTemplate redisTemplate;
+
     /** 屏蔽异步登录日志，避免 @Transactional 回滚与 REQUIRES_NEW 的冲突 */
     @MockitoBean
     private LoginLogService loginLogService;
 
     private static final String TEST_USERNAME = "authtest";
     private static final String TEST_PASSWORD = "Auth@12345";
+    /** v1 默认租户 ID，与 AuthService 中常量保持一致 */
+    private static final long DEFAULT_TENANT_ID = 0L;
+    private static final String FAIL_KEY = "mb:iam:login:fail:" + DEFAULT_TENANT_ID + ":" + TEST_USERNAME;
 
     @BeforeEach
     void setUp() {
+        // 清理可能残留的失败计数
+        redisTemplate.delete(FAIL_KEY);
         // 每个测试方法前创建测试用户（@Transactional 保证测试结束后回滚）
         userService.createUser(new UserCreateCmd(
             TEST_USERNAME,
@@ -85,5 +94,37 @@ class AuthServiceIntegrationTest extends BaseIntegrationTest {
 
         assertThatThrownBy(() -> authService.login(request))
             .isInstanceOf(UnauthorizedException.class);
+    }
+
+    // ───────── 失败计数 key 格式：包含 tenantId 段 ─────────
+
+    @Test
+    void failed_login_should_write_redis_key_with_tenant_prefix() {
+        LoginCmd request = new LoginCmd(TEST_USERNAME, "WrongPassword@999", null, null);
+
+        assertThatThrownBy(() -> authService.login(request))
+            .isInstanceOf(UnauthorizedException.class);
+
+        String value = redisTemplate.opsForValue().get(FAIL_KEY);
+        assertThat(value).as("登录失败计数必须写入 tenant 前缀的 key").isEqualTo("1");
+
+        // 旧 key（不含 tenantId）必须不存在，防退化
+        String legacyKey = "mb:iam:login:fail:" + TEST_USERNAME;
+        assertThat(redisTemplate.opsForValue().get(legacyKey)).isNull();
+
+        redisTemplate.delete(FAIL_KEY);
+    }
+
+    @Test
+    void successful_login_should_clear_fail_counter_with_tenant_prefix() {
+        // 先失败一次，写入计数
+        assertThatThrownBy(() -> authService.login(
+            new LoginCmd(TEST_USERNAME, "WrongPassword@999", null, null)))
+            .isInstanceOf(UnauthorizedException.class);
+        assertThat(redisTemplate.opsForValue().get(FAIL_KEY)).isEqualTo("1");
+
+        // 成功登录应清除计数
+        authService.login(new LoginCmd(TEST_USERNAME, TEST_PASSWORD, null, null));
+        assertThat(redisTemplate.opsForValue().get(FAIL_KEY)).isNull();
     }
 }
