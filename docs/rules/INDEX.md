@@ -54,6 +54,7 @@ scope: [后端/前端/全栈/构建/部署/流程]
 | [AI 跨文件引用必须 grep 验证（置信度陷阱）](plan-code-snippets-must-verify.md) | 计划, plan, 方法签名, 实施, 跨文件调用 | 0414 M4 计划 3 处不匹配 → 扩展为 AI 置信度通用规则 |
 | [批量重命名脚本必须可回滚](batch-rename-script-must-be-reversible.md) | 批量重命名, rename script, 批处理脚本, 大规模改名 | 0416 DTO/API 包重命名时，首版脚本把工作树打进半迁移中间态 |
 | [业务逻辑代码必须 TDD（先写失败测试再实现）](tdd-enforcement.md) | TDD, 测试, test, 先写测试, 业务逻辑, Service, hook, 状态机, bug 修复, 先实现再测试, 补测试 | 0418 审计 M4/M5 commit 历史发现实际是"实现先行，半小时后补测试"，与 Superpowers TDD skill 的 Iron Law 冲突 |
+| [过度工程化陷阱识别（Review 后先问"是不是真问题"）](over-engineering-trap.md) | Review, 隐患, 性能, 缓存, 超时, 方案 A 方案 B, 链式补丁, 决策四步协议 | 0418 meta-0023 撤销 ADR-0021/0022 过度工程化反面样本 |
 
 ### 全栈
 | 规则 | triggers | 来源 |

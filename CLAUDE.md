@@ -166,8 +166,13 @@ mb-common → mb-schema → mb-infra → mb-platform → mb-business → mb-admi
 | [0018](docs/adr/0018-废弃compact主题改为style加customizer维度组合.md) | **废弃 Compact 主题，改为 Style + Customizer 维度组合** | 已采纳 |
 | [0019](docs/adr/0019-正交三层契约与mix-rename和primitive-blue修正.md) | **正交三层 token 契约（Layout × Style × Component）+ mix rename + primitive blue 修正** | 已采纳 |
 | [0020](docs/adr/0020-feishu-rename-to-lark-console-and-token-expansion.md) | **feishu → lark-console 重命名 + semantic token 扩展 54 → 70** | 已采纳 |
+| [0021](docs/adr/0021-虚拟线程加java25加通知分发取消同步聚合.md) | 虚拟线程 + Java 25 + Dispatcher fire-and-forget | **已撤销（见 meta-0023）** |
+| [0022](docs/adr/0022-权限一致性应用层清关联加jooq-listener源头捕获.md) | FK RESTRICT + Repository 清关联 + jOOQ listener 源头捕获 | **已撤销（见 meta-0023）** |
+| [meta-0023](docs/adr/meta-0023-over-engineering-case-study.md) | **撤销 ADR-0021 / 0022——过度工程化反面样本 + 决策四步协议"是不是"必须问**（启用新 ADR 命名规范 `<scope>-<nnnn>-<title>.md`） | 已采纳 |
 
 **新增 ADR 的时机**：任何翻转既有决策、引入新架构概念、或修订规划文档的行为，都应该先写 ADR 再改代码/specs。
+
+**新 ADR 命名规范**（从 meta-0023 起）：`<scope>-<nnnn>-<kebab-title>.md`，scope ∈ `{backend, frontend, meta}`。编号全局连续递增，开新 ADR 前先 `ls docs/adr/` 查最大编号 +1。详见 [docs/rules/adr-numbering-discipline.md](docs/rules/adr-numbering-discipline.md) 和 [docs/collab/concurrent-dev-protocol.md](docs/collab/concurrent-dev-protocol.md)。
 
 ---
 
