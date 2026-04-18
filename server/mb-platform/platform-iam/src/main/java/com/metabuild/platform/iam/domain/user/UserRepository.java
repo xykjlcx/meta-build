@@ -3,16 +3,24 @@ package com.metabuild.platform.iam.domain.user;
 import com.metabuild.common.dto.PageQuery;
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.infra.jooq.query.SortParser;
+import com.metabuild.platform.iam.api.cmd.UserListQuery;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
 import lombok.RequiredArgsConstructor;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.Record;
+import org.jooq.SortField;
+import org.jooq.impl.DSL;
 import org.springframework.stereotype.Repository;
 
 import java.time.Clock;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static com.metabuild.schema.tables.MbIamLoginLog.MB_IAM_LOGIN_LOG;
 import static com.metabuild.schema.tables.MbIamUser.MB_IAM_USER;
 
 /**
@@ -60,6 +68,125 @@ public class UserRepository {
 
         return PageResult.of(records, total, query);
     }
+
+    /**
+     * Admin 列表分页查询（支持按部门 / 状态 / 关键词过滤 + LATERAL JOIN 聚合 lastLoginAt）。
+     *
+     * <p>递归后代过滤：当 {@code includeDescendants=true} 时，上层需传入已展开的 deptIds
+     * 列表（由 Service 层调用 DeptRepository.findAllChildDeptIds 展开）。
+     *
+     * <p>sort 白名单：{@code username / nickname / createdAt / lastLoginAt}。默认 id desc。
+     */
+    public PageResult<UserListRow> findListPage(UserListQuery query, List<Long> deptFilterIds) {
+        Condition where = DSL.noCondition();
+
+        if (deptFilterIds != null && !deptFilterIds.isEmpty()) {
+            where = where.and(MB_IAM_USER.DEPT_ID.in(deptFilterIds));
+        } else if (query.deptId() != null) {
+            where = where.and(MB_IAM_USER.DEPT_ID.eq(query.deptId()));
+        }
+
+        if (query.status() != null) {
+            where = where.and(MB_IAM_USER.STATUS.eq(query.status()));
+        }
+
+        if (query.hasKeyword()) {
+            String pattern = "%" + query.keyword() + "%";
+            where = where.and(
+                MB_IAM_USER.USERNAME.likeIgnoreCase(pattern)
+                    .or(MB_IAM_USER.NICKNAME.likeIgnoreCase(pattern))
+                    .or(MB_IAM_USER.EMAIL.likeIgnoreCase(pattern))
+            );
+        }
+
+        // LATERAL JOIN 聚合 lastLoginAt
+        Field<OffsetDateTime> lastLoginAt = DSL.field(
+            DSL.name("ll", "last_login_at"), OffsetDateTime.class
+        );
+        var lateral = DSL.lateral(
+            DSL.select(DSL.max(MB_IAM_LOGIN_LOG.CREATED_AT).as("last_login_at"))
+                .from(MB_IAM_LOGIN_LOG)
+                .where(MB_IAM_LOGIN_LOG.USER_ID.eq(MB_IAM_USER.ID))
+                .and(MB_IAM_LOGIN_LOG.SUCCESS.eq(true))
+        ).as("ll");
+
+        List<SortField<?>> sortFields = buildListPageSort(query.page().sort(), lastLoginAt);
+
+        long total = dsl.fetchCount(dsl.selectFrom(MB_IAM_USER).where(where));
+
+        List<Record> records = dsl.select(MB_IAM_USER.fields())
+            .select(lastLoginAt)
+            .from(MB_IAM_USER)
+            .leftJoin(lateral).on(DSL.trueCondition())
+            .where(where)
+            .orderBy(sortFields)
+            .limit(query.page().size())
+            .offset(query.page().offset())
+            .fetch();
+
+        List<UserListRow> rows = records.stream()
+            .map(r -> new UserListRow(
+                r.get(MB_IAM_USER.ID),
+                r.get(MB_IAM_USER.USERNAME),
+                r.get(MB_IAM_USER.EMAIL),
+                r.get(MB_IAM_USER.PHONE),
+                r.get(MB_IAM_USER.NICKNAME),
+                r.get(MB_IAM_USER.AVATAR),
+                r.get(MB_IAM_USER.DEPT_ID),
+                r.get(MB_IAM_USER.STATUS),
+                Boolean.TRUE.equals(r.get(MB_IAM_USER.MUST_CHANGE_PASSWORD)),
+                r.get(MB_IAM_USER.PASSWORD_UPDATED_AT),
+                r.get(lastLoginAt),
+                r.get(MB_IAM_USER.CREATED_AT),
+                r.get(MB_IAM_USER.UPDATED_AT)
+            ))
+            .toList();
+
+        return PageResult.of(rows, total, query.page());
+    }
+
+    private List<SortField<?>> buildListPageSort(List<String> sortParams, Field<OffsetDateTime> lastLoginAt) {
+        // 白名单：username / nickname / createdAt / lastLoginAt；默认 id desc
+        if (sortParams == null || sortParams.isEmpty()) {
+            return List.of(MB_IAM_USER.ID.desc());
+        }
+        List<SortField<?>> result = new ArrayList<>();
+        for (String param : sortParams) {
+            if (param == null || param.isBlank()) continue;
+            String[] parts = param.split(",");
+            String field = parts[0].trim().toLowerCase();
+            boolean asc = parts.length < 2 || !"desc".equalsIgnoreCase(parts[1].trim());
+            SortField<?> sf = switch (field) {
+                case "username" -> asc ? MB_IAM_USER.USERNAME.asc() : MB_IAM_USER.USERNAME.desc();
+                case "nickname" -> asc ? MB_IAM_USER.NICKNAME.asc() : MB_IAM_USER.NICKNAME.desc();
+                case "createdat" -> asc ? MB_IAM_USER.CREATED_AT.asc() : MB_IAM_USER.CREATED_AT.desc();
+                case "lastloginat" -> asc ? lastLoginAt.asc().nullsLast() : lastLoginAt.desc().nullsLast();
+                case "id" -> asc ? MB_IAM_USER.ID.asc() : MB_IAM_USER.ID.desc();
+                default -> null; // 静默忽略非白名单字段，保持向后兼容
+            };
+            if (sf != null) result.add(sf);
+        }
+        return result.isEmpty() ? List.of(MB_IAM_USER.ID.desc()) : result;
+    }
+
+    /**
+     * 列表行（含聚合字段）。package-private，只在 platform-iam 领域内部使用。
+     */
+    public record UserListRow(
+        Long id,
+        String username,
+        String email,
+        String phone,
+        String nickname,
+        String avatar,
+        Long deptId,
+        Short status,
+        boolean mustChangePassword,
+        OffsetDateTime passwordUpdatedAt,
+        OffsetDateTime lastLoginAt,
+        OffsetDateTime createdAt,
+        OffsetDateTime updatedAt
+    ) {}
 
     public Long insert(MbIamUserRecord record) {
         dsl.insertInto(MB_IAM_USER).set(record).execute();

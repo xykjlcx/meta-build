@@ -12,9 +12,12 @@ import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.UserApi;
 import com.metabuild.platform.iam.api.cmd.ChangePasswordCmd;
 import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
+import com.metabuild.platform.iam.api.cmd.UserListQuery;
+import com.metabuild.platform.iam.api.vo.UserListVo;
 import com.metabuild.platform.iam.api.vo.UserVo;
 import com.metabuild.platform.iam.api.cmd.UserUpdateCmd;
 import com.metabuild.platform.iam.domain.auth.PasswordPolicy;
+import com.metabuild.platform.iam.domain.dept.DeptRepository;
 import com.metabuild.schema.tables.records.MbIamPasswordHistoryRecord;
 import com.metabuild.schema.tables.records.MbIamUserRecord;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +46,7 @@ public class UserService implements UserApi {
     private final CurrentUser currentUser;
     private final Clock clock;
     private final SnowflakeIdGenerator idGenerator;
+    private final DeptRepository deptRepository;
 
     @Override
     public UserVo getById(Long id) {
@@ -56,6 +60,38 @@ public class UserService implements UserApi {
         PageResult<MbIamUserRecord> page = userRepository.findPage(query);
         List<UserVo> content = page.content().stream().map(this::toResponse).toList();
         return new PageResult<>(content, page.totalElements(), page.totalPages(), page.page(), page.size());
+    }
+
+    /**
+     * Admin 列表分页查询（带部门/状态/关键词过滤 + lastLoginAt 聚合）。
+     * 详见 ADR backend-0026。
+     */
+    public PageResult<UserListVo> listForAdmin(UserListQuery query) {
+        List<Long> deptFilterIds = null;
+        if (query.deptId() != null && query.includeDescendants()) {
+            deptFilterIds = deptRepository.findAllChildDeptIds(query.deptId());
+        }
+        PageResult<UserRepository.UserListRow> page = userRepository.findListPage(query, deptFilterIds);
+        List<UserListVo> content = page.content().stream().map(this::toListVo).toList();
+        return new PageResult<>(content, page.totalElements(), page.totalPages(), page.page(), page.size());
+    }
+
+    private UserListVo toListVo(UserRepository.UserListRow r) {
+        return new UserListVo(
+            r.id(),
+            r.username(),
+            r.email(),
+            r.phone(),
+            r.nickname(),
+            r.avatar(),
+            r.deptId(),
+            r.status(),
+            r.mustChangePassword(),
+            r.passwordUpdatedAt(),
+            r.lastLoginAt(),
+            r.createdAt(),
+            r.updatedAt()
+        );
     }
 
     @Transactional

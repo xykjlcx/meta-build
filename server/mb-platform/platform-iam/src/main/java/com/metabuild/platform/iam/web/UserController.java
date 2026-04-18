@@ -2,13 +2,14 @@ package com.metabuild.platform.iam.web;
 
 import com.metabuild.common.dto.PageResult;
 import com.metabuild.common.security.CurrentUser;
-import com.metabuild.infra.web.pagination.PageRequestDto;
 import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.iam.api.cmd.AssignRolesCmd;
 import com.metabuild.platform.iam.api.cmd.ChangePasswordCmd;
 import com.metabuild.platform.iam.api.cmd.ResetPasswordCmd;
 import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
+import com.metabuild.platform.iam.api.cmd.UserListQuery;
+import com.metabuild.platform.iam.api.vo.UserListVo;
 import com.metabuild.platform.iam.api.vo.UserVo;
 import com.metabuild.platform.iam.api.cmd.UserUpdateCmd;
 import com.metabuild.platform.iam.domain.user.UserService;
@@ -34,8 +35,15 @@ public class UserController {
 
     @GetMapping
     @RequirePermission("iam:user:list")
-    public PageResult<UserVo> list(@ParameterObject PageRequestDto request) {
-        return userService.list(paginationPolicy.normalize(request));
+    public PageResult<UserListVo> list(@ParameterObject UserListRequestDto request) {
+        UserListQuery query = new UserListQuery(
+            paginationPolicy.normalize(request),
+            request.getDeptId(),
+            Boolean.TRUE.equals(request.getIncludeDescendants()),
+            request.getStatus(),
+            request.getKeyword()
+        );
+        return userService.listForAdmin(query);
     }
 
     @GetMapping("/{id}")
