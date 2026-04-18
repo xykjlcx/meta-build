@@ -35,6 +35,7 @@ import { toast } from 'sonner';
 import { useAuth } from '../../auth';
 import { BreadcrumbNav } from '../../components/breadcrumb-nav';
 import { DarkModeToggle } from '../../components/dark-mode-toggle';
+import { SystemSwitcherPopover } from '../../components/system-switcher-popover';
 import { ThemeCustomizer } from '../../components/theme-customizer';
 import { useLanguage } from '../../i18n';
 import type { ShellLayoutProps } from '../../layouts/types';
@@ -57,6 +58,7 @@ export function MixLayout({
   currentUser,
   notificationSlot,
   resolveMenuHref,
+  systems,
 }: ShellLayoutProps) {
   const { t } = useTranslation('shell');
   const { logout, isLoggingOut } = useAuth();
@@ -92,6 +94,7 @@ export function MixLayout({
           activeModuleId={activeModuleId}
           currentUser={currentUser}
           notificationSlot={notificationSlot}
+          systems={systems}
           isLoggingOut={isLoggingOut}
           onLogout={() => logout()}
           onOpenMobileNav={() => setMobileOpen(true)}
@@ -211,6 +214,7 @@ function MixHeader({
   activeModuleId,
   currentUser,
   notificationSlot,
+  systems,
   isLoggingOut,
   onLogout,
   onOpenMobileNav,
@@ -220,6 +224,7 @@ function MixHeader({
   activeModuleId: number | null;
   currentUser: ShellLayoutProps['currentUser'];
   notificationSlot?: ShellLayoutProps['notificationSlot'];
+  systems?: ShellLayoutProps['systems'];
   isLoggingOut: boolean;
   onLogout: () => void;
   onOpenMobileNav: () => void;
@@ -339,8 +344,12 @@ function MixHeader({
           {/* 竖分割线：h-6 = 24px 对齐飞书实测 */}
           <div className="mx-1 hidden h-6 w-px bg-border md:block" />
 
-          {/* 九宫格切换器 */}
-          <MixSubsystemSwitcher />
+          {/* 九宫格切换器：优先使用 L5 注入的 systems，fallback 到硬编码 placeholder */}
+          {systems && systems.length > 0 ? (
+            <SystemSwitcherPopover systems={systems} />
+          ) : (
+            <MixSubsystemSwitcher />
+          )}
 
           {/* 用户头像 + DropdownMenu（桌面） */}
           <MixUserMenu currentUser={currentUser} isLoggingOut={isLoggingOut} onLogout={onLogout} />

@@ -2,6 +2,7 @@ import { authApi, noticeApi } from '@mb/api-sdk';
 import { LayoutResolver, NotificationBadge, toCurrentUser, useSseConnection } from '@mb/app-shell';
 import { Outlet, createFileRoute, redirect, useNavigate } from '@tanstack/react-router';
 import { useCallback } from 'react';
+import { SYSTEMS } from '../config/systems';
 import { SseHandlers } from '../features/notice/components/sse-handlers';
 import { resolveMenuHref } from '../menu-route-map';
 
@@ -67,6 +68,7 @@ function AuthedLayout() {
         />
       }
       resolveMenuHref={resolveMenuHref}
+      systems={SYSTEMS}
     >
       <SseHandlers />
       <Outlet />

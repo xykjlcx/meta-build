@@ -49,6 +49,7 @@ import { type CurrentUser, useAuth } from '../../auth';
 import { DarkModeToggle } from '../../components/dark-mode-toggle';
 import { GlobalSearchPlaceholder } from '../../components/global-search-placeholder';
 import { LanguageSwitcher } from '../../components/language-switcher';
+import { SystemSwitcherPopover } from '../../components/system-switcher-popover';
 import { ThemeCustomizer } from '../../components/theme-customizer';
 import { useLanguage } from '../../i18n';
 import type { ShellLayoutProps } from '../../layouts/types';
@@ -80,6 +81,7 @@ export function InsetLayout({
   sidebarFooterSlot,
   sidebarAboveFooterSlot,
   resolveMenuHref,
+  systems,
 }: ShellLayoutProps) {
   const { logout, isLoggingOut } = useAuth();
   const { sidebarMode, setSidebarMode } = useStyle();
@@ -113,6 +115,7 @@ export function InsetLayout({
       <SidebarInset>
         <InsetHeader
           notificationSlot={notificationSlot}
+          systems={systems}
           isLoggingOut={isLoggingOut}
           onLogout={() => logout()}
         />
@@ -325,10 +328,12 @@ function DefaultSidebarFooter({
 
 function InsetHeader({
   notificationSlot,
+  systems,
   isLoggingOut,
   onLogout,
 }: {
   notificationSlot?: ShellLayoutProps['notificationSlot'];
+  systems?: ShellLayoutProps['systems'];
   isLoggingOut: boolean;
   onLogout: () => void;
 }) {
@@ -354,6 +359,12 @@ function InsetHeader({
 
       <div className="ml-auto flex shrink-0 items-center gap-1">
         {notificationSlot}
+
+        {systems && systems.length > 0 && (
+          <div className="hidden md:inline-flex">
+            <SystemSwitcherPopover systems={systems} />
+          </div>
+        )}
 
         {/* 桌面端完整元素 */}
         <div className="hidden items-center gap-1 md:flex">
