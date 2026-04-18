@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
  * 操作日志查询接口（追加表，仅支持查询）。
  */
 @RestController
-@RequestMapping("/api/v1/oplog")
+@RequestMapping("/api/v1/operation-logs")
 @RequiredArgsConstructor
 public class OperationLogController {
 
@@ -24,7 +24,7 @@ public class OperationLogController {
     private final PaginationPolicy paginationPolicy;
 
     @GetMapping
-    @RequirePermission("oplog:log:list")
+    @RequirePermission("log:operation:list")
     public PageResult<OperationLogVo> list(@ParameterObject PageRequestDto request) {
         return service.list(paginationPolicy.normalize(request));
     }

@@ -259,33 +259,31 @@ springdoc:
   packages-to-scan: com.metabuild.platform, com.metabuild.business  # 覆盖 platform 和 business 两层的 Controller
 ```
 
-#### springdoc-openapi-maven-plugin
+#### 契约快照生成机制（OpenapiSnapshotTest）
 
-`mvn springdoc:generate` 需要在 `mb-admin/pom.xml` 中配置：
+> 本项目**不使用** `springdoc-openapi-maven-plugin`。该插件会在 integration-test phase 通过 `spring-boot-maven-plugin start/stop` 额外启动一个独立 Spring Boot 进程来拉取 `/v3/api-docs`，而我们已经在 integration tests 里通过 `@SpringBootTest` 启动了一次。复用已有 context 更省一次完整启停时间。
 
-```xml
-<plugin>
-    <groupId>org.springdoc</groupId>
-    <artifactId>springdoc-openapi-maven-plugin</artifactId>
-    <version>1.4</version>
-    <executions>
-        <execution>
-            <id>generate-openapi</id>
-            <phase>integration-test</phase>
-            <goals>
-                <goal>generate</goal>
-            </goals>
-        </execution>
-    </executions>
-    <configuration>
-        <apiDocsUrl>http://localhost:8080/v3/api-docs</apiDocsUrl>
-        <outputFileName>openapi.json</outputFileName>
-        <outputDir>${project.build.directory}</outputDir>
-    </configuration>
-</plugin>
+实现：`server/mb-admin/src/test/java/com/metabuild/admin/OpenapiSnapshotTest.java`
+
+```java
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@ActiveProfiles("test")
+@Testcontainers
+class OpenapiSnapshotTest {
+    // 复用 SharedPostgresContainer + SharedRedisContainer
+    @Test
+    void refresh_openapi_snapshot() throws Exception {
+        String raw = rest.getForObject("/v3/api-docs", String.class);
+        // Jackson readTree + writeValueAsString 保证单行压缩稳定格式
+        Path target = Path.of("..").resolve("api-contract").resolve("openapi-v1.json");
+        Files.writeString(target, mapper.writeValueAsString(mapper.readTree(raw)));
+    }
+}
 ```
 
-此插件在构建阶段启动应用并调用 `/v3/api-docs` 生成 JSON。
+**运行时机**：
+- 本地：`./mvnw -pl mb-admin -am test -Dtest=OpenapiSnapshotTest -Dsurefire.failIfNoSpecifiedTests=false` 刷新基线
+- CI：`mvn verify` 会连带跑这个测试，随后 `git diff --exit-code -- server/api-contract/openapi-v1.json` 检测 drift
 
 ```java
 // mb-admin/src/main/java/com/metabuild/admin/config/OpenApiConfig.java
@@ -380,17 +378,14 @@ export default defineConfig({
 | `client/packages/api-sdk/src/generated/` | **入 git** | orval 生成产物，作为契约快照提交并接受 drift 校验 |
 | `client/packages/api-sdk/package.json` | 入 git | - |
 | `server/api-contract/openapi-v1.json` | **入 git** | **契约基线**（手动 commit 或 pre-commit hook 更新） |
-| `server/mb-admin/target/openapi.json` | 不入 git | Maven 构建产物（`target/` 在 `.gitignore`） |
+**基线存放位置**：`server/api-contract/openapi-v1.json`（持久化目录，入 git）。不使用 `target/`（Maven 构建产物目录，在 `.gitignore` 中）。
 
-**为什么基线不放 `target/`**：`target/` 是 Maven 构建产物目录，必须在 `.gitignore` 里排除，不能把基线文件放进去。基线文件必须放在持久化目录 `server/api-contract/`。
+CI 流程（`server.yml`）:
+1. `mvn -B verify` → 跑 integration tests，其中 `OpenapiSnapshotTest` 会**直接覆写** `server/api-contract/openapi-v1.json`
+2. `git diff --exit-code -- server/api-contract/openapi-v1.json` → 有差异说明开发者改了后端代码但未 commit 新基线，CI fail
+3. 前端 `client.yml` 再：`pnpm generate:api-sdk` → `pnpm check:types` → 类型层再一次把关
 
-CI 流程:
-1. `mvn springdoc:generate -pl mb-admin` → 生成到 `server/mb-admin/target/openapi.json`
-2. 对比 `server/api-contract/openapi-v1.json`（git 基线），有差异 → CI fail（提示开发者先更新基线）
-3. `pnpm -C client generate:api-sdk` → `client/packages/api-sdk/src/generated/`
-4. `pnpm -C client tsc --noEmit` → 类型检查
-
-**基线更新约定**: 后端改 DTO 后，开发者本地运行 `mvn springdoc:generate && cp server/mb-admin/target/openapi.json server/api-contract/openapi-v1.json && git add server/api-contract/`，然后和业务代码一起 commit。
+**基线更新约定**：后端改 Controller/DTO/注解后，本地运行 `./mvnw -pl mb-admin -am test -Dtest=OpenapiSnapshotTest -Dsurefire.failIfNoSpecifiedTests=false` → `git add server/api-contract/openapi-v1.json` → 与业务代码一起 commit。
 
 ## 11. API 版本管理 [M4+M6]
 
@@ -414,7 +409,7 @@ public List<UserVo> listLegacy(HttpServletResponse res) {
 }
 ```
 
-<!-- verify: cd server && mvn springdoc:generate -pl mb-admin && test -f mb-admin/target/openapi.json && diff -q mb-admin/target/openapi.json api-contract/openapi-v1.json -->
+<!-- verify: cd server && ./mvnw -pl mb-admin -am test -Dtest=OpenapiSnapshotTest -Dsurefire.failIfNoSpecifiedTests=false -q && git diff --exit-code -- api-contract/openapi-v1.json -->
 
 ---
 

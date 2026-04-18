@@ -14,7 +14,7 @@ import static com.metabuild.schema.tables.MbLogOperation.MB_LOG_OPERATION;
  */
 @Repository
 @RequiredArgsConstructor
-public class OplogCleanupRepository {
+public class OperationLogCleanupRepository {
 
     private final DSLContext dsl;
 

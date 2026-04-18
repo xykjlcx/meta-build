@@ -2,6 +2,7 @@ package com.metabuild.admin.architecture;
 
 import com.metabuild.infra.archunit.BusinessBoundaryRule;
 import com.metabuild.infra.archunit.AdminUsecaseRule;
+import com.metabuild.infra.archunit.CacheRule;
 import com.metabuild.infra.archunit.CodingStyleRule;
 import com.metabuild.infra.archunit.ConfigManagementRule;
 import com.metabuild.infra.archunit.ControllerRule;
@@ -105,6 +106,13 @@ class ArchitectureTest {
     @Test
     void no_jdbc_template_in_business() {
         JdbcIsolationRule.NO_JDBC_TEMPLATE_IN_BUSINESS.check(classes);
+    }
+
+    // ========== 分层架构：缓存规则 ==========
+
+    @Test
+    void no_cache_evict_all_entries() {
+        CacheRule.NO_CACHE_EVICT_ALL_ENTRIES.check(classes);
     }
 
     // ========== 模块边界 ==========

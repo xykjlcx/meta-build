@@ -9,5 +9,5 @@ import org.springframework.context.annotation.ComponentScan;
  */
 @AutoConfiguration
 @ComponentScan(basePackages = "com.metabuild.platform.log")
-public class OplogAutoConfiguration {
+public class LogAutoConfiguration {
 }

@@ -22,3 +22,10 @@ jobs:
       - name: Build & Verify
         working-directory: server
         run: mvn -B verify
+
+      # OpenapiSnapshotTest 会在 verify 阶段覆写 server/api-contract/openapi-v1.json
+      # 若有差异 = 开发者改了后端代码但未提交新契约基线
+      - name: Check openapi contract drift
+        run: |
+          git diff --exit-code -- server/api-contract/openapi-v1.json || \
+            (echo "ERROR: server/api-contract/openapi-v1.json 未随后端代码更新。请本地运行 OpenapiSnapshotTest 后 commit。" && exit 1)

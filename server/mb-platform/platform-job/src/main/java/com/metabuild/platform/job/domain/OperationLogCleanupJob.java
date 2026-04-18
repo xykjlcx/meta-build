@@ -16,13 +16,13 @@ import java.time.OffsetDateTime;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class OplogCleanupJob {
+public class OperationLogCleanupJob {
 
     private static final int RETAIN_DAYS = 90;
-    private static final String JOB_NAME = "oplog-cleanup";
+    private static final String JOB_NAME = "operation-log-cleanup";
 
     private final JobLogService jobLogService;
-    private final OplogCleanupRepository oplogCleanupRepository;
+    private final OperationLogCleanupRepository operationLogCleanupRepository;
 
     @Scheduled(cron = "0 0 2 * * ?")
     @SchedulerLock(name = JOB_NAME, lockAtLeastFor = "PT5M", lockAtMostFor = "PT30M")
@@ -32,7 +32,7 @@ public class OplogCleanupJob {
 
         try {
             OffsetDateTime cutoff = startTime.minusDays(RETAIN_DAYS);
-            int deleted = oplogCleanupRepository.deleteOlderThan(cutoff);
+            int deleted = operationLogCleanupRepository.deleteOlderThan(cutoff);
 
             OffsetDateTime endTime = OffsetDateTime.now();
             log.info("[{}] 清理完成，共删除 {} 条记录", JOB_NAME, deleted);
