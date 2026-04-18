@@ -6,6 +6,7 @@ import com.metabuild.infra.web.pagination.PaginationPolicy;
 import com.metabuild.infra.security.RequirePermission;
 import com.metabuild.platform.iam.api.cmd.AssignRolesCmd;
 import com.metabuild.platform.iam.api.cmd.ChangePasswordCmd;
+import com.metabuild.platform.iam.api.cmd.ProfileUpdateCmd;
 import com.metabuild.platform.iam.api.cmd.ResetPasswordCmd;
 import com.metabuild.platform.iam.api.cmd.UserBatchPatchCmd;
 import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
@@ -80,6 +81,12 @@ public class UserController {
     @PutMapping("/me/password")
     public void changeMyPassword(@Valid @RequestBody ChangePasswordCmd request) {
         userService.changePassword(currentUser.userId(), request);
+    }
+
+    /** 修改自己的 profile（nickname / email / phone / avatar，无需权限） */
+    @PutMapping("/me")
+    public UserVo updateMyProfile(@Valid @RequestBody ProfileUpdateCmd request) {
+        return userService.updateMyProfile(currentUser.userId(), request);
     }
 
     /** 管理员重置用户密码 */

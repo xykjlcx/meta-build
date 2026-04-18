@@ -52,6 +52,21 @@ public class UserRepository {
         );
     }
 
+    /**
+     * 检查 email 是否已被其他用户使用（排除指定 id，用于自己修改 profile 时跳过自身）。
+     * email = null 或空串时视为无冲突（允许多个 null）。
+     */
+    public boolean existsByEmailExcludingId(String email, Long excludeId) {
+        if (email == null || email.isBlank()) {
+            return false;
+        }
+        var condition = MB_IAM_USER.EMAIL.eq(email);
+        if (excludeId != null) {
+            condition = condition.and(MB_IAM_USER.ID.ne(excludeId));
+        }
+        return dsl.fetchExists(dsl.selectFrom(MB_IAM_USER).where(condition));
+    }
+
     public PageResult<MbIamUserRecord> findPage(PageQuery query) {
         var sortFields = SortParser.builder()
             .forTable(MB_IAM_USER)

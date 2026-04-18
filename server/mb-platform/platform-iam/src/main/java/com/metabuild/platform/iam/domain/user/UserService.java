@@ -12,6 +12,7 @@ import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.UserApi;
 import com.metabuild.platform.iam.api.cmd.ChangePasswordCmd;
 import com.metabuild.platform.iam.api.cmd.UserBatchPatchCmd;
+import com.metabuild.platform.iam.api.cmd.ProfileUpdateCmd;
 import com.metabuild.platform.iam.api.cmd.UserCreateCmd;
 import com.metabuild.platform.iam.api.cmd.UserListQuery;
 import com.metabuild.platform.iam.api.vo.UserBatchResultVo;
@@ -194,6 +195,33 @@ public class UserService implements UserApi {
         }
         log.info("批量更新用户: count={}, patch={}", updatedCount, cmd.patch());
         return new UserBatchResultVo(updatedCount, List.of());
+    }
+
+    /**
+     * 更新当前用户的 profile（nickname / email / phone / avatar）。
+     * 禁止修改 username / deptId / status（ADR backend-0026 决策）。
+     * email 唯一性冲突抛 iam.user.emailDuplicate。
+     */
+    @Transactional
+    public UserVo updateMyProfile(Long userId, ProfileUpdateCmd request) {
+        var record = userRepository.findById(userId)
+            .orElseThrow(() -> new NotFoundException(IamErrorCodes.USER_NOT_FOUND, userId));
+
+        if (request.email() != null && !request.email().equals(record.getEmail())) {
+            if (userRepository.existsByEmailExcludingId(request.email(), userId)) {
+                throw new ConflictException(IamErrorCodes.USER_EMAIL_DUPLICATE, request.email());
+            }
+            record.setEmail(request.email());
+        }
+        if (request.phone() != null) record.setPhone(request.phone());
+        if (request.nickname() != null) record.setNickname(request.nickname());
+        if (request.avatar() != null) record.setAvatar(request.avatar());
+
+        int updated = userRepository.update(record, userId);
+        if (updated == 0) {
+            throw new ConflictException(CommonErrorCodes.CONCURRENT_MODIFICATION);
+        }
+        return toResponse(record);
     }
 
     @Transactional
