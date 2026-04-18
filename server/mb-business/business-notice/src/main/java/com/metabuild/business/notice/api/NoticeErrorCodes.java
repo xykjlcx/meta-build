@@ -11,6 +11,7 @@ public final class NoticeErrorCodes {
     public static final String ONLY_DRAFT_CAN_PUBLISH = "notice.onlyDraftCanPublish";
     public static final String ONLY_PUBLISHED_CAN_REVOKE = "notice.onlyPublishedCanRevoke";
     public static final String ONLY_PUBLISHED_OR_REVOKED_CAN_DUPLICATE = "notice.onlyPublishedOrRevokedCanDuplicate";
+    public static final String INTERNAL_ERROR = "notice.internalError";
 
     private NoticeErrorCodes() {
     }

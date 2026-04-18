@@ -24,8 +24,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Safelist;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
@@ -52,6 +54,8 @@ public class NoticeService {
     private final SnowflakeIdGenerator idGenerator;
     private final ApplicationEventPublisher eventPublisher;
     private final Clock clock;
+    /** 自代理，用于在 batch 方法中调用带 REQUIRES_NEW 的 publishOne/deleteOne，避免 Spring 自调用绕过 AOP */
+    private final ObjectProvider<NoticeService> selfProvider;
 
     /**
      * 分页查询公告列表。
@@ -249,50 +253,111 @@ public class NoticeService {
     }
 
     /**
-     * 批量发布公告（待重构：当前是 silent skip，无接收人展开，无事件）。
+     * 单条发布（独立事务，从 DB 读已存 targets 展开 → 写 recipients → 更新状态 → 发事件）。
+     * <p>
+     * 与 {@link #publish(Long, NoticePublishCmd)} 区别：本方法不接收 cmd，
+     * 假设 targets 已在编辑阶段保存到 biz_notice_target；专供 batchPublish 循环调用。
      */
-    @Transactional
-    public BatchResultVo batchPublish(BatchIdsCmd cmd) {
-        int success = 0;
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public NoticeDetailVo publishOne(Long id) {
+        var existing = noticeRepository.findSnapshotById(id)
+            .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
 
-        for (Long id : cmd.ids()) {
-            var opt = noticeRepository.findSnapshotById(id);
-            if (opt.isEmpty() || opt.get().status() != (short) NoticeStatus.DRAFT.code()) {
-                continue;
-            }
-            noticeRepository.updateStatus(id, (short) NoticeStatus.PUBLISHED.code(), currentUser.userId());
-            success++;
+        if (existing.status() != (short) NoticeStatus.DRAFT.code()) {
+            throw new BusinessException(NoticeErrorCodes.ONLY_DRAFT_CAN_PUBLISH);
         }
 
-        log.info("批量发布公告: success={}", success);
-        return new BatchResultVo(success, 0, List.of());
+        // 从 DB 读已保存的 targets，转回 NoticeTarget 用于复用 expandTargets
+        List<NoticeTarget> targets = noticeTargetRepository.findByNoticeId(id).stream()
+            .map(vo -> new NoticeTarget(vo.targetType(), vo.targetId()))
+            .toList();
+        List<Long> recipientUserIds = expandTargets(targets);
+
+        // 清理旧接收人（幂等），分批写入新接收人
+        noticeRecipientRepository.deleteByNoticeId(id);
+        if (!recipientUserIds.isEmpty()) {
+            noticeRecipientRepository.batchInsert(id, recipientUserIds);
+        }
+
+        noticeRepository.updateStatus(id, (short) NoticeStatus.PUBLISHED.code(), currentUser.userId());
+
+        log.info("发布公告: noticeId={}, 接收人数={}", id, recipientUserIds.size());
+
+        eventPublisher.publishEvent(new NoticePublishedEvent(id, existing.title(), recipientUserIds));
+
+        return detail(id);
     }
 
     /**
-     * 批量删除公告（待重构：当前是 silent skip）。
+     * 单条删除（独立事务）。
      */
-    @Transactional
-    public BatchResultVo batchDelete(BatchIdsCmd cmd) {
-        int success = 0;
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteOne(Long id) {
+        var existing = noticeRepository.findSnapshotById(id)
+            .orElseThrow(() -> new NotFoundException(NoticeErrorCodes.NOT_FOUND, id));
 
-        for (Long id : cmd.ids()) {
-            var opt = noticeRepository.findSnapshotById(id);
-            if (opt.isEmpty()) {
-                continue;
-            }
-            NoticeStatus status = NoticeStatus.fromCode(opt.get().status());
-            if (status != NoticeStatus.DRAFT && status != NoticeStatus.REVOKED) {
-                continue;
-            }
-            noticeAttachmentRepository.deleteByNoticeId(id);
-            noticeTargetRepository.deleteByNoticeId(id);
-            noticeRecipientRepository.deleteByNoticeId(id);
-            noticeRepository.deleteById(id);
-            success++;
+        NoticeStatus status = NoticeStatus.fromCode(existing.status());
+        if (status != NoticeStatus.DRAFT && status != NoticeStatus.REVOKED) {
+            throw new BusinessException(NoticeErrorCodes.ONLY_DRAFT_OR_REVOKED_CAN_DELETE);
         }
 
-        log.info("批量删除公告: success={}", success);
-        return new BatchResultVo(success, 0, List.of());
+        noticeAttachmentRepository.deleteByNoticeId(id);
+        noticeTargetRepository.deleteByNoticeId(id);
+        noticeRecipientRepository.deleteByNoticeId(id);
+        noticeRepository.deleteById(id);
+        log.info("删除公告: noticeId={}", id);
+    }
+
+    /**
+     * 批量发布公告：每条独立事务，逐条执行，失败项进入 failures 不影响其他。
+     */
+    public BatchResultVo batchPublish(BatchIdsCmd cmd) {
+        NoticeService self = selfProvider.getObject();
+        int success = 0;
+        List<BatchResultVo.FailedItem> failures = new ArrayList<>();
+
+        for (Long id : cmd.ids()) {
+            try {
+                self.publishOne(id);
+                success++;
+            } catch (BusinessException e) {
+                failures.add(new BatchResultVo.FailedItem(id, e.getCode(), e.getMessage()));
+            } catch (Exception e) {
+                log.error("批量发布异常 id={}", id, e);
+                failures.add(new BatchResultVo.FailedItem(
+                    id, NoticeErrorCodes.INTERNAL_ERROR, e.getMessage()
+                ));
+            }
+        }
+
+        log.info("批量发布公告: success={}, failed={}", success, failures.size());
+        return new BatchResultVo(success, failures.size(), failures);
+    }
+
+    /**
+     * 批量删除公告：每条独立事务，失败项进入 failures。
+     */
+    public BatchResultVo batchDelete(BatchIdsCmd cmd) {
+        NoticeService self = selfProvider.getObject();
+        int success = 0;
+        List<BatchResultVo.FailedItem> failures = new ArrayList<>();
+
+        for (Long id : cmd.ids()) {
+            try {
+                self.deleteOne(id);
+                success++;
+            } catch (BusinessException e) {
+                failures.add(new BatchResultVo.FailedItem(id, e.getCode(), e.getMessage()));
+            } catch (Exception e) {
+                log.error("批量删除异常 id={}", id, e);
+                failures.add(new BatchResultVo.FailedItem(
+                    id, NoticeErrorCodes.INTERNAL_ERROR, e.getMessage()
+                ));
+            }
+        }
+
+        log.info("批量删除公告: success={}, failed={}", success, failures.size());
+        return new BatchResultVo(success, failures.size(), failures);
     }
 
     // ------ 已读/未读 ------
