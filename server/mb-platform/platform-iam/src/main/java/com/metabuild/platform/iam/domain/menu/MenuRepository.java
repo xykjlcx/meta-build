@@ -82,15 +82,6 @@ public class MenuRepository {
             .execute();
     }
 
-    /** 删除角色与指定菜单子集的关联 */
-    public void deleteRoleMenusByMenuIds(Long roleId, java.util.Set<Long> menuIds) {
-        if (menuIds == null || menuIds.isEmpty()) return;
-        dsl.deleteFrom(MB_IAM_ROLE_MENU)
-            .where(MB_IAM_ROLE_MENU.ROLE_ID.eq(roleId))
-            .and(MB_IAM_ROLE_MENU.MENU_ID.in(menuIds))
-            .execute();
-    }
-
     /** 批量插入角色的菜单关联 */
     public void insertRoleMenus(Long roleId, List<Long> menuIds) {
         if (menuIds == null || menuIds.isEmpty()) return;

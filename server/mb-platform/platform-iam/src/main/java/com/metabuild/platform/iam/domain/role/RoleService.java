@@ -13,7 +13,6 @@ import com.metabuild.platform.iam.api.cmd.AssignRolesCmd;
 import com.metabuild.platform.iam.api.cmd.RoleCreateCmd;
 import com.metabuild.platform.iam.api.vo.RoleVo;
 import com.metabuild.platform.iam.api.cmd.RoleUpdateCmd;
-import com.metabuild.platform.iam.domain.permission.PermissionWriteFacade;
 import com.metabuild.schema.tables.records.MbIamRoleRecord;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +31,6 @@ import java.util.List;
 public class RoleService implements RoleApi {
 
     private final RoleRepository roleRepository;
-    private final PermissionWriteFacade permissionWriteFacade;
     private final CurrentUser currentUser;
     private final SnowflakeIdGenerator idGenerator;
 
@@ -102,13 +100,18 @@ public class RoleService implements RoleApi {
     public void deleteRole(Long id) {
         roleRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(IamErrorCodes.ROLE_NOT_FOUND, id));
-        permissionWriteFacade.deleteRole(id);
+        // 显式清理关联数据（FK CASCADE 也会删，但显式操作意图更清晰）
+        roleRepository.deleteUserRolesByRoleId(id);
+        roleRepository.deleteRoleMenusByRoleId(id);
+        roleRepository.deleteDataScopeDeptsByRoleId(id);
+        roleRepository.deleteById(id);
         log.info("删除角色: roleId={}", id);
     }
 
     @Transactional
     public void assignRolesToUser(Long userId, AssignRolesCmd request) {
-        permissionWriteFacade.assignRolesToUser(userId, request.roleIds());
+        roleRepository.deleteUserRoles(userId);
+        roleRepository.insertUserRoles(userId, request.roleIds());
         log.info("分配角色: userId={}, roleIds={}", userId, request.roleIds());
     }
 

@@ -23,17 +23,15 @@ public class PermissionService implements PermissionApi {
 
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;
-    private final PermissionCache permissionCache;
 
     @Override
     public Set<String> getPermissions(Long userId) {
-        return permissionCache.get(userId).orElseGet(() -> {
-            List<String> codes = permissionRepository.findPermissionCodesByUserId(userId);
-            Set<String> permissions = new HashSet<>(codes);
-            permissionCache.put(userId, permissions);
-            log.debug("加载用户权限: userId={}, count={} (DB)", userId, permissions.size());
-            return permissions;
-        });
+        // 通过用户 → 角色 → 菜单权限码路径查询
+        List<String> codes = permissionRepository.findPermissionCodesByUserId(userId);
+
+        Set<String> permissions = new HashSet<>(codes);
+        log.debug("加载用户权限: userId={}, count={}", userId, permissions.size());
+        return permissions;
     }
 
     @Override

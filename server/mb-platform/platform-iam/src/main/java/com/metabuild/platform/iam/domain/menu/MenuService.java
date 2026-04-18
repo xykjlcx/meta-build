@@ -6,7 +6,6 @@ import com.metabuild.platform.iam.api.IamErrorCodes;
 import com.metabuild.platform.iam.api.MenuApi;
 import com.metabuild.platform.iam.api.cmd.MenuCreateCmd;
 import com.metabuild.platform.iam.api.vo.MenuVo;
-import com.metabuild.platform.iam.domain.permission.PermissionWriteFacade;
 import com.metabuild.platform.iam.domain.role.RoleRepository;
 import com.metabuild.schema.tables.records.MbIamMenuRecord;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +29,6 @@ public class MenuService implements MenuApi {
 
     private final MenuRepository menuRepository;
     private final RoleRepository roleRepository;
-    private final PermissionWriteFacade permissionWriteFacade;
     private final CurrentUser currentUser;
 
     @Override
@@ -95,7 +93,8 @@ public class MenuService implements MenuApi {
 
     @Transactional
     public void assignMenusToRole(Long roleId, List<Long> menuIds) {
-        permissionWriteFacade.assignPermissionsToRole(roleId, menuIds);
+        menuRepository.deleteRoleMenus(roleId);
+        menuRepository.insertRoleMenus(roleId, menuIds);
         log.info("分配菜单到角色: roleId={}, menuCount={}", roleId, menuIds.size());
     }
 
