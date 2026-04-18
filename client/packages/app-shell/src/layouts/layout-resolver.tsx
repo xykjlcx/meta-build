@@ -4,15 +4,23 @@ import { useMenu } from '../menu';
 import type { MenuHrefResolver } from '../menu/menu-utils';
 import { LayoutPresetProvider } from './layout-preset-provider';
 import { layoutRegistry } from './registry-core';
+import type { SystemItem } from './types';
 import { useLayoutPreset } from './use-layout-preset';
 
 interface LayoutResolverProps {
   children: ReactNode;
   notificationSlot?: ReactNode;
   resolveMenuHref?: MenuHrefResolver;
+  /** L5 注入的九宫格"系统切换"数据，透传到 preset */
+  systems?: SystemItem[];
 }
 
-function LayoutResolverInner({ children, notificationSlot, resolveMenuHref }: LayoutResolverProps) {
+function LayoutResolverInner({
+  children,
+  notificationSlot,
+  resolveMenuHref,
+  systems,
+}: LayoutResolverProps) {
   const { presetId } = useLayoutPreset();
   const menu = useMenu();
   const currentUser = useCurrentUser();
@@ -25,6 +33,7 @@ function LayoutResolverInner({ children, notificationSlot, resolveMenuHref }: La
       currentUser={currentUser}
       notificationSlot={notificationSlot}
       resolveMenuHref={resolveMenuHref}
+      systems={systems}
     >
       {children}
     </Layout>
@@ -35,10 +44,15 @@ export function LayoutResolver({
   children,
   notificationSlot,
   resolveMenuHref,
+  systems,
 }: LayoutResolverProps) {
   return (
     <LayoutPresetProvider>
-      <LayoutResolverInner notificationSlot={notificationSlot} resolveMenuHref={resolveMenuHref}>
+      <LayoutResolverInner
+        notificationSlot={notificationSlot}
+        resolveMenuHref={resolveMenuHref}
+        systems={systems}
+      >
         {children}
       </LayoutResolverInner>
     </LayoutPresetProvider>
