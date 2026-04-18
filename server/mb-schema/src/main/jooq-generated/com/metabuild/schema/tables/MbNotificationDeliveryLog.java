@@ -66,16 +66,10 @@ public class MbNotificationDeliveryLog extends TableImpl<MbNotificationDeliveryL
     public final TableField<MbNotificationDeliveryLogRecord, Long> TENANT_ID = createField(DSL.name("tenant_id"), SQLDataType.BIGINT.nullable(false).defaultValue(DSL.field(DSL.raw("0"), SQLDataType.BIGINT)), this, "");
 
     /**
-     * The column <code>public.mb_notification_delivery_log.notice_id</code>.
-     * 业务来源 ID（如 notice.id），可空
+     * The column <code>public.mb_notification_delivery_log.business_id</code>.
+     * 业务来源 ID（notice.id / order.id / approval.id），由 business_type 区分
      */
-    public final TableField<MbNotificationDeliveryLogRecord, Long> NOTICE_ID = createField(DSL.name("notice_id"), SQLDataType.BIGINT, this, "业务来源 ID（如 notice.id），可空");
-
-    /**
-     * The column <code>public.mb_notification_delivery_log.message_type</code>.
-     * 消息类型，如 NOTICE_PUBLISHED
-     */
-    public final TableField<MbNotificationDeliveryLogRecord, String> MESSAGE_TYPE = createField(DSL.name("message_type"), SQLDataType.VARCHAR(64), this, "消息类型，如 NOTICE_PUBLISHED");
+    public final TableField<MbNotificationDeliveryLogRecord, Long> BUSINESS_ID = createField(DSL.name("business_id"), SQLDataType.BIGINT, this, "业务来源 ID（notice.id / order.id / approval.id），由 business_type 区分");
 
     /**
      * The column <code>public.mb_notification_delivery_log.channel</code>.
@@ -98,9 +92,9 @@ public class MbNotificationDeliveryLog extends TableImpl<MbNotificationDeliveryL
 
     /**
      * The column <code>public.mb_notification_delivery_log.duration_ms</code>.
-     * 耗时（毫秒）
+     * 耗时（毫秒，BIGINT）
      */
-    public final TableField<MbNotificationDeliveryLogRecord, Integer> DURATION_MS = createField(DSL.name("duration_ms"), SQLDataType.INTEGER.nullable(false), this, "耗时（毫秒）");
+    public final TableField<MbNotificationDeliveryLogRecord, Long> DURATION_MS = createField(DSL.name("duration_ms"), SQLDataType.BIGINT.nullable(false), this, "耗时（毫秒，BIGINT）");
 
     /**
      * The column <code>public.mb_notification_delivery_log.error_code</code>.
@@ -119,6 +113,31 @@ public class MbNotificationDeliveryLog extends TableImpl<MbNotificationDeliveryL
      * The column <code>public.mb_notification_delivery_log.created_at</code>.
      */
     public final TableField<MbNotificationDeliveryLogRecord, OffsetDateTime> CREATED_AT = createField(DSL.name("created_at"), SQLDataType.TIMESTAMPWITHTIMEZONE(6).nullable(false).defaultValue(DSL.field(DSL.raw("now()"), SQLDataType.TIMESTAMPWITHTIMEZONE)), this, "");
+
+    /**
+     * The column
+     * <code>public.mb_notification_delivery_log.business_type</code>.
+     * 业务大类：NOTICE / ORDER / APPROVAL 等
+     */
+    public final TableField<MbNotificationDeliveryLogRecord, String> BUSINESS_TYPE = createField(DSL.name("business_type"), SQLDataType.VARCHAR(32).nullable(false).defaultValue(DSL.field(DSL.raw("'UNKNOWN'::character varying"), SQLDataType.VARCHAR)), this, "业务大类：NOTICE / ORDER / APPROVAL 等");
+
+    /**
+     * The column <code>public.mb_notification_delivery_log.event_type</code>.
+     * 业务事件：NOTICE_PUBLISHED / ORDER_SHIPPED 等
+     */
+    public final TableField<MbNotificationDeliveryLogRecord, String> EVENT_TYPE = createField(DSL.name("event_type"), SQLDataType.VARCHAR(64), this, "业务事件：NOTICE_PUBLISHED / ORDER_SHIPPED 等");
+
+    /**
+     * The column <code>public.mb_notification_delivery_log.message_type</code>.
+     * 消息格式：TEXT / HTML / TEMPLATE / CARD 等（区别于 channel 投递渠道）
+     */
+    public final TableField<MbNotificationDeliveryLogRecord, String> MESSAGE_TYPE = createField(DSL.name("message_type"), SQLDataType.VARCHAR(32), this, "消息格式：TEXT / HTML / TEMPLATE / CARD 等（区别于 channel 投递渠道）");
+
+    /**
+     * The column <code>public.mb_notification_delivery_log.trace_id</code>. MDC
+     * 链路追踪 ID，关联 ELK / OpenTelemetry 日志
+     */
+    public final TableField<MbNotificationDeliveryLogRecord, String> TRACE_ID = createField(DSL.name("trace_id"), SQLDataType.VARCHAR(64), this, "MDC 链路追踪 ID，关联 ELK / OpenTelemetry 日志");
 
     private MbNotificationDeliveryLog(Name alias, Table<MbNotificationDeliveryLogRecord> aliased) {
         this(alias, aliased, (Field<?>[]) null, null);
@@ -158,7 +177,7 @@ public class MbNotificationDeliveryLog extends TableImpl<MbNotificationDeliveryL
 
     @Override
     public List<Index> getIndexes() {
-        return Arrays.asList(Indexes.IDX_NOTIF_DELIVERY_LOG_CREATED_AT, Indexes.IDX_NOTIF_DELIVERY_LOG_NOTICE_CHANNEL, Indexes.IDX_NOTIF_DELIVERY_LOG_STATUS);
+        return Arrays.asList(Indexes.IDX_NOTIF_DELIVERY_LOG_BUSINESS_CHANNEL, Indexes.IDX_NOTIF_DELIVERY_LOG_CREATED_AT, Indexes.IDX_NOTIF_DELIVERY_LOG_STATUS);
     }
 
     @Override

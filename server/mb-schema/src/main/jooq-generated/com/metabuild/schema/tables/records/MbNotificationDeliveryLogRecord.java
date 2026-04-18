@@ -49,35 +49,19 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
     }
 
     /**
-     * Setter for <code>public.mb_notification_delivery_log.notice_id</code>.
-     * 业务来源 ID（如 notice.id），可空
+     * Setter for <code>public.mb_notification_delivery_log.business_id</code>.
+     * 业务来源 ID（notice.id / order.id / approval.id），由 business_type 区分
      */
-    public void setNoticeId(Long value) {
+    public void setBusinessId(Long value) {
         set(2, value);
     }
 
     /**
-     * Getter for <code>public.mb_notification_delivery_log.notice_id</code>.
-     * 业务来源 ID（如 notice.id），可空
+     * Getter for <code>public.mb_notification_delivery_log.business_id</code>.
+     * 业务来源 ID（notice.id / order.id / approval.id），由 business_type 区分
      */
-    public Long getNoticeId() {
+    public Long getBusinessId() {
         return (Long) get(2);
-    }
-
-    /**
-     * Setter for <code>public.mb_notification_delivery_log.message_type</code>.
-     * 消息类型，如 NOTICE_PUBLISHED
-     */
-    public void setMessageType(String value) {
-        set(3, value);
-    }
-
-    /**
-     * Getter for <code>public.mb_notification_delivery_log.message_type</code>.
-     * 消息类型，如 NOTICE_PUBLISHED
-     */
-    public String getMessageType() {
-        return (String) get(3);
     }
 
     /**
@@ -85,7 +69,7 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
      * 渠道：IN_APP/EMAIL/WECHAT_MP/WECHAT_MINI
      */
     public void setChannel(String value) {
-        set(4, value);
+        set(3, value);
     }
 
     /**
@@ -93,7 +77,7 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
      * 渠道：IN_APP/EMAIL/WECHAT_MP/WECHAT_MINI
      */
     public String getChannel() {
-        return (String) get(4);
+        return (String) get(3);
     }
 
     /**
@@ -102,7 +86,7 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
      * 本次投递的收件人数量
      */
     public void setRecipientCount(Integer value) {
-        set(5, value);
+        set(4, value);
     }
 
     /**
@@ -111,7 +95,7 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
      * 本次投递的收件人数量
      */
     public Integer getRecipientCount() {
-        return (Integer) get(5);
+        return (Integer) get(4);
     }
 
     /**
@@ -119,7 +103,7 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
      * 状态：SUCCESS/TIMEOUT/FAILED
      */
     public void setStatus(String value) {
-        set(6, value);
+        set(5, value);
     }
 
     /**
@@ -127,23 +111,23 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
      * 状态：SUCCESS/TIMEOUT/FAILED
      */
     public String getStatus() {
-        return (String) get(6);
+        return (String) get(5);
     }
 
     /**
      * Setter for <code>public.mb_notification_delivery_log.duration_ms</code>.
-     * 耗时（毫秒）
+     * 耗时（毫秒，BIGINT）
      */
-    public void setDurationMs(Integer value) {
-        set(7, value);
+    public void setDurationMs(Long value) {
+        set(6, value);
     }
 
     /**
      * Getter for <code>public.mb_notification_delivery_log.duration_ms</code>.
-     * 耗时（毫秒）
+     * 耗时（毫秒，BIGINT）
      */
-    public Integer getDurationMs() {
-        return (Integer) get(7);
+    public Long getDurationMs() {
+        return (Long) get(6);
     }
 
     /**
@@ -151,7 +135,7 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
      * 失败错误码
      */
     public void setErrorCode(String value) {
-        set(8, value);
+        set(7, value);
     }
 
     /**
@@ -159,7 +143,7 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
      * 失败错误码
      */
     public String getErrorCode() {
-        return (String) get(8);
+        return (String) get(7);
     }
 
     /**
@@ -168,7 +152,7 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
      * 500 字符）
      */
     public void setErrorMessage(String value) {
-        set(9, value);
+        set(8, value);
     }
 
     /**
@@ -177,21 +161,87 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
      * 500 字符）
      */
     public String getErrorMessage() {
-        return (String) get(9);
+        return (String) get(8);
     }
 
     /**
      * Setter for <code>public.mb_notification_delivery_log.created_at</code>.
      */
     public void setCreatedAt(OffsetDateTime value) {
-        set(10, value);
+        set(9, value);
     }
 
     /**
      * Getter for <code>public.mb_notification_delivery_log.created_at</code>.
      */
     public OffsetDateTime getCreatedAt() {
-        return (OffsetDateTime) get(10);
+        return (OffsetDateTime) get(9);
+    }
+
+    /**
+     * Setter for
+     * <code>public.mb_notification_delivery_log.business_type</code>.
+     * 业务大类：NOTICE / ORDER / APPROVAL 等
+     */
+    public void setBusinessType(String value) {
+        set(10, value);
+    }
+
+    /**
+     * Getter for
+     * <code>public.mb_notification_delivery_log.business_type</code>.
+     * 业务大类：NOTICE / ORDER / APPROVAL 等
+     */
+    public String getBusinessType() {
+        return (String) get(10);
+    }
+
+    /**
+     * Setter for <code>public.mb_notification_delivery_log.event_type</code>.
+     * 业务事件：NOTICE_PUBLISHED / ORDER_SHIPPED 等
+     */
+    public void setEventType(String value) {
+        set(11, value);
+    }
+
+    /**
+     * Getter for <code>public.mb_notification_delivery_log.event_type</code>.
+     * 业务事件：NOTICE_PUBLISHED / ORDER_SHIPPED 等
+     */
+    public String getEventType() {
+        return (String) get(11);
+    }
+
+    /**
+     * Setter for <code>public.mb_notification_delivery_log.message_type</code>.
+     * 消息格式：TEXT / HTML / TEMPLATE / CARD 等（区别于 channel 投递渠道）
+     */
+    public void setMessageType(String value) {
+        set(12, value);
+    }
+
+    /**
+     * Getter for <code>public.mb_notification_delivery_log.message_type</code>.
+     * 消息格式：TEXT / HTML / TEMPLATE / CARD 等（区别于 channel 投递渠道）
+     */
+    public String getMessageType() {
+        return (String) get(12);
+    }
+
+    /**
+     * Setter for <code>public.mb_notification_delivery_log.trace_id</code>. MDC
+     * 链路追踪 ID，关联 ELK / OpenTelemetry 日志
+     */
+    public void setTraceId(String value) {
+        set(13, value);
+    }
+
+    /**
+     * Getter for <code>public.mb_notification_delivery_log.trace_id</code>. MDC
+     * 链路追踪 ID，关联 ELK / OpenTelemetry 日志
+     */
+    public String getTraceId() {
+        return (String) get(13);
     }
 
     // -------------------------------------------------------------------------
@@ -217,13 +267,12 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
     /**
      * Create a detached, initialised MbNotificationDeliveryLogRecord
      */
-    public MbNotificationDeliveryLogRecord(Long id, Long tenantId, Long noticeId, String messageType, String channel, Integer recipientCount, String status, Integer durationMs, String errorCode, String errorMessage, OffsetDateTime createdAt) {
+    public MbNotificationDeliveryLogRecord(Long id, Long tenantId, Long businessId, String channel, Integer recipientCount, String status, Long durationMs, String errorCode, String errorMessage, OffsetDateTime createdAt, String businessType, String eventType, String messageType, String traceId) {
         super(MbNotificationDeliveryLog.MB_NOTIFICATION_DELIVERY_LOG);
 
         setId(id);
         setTenantId(tenantId);
-        setNoticeId(noticeId);
-        setMessageType(messageType);
+        setBusinessId(businessId);
         setChannel(channel);
         setRecipientCount(recipientCount);
         setStatus(status);
@@ -231,6 +280,10 @@ public class MbNotificationDeliveryLogRecord extends UpdatableRecordImpl<MbNotif
         setErrorCode(errorCode);
         setErrorMessage(errorMessage);
         setCreatedAt(createdAt);
+        setBusinessType(businessType);
+        setEventType(eventType);
+        setMessageType(messageType);
+        setTraceId(traceId);
         resetChangedOnNotNull();
     }
 }

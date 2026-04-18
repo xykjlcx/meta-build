@@ -4,6 +4,7 @@ import com.metabuild.common.id.SnowflakeIdGenerator;
 import com.metabuild.platform.notification.api.NotificationMessage;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
+import org.slf4j.MDC;
 import org.springframework.stereotype.Repository;
 
 import java.time.Clock;
@@ -28,24 +29,27 @@ public class DeliveryLogRepository {
                        long durationMs,
                        String errorCode,
                        String errorMessage) {
-        Long noticeId = parseNoticeId(message.referenceId());
+        Long businessId = parseBusinessId(message.referenceId());
+        String businessType = resolveBusinessType(message.module());
         String trimmedError = trim(errorMessage, 500);
         dsl.insertInto(MB_NOTIFICATION_DELIVERY_LOG)
                 .set(MB_NOTIFICATION_DELIVERY_LOG.ID, idGenerator.nextId())
                 .set(MB_NOTIFICATION_DELIVERY_LOG.TENANT_ID, message.tenantId() == null ? 0L : message.tenantId())
-                .set(MB_NOTIFICATION_DELIVERY_LOG.NOTICE_ID, noticeId)
-                .set(MB_NOTIFICATION_DELIVERY_LOG.MESSAGE_TYPE, message.templateCode())
+                .set(MB_NOTIFICATION_DELIVERY_LOG.BUSINESS_ID, businessId)
+                .set(MB_NOTIFICATION_DELIVERY_LOG.BUSINESS_TYPE, businessType)
+                .set(MB_NOTIFICATION_DELIVERY_LOG.EVENT_TYPE, message.templateCode())
                 .set(MB_NOTIFICATION_DELIVERY_LOG.CHANNEL, channel)
                 .set(MB_NOTIFICATION_DELIVERY_LOG.RECIPIENT_COUNT, message.recipientUserIds() == null ? 0 : message.recipientUserIds().size())
                 .set(MB_NOTIFICATION_DELIVERY_LOG.STATUS, status)
-                .set(MB_NOTIFICATION_DELIVERY_LOG.DURATION_MS, (int) Math.min(durationMs, Integer.MAX_VALUE))
+                .set(MB_NOTIFICATION_DELIVERY_LOG.DURATION_MS, durationMs)
                 .set(MB_NOTIFICATION_DELIVERY_LOG.ERROR_CODE, errorCode)
                 .set(MB_NOTIFICATION_DELIVERY_LOG.ERROR_MESSAGE, trimmedError)
+                .set(MB_NOTIFICATION_DELIVERY_LOG.TRACE_ID, MDC.get("traceId"))
                 .set(MB_NOTIFICATION_DELIVERY_LOG.CREATED_AT, OffsetDateTime.now(clock))
                 .execute();
     }
 
-    private Long parseNoticeId(String referenceId) {
+    private Long parseBusinessId(String referenceId) {
         if (referenceId == null || referenceId.isBlank()) {
             return null;
         }
@@ -54,6 +58,17 @@ public class DeliveryLogRepository {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    /**
+     * 从 NotificationMessage.module() 推导 business_type。
+     * module 是业务来源（notice / order / approval），归一化为大写枚举值。
+     */
+    private String resolveBusinessType(String module) {
+        if (module == null || module.isBlank()) {
+            return "UNKNOWN";
+        }
+        return module.toUpperCase();
     }
 
     private String trim(String s, int max) {
