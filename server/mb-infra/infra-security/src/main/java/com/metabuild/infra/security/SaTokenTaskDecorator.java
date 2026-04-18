@@ -5,6 +5,9 @@ import cn.dev33.satoken.context.SaTokenContextForThreadLocalStorage;
 import cn.dev33.satoken.context.model.SaRequest;
 import cn.dev33.satoken.context.model.SaResponse;
 import cn.dev33.satoken.context.model.SaStorage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestAttributes;
@@ -18,9 +21,14 @@ import org.springframework.web.context.request.RequestContextHolder;
  *
  * <p>同时传递 Spring {@link RequestContextHolder}，保证 @RequestScope 代理的 bean
  * （如 SaTokenCurrentUser）在子线程中仍可解析。
+ *
+ * <p>Order 晚于 MdcTaskDecorator：MDC 先恢复，Sa-Token 后恢复（SaToken 内部日志能带 traceId）。
  */
+@Order(100)
 @Component
 public class SaTokenTaskDecorator implements TaskDecorator {
+
+    private static final Logger log = LoggerFactory.getLogger(SaTokenTaskDecorator.class);
 
     @Override
     public Runnable decorate(Runnable runnable) {
@@ -33,6 +41,7 @@ public class SaTokenTaskDecorator implements TaskDecorator {
             storage = SaHolder.getStorage();
         } catch (Exception e) {
             // 父线程无 web 上下文（如定时任务触发的异步调用），跳过传递
+            log.debug("Sa-Token 上下文捕获跳过（父线程无 web 上下文）: {}", e.getMessage());
             request = null;
             response = null;
             storage = null;

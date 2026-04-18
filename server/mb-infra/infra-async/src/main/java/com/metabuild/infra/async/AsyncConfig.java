@@ -3,11 +3,12 @@ package com.metabuild.infra.async;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
-import org.springframework.beans.factory.ListableBeanFactory;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.task.TaskExecutionAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.core.task.TaskDecorator;
 import org.springframework.scheduling.annotation.AsyncConfigurer;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
@@ -17,8 +18,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 /**
  * 异步线程池配置：core=4, max=8, queue=200, CallerRunsPolicy。
- * 通过 BeanFactory 在 decorate 时实时收集所有 TaskDecorator bean（MDC + Sa-Token 等），
- * 组合为单个装饰器，避免早期初始化漏掉后注册的 decorator bean。
+ * 通过 ObjectProvider 注入所有 TaskDecorator，首次 decorate 时懒加载 + 缓存，
+ * 按 @Order 链式包裹（MdcTaskDecorator 在外、SaTokenTaskDecorator 在内）。
  */
 @AutoConfiguration
 @AutoConfigureBefore(TaskExecutionAutoConfiguration.class)
@@ -27,10 +28,10 @@ public class AsyncConfig implements AsyncConfigurer {
 
     private static final Logger log = LoggerFactory.getLogger(AsyncConfig.class);
 
-    private final ListableBeanFactory beanFactory;
+    private final ObjectProvider<TaskDecorator> taskDecorators;
 
-    public AsyncConfig(ListableBeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
+    public AsyncConfig(ObjectProvider<TaskDecorator> taskDecorators) {
+        this.taskDecorators = taskDecorators;
     }
 
     @Bean
@@ -48,10 +49,9 @@ public class AsyncConfig implements AsyncConfigurer {
         executor.setRejectedExecutionHandler(new ThreadPoolExecutor.CallerRunsPolicy());
         executor.setWaitForTasksToCompleteOnShutdown(true);
         executor.setAwaitTerminationSeconds(30);
-        // 通过 BeanFactory 在 decorate 时实时解析所有 TaskDecorator bean
-        executor.setTaskDecorator(new CompositeTaskDecorator(beanFactory));
+        executor.setTaskDecorator(new CompositeTaskDecorator(taskDecorators));
         executor.initialize();
-        log.info("异步线程池初始化完成（TaskDecorator 延迟解析）");
+        log.info("异步线程池初始化完成（TaskDecorator @Order 链式装配，懒加载 + 缓存）");
         return executor;
     }
 
