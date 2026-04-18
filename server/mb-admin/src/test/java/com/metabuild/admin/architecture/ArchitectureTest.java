@@ -8,12 +8,15 @@ import com.metabuild.infra.archunit.ConfigManagementRule;
 import com.metabuild.infra.archunit.ControllerRule;
 import com.metabuild.infra.archunit.DoNotIncludeGeneratedJooq;
 import com.metabuild.infra.archunit.GeneralCodingRulesBundle;
+import com.metabuild.infra.archunit.HttpClientRule;
 import com.metabuild.infra.archunit.ApiNamingRule;
 import com.metabuild.infra.archunit.JdbcIsolationRule;
 import com.metabuild.infra.archunit.JooqIsolationRule;
 import com.metabuild.infra.archunit.ModuleBoundaryRule;
 import com.metabuild.infra.archunit.PaginationRule;
+import com.metabuild.infra.archunit.PermissionWriteRule;
 import com.metabuild.infra.archunit.SaTokenIsolationRule;
+import com.metabuild.infra.archunit.ScheduledRule;
 import com.metabuild.infra.archunit.TimezoneRule;
 import com.metabuild.infra.archunit.TransactionRule;
 import com.tngtech.archunit.core.domain.JavaClasses;
@@ -229,5 +232,26 @@ class ArchitectureTest {
     @Test
     void no_java_util_logging() {
         GeneralCodingRulesBundle.NO_JAVA_UTIL_LOGGING.check(classes);
+    }
+
+    // ========== HTTP 客户端 ==========
+
+    @Test
+    void no_direct_rest_template_construction() {
+        HttpClientRule.NO_DIRECT_REST_TEMPLATE_CONSTRUCTION.check(classes);
+    }
+
+    // ========== 定时任务 ==========
+
+    @Test
+    void scheduled_method_must_have_shedlock() {
+        ScheduledRule.SCHEDULED_METHOD_MUST_HAVE_SHEDLOCK.check(classes);
+    }
+
+    // ========== 权限写入门面 ==========
+
+    @Test
+    void only_permission_write_facade_can_call_permission_write_methods() {
+        PermissionWriteRule.ONLY_PERMISSION_WRITE_FACADE_CAN_CALL_PERMISSION_WRITE_METHODS.check(classes);
     }
 }
