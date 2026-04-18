@@ -14,7 +14,7 @@
 | # | 维度 | 结论 |
 |---|------|------|
 | 1 | L4 哲学 | **隔离 TanStack Router / 菜单 API / 全局状态管理器**——L4 是"换壳不换业务"的关键层。L5 业务代码不直接 import `@tanstack/react-router` / `i18next`，全部走 L4 暴露的 hook 和工厂函数 |
-| 2 | 布局预设 | **认证后布局走 `LayoutResolver + Preset Registry`**。`BasicLayout` 保留给登录页 / 无菜单页；canonical authed preset 为 `inset`，`mix` 为第二套正式 preset |
+| 2 | 布局预设 | **认证后布局走 `LayoutResolver + Preset Registry`**。`BasicLayout` 保留给登录页 / 无菜单页；authed preset 共 5 套：`inset`、`mix`（M3 基座），`claude-classic`、`claude-inset`、`claude-rail`（Plan A 新增，见 [ADR frontend-0025 三层导航哲学](../../adr/frontend-0025-three-layer-navigation-philosophy.md)）；默认 preset 为 `claude-inset` |
 | 3 | Provider 顺序 | **严格 6 层**：`ErrorBoundary` → `QueryClientProvider` → `I18nProvider` → `StyleProvider` → `RouterProvider` → 全局 Toast/Dialog 容器。顺序错误会导致部分 Provider 拿不到上层 context |
 | 4 | 认证门面 | **对称双门面**：`useCurrentUser()` 读 + `useAuth()` 写。对应后端 `CurrentUser` + `AuthFacade`。`features/**` 禁止直调 `@mb/api-sdk/auth/*` 状态接口，必须走门面 |
 | 5 | i18n 默认语言 | `zh-CN` 默认 + `zh-CN` fallback；**不做浏览器自动检测**（YAGNI） |
@@ -109,13 +109,18 @@ interface LayoutPresetDef {
 
 authed layout 通过 `PresetRegistry` 显式注册：
 
-- canonical 默认值：`defaultLayoutId = 'inset'`
-- 正式 preset：
-  - `inset`
-  - `mix`
+- canonical 默认值：`defaultLayoutId = 'claude-inset'`（Plan A 切换；历史默认为 `inset`）
+- 正式 preset（共 5 套）：
+  - `inset`（M3 基座，卡片式内容 + 侧边栏）
+  - `mix`（M3 基座，顶部一级 tab + 二级侧边栏）
+  - `claude-classic`（Plan A，顶部 HeaderTab + 传统侧栏；见 [ADR frontend-0025](../../adr/frontend-0025-three-layer-navigation-philosophy.md)）
+  - `claude-inset`（Plan A，HeaderTab + 卡片式内容，默认 preset）
+  - `claude-rail`（Plan A，左侧 icon rail + 模块级二级侧栏）
 - `BasicLayout` 保留为无菜单布局，不进入 authed preset 列表
 
 **禁止** 通过“第一个 import 即默认 preset”的 side-effect 顺序定义默认值。默认布局必须显式配置，避免 AI 和 bundler 推理失真。
+
+**三层导航哲学**：`claude-*` 三套 preset 共享"九宫格系统切换 → HeaderTab 模块切换 → Sidebar 菜单"的三层导航模型，不同 preset 只在视觉密度和侧栏形态上差异（详见 [ADR frontend-0025](../../adr/frontend-0025-three-layer-navigation-philosophy.md)）。`inset` / `mix` 仍使用 M3 两层模型（sidebar + 内容），保持向后兼容。
 
 ### 3.3 Phase D 清理完成
 
@@ -124,7 +129,7 @@ Phase D 后，旧兼容壳已从源码导出中移除：
 | 当前状态 | 说明 |
 |------|------|
 | `LayoutResolver` | 认证后布局唯一入口 |
-| `inset` / `mix` | 两套正式 preset |
+| `inset` / `mix` / `claude-classic` / `claude-inset` / `claude-rail` | 5 套正式 preset（inset + mix 为 M3 基座；claude-* 为 Plan A 新增） |
 | `BasicLayout` | 保留给登录页 / 无菜单页 |
 
 旧固定布局兼容壳与旧单 theme API 均已下线，不再作为 public API。
@@ -133,8 +138,11 @@ Phase D 后，旧兼容壳已从源码导出中移除：
 
 | 场景 | 用哪个 |
 |------|-------|
-| 业务管理后台（默认） | `inset` |
-| 多模块 SaaS 导航 | `mix` |
+| 业务管理后台（当前默认） | `claude-inset` |
+| 多模块 SaaS 导航（M3 基座） | `mix` |
+| 仅 sidebar 的传统后台（M3 基座） | `inset` |
+| HeaderTab + 传统侧栏（Claude Design） | `claude-classic` |
+| icon rail + 模块级二级侧栏 | `claude-rail` |
 | 登录 / 注册 / 忘记密码 | `BasicLayout` |
 | 全屏数据大屏 | `BasicLayout` |
 | 嵌入式（去掉外部 chrome） | `BasicLayout` |
@@ -181,7 +189,7 @@ registerLayout({
 
 注册后 ThemeCustomizer 的 preset 下拉自动出现新选项（因为 UI 读 `layoutRegistry.list()`，动态渲染）。
 
-> **注意**：内置 preset（`inset` / `mix`）由 `packages/app-shell/src/layouts/registry.ts` 在模块加载时注册。使用者的自定义 preset 需要在应用入口显式注册，不能依赖 side-effect import 顺序。
+> **注意**：内置 5 套 preset（`inset` / `mix` / `claude-classic` / `claude-inset` / `claude-rail`）由 `packages/app-shell/src/layouts/registry.ts` 在模块加载时注册。使用者的自定义 preset 需要在应用入口显式注册，不能依赖 side-effect import 顺序。
 
 ---
 
@@ -503,7 +511,7 @@ Header 不再是独立的全局组件，而是由各 layout preset 自管（见 
 - **通知徽章**：`<NotificationBadge />`
 - **用户菜单**：用户头像 + 下拉菜单（含登出），用 `@mb/ui-primitives` 的 Avatar + DropdownMenu 组装
 
-扩展新 layout preset 时，参考 `packages/app-shell/src/presets/inset/inset-layout.tsx` 的 header JSX 结构。两个已有 preset 之间的 header 子组件（如 MixUserMenu / MixMobileOverflowMenu）未来可能抽取到 `components/header-*.tsx`（见 docs/handoff/feishu-style-visual-check.md follow-up）。
+扩展新 layout preset 时，参考 `packages/app-shell/src/presets/inset/inset-layout.tsx` 的 header JSX 结构。5 套内置 preset 之间的 header 子组件（如 MixUserMenu / MixMobileOverflowMenu / HeaderTabSwitcher）公用部分已抽取到 `components/header-*.tsx`（`claude-*` 三套 preset 共享 HeaderTabSwitcher，详见 [ADR frontend-0025](../../adr/frontend-0025-three-layer-navigation-philosophy.md)）。
 
 ### 6.2 Sidebar
 

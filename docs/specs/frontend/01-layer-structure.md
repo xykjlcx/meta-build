@@ -316,7 +316,7 @@ meta-build 前端是 **git 模板仓库**（template repository），不是 npm 
 
 | 层 | 初始代码来源 | 备注 |
 |---|------------|------|
-| L1 `@mb/ui-tokens` | meta-build 自写 | 2 套初始 style（classic / lark-console）+ ColorMode（light/dark）+ Customizer 维度（compact 已废弃，见 ADR-0018）|
+| L1 `@mb/ui-tokens` | meta-build 自写 | 3 套初始 style（classic / lark-console / claude-warm）+ ColorMode（light/dark）+ Customizer 维度（密度：compact/default/comfortable；旧 compact 独立主题已废弃，见 ADR-0018）|
 | L2 `@mb/ui-primitives` | shadcn/ui CLI 拷贝 + meta-build 调整 | 原子组件与布局基础件，参考 shadcn 默认实现 |
 | L3 `@mb/ui-patterns` | meta-build 自写 | Nx 系列业务组件 + PageHeader / StatusBadge / SearchInput |
 | L4 `@mb/app-shell` | meta-build 自写 | 布局参考 shadcn examples + 自写 i18n / 认证门面 |

@@ -66,7 +66,7 @@ client/
 | Toast | Sonner（命令式 `toast()`） |
 | Mock | MSW（开发时自动启用） |
 | 测试 | Vitest + Storybook 8 + Playwright E2E |
-| 代码质量 | Biome + Stylelint + dependency-cruiser（7 条规则） |
+| 代码质量 | Biome + Stylelint + dependency-cruiser（9 条规则） |
 
 ### 2.3 依赖方向（严格单向，dependency-cruiser 守护）
 
@@ -637,7 +637,7 @@ pnpm check:i18n              # i18n 双语 key 一致性
 pnpm check:business-words    # L3 业务词汇扫描
 pnpm lint                    # Biome 代码检查
 pnpm lint:css                # Stylelint CSS 检查
-pnpm check:deps              # 依赖方向检查（7 条规则）
+pnpm check:deps              # 依赖方向检查（9 条规则）
 pnpm check:env               # 环境变量一致性
 ```
 
